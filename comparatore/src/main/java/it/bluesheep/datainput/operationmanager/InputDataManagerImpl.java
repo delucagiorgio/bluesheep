@@ -3,6 +3,8 @@ package it.bluesheep.datainput.operationmanager;
 import java.util.List;
 
 import it.bluesheep.datainput.IInputDataManager;
+import it.bluesheep.entities.input.AbstractInputRecord;
+import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.service.api.IApiInterface;
 
 /**
@@ -12,9 +14,10 @@ import it.bluesheep.service.api.IApiInterface;
  *
  */
 public abstract class InputDataManagerImpl implements IInputDataManager {
+	//private static final String BETFAIR_EXCHANGE_API = "BETFAIR_EXCHANGE";
 	
 	protected IApiInterface apiServiceInterface;
-
+	
 	// TODO Da capire come gestire le azioni comuni
 	/**
 	 * 1. preparazione dei dati relativi alla connessione (metodo astratto da implementare nella sottoclasse)
@@ -23,6 +26,8 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * 4. collezionare i dati in maniera da renderli omogenei
 	 */
 	@Override
-	public abstract List<Object> getDataFromService();//i dati di ritorno saranno tutti omologati a prescindere dal tipo di servizio chiamato
+	public abstract String getDataFromService();
+	
+	public abstract List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, String serviceName, Scommessa tipoScommessa);
 
 }
