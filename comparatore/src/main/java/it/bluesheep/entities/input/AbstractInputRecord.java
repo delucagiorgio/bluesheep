@@ -17,13 +17,14 @@ public abstract class AbstractInputRecord {
 	protected double quota;
 	protected Scommessa tipoScommessa;
 	
-	public AbstractInputRecord(Date dataOraEvento,String campionato, String partecipante1, String partecipante2) {
+	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2) {
 		this.dataOraEvento = dataOraEvento;
 		this.campionato = campionato;
 		this.partecipante1 = partecipante1;
 		this.partecipante2 = partecipante2;
-		this.keyEvento = "" + this.dataOraEvento + "|" + this.sport + "|" + this.partecipante1 + " vs " + this.partecipante2 
-				+ "|" + this.campionato;
+		this.sport = sport;
+		this.keyEvento = "" + this.dataOraEvento + ":" + this.sport + ":" + this.partecipante1 + " vs " + this.partecipante2 
+				+ ":" + this.campionato;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {

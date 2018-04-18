@@ -66,7 +66,7 @@ public class FoeRescriptOperations extends FoeOperations {
         requestString = JsonConverter.convertToJson(params);
 
         HttpUtil requester = new HttpUtil();
-        String response = requester.sendPostRequestRescript(requestString, operation, appKey, ssoToken);
+        String response = requester.sendPostRequestRescript(requestString, operation, appKey, ssoToken); // response è la stringa JSON che ci serve
         if (response != null) {
             return response;
         } else {

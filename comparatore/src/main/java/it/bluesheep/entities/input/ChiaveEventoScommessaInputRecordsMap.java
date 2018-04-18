@@ -26,29 +26,31 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<String,M
 	
 	private static final long serialVersionUID = 1L;
 
-	public void addToMapEventoScommessaRecord(String eventoKey, Scommessa scommessa, AbstractInputRecord record) {
+	public void addToMapEventoScommessaRecord(AbstractInputRecord record) {
 		
 		//mappa relativa alle scommesse di un evento
-		Map<Scommessa,List<AbstractInputRecord>> eventoScommessaRecordsMap = get(eventoKey);
+		Map<Scommessa,List<AbstractInputRecord>> eventoScommessaRecordsMap = get(record.getKeyEvento());
 		
 		//key non esiste, va aggiunta per la prima volta
 		if(eventoScommessaRecordsMap == null) {
+			
 			List<AbstractInputRecord> newList = new ArrayList<AbstractInputRecord>();
 			newList.add(record);
 			Map<Scommessa, List<AbstractInputRecord>> scommessaRecordsMap = new HashMap<Scommessa, List<AbstractInputRecord>>();
-			scommessaRecordsMap.put(scommessa, newList);
-			put(eventoKey, scommessaRecordsMap);
+			scommessaRecordsMap.put(record.getTipoScommessa(), newList);
+			put(record.getKeyEvento(), scommessaRecordsMap);
+			
 		}else{
 			//ci sono già delle scommesse all'interno della mappa, il record di input 
 			//attuale va aggiunto nella corretta sessione di scommesse e appeso all lista di riferimento
 			
-			List<AbstractInputRecord> inputRecordListScommessa = eventoScommessaRecordsMap.get(scommessa);
+			List<AbstractInputRecord> inputRecordListScommessa = eventoScommessaRecordsMap.get(record.getTipoScommessa());
 			
 			//prima occorrenza di questa tipologia di scommessa
 			if(inputRecordListScommessa == null) {
 				inputRecordListScommessa = new ArrayList<AbstractInputRecord>();
 				inputRecordListScommessa.add(record);
-				eventoScommessaRecordsMap.put(scommessa, inputRecordListScommessa);
+				eventoScommessaRecordsMap.put(record.getTipoScommessa(), inputRecordListScommessa);
 			}else {
 				//esistono già delle occorrenze per questo evento su questa scommessa: 
 				//il record è aggiunto a fine lista

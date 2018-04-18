@@ -25,22 +25,30 @@ public class TxOddsBluesheepJsonConverter {
 	public JSONObject getChildNodeByKey(JSONObject obj, String childNodeKey) {
 		
 		//costruisce l'oggetto JSON relativo al field passato come parametro (ChildNode)
-		JSONObject returnObj = obj.getJSONObject(childNodeKey);
+		JSONObject returnObj = obj.optJSONObject(childNodeKey);
 		
 		return returnObj;
 	}
 	
 	/**
 	 * GD - 17/04/18 
-	 * Ritorna una collezione di oggetti JSON relativa ad una specifica chiave dell'attuale stringa JSON in analisi
+	 * Ritorna una collezione di oggetti JSON relativa ad una specifica chiave dell'attuale stringa JSON in analisi,
+	 * null se il tipo restituito non è un ArrayJSON o se la chiave non esiste
 	 * @param obj l'oggetto JSON in analisi
 	 * @param childNodeKey la chiave di cui si vuole ottenere la collezione di dati
-	 * @return la collezione di dati avente chiave childNodeKey
+	 * @return la collezione di dati avente chiave childNodeKey, null se il tipo restituito non è un ArrayJSON o se la chiave non esiste
 	 */
 	public JSONArray getChildNodeArrayByKey(JSONObject obj, String childNodeKey) {
 		
 		//costruisce un JSONArray relativo ad una collezione presente in un oggetto JSON
-		JSONArray arrayNodes = obj.getJSONArray(childNodeKey);
+		JSONArray arrayNodes = obj.optJSONArray(childNodeKey);
+		
+		//se il nodo figlio non è un array allora è un oggetto, lo aggiungo ad un array e ritorno l'oggetto
+		if(arrayNodes == null) {
+			JSONObject objectNode = obj.getJSONObject(childNodeKey);
+			arrayNodes = new JSONArray();
+			arrayNodes.put(objectNode.toMap());
+		}
 		
 		return arrayNodes;
 	}

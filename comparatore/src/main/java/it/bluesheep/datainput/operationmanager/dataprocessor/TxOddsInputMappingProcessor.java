@@ -1,4 +1,4 @@
-package it.bluesheep.datainput.operationmanager.util;
+package it.bluesheep.datainput.operationmanager.dataprocessor;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.TxOddsInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
+import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.util.TxOddsBluesheepJsonConverter;
 
 /**
@@ -21,7 +22,8 @@ import it.bluesheep.util.TxOddsBluesheepJsonConverter;
  */
 public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 
-	public static List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo) {
+	@Override
+	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 		
 		TxOddsBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
@@ -43,20 +45,19 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 		
 		List<AbstractInputRecord> recordsToBeReturned = new ArrayList<AbstractInputRecord>();
 		
-		for(int i = 0; i < matchesArrays.length(); i++) {
+		for(int i = 0; matchesArrays != null &&  i < matchesArrays.length(); i++) {
 			try {
-				//System.out.println("Processing record id = " + i);
 				JSONObject matchJsonObject = matchesArrays.getJSONObject(i);
 				
 				//le informazioni del match vengono mappate nell'entità
-				TxOddsInputRecord recordToBeMapped = mapInfoMatchIntoAbstractInputRecord(matchJsonObject);
+				TxOddsInputRecord recordToBeMapped = mapInfoMatchIntoAbstractInputRecord(matchJsonObject, sport);
 				
 				//Ora il match è definito e devo prendere le relative quote per la scommessa in analisi (esempio UNDER 2,5)
-				List<AbstractInputRecord> mappedRecordsWithOdds = mapInfoBookmakersIntoAbstractInputRecordList(recordToBeMapped, matchJsonObject, scommessaTipo);
+				List<AbstractInputRecord> mappedRecordsWithOdds = mapInfoBookmakersIntoAbstractInputRecordList(recordToBeMapped, matchJsonObject, scommessaTipo, sport);
 				
 				recordsToBeReturned.addAll(mappedRecordsWithOdds);
 			}catch(Exception e) {
-				System.out.println("Error : cause is " + e.getMessage());
+				e.printStackTrace();	
 			}
 		}
 		
@@ -71,7 +72,7 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	 * @param scommessaTipo la tipologia di scommessa
 	 * @return i record omologati relativi al match passato come parametro sulla determinata scommessa
 	 */
-	private static List<AbstractInputRecord> mapInfoBookmakersIntoAbstractInputRecordList(TxOddsInputRecord recordToBeMapped, JSONObject matchJsonObject, Scommessa scommessaTipo) {
+	private List<AbstractInputRecord> mapInfoBookmakersIntoAbstractInputRecordList(TxOddsInputRecord recordToBeMapped, JSONObject matchJsonObject, Scommessa scommessaTipo, Sport sport) {
 		
 		TxOddsBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
@@ -83,40 +84,75 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 		for(int i = 0; i < bookmakersArrayJSONObject.length(); i++) {
 			//per ogni bookmaker, accedo all'offer e prendo le quote relative alla mia scommessa
 			JSONObject bookmakerJSONObject = bookmakersArrayJSONObject.getJSONObject(i);
-			JSONObject offerJSONObject = jsonConverter.getChildNodeByKey(bookmakerJSONObject, "offer");
+			JSONArray offerJSONArray = jsonConverter.getChildNodeArrayByKey(bookmakerJSONObject, "offer");
 			
-			//in base al tipo di offerta, devo prendere il primo, il secondo o il terzo campo
-			String campoQuotaScommessa = getCorrectFieldByScommessa(scommessaTipo);
-			if(campoQuotaScommessa != null) {
+			for(int k = 0; k < offerJSONArray.length(); k++) {
+				JSONObject offerJSONObject = offerJSONArray.getJSONObject(k);
 				
-				//l'oggetto quota sarà sempre unico per bookmaker (le quote offerte per una determinata scommessa sono uniche e le ultime più aggiornate)
-				//prendo l'oggetto JSON delle quote e prendo il dato richiesto
-				JSONObject oddsJSONObject = jsonConverter.getChildNodeByKey(offerJSONObject, "odds");
-				
-				//JSONObject oddsJSONObject = oddsJSONArray.getJSONObject(0);
-				
-				double quotaScommessa = oddsJSONObject.getDouble(campoQuotaScommessa);
-			
-				//mappo le informazioni rimanenti nel nuovo oggetto
-				TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
-				
-				newRecord.setBookmakerName(jsonConverter.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString("name"));
-				newRecord.setTipoScommessa(scommessaTipo);
-				newRecord.setQuota(quotaScommessa);
-				
-				System.out.println("Bookmaker = " + newRecord.getBookmakerName() + " | " +
-								   "Campionato = " + newRecord.getCampionato() + " | " +
-								   "Partecipante1 = " + newRecord.getPartecipante1() + " | " +
-								   "Partecipante2 = " +  newRecord.getPartecipante2() +" | " +
-								   "Quota = " +  newRecord.getQuota() + " | " +
-								   "DataOraEvento = " +  newRecord.getDataOraEvento() + " | " +
-								   "TipoScommessa = " + newRecord.getTipoScommessa().toString());
-				
-				recordToBeReturned.add(newRecord);
+				//in base al tipo di offerta, devo prendere il primo, il secondo o il terzo campo
+				String campoQuotaScommessa = getCorrectFieldByScommessa(scommessaTipo);
+				if(campoQuotaScommessa != null) {
+					
+					//l'oggetto quota sarà sempre unico per bookmaker (le quote offerte per una determinata scommessa sono uniche e le ultime più aggiornate)
+					//prendo l'oggetto JSON delle quote e prendo il dato richiesto
+					JSONArray oddsJSONArray = jsonConverter.getChildNodeArrayByKey(offerJSONObject, "odds");
+					
+					//per ogni quota offerta dal bookmaker in analisi
+					for(int j = 0; j < oddsJSONArray.length(); j++) {
+						JSONObject oddsJSONObject = oddsJSONArray.getJSONObject(j);
+						
+						double quotaTotalUnderOver = getCorrectQuotaUnderOverByScommessa(scommessaTipo);
+						
+						//(se la quota non è totale) oppure (se la quota è totale e il campo o3 corrisponde alla quota cercata)
+						if(quotaTotalUnderOver < 0 || oddsJSONObject.getDouble("o3") == quotaTotalUnderOver) {
+							
+							double quotaScommessa = oddsJSONObject.getDouble(campoQuotaScommessa);
+						
+							//mappo le informazioni rimanenti nel nuovo oggetto
+							TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
+							
+							newRecord.setBookmakerName(jsonConverter.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString("name"));
+							newRecord.setTipoScommessa(scommessaTipo);
+							newRecord.setQuota(quotaScommessa);
+							
+							System.out.println(newRecord.getKeyEvento() + " | " +
+											   newRecord.getBookmakerName() + " | " +
+											   newRecord.getCampionato() + " | " +
+											   newRecord.getPartecipante1() + " | " +
+											   newRecord.getPartecipante2() +" | " +
+											   newRecord.getQuota() + " | " +
+											   newRecord.getDataOraEvento() + " | " +
+											   newRecord.getTipoScommessa().getCode());
+							
+							recordToBeReturned.add(newRecord);
+						}
+					}
+				}
 			}
 		}
 		
 		return recordToBeReturned;
+	}
+
+	/**
+	 * GD - 18/04/18
+	 * In base al tipo di scommessa totale (UNDER/OVER) scelta, viene restituito il valore che deve trovarsi
+	 * nella definizione del campo "o3" per differenziare le quote totali
+	 * @param scommessaTipo tipo di scommessa
+	 * @return il valore da cercare nelle odds, -1 se la scommessa non è di tipoTotale
+	 */
+	private double getCorrectQuotaUnderOverByScommessa(Scommessa scommessaTipo) {
+		
+		double returnValue = -1.0; //default value
+		
+		String scommessaCode = scommessaTipo.getCode();
+		
+		if(scommessaCode.startsWith("O") || scommessaCode.startsWith("U")) {
+			String scommessaTotaleQuotaGoal = scommessaCode.split("_")[1];
+			returnValue = new Double(scommessaTotaleQuotaGoal).doubleValue();
+		}
+		
+		return returnValue;
 	}
 
 	/**
@@ -126,31 +162,35 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	 * @param scommessaTipo la scommessa
 	 * @return il nome del campo su cui leggere la quota
 	 */
-	private static String getCorrectFieldByScommessa(Scommessa scommessaTipo) {
+	private String getCorrectFieldByScommessa(Scommessa scommessaTipo) {
 		
 		String fieldByScommessa = null;
 		
 		switch(scommessaTipo) {
 		case SFIDANTE1VINCENTE_1:
+		case ENTRAMBISEGNANO_GOAL:
+			fieldByScommessa = "o1";
+			break;
+		case PAREGGIO_X:
+			fieldByScommessa = "o2";
+			break;
+		case SFIDANTE2VINCENTE_2:
+		case NESSUNOSEGNA_NOGOAL:
+			fieldByScommessa = "o3";
+			break;
 		case ALMENO1GOAL_O0X5:
 		case ALMENO2GOAL_O1X5:
 		case ALMENO3GOAL_O2X5:
 		case ALMENO4G0AL_O3X5:
 		case ALMENO5GOAL_O4X5:
-		case ENTRAMBISEGNANO_GOAL:
 			fieldByScommessa = "o1";
 			break;
-		case PAREGGIO_X:
 		case NESSUNGOAL_U0X5:
 		case ALPIU1GOAL_U1X5: 
 		case ALPIU2GOAL_U2X5:
 		case ALPIU3GOAL_U3X5:
 		case ALPIU4GOAL_U4X5:
 			fieldByScommessa = "o2";
-			break;
-		case SFIDANTE2VINCENTE_2:
-		case NESSUNOSEGNA_NOGOAL:
-			fieldByScommessa = "o3";
 			break;
 		default:
 			break;
@@ -166,7 +206,7 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	 * @return il record di input generico
 	 * @throws ParseException
 	 */
-	private static TxOddsInputRecord mapInfoMatchIntoAbstractInputRecord(JSONObject matchJsonObject) throws ParseException {		
+	private TxOddsInputRecord mapInfoMatchIntoAbstractInputRecord(JSONObject matchJsonObject, Sport sport) throws ParseException {		
 		//Mapping della data e dell'ora dell'evento
 		//"time": "2018-04-17T16:30:00+00:00"
 		String timeDateMatch = matchJsonObject.getString("time");
@@ -185,7 +225,7 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	    //"ateam": "Zwolle"
 	    String awayTeam = matchJsonObject.getString("ateam");
 	    
-	    TxOddsInputRecord record = new TxOddsInputRecord(date, group, homeTeam, awayTeam);
+	    TxOddsInputRecord record = new TxOddsInputRecord(date, sport, group, homeTeam, awayTeam);
 	    
 		return record;
 	}
