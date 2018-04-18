@@ -1,12 +1,13 @@
-package it.bluesheep.datainput.operationmanager;
+package it.bluesheep.io.datainput.operationmanager.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import it.bluesheep.datainput.IInputDataManager;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
+import it.bluesheep.entities.util.scommessa.ScommessaUtilManager;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.service.api.IApiInterface;
 
 /**
@@ -77,10 +78,9 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		List<Scommessa> scommessaList = new ArrayList<Scommessa>();
 		
 		if(sport.equals(Sport.TENNIS)) {
-			scommessaList.add(Scommessa.SFIDANTE1VINCENTE_1);
-			scommessaList.add(Scommessa.SFIDANTE2VINCENTE_2);
+			scommessaList = ScommessaUtilManager.getScommessaListTennis2WayOdds();
 		}else if(sport.equals(Sport.CALCIO)) {
-			scommessaList = scommessaTipoList;
+			scommessaList = ScommessaUtilManager.getScommessaListCalcioAllOdds();
 		}
 		
 		return scommessaList;

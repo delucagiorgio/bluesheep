@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 
 import org.junit.jupiter.api.Test;
 
-import it.bluesheep.datainput.IInputDataManager;
-import it.bluesheep.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.IInputDataManager;
+import it.bluesheep.io.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
 
 public class TestJsonConversion {
 	
@@ -36,7 +36,7 @@ public class TestJsonConversion {
 		
 		IInputDataManager inputDataManager = new BookmakerVsBookmakerInputDataManagerImpl();
 		
-		inputDataManager.mapJsonToAbstractInputRecord(inputJson, Scommessa.ALMENO3GOAL_O2X5, Sport.CALCIO);	
+		inputDataManager.mapJsonToAbstractInputRecord(inputJson, Scommessa.ALMENO1GOAL_O0X5, Sport.CALCIO);	
 	}
 
 }

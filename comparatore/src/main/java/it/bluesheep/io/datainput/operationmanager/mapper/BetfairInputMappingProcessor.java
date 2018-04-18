@@ -1,4 +1,4 @@
-package it.bluesheep.datainput.operationmanager.dataprocessor;
+package it.bluesheep.io.datainput.operationmanager.mapper;
 
 import java.util.List;
 

@@ -1,8 +1,6 @@
-package it.bluesheep.dataoutput.operationmanager.impl;
+package it.bluesheep.io.dataoutput.operationmanager;
 
 import java.util.List;
-
-import it.bluesheep.dataoutput.operationmanager.OutputDataManagerImpl;
 
 public abstract class FileOutputDataManagerImpl extends OutputDataManagerImpl {
 

@@ -3,12 +3,12 @@ package it.bluesheep;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.bluesheep.datainput.IInputDataManager;
-import it.bluesheep.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.IInputDataManager;
+import it.bluesheep.io.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
 
 public class BlueSheepComparatoreMain {
 

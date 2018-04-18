@@ -1,4 +1,4 @@
-package it.bluesheep.dataoutput;
+package it.bluesheep.io.dataoutput;
 
 import java.util.List;
 

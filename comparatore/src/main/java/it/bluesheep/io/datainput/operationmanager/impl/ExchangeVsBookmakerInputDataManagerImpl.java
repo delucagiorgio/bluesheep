@@ -1,13 +1,12 @@
-package it.bluesheep.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.impl;
 
 import java.util.List;
 
-import it.bluesheep.datainput.operationmanager.InputDataManagerImpl;
-import it.bluesheep.datainput.operationmanager.dataprocessor.AbstractInputMappingProcessor;
-import it.bluesheep.datainput.operationmanager.dataprocessor.BetfairInputMappingProcessor;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.mapper.BetfairInputMappingProcessor;
 
 public class ExchangeVsBookmakerInputDataManagerImpl extends InputDataManagerImpl {
 

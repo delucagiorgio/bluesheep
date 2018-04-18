@@ -1,4 +1,4 @@
-package it.bluesheep.datainput.operationmanager.dataprocessor;
+package it.bluesheep.io.datainput.operationmanager.mapper;
 
 import java.text.DateFormat;
 import java.text.ParseException;

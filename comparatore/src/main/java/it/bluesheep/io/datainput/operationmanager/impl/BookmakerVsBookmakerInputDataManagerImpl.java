@@ -1,17 +1,12 @@
-package it.bluesheep.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.impl;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
-import comparatore.test.json.TestJsonConversion;
-import it.bluesheep.datainput.operationmanager.InputDataManagerImpl;
-import it.bluesheep.datainput.operationmanager.dataprocessor.AbstractInputMappingProcessor;
-import it.bluesheep.datainput.operationmanager.dataprocessor.TxOddsInputMappingProcessor;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.mapper.TxOddsInputMappingProcessor;
 
 public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataManagerImpl{ 
 	
@@ -25,21 +20,21 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 	@Override
 	public String getDataFromService(Scommessa scommessa, Sport sport) {
 		String inputJson = "";
-		InputStream inStream = null;
-		BufferedReader br = null;
-		try {
-			inStream = TestJsonConversion.class.getResourceAsStream("/CALCIO_TOTAL.txt");
-			br = new BufferedReader(new InputStreamReader(inStream));
-			String inputLine = br.readLine();
-			while(inputLine != null) {
-				inputJson = inputJson + inputLine;
-				inputLine = br.readLine();
-			}
-			br.close();
-			inStream.close();
-		}catch(Exception e) {
-			System.out.println("Exception is " + e.getMessage());
-		}
+//		InputStream inStream = null;
+//		BufferedReader br = null;
+//		try {
+//			inStream = BookmakerVsBookmakerInputDataManagerImpl.class.getResourceAsStream("/CALCIO_TOTAL.txt");
+//			br = new BufferedReader(new InputStreamReader(inStream));
+//			String inputLine = br.readLine();
+//			while(inputLine != null) {
+//				inputJson = inputJson + inputLine;
+//				inputLine = br.readLine();
+//			}
+//			br.close();
+//			inStream.close();
+//		}catch(Exception e) {
+//			System.out.println("Exception is " + e.getMessage());
+//		}
 		return inputJson;
 	}
 

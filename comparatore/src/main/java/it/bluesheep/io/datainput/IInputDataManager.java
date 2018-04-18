@@ -1,4 +1,4 @@
-package it.bluesheep.datainput;
+package it.bluesheep.io.datainput;
 
 import java.util.List;
 
