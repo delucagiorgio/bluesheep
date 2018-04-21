@@ -1,8 +1,11 @@
-package it.bluesheep.entities.util.scommessa;
+package it.bluesheep.entities.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import it.bluesheep.entities.util.scommessa.Scommessa;
+import it.bluesheep.entities.util.sport.Sport;
 
 /**
  * Classe da utilizzare per aggiungere metodi comuni e utili all'elaborazione e alla stesura del codice
@@ -92,12 +95,15 @@ public class ScommessaUtilManager {
 	 * NB: LA SCOMMESSA DEVE ESSERE DI TIPO TOTAL
 	 * Ritorna la scommessa di tipo TOTAL opposta alla scommessa passata come parametro
 	 * @param scommessa la scommessa di cui si vuole ottenere l'opposta
+	 * @param sport lo sport dell'evento
 	 * @return la scommessa di tipo TOTAL opposta alla scommessa passata come parametro, null se non trovata
 	 */
-	public static Scommessa getOppositeScommessaByScommessaBookVsBook(Scommessa scommessa) {
+	public static Scommessa getOppositeScommessaByScommessaBookVsBook(Scommessa scommessa, Sport sport) {
 		Scommessa opposite = null;
-		if(getScommessaListCalcioTotalOdds().contains(scommessa)) {
-			opposite = getOppositeScommessaTotalOdds(scommessa);
+		if(Sport.CALCIO.equals(sport) && getScommessaListCalcioTotalOdds().contains(scommessa)) {
+			opposite = getOppositeScommessaTotalOdds(scommessa, sport);
+		}else if (Sport.TENNIS.equals(sport) && getScommessaListTennis2WayOdds().contains(scommessa)) {
+			opposite = getOppositeScommessaTotalOdds(scommessa, sport);
 		}
 		
 		return opposite;
@@ -109,41 +115,54 @@ public class ScommessaUtilManager {
 	 * @param scommessa la scommessa di cui si vuole ottenere l'opposto
 	 * @return la scommessa opposta
 	 */
-	private static Scommessa getOppositeScommessaTotalOdds(Scommessa scommessa) {
+	private static Scommessa getOppositeScommessaTotalOdds(Scommessa scommessa, Sport sport) {
 		Scommessa opposite = null;
-		switch(scommessa) {
-		case ALMENO1GOAL_O0X5:
-			opposite = Scommessa.NESSUNGOAL_U0X5;
-			break;
-		case ALMENO2GOAL_O1X5:
-			opposite = Scommessa.ALPIU1GOAL_U1X5;
-			break;
-		case ALMENO3GOAL_O2X5:
-			opposite = Scommessa.ALPIU2GOAL_U2X5;
-			break;
-		case ALMENO4G0AL_O3X5:
-			opposite = Scommessa.ALPIU3GOAL_U3X5;
-			break;
-		case ALMENO5GOAL_O4X5:
-			opposite = Scommessa.ALPIU4GOAL_U4X5;
-			break;
-		case NESSUNGOAL_U0X5:
-			opposite = Scommessa.ALMENO1GOAL_O0X5;
-			break;
-		case ALPIU1GOAL_U1X5:
-			opposite = Scommessa.ALMENO2GOAL_O1X5;
-			break;
-		case ALPIU2GOAL_U2X5:
-			opposite = Scommessa.ALMENO3GOAL_O2X5;
-			break;
-		case ALPIU3GOAL_U3X5:
-			opposite = Scommessa.ALMENO4G0AL_O3X5;
-			break;
-		case ALPIU4GOAL_U4X5:
-			opposite = Scommessa.ALMENO5GOAL_O4X5;
-			break;
-		default:
-			break;
+		if(Sport.CALCIO.equals(sport)) {
+			switch(scommessa) {
+			case ALMENO1GOAL_O0X5:
+				opposite = Scommessa.NESSUNGOAL_U0X5;
+				break;
+			case ALMENO2GOAL_O1X5:
+				opposite = Scommessa.ALPIU1GOAL_U1X5;
+				break;
+			case ALMENO3GOAL_O2X5:
+				opposite = Scommessa.ALPIU2GOAL_U2X5;
+				break;
+			case ALMENO4G0AL_O3X5:
+				opposite = Scommessa.ALPIU3GOAL_U3X5;
+				break;
+			case ALMENO5GOAL_O4X5:
+				opposite = Scommessa.ALPIU4GOAL_U4X5;
+				break;
+			case NESSUNGOAL_U0X5:
+				opposite = Scommessa.ALMENO1GOAL_O0X5;
+				break;
+			case ALPIU1GOAL_U1X5:
+				opposite = Scommessa.ALMENO2GOAL_O1X5;
+				break;
+			case ALPIU2GOAL_U2X5:
+				opposite = Scommessa.ALMENO3GOAL_O2X5;
+				break;
+			case ALPIU3GOAL_U3X5:
+				opposite = Scommessa.ALMENO4G0AL_O3X5;
+				break;
+			case ALPIU4GOAL_U4X5:
+				opposite = Scommessa.ALMENO5GOAL_O4X5;
+				break;
+			default:
+				break;
+			}
+		}else if(Sport.TENNIS.equals(sport)) {
+			switch(scommessa) {
+			case SFIDANTE2VINCENTE_2:
+				opposite = Scommessa.SFIDANTE1VINCENTE_1;
+				break;
+			case SFIDANTE1VINCENTE_1:
+				opposite = Scommessa.SFIDANTE2VINCENTE_2;
+				break;
+			default:
+				break;
+			}
 		}
 		return opposite;
 	}

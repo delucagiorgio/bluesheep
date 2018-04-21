@@ -1,17 +1,18 @@
 package com.betfair.foe.exceptions;
 
-public class FOEException extends Throwable {
+public class BetFairAPIException extends Throwable {
 
-    private String errorDetails;
+	private static final long serialVersionUID = 1L;
+	private String errorDetails;
     private String errorCode;
     private String errorCause;
     private String requestUUID;
 
-    public FOEException() {
+    public BetFairAPIException() {
         super();
     }
 
-    public FOEException(String errorDetails, String errorCode, String errorCause, String requestUUID) {
+    public BetFairAPIException(String errorDetails, String errorCode, String errorCause, String requestUUID) {
         this.errorCode=errorCode;
         this.errorDetails=errorDetails;
         this.errorCause=errorCause;

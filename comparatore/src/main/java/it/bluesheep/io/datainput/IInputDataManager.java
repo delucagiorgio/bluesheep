@@ -12,7 +12,7 @@ public interface IInputDataManager {
 	
 	public abstract List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport);
 
-	public List<AbstractInputRecord> processAllData(Sport sport, List<Scommessa> scommessaTipoList);
+	public List<AbstractInputRecord> processAllData(Sport sport);
 
 	
 }

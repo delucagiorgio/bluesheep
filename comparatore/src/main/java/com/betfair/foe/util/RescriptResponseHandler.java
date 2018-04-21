@@ -14,6 +14,7 @@ public class RescriptResponseHandler implements ResponseHandler<String> {
 
     public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
         StatusLine statusLine = response.getStatusLine();
+        System.out.println(statusLine);
         HttpEntity entity = response.getEntity();
         if (statusLine.getStatusCode() != 200) {
 

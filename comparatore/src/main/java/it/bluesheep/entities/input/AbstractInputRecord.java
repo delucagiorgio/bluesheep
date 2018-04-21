@@ -1,5 +1,6 @@
 package it.bluesheep.entities.input;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import it.bluesheep.entities.util.scommessa.Scommessa;
@@ -17,7 +18,8 @@ public abstract class AbstractInputRecord {
 	protected double quota;
 	protected Scommessa tipoScommessa;
 	
-	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2) {
+	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2) {	
+		Calendar.getInstance().setTime(dataOraEvento);
 		this.dataOraEvento = dataOraEvento;
 		this.campionato = campionato;
 		this.partecipante1 = partecipante1;
@@ -28,6 +30,7 @@ public abstract class AbstractInputRecord {
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {
+		Calendar.getInstance().setTime(record.getDataOraEvento());
 		this.dataOraEvento = record.getDataOraEvento();
 		this.sport = record.getSport();
 		this.partecipante1 = record.getPartecipante1();

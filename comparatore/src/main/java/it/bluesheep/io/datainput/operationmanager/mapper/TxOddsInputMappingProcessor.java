@@ -115,15 +115,6 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 							newRecord.setTipoScommessa(scommessaTipo);
 							newRecord.setQuota(quotaScommessa);
 							
-							System.out.println(newRecord.getKeyEvento() + " | " +
-											   newRecord.getBookmakerName() + " | " +
-											   newRecord.getCampionato() + " | " +
-											   newRecord.getPartecipante1() + " | " +
-											   newRecord.getPartecipante2() +" | " +
-											   newRecord.getQuota() + " | " +
-											   newRecord.getDataOraEvento() + " | " +
-											   newRecord.getTipoScommessa().getCode());
-							
 							recordToBeReturned.add(newRecord);
 						}
 					}
@@ -228,6 +219,5 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	    TxOddsInputRecord record = new TxOddsInputRecord(date, sport, group, homeTeam, awayTeam);
 	    
 		return record;
-	}
-	
+	}	
 }

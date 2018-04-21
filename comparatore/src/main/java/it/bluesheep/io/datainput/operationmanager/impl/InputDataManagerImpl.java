@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
+import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
-import it.bluesheep.entities.util.scommessa.ScommessaUtilManager;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.service.api.IApiInterface;
@@ -44,12 +44,10 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * @return una lista di AbstractInputRecord relativi allo sport passato come parametro 
 	 * 		   e alle tipologie di scommessa previste per tale sport
 	 */
-	public List<AbstractInputRecord> processAllData(Sport sport, List<Scommessa> scommessaTipoList){
-				
-		//scommessaTipoList rappresenta tutte le scommesse richieste lato business da calcolare e poi processare
-		
+	public List<AbstractInputRecord> processAllData(Sport sport){
+						
 		//la lista di scommesse filtrata per possibili combinazioni sul determinato sport
-		List<Scommessa> sportScommessaList = getCombinazioniSportScommessa(sport,scommessaTipoList);
+		List<Scommessa> sportScommessaList = getCombinazioniSportScommessa(sport);
 		
 		List<AbstractInputRecord> recordToBeReturned = new ArrayList<AbstractInputRecord>();
 		
@@ -73,7 +71,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * @param scommessaTipoList la lista di tutte le possibili quote volute
 	 * @return la lista di scommesse filtrate per lo sport passato come parametro
 	 */
-	private List<Scommessa> getCombinazioniSportScommessa(Sport sport, List<Scommessa> scommessaTipoList) {
+	private List<Scommessa> getCombinazioniSportScommessa(Sport sport) {
 		
 		List<Scommessa> scommessaList = new ArrayList<Scommessa>();
 		

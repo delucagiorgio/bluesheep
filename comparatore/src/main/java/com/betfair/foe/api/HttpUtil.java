@@ -62,7 +62,7 @@ public class HttpUtil {
     }
 
     public String sendPostRequestRescript(String param, String operation, String appKey, String ssoToken) {
-        String apiNgURL = FoeDemo.getProperties().getProperty("FOE_URL") + FoeDemo.getProperties().getProperty("RESCRIPT_SUFFIX") + operation + "/";
+        String apiNgURL = FoeDemo.getProperties().getProperty("FOE_URL") + FoeDemo.getProperties().getProperty("RESCRIPT_SUFFIX") + operation;
         return sendPostRequest(param, appKey, ssoToken, apiNgURL, new RescriptResponseHandler());
     }
 }

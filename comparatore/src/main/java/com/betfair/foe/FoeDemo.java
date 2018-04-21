@@ -6,6 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.betfair.foe.api.HttpClientNonInteractiveLoginSSO;
+
 public class FoeDemo {
 
     private static Properties properties = new Properties();
@@ -27,55 +32,28 @@ public class FoeDemo {
 
         System.out.println("Welcome to FOE API example!\n");
 
-        BufferedReader inputStreamReader = new BufferedReader(new InputStreamReader(System.in));
-
-        // getting the AppKey and the session token
-        if (args.length >= 2) {
-            applicationKey = args[0];
-            sessionToken = args[1];
-        } else {
-            while (applicationKey == null || applicationKey.isEmpty()) {
-
-                System.out.println("Please insert a valid App Key: ");
-                System.out.print("> ");
-                try {
-                    applicationKey = inputStreamReader.readLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            while (sessionToken == null || sessionToken.isEmpty()) {
-                System.out.println("Please insert a valid Session Token: ");
-                System.out.print("> ");
-                try {
-                    sessionToken = inputStreamReader.readLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        applicationKey = "txarSy4JZTpbX8OD";
+        
+        HttpClientNonInteractiveLoginSSO loginHttpHelper = new HttpClientNonInteractiveLoginSSO();
+        String product = null;
+        try {
+        	JSONArray credentialJSONArray = new JSONArray(loginHttpHelper.login());
+			sessionToken = new JSONObject(credentialJSONArray.getString(0)).getString("sessionToken");
+			product = new JSONObject(credentialJSONArray.getString(1)).getString("product");
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+        
+        System.out.println(sessionToken);
+        
+        while (sessionToken == null || sessionToken.isEmpty()) {
+            System.out.println("Please insert a valid Session Token: ");
+            System.out.print("> ");
         }
 
-        System.out.println("Choose an option: ");
-        System.out.println("1. Specific call demo");
-        System.out.println("2. Bulk loading demo");
+        ApiNGJsonRpcDemo demo = new ApiNGJsonRpcDemo();
+        demo.start(applicationKey, sessionToken);
 
-        String option = null;
-        while (option == null || (!option.equals("1") && !option.equals("2"))) {
-            System.out.print("\nEnter 1 or 2: ");
-            try {
-                option = inputStreamReader.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        FoeRescriptDemo demo = new FoeRescriptDemo(applicationKey, sessionToken);
-        if (option.equals("1")) {
-            demo.specificCallDemo();
-        } else {
-            demo.bulkLoadingDemo();
-        }
     }
 
     public static Properties getProperties() {
