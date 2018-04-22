@@ -1,15 +1,15 @@
 package com.betfair.foe;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Properties;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.betfair.foe.api.HttpClientNonInteractiveLoginSSO;
+
+import it.bluesheep.entities.util.sport.Sport;
 
 public class FoeDemo {
 
@@ -52,7 +52,7 @@ public class FoeDemo {
         }
 
         ApiNGJsonRpcDemo demo = new ApiNGJsonRpcDemo();
-        demo.start(applicationKey, sessionToken);
+        demo.start(applicationKey, sessionToken, Sport.CALCIO);
 
     }
 

@@ -1,9 +1,9 @@
 package com.betfair.foe.entities;
 
-import com.betfair.foe.enums.MarketProjection;
-import com.betfair.foe.enums.MarketSort;
-
 import java.util.Set;
+
+import com.betfair.foe.enums.types.MarketProjection;
+import com.betfair.foe.enums.types.MarketSort;
 
 public class ListMarketCatalogueRequestParams {
 

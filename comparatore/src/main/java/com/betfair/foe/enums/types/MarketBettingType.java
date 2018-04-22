@@ -1,7 +1,7 @@
-package com.betfair.foe.enums;
+package com.betfair.foe.enums.types;
 
 public enum MarketBettingType {
-    ODDS("ODDS"),
+    ODDS("MATCH_ODDS"),
     LINE("LINE"),
     FIXED_ODDS("FIXED_ODDS"),
     MOVING_HANDICAP("MOVING_HANDICAP");

@@ -1,10 +1,10 @@
 package com.betfair.foe.entities;
 
-import com.betfair.foe.enums.LegType;
-import com.betfair.foe.enums.MarketStatus;
-
 import java.util.Date;
 import java.util.List;
+
+import com.betfair.foe.enums.types.LegType;
+import com.betfair.foe.enums.types.MarketStatus;
 
 public class MarketDetails {
 

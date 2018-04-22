@@ -7,6 +7,10 @@ import java.util.Set;
 
 import com.betfair.foe.entities.*;
 import com.betfair.foe.enums.*;
+import com.betfair.foe.enums.types.MarketProjection;
+import com.betfair.foe.enums.types.MarketSort;
+import com.betfair.foe.enums.types.MatchProjection;
+import com.betfair.foe.enums.types.OrderProjection;
 import com.betfair.foe.exceptions.BetFairAPIException;
 
 

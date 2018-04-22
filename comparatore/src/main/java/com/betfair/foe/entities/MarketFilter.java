@@ -1,9 +1,9 @@
 package com.betfair.foe.entities;
 
 
-import com.betfair.foe.enums.MarketBettingType;
-
 import java.util.Set;
+
+import com.betfair.foe.enums.types.MarketBettingType;
 
 
 public class MarketFilter {

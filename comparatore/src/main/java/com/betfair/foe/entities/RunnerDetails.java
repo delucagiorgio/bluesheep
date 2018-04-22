@@ -1,6 +1,6 @@
 package com.betfair.foe.entities;
 
-import com.betfair.foe.enums.RunnerStatus;
+import com.betfair.foe.enums.types.RunnerStatus;
 
 public class RunnerDetails {
 

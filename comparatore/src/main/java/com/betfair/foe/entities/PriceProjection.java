@@ -2,7 +2,7 @@ package com.betfair.foe.entities;
 
 import java.util.Set;
 
-import com.betfair.foe.enums.PriceData;
+import com.betfair.foe.enums.types.PriceData;
 
 
 public class PriceProjection {

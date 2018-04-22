@@ -8,11 +8,11 @@ import java.util.Set;
 import com.betfair.foe.FoeDemo;
 import com.betfair.foe.entities.MarketFilter;
 import com.betfair.foe.entities.PriceProjection;
-import com.betfair.foe.enums.ApiNgOperation;
-import com.betfair.foe.enums.MarketProjection;
-import com.betfair.foe.enums.MarketSort;
-import com.betfair.foe.enums.MatchProjection;
-import com.betfair.foe.enums.OrderProjection;
+import com.betfair.foe.enums.types.ApiNgOperation;
+import com.betfair.foe.enums.types.MarketProjection;
+import com.betfair.foe.enums.types.MarketSort;
+import com.betfair.foe.enums.types.MatchProjection;
+import com.betfair.foe.enums.types.OrderProjection;
 import com.betfair.foe.exceptions.BetFairAPIException;
 import com.betfair.foe.util.JsonConverter;
 import com.betfair.foe.util.JsonrpcRequest;
@@ -42,7 +42,7 @@ public class ApiNgJsonRpcOperations extends ApiNgOperations{
     }
 
     public String listMarketBook(List<String> marketIds, PriceProjection priceProjection, OrderProjection orderProjection,
-                                           MatchProjection matchProjection, String currencyCode, String appKey, String ssoId) throws BetFairAPIException {
+    				MatchProjection matchProjection, String currencyCode, String appKey, String ssoId) throws BetFairAPIException {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(LOCALE, locale);
         params.put(MARKET_IDS, marketIds);

@@ -1,56 +1,19 @@
 package it.bluesheep.util;
 
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class TxOddsBluesheepJsonConverter {
+public class TxOddsBluesheepJsonConverter extends AbstractBluesheepJsonConverter {
 	
-	private static TxOddsBluesheepJsonConverter instance;
+	private TxOddsBluesheepJsonConverter() {
+		super();
+	}
 	
-	private TxOddsBluesheepJsonConverter() {}
-	
-	public synchronized static TxOddsBluesheepJsonConverter getTxOddsBluesheepJsonConverter() {
+	public synchronized static AbstractBluesheepJsonConverter getTxOddsBluesheepJsonConverter() {
 		if(instance == null) {
 			instance = new TxOddsBluesheepJsonConverter();
 		}
 		return instance;
-	}
-	
-	/**
-	 * GD - 17/04/18 
-	 * Ritorna l'oggetto JSON relativo ad un nodo specifico dell'attuale stringa JSON in analisi
-	 * @param obj il JSON in analisi
-	 * @param childNodeKey il nome del nodo JSON richiesto come oggetto di ritorno
-	 * @return l'oggetto JSON con chiave pari a "childNode"
-	 */
-	public JSONObject getChildNodeByKey(JSONObject obj, String childNodeKey) {
-		
-		//costruisce l'oggetto JSON relativo al field passato come parametro (ChildNode)
-		JSONObject returnObj = obj.optJSONObject(childNodeKey);
-		
-		return returnObj;
-	}
-	
-	/**
-	 * GD - 17/04/18 
-	 * Ritorna una collezione di oggetti JSON relativa ad una specifica chiave dell'attuale stringa JSON in analisi,
-	 * null se il tipo restituito non è un ArrayJSON o se la chiave non esiste
-	 * @param obj l'oggetto JSON in analisi
-	 * @param childNodeKey la chiave di cui si vuole ottenere la collezione di dati
-	 * @return la collezione di dati avente chiave childNodeKey, null se il tipo restituito non è un ArrayJSON o se la chiave non esiste
-	 */
-	public JSONArray getChildNodeArrayByKey(JSONObject obj, String childNodeKey) {
-		
-		//costruisce un JSONArray relativo ad una collezione presente in un oggetto JSON
-		JSONArray arrayNodes = obj.optJSONArray(childNodeKey);
-		
-		//se il nodo figlio non è un array allora è un oggetto, lo aggiungo ad un array e ritorno l'oggetto
-		if(arrayNodes == null) {
-			JSONObject objectNode = obj.getJSONObject(childNodeKey);
-			arrayNodes = new JSONArray();
-			arrayNodes.put(objectNode.toMap());
-		}
-		
-		return arrayNodes;
 	}
 	
 	/**
@@ -63,12 +26,7 @@ public class TxOddsBluesheepJsonConverter {
 		return getChildNodeByKey(obj, "@attributes");
 	}
 	
-	/**
-	 * GD - 17/04/18 
-	 * Ritorna la collezione di "match" relativa all'oggetto passato come parametro
-	 * @param obj l'oggetto di cui si vogliono ottenere le informazioni "match"
-	 * @return la collezione di "match" relativa all'oggetto JSON passato come parametro
-	 */
+	@Override
 	public JSONArray getAllMatchesFromJSONObjectRoot(JSONObject obj) {
 		return getChildNodeArrayByKey(obj, "match");
 	}

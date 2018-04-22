@@ -1,7 +1,6 @@
 package com.betfair.foe;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,13 +11,14 @@ import com.betfair.foe.entities.MarketCatalogue;
 import com.betfair.foe.entities.MarketFilter;
 import com.betfair.foe.entities.PriceProjection;
 import com.betfair.foe.entities.RunnerCatalog;
-import com.betfair.foe.entities.TimeRange;
-import com.betfair.foe.enums.MarketProjection;
-import com.betfair.foe.enums.MarketSort;
-import com.betfair.foe.enums.MatchProjection;
-import com.betfair.foe.enums.OrderProjection;
-import com.betfair.foe.enums.PriceData;
+import com.betfair.foe.enums.types.MarketProjection;
+import com.betfair.foe.enums.types.MarketSort;
+import com.betfair.foe.enums.types.MatchProjection;
+import com.betfair.foe.enums.types.OrderProjection;
+import com.betfair.foe.enums.types.PriceData;
 import com.betfair.foe.exceptions.BetFairAPIException;
+
+import it.bluesheep.entities.util.sport.Sport;
 
 /**
  * This is a demonstration class to show a quick demo of the new Betfair API-NG.
@@ -33,7 +33,7 @@ public class ApiNGJsonRpcDemo {
     private String applicationKey;
     private String sessionToken;
 
-    public void start(String appKey, String ssoid) {
+    public void start(String appKey, String ssoid, Sport sport) {
 
         this.applicationKey = appKey;
         this.sessionToken = ssoid;
@@ -50,7 +50,7 @@ public class ApiNGJsonRpcDemo {
 
             System.out.println("1.(listEventTypes) Get all Event Types...\n");
             String r = jsonOperations.listEventTypes(marketFilter, applicationKey, sessionToken);
-            System.out.println("2. Extract Event Type Id for Horse Racing...\n");
+            System.out.println(r);
 //            for (EventTypeResult eventTypeResult : r) {
 //                if(eventTypeResult.getEventType().getName().equals("Horse Racing")){
 //                    System.out.println("3. EventTypeId for \"Horse Racing\" is: " + eventTypeResult.getEventType().getId()+"\n");
@@ -66,19 +66,12 @@ public class ApiNGJsonRpcDemo {
              * sort: FIRST_TO_START - specify sort order to first to start race
              */
             System.out.println("4.(listMarketCataloque) Get next horse racing market in the UK...\n");
-            TimeRange time = new TimeRange();
-            time.setFrom(new Date());
 
-            Set<String> countries = new HashSet<String>();
-            countries.add("GB");
 
             Set<String> typesCode = new HashSet<String>();
-            typesCode.add("WIN");
 
             marketFilter = new MarketFilter();
             marketFilter.setEventTypeIds(eventTypeIds);
-            marketFilter.setMarketStartTime(time);
-            marketFilter.setMarketCountries(countries);
             marketFilter.setMarketTypeCodes(typesCode);
 
             Set<MarketProjection> marketProjection = new HashSet<MarketProjection>();

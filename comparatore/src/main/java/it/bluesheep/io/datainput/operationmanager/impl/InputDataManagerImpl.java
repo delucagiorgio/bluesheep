@@ -40,7 +40,6 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * GD - 18/04/18
 	 * Processa tutte le tipologie di quote realtive ad uno sport.
 	 * @param sport lo sport di cui si vogliono ottenere le quote
-	 * @param scommessaTipoList la lista di tutte le scommesse richieste dal business
 	 * @return una lista di AbstractInputRecord relativi allo sport passato come parametro 
 	 * 		   e alle tipologie di scommessa previste per tale sport
 	 */

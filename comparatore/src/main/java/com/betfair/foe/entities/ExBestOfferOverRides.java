@@ -1,6 +1,6 @@
 package com.betfair.foe.entities;
 
-import com.betfair.foe.enums.RollupModel;
+import com.betfair.foe.enums.types.RollupModel;
 
 public class ExBestOfferOverRides {
 

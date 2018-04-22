@@ -1,8 +1,8 @@
 package com.betfair.foe.entities;
 
-import com.betfair.foe.enums.PriceType;
-
 import java.util.Date;
+
+import com.betfair.foe.enums.types.PriceType;
 
 public class Rule4Deduction {
 

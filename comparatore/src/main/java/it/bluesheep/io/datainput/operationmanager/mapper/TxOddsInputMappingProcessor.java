@@ -14,6 +14,7 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.TxOddsInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.util.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.TxOddsBluesheepJsonConverter;
 
 /**
@@ -25,7 +26,7 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 		
-		TxOddsBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
+		AbstractBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
 		JSONObject jsonRootObject = new JSONObject(jsonString);
 		
@@ -74,7 +75,7 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	 */
 	private List<AbstractInputRecord> mapInfoBookmakersIntoAbstractInputRecordList(TxOddsInputRecord recordToBeMapped, JSONObject matchJsonObject, Scommessa scommessaTipo, Sport sport) {
 		
-		TxOddsBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
+		AbstractBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
 		//Insieme di tutti i bookmaker che offrono quote sul match e scommessa in analisi 
 		JSONArray bookmakersArrayJSONObject = jsonConverter.getChildNodeArrayByKey(matchJsonObject, "bookmaker");
@@ -111,7 +112,9 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 							//mappo le informazioni rimanenti nel nuovo oggetto
 							TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
 							
-							newRecord.setBookmakerName(jsonConverter.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString("name"));
+							TxOddsBluesheepJsonConverter blusheepJsonConv = (TxOddsBluesheepJsonConverter) jsonConverter;
+							
+							newRecord.setBookmakerName(blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString("name"));
 							newRecord.setTipoScommessa(scommessaTipo);
 							newRecord.setQuota(quotaScommessa);
 							

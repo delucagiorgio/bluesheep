@@ -1,9 +1,9 @@
 package com.betfair.foe.entities;
 
-import com.betfair.foe.enums.ResponseFilter;
-
 import java.util.List;
 import java.util.Set;
+
+import com.betfair.foe.enums.types.ResponseFilter;
 
 public class ListMarketPricesRequestParams {
 
