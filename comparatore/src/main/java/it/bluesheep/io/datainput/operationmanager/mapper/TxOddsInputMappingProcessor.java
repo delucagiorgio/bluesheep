@@ -1,14 +1,14 @@
 package it.bluesheep.io.datainput.operationmanager.mapper;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.betfair.foe.util.ISO8601DateTypeAdapter;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.TxOddsInputRecord;
@@ -21,7 +21,7 @@ import it.bluesheep.util.TxOddsBluesheepJsonConverter;
  * La classe si occupa di mappare i dati in input sotto forma di JSON in oggetti della stessa morfologia (AbstractInputRecord)
  * @author Giorgio De Luca
  */
-public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
+public final class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
@@ -204,8 +204,8 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 		//Mapping della data e dell'ora dell'evento
 		//"time": "2018-04-17T16:30:00+00:00"
 		String timeDateMatch = matchJsonObject.getString("time");
-		DateFormat df = new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ss");
-		Date date = df.parse(timeDateMatch);
+		ISO8601DateTypeAdapter adapterDate = new ISO8601DateTypeAdapter();
+		Date date = adapterDate.getDateFromString(timeDateMatch);
 		
 	    //Mapping del campionato e della lega
 	    //"group": "FBDUT Eredivisie > Regular Season-17"
@@ -219,7 +219,7 @@ public class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 	    //"ateam": "Zwolle"
 	    String awayTeam = matchJsonObject.getString("ateam");
 	    
-	    TxOddsInputRecord record = new TxOddsInputRecord(date, sport, group, homeTeam, awayTeam);
+	    TxOddsInputRecord record = new TxOddsInputRecord(date, sport, group, homeTeam, awayTeam, null);
 	    
 		return record;
 	}	

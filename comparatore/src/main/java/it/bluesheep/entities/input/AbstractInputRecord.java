@@ -17,26 +17,32 @@ public abstract class AbstractInputRecord {
 	protected String bookmakerName;
 	protected double quota;
 	protected Scommessa tipoScommessa;
+	protected String filler;
 	
-	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2) {	
-		Calendar.getInstance().setTime(dataOraEvento);
+	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {	
+		if(dataOraEvento != null) {
+			Calendar.getInstance().setTime(dataOraEvento);
+		}
 		this.dataOraEvento = dataOraEvento;
 		this.campionato = campionato;
 		this.partecipante1 = partecipante1;
 		this.partecipante2 = partecipante2;
 		this.sport = sport;
-		this.keyEvento = "" + this.dataOraEvento + ":" + this.sport + ":" + this.partecipante1 + " vs " + this.partecipante2 
-				+ ":" + this.campionato;
+		this.filler = filler;
+		this.keyEvento = "" + this.dataOraEvento + ":" + this.sport + ":" + this.partecipante1 + " vs " + this.partecipante2;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {
-		Calendar.getInstance().setTime(record.getDataOraEvento());
+		if(record.getDataOraEvento() != null) {
+			Calendar.getInstance().setTime(record.getDataOraEvento());
+		}
 		this.dataOraEvento = record.getDataOraEvento();
 		this.sport = record.getSport();
 		this.partecipante1 = record.getPartecipante1();
 		this.partecipante2 = record.getPartecipante2();
 		this.campionato = record.getCampionato();
 		this.keyEvento = record.getKeyEvento();
+		this.filler = record.getFiller();
 	}
 
 	public Date getDataOraEvento() {
@@ -109,6 +115,14 @@ public abstract class AbstractInputRecord {
 
 	public void setTipoScommessa(Scommessa tipoScommessa) {
 		this.tipoScommessa = tipoScommessa;
+	}
+
+	public String getFiller() {
+		return filler;
+	}
+
+	public void setFiller(String filler) {
+		this.filler = filler;
 	}
 	
 	

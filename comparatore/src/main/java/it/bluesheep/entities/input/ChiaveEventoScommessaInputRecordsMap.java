@@ -25,6 +25,10 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<String,Map<Scommessa, List<AbstractInputRecord>>>{
 	
 	private static final long serialVersionUID = 1L;
+	
+	public ChiaveEventoScommessaInputRecordsMap() {
+		super();
+	}
 
 	public void addToMapEventoScommessaRecord(AbstractInputRecord record) {
 		

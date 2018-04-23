@@ -17,7 +17,6 @@ import it.bluesheep.service.api.IApiInterface;
  *
  */
 public abstract class InputDataManagerImpl implements IInputDataManager {
-	//private static final String BETFAIR_EXCHANGE_API = "BETFAIR_EXCHANGE";
 	
 	protected IApiInterface apiServiceInterface;
 	
@@ -29,7 +28,6 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * 3. elaborazione della risposta ed eventuale gestione di eccezioni
 	 * 4. collezionare i dati in maniera da renderli omogenei
 	 */
-	@Override
 	public abstract String getDataFromService(Scommessa scommessa, Sport sport);
 	
 	
