@@ -95,12 +95,16 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		
 		return recordsToBeReturned;
 	}
-
+	
+	/**
+	 * GD - 22/04/2018
+	 * Calcola in base al tipo di scommessa il corretto indice da andare a leggere per ottenere le informazioni
+	 * esatte riguardanti la scommessa passata come parametro
+	 * @param scommessaTipo la scommessa
+	 * @return l'indice corretto da leggere, -1 in caso di errore
+	 */
 	private int getCorrectOddIndexInJSONObjectByScommessa(Scommessa scommessaTipo) {
-		
+//		int correctIndex = -1;
 		return 0;
 	}
-	
-
-
 }

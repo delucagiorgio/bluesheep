@@ -14,6 +14,8 @@ import it.bluesheep.entities.util.sport.Sport;
  */
 public class ScommessaUtilManager {
 	
+	private ScommessaUtilManager() {}
+	
 	/**
 	 * GD - 18/04/18
 	 * Ritorna la lista di scommesse per lo sport TENNIS
@@ -166,5 +168,4 @@ public class ScommessaUtilManager {
 		}
 		return opposite;
 	}
-
 }

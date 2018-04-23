@@ -11,6 +11,7 @@ import it.bluesheep.io.datacompare.IProcessDataManager;
 import it.bluesheep.io.datacompare.TxOddsProcessDataManager;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.io.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.impl.ExchangeVsBookmakerInputDataManagerImpl;
 
 public class BlueSheepComparatoreMain {
 
@@ -23,8 +24,8 @@ public class BlueSheepComparatoreMain {
 		
 		//interrogazione di TxOdds
 		
-		inputDataManager = new BookmakerVsBookmakerInputDataManagerImpl();
-		processDataManager = new TxOddsProcessDataManager();
+		inputDataManager = new ExchangeVsBookmakerInputDataManagerImpl();
+//		processDataManager = new TxOddsProcessDataManager();
 		
 		for(Sport sport : Sport.values()) {
 			
@@ -34,23 +35,23 @@ public class BlueSheepComparatoreMain {
 			}
 		}
 		
-		List<RecordOutput> recordToOutputList = new ArrayList<RecordOutput>();
-		
-		try{
-			for(Sport sport : Sport.values()) {
-				recordToOutputList.addAll(processDataManager.compareOdds(inputRecordMap, sport));
-			}
-		}catch(Exception e) {
-			e.printStackTrace(System.out);
-		}
-		
-		for(RecordOutput output : recordToOutputList) {
-			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
-							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
-							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
-							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating());
-		}
+//		List<RecordOutput> recordToOutputList = new ArrayList<RecordOutput>();
+//		
+//		try{
+//			for(Sport sport : Sport.values()) {
+//				recordToOutputList.addAll(processDataManager.compareOdds(inputRecordMap, sport));
+//			}
+//		}catch(Exception e) {
+//			e.printStackTrace(System.out);
+//		}
+//		
+//		for(RecordOutput output : recordToOutputList) {
+//			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
+//							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
+//							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
+//							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
+//							   output.getScommessaBookmaker2() + ";" + output.getRating());
+//		}
 		
 		
 

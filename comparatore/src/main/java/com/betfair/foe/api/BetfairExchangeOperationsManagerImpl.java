@@ -18,19 +18,20 @@ import com.betfair.foe.util.JsonConverter;
 import com.betfair.foe.util.JsonrpcRequest;
 
 
-public class ApiNgJsonRpcOperations extends ApiNgOperations{
+public class BetfairExchangeOperationsManagerImpl extends BetfairExchangeOperationsManager{
 
-    private static ApiNgJsonRpcOperations instance = null;
+    private static BetfairExchangeOperationsManagerImpl instance = null;
 
-    private ApiNgJsonRpcOperations(){}
+    private BetfairExchangeOperationsManagerImpl(){}
 
-    public static ApiNgJsonRpcOperations getInstance(){
+    public static BetfairExchangeOperationsManagerImpl getInstance(){
         if (instance == null){
-            instance = new ApiNgJsonRpcOperations();
+            instance = new BetfairExchangeOperationsManagerImpl();
         }
         return instance;
     }
 
+    @Override
     public String listEventTypes(MarketFilter filter, String appKey, String ssoId) throws BetFairAPIException {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(FILTER, filter);
@@ -38,9 +39,9 @@ public class ApiNgJsonRpcOperations extends ApiNgOperations{
         String result = getInstance().makeRequest(ApiNgOperation.LISTEVENTTYPES.getOperationName(), params, appKey, ssoId);
 
         return result;
-
     }
 
+    @Override
     public String listMarketBook(List<String> marketIds, PriceProjection priceProjection, OrderProjection orderProjection,
     				MatchProjection matchProjection, String currencyCode, String appKey, String ssoId) throws BetFairAPIException {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -53,10 +54,9 @@ public class ApiNgJsonRpcOperations extends ApiNgOperations{
         String result = getInstance().makeRequest(ApiNgOperation.LISTMARKETBOOK.getOperationName(), params, appKey, ssoId);
 
         return result;
-
-
     }
 
+    @Override
     public String listMarketCatalogue(MarketFilter filter, Set<MarketProjection> marketProjection,
                                                      MarketSort sort, String maxResult, String appKey, String ssoId) throws BetFairAPIException {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -67,10 +67,18 @@ public class ApiNgJsonRpcOperations extends ApiNgOperations{
         params.put(MARKET_PROJECTION, marketProjection);
         String result = getInstance().makeRequest(ApiNgOperation.LISTMARKETCATALOGUE.getOperationName(), params, appKey, ssoId);
 
+        return result;
+    }
+    
+	@Override
+	public String listEvents(MarketFilter filter,String appKey, String ssoId) throws BetFairAPIException {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(FILTER, filter);
+        params.put(LOCALE, locale);
+        String result = getInstance().makeRequest(ApiNgOperation.LISTEVENTS.getOperationName(), params, appKey, ssoId);
 
         return result;
-
-    }
+	}
 
     protected String makeRequest(String operation, Map<String, Object> params, String appKey, String ssoToken) {
         String requestString;
@@ -85,8 +93,6 @@ public class ApiNgJsonRpcOperations extends ApiNgOperations{
         //We need to pass the "sendPostRequest" method a string in util format:  requestString
         HttpUtil requester = new HttpUtil();
         return requester.sendPostRequestRescript(requestString, operation, appKey, ssoToken);
-
        }
-
 }
 

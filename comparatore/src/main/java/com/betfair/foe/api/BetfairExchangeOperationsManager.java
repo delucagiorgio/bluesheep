@@ -5,8 +5,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.betfair.foe.entities.*;
-import com.betfair.foe.enums.*;
+import com.betfair.foe.entities.MarketFilter;
+import com.betfair.foe.entities.PriceProjection;
 import com.betfair.foe.enums.types.MarketProjection;
 import com.betfair.foe.enums.types.MarketSort;
 import com.betfair.foe.enums.types.MatchProjection;
@@ -14,7 +14,7 @@ import com.betfair.foe.enums.types.OrderProjection;
 import com.betfair.foe.exceptions.BetFairAPIException;
 
 
-public abstract class ApiNgOperations {
+public abstract class BetfairExchangeOperationsManager implements IBetfairExchangeOperationsManager{
 	protected final String FILTER = "filter";
     protected final String LOCALE = "locale";
     protected final String SORT = "sort";
@@ -27,7 +27,7 @@ public abstract class ApiNgOperations {
     protected final String PRICE_PROJECTION = "priceProjection";
     protected final String MATCH_PROJECTION = "matchProjection";
     protected final String ORDER_PROJECTION = "orderProjection";
-    protected final String locale = Locale.getDefault().toString();
+    protected final String locale = Locale.ITALIAN.toString();
 
 	public abstract String listEventTypes(MarketFilter filter, String appKey, String ssoId) throws BetFairAPIException;
 
@@ -36,6 +36,8 @@ public abstract class ApiNgOperations {
 
     public abstract String listMarketCatalogue(MarketFilter filter, Set<MarketProjection> marketProjection,
         MarketSort sort, String maxResult, String appKey, String ssoId) throws BetFairAPIException;
+    
+    public abstract String listEvents(MarketFilter filter, String appKey, String ssoId) throws BetFairAPIException;
 
     protected abstract String makeRequest(String operation, Map<String, Object> params, String appKey, String ssoToken) throws  BetFairAPIException;
 

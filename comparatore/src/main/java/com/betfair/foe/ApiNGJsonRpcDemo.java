@@ -5,12 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.betfair.foe.api.ApiNgJsonRpcOperations;
-import com.betfair.foe.api.ApiNgOperations;
-import com.betfair.foe.entities.MarketCatalogue;
+import com.betfair.foe.api.BetfairExchangeOperationsManagerImpl;
+import com.betfair.foe.api.BetfairExchangeOperationsManager;
 import com.betfair.foe.entities.MarketFilter;
 import com.betfair.foe.entities.PriceProjection;
-import com.betfair.foe.entities.RunnerCatalog;
+import com.betfair.foe.enums.dao.MarketBettingTypeEnumDao;
+import com.betfair.foe.enums.types.MarketBettingType;
 import com.betfair.foe.enums.types.MarketProjection;
 import com.betfair.foe.enums.types.MarketSort;
 import com.betfair.foe.enums.types.MatchProjection;
@@ -29,7 +29,7 @@ import it.bluesheep.entities.util.sport.Sport;
  */
 public class ApiNGJsonRpcDemo {
 
-    private ApiNgOperations jsonOperations = ApiNgJsonRpcOperations.getInstance();
+    private BetfairExchangeOperationsManager jsonOperations = BetfairExchangeOperationsManagerImpl.getInstance();
     private String applicationKey;
     private String sessionToken;
 
@@ -47,9 +47,13 @@ public class ApiNGJsonRpcDemo {
             MarketFilter marketFilter;
             marketFilter = new MarketFilter();
             Set<String> eventTypeIds = new HashSet<String>();
-
-            System.out.println("1.(listEventTypes) Get all Event Types...\n");
-            String r = jsonOperations.listEventTypes(marketFilter, applicationKey, sessionToken);
+            eventTypeIds.add("1");
+            Set<String> marketTypes = MarketBettingTypeEnumDao.getCalcioExchangeOdds();
+            
+            marketFilter.setEventTypeIds(eventTypeIds);
+            marketFilter.setMarketTypeCodes(marketTypes);
+            
+            String r = jsonOperations.listEvents(marketFilter, applicationKey, sessionToken);
             System.out.println(r);
 //            for (EventTypeResult eventTypeResult : r) {
 //                if(eventTypeResult.getEventType().getName().equals("Horse Racing")){
@@ -161,36 +165,6 @@ public class ApiNGJsonRpcDemo {
 
         } catch (BetFairAPIException apiExc) {
             System.out.println(apiExc.toString());
-        }
-    }
-
-    private static double getPrice() {
-
-        try {
-            return new Double((String) FoeDemo.getProperties().get("BET_PRICE"));
-        } catch (NumberFormatException e) {
-            //returning the default value
-            return new Double(1000);
-        }
-
-    }
-
-    private static double getSize(){
-        try{
-            return new Double((String)FoeDemo.getProperties().get("BET_SIZE"));
-        } catch (NumberFormatException e){
-            //returning the default value
-            return new Double(0.01);
-        }
-    }
-
-    private void printMarketCatalogue(MarketCatalogue mk){
-        System.out.println("Market Name: "+mk.getMarketName() + "; Id: "+mk.getMarketId()+"\n");
-        List<RunnerCatalog> runners = mk.getRunners();
-        if(runners!=null){
-            for(RunnerCatalog rCat : runners){
-                System.out.println("Runner Name: "+rCat.getRunnerName()+"; Selection Id: "+rCat.getSelectionId()+"\n");
-            }
         }
     }
 }
