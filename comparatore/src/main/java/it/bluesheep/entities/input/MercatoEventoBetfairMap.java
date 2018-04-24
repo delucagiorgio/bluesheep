@@ -1,10 +1,6 @@
 package it.bluesheep.entities.input;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TreeMap;
-
-import it.bluesheep.entities.util.scommessa.Scommessa;
 
 /**
  * Questa mappa è necessaria per mantenere il legame che c'è tra le informazioni di un EventoBetfair e 
@@ -18,33 +14,22 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
  * @author Giorgio De Luca
  *
  */
-public final class EventoBetfairMercatoTipoScommessaMap extends TreeMap<EventoBetfair, Map<Scommessa,String>> {
+public final class MercatoEventoBetfairMap extends TreeMap<String, EventoBetfair> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public EventoBetfairMercatoTipoScommessaMap() {
+	public MercatoEventoBetfairMap() {
 		super();
 	}
 	
-	public void addEventoBetfairMercatoByTipoScommessa(EventoBetfair evento, Scommessa scommessaTipo, String marketId) {
+	public void addEventoBetfairByMarketId(EventoBetfair evento, String marketId) {
 		
 		//mappa relativa alla corrispondenza scommessa - mercato su un determinato evento
-		Map<Scommessa,String> scommessaStringMap = get(evento);
+		EventoBetfair eventoByMarketID = get(marketId);
 		
 		//se non esiste questo evento nella mappa
-		if(scommessaStringMap == null) {
-			
-			scommessaStringMap = new HashMap<Scommessa,String>();
-			scommessaStringMap.put(scommessaTipo, marketId);
-			this.put(evento, scommessaStringMap);
-			
-		}else {//se esiste già questo evento nella mappa
-			
-			//se non esiste già la tipologia di scommessa legata a questo evento
-			if(scommessaStringMap.get(scommessaTipo) == null) {
-				scommessaStringMap.put(scommessaTipo, marketId);
-			}
-			
+		if(eventoByMarketID == null) {
+			this.put(marketId, evento);	
 		}
 	}
 

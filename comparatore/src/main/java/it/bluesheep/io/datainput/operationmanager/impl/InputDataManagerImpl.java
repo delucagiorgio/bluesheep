@@ -28,7 +28,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * 3. elaborazione della risposta ed eventuale gestione di eccezioni
 	 * 4. collezionare i dati in maniera da renderli omogenei
 	 */
-	public abstract String getDataFromService(Scommessa scommessa, Sport sport);
+	public abstract List<String> getDataFromService(Scommessa scommessa, Sport sport);
 	
 	
 	@Override
@@ -52,10 +52,12 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		for(Scommessa scommessa : sportScommessaList) {
 			
 			//chiamo il servizio per ottenere i dati sullo sport e la relativa tipologia di scommessa
-			String resultJSON = getDataFromService(scommessa, sport);
+			List<String> resultJSONList = getDataFromService(scommessa, sport);
 			
-			//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
-			recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
+			for(String resultJSON : resultJSONList) {
+				//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
+				recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
+			}
 		}
 		
 		return recordToBeReturned;

@@ -47,7 +47,9 @@ public class BetfairExchangeOperationsManagerImpl extends BetfairExchangeOperati
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(LOCALE, locale);
         params.put(MARKET_IDS, marketIds);
-        params.put(PRICE_PROJECTION, priceProjection);
+        if(priceProjection != null) {
+        	params.put(PRICE_PROJECTION, priceProjection);
+        }
         params.put(ORDER_PROJECTION, orderProjection);
         params.put(MATCH_PROJECTION, matchProjection);
         params.put("currencyCode", currencyCode);

@@ -1,13 +1,10 @@
 package it.bluesheep.service.api;
 
-public interface IApiInterface {
+import java.util.List;
 
-	//TODO qui devono essere gestiti tutti i metodi utili alla connessione del servizio
-	
-	/**
-	 * 1. connessione
-	 * 2. chiamate per ottenere i risultati generiche
-	 * 3. gestione dei filtri da applicare alla chiamata di servizio
-	 */
-	
+import it.bluesheep.entities.input.AbstractInputRecord;
+import it.bluesheep.entities.util.sport.Sport;
+
+public interface IApiInterface {
+	public String getData(String sport, String oddsType);	
 }

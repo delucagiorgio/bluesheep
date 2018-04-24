@@ -19,7 +19,7 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 	}
 	
 	@Override
-	public String getDataFromService(Scommessa scommessa, Sport sport) {
+	public List<String> getDataFromService(Scommessa scommessa, Sport sport) {
 		
 		apiServiceInterface = new TxOddsApiImpl();
 		

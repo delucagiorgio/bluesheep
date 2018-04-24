@@ -75,22 +75,24 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 			//prendo le informazioni relative al lato "Banco"
 			JSONArray laySideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, "availableToLay");
 			
-			int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
-			
-			//prendo il prezzo più basso
-			JSONObject bestPriceLayOddsJSONObject = laySideOddsJSONArray.getJSONObject(correctOddIndexByScommessa);
-			
-			double quotaLayMin = bestPriceLayOddsJSONObject.getDouble("price");
-			double liquidità = bestPriceLayOddsJSONObject.getDouble("size");
-			
-			//mappo le informazioni nel record di input generico
-			BetfairExchangeInputRecord recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
-			recordToBeMapped.setQuota(quotaLayMin);
-			recordToBeMapped.setLiquidita(liquidità);
-			recordToBeMapped.setSport(sport);
-			recordToBeMapped.setTipoScommessa(scommessaTipo);
-			
-			recordsToBeReturned.add(recordToBeMapped);
+			if(laySideOddsJSONArray.length() > 0) {
+				int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
+				
+				//prendo il prezzo più basso
+				JSONObject bestPriceLayOddsJSONObject = laySideOddsJSONArray.getJSONObject(correctOddIndexByScommessa);
+				
+				double quotaLayMin = bestPriceLayOddsJSONObject.getDouble("price");
+				double liquidità = bestPriceLayOddsJSONObject.getDouble("size");
+				
+				//mappo le informazioni nel record di input generico
+				BetfairExchangeInputRecord recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
+				recordToBeMapped.setQuota(quotaLayMin);
+				recordToBeMapped.setLiquidita(liquidità);
+				recordToBeMapped.setSport(sport);
+				recordToBeMapped.setTipoScommessa(scommessaTipo);
+				
+				recordsToBeReturned.add(recordToBeMapped);
+			}
 		}
 		
 		return recordsToBeReturned;

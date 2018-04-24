@@ -9,6 +9,7 @@ public class EventoBetfair {
 	private Date dataOraEvento;
 	private String campionato;
 	private String id;
+	private String marketId;
 	
 	public String getPartecipante1() {
 		return partecipante1;
@@ -46,6 +47,14 @@ public class EventoBetfair {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getMarketId() {
+		return marketId;
+	}
+
+	public void setMarketId(String marketId) {
+		this.marketId = marketId;
 	}
 
 }
