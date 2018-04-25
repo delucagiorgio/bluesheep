@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -19,7 +21,7 @@ import it.bluesheep.service.api.IApiInterface;
  */
 public class TxOddsApiImpl implements IApiInterface {
 
-	public String getData(String sport, String oddsType) {
+	public List<String> getData(String sport, String oddsType) {
 		
 		
 		String u = "fabiodisante";
@@ -33,16 +35,17 @@ public class TxOddsApiImpl implements IApiInterface {
 		String odds_format = "0";
 		
 		String https_url = "https://xml2.txodds.com/feed/odds/xml.php?ident="+u+"&passwd="+p+"&active="+active+"&spid="+sport+"&ot="+oddsType+"&days="+days+"&json="+json+"&all_odds="+ allOdds + "&odds_format=" + odds_format;
-		String result = null;
+		List<String> result = new ArrayList<String>();
 		
 		URL url;
+		HttpsURLConnection con;
 		try {
 		
 		   url = new URL(https_url);
-		   HttpsURLConnection con = (HttpsURLConnection)url.openConnection();
+		   con = (HttpsURLConnection)url.openConnection();
 		     
 		   //dump all the content
-		   result = get_result(con);
+		   result.add(get_result(con));
 				
 		} catch (MalformedURLException e) {
 		   e.printStackTrace();

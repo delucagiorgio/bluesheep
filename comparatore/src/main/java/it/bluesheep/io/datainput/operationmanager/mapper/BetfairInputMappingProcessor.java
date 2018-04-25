@@ -7,13 +7,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
-import it.bluesheep.entities.input.BetfairExchangeInputRecord;
+import it.bluesheep.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.util.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.BetfairBluesheepJsonConverter;
 
 public final class BetfairInputMappingProcessor extends AbstractInputMappingProcessor{
+	
+	private static final String RESULT_JSON_STRING = "result";
+	private static final String MARKETID_JSON_STRING = "marketId";
+	private static final String RUNNERS_JSON_STRING = "runners";
+	private static final String EXCHANGE_JSON_STRING = "ex";
+	private static final String LAY_SIDE_JSON_STRING = "availableToLay";
+	private static final String PRICE_JSON_STRING = "price";
+	private static final String SIZE_JSON_STRING = "size";
 
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
@@ -23,7 +31,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		JSONObject jsonObject = new JSONObject(jsonString);
 		
 		//Ottieni risultati della chiamata
-		JSONArray resultArrayJSONObject = jsonConverter.getChildNodeArrayByKey(jsonObject, "result");
+		JSONArray resultArrayJSONObject = jsonConverter.getChildNodeArrayByKey(jsonObject, RESULT_JSON_STRING);
 		
 		JSONObject resultJSONObject = null;
 		String marketNode = null;
@@ -35,7 +43,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		for(int i = 0; i < resultArrayJSONObject.length(); i++) {
 			resultJSONObject = resultArrayJSONObject.getJSONObject(i);
 			
-			marketNode = resultJSONObject.getString("marketId");
+			marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
 			BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode);
 			
 			List<AbstractInputRecord> recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
@@ -64,30 +72,30 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		List<AbstractInputRecord> recordsToBeReturned = new ArrayList<AbstractInputRecord>();
 		
 		//Solitamente più di uno, rappresentano i dettagli delle quote
-		JSONArray runnerJSONArray = jsonConverter.getChildNodeArrayByKey(resultJSONObject, "runners");
+		JSONArray runnerJSONArray = jsonConverter.getChildNodeArrayByKey(resultJSONObject, RUNNERS_JSON_STRING);
+		int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
+
+		//per ogni runner
+		JSONObject runnerJSONObject = runnerJSONArray.getJSONObject(correctOddIndexByScommessa);
+		//prendo le informazioni relative alle quote di exchange
+		JSONObject exchangeOddsJSONObject = jsonConverter.getChildNodeByKey(runnerJSONObject, EXCHANGE_JSON_STRING);
 		
-		for(int j = 0; j < runnerJSONArray.length(); j++) {
-			//per ogni runner
-			JSONObject runnerJSONObject = runnerJSONArray.getJSONObject(j);
-			//prendo le informazioni relative alle quote di exchange
-			JSONObject exchangeOddsJSONObject = jsonConverter.getChildNodeByKey(runnerJSONObject, "ex");
+		//prendo le informazioni relative al lato "Banco"
+		JSONArray laySideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, LAY_SIDE_JSON_STRING);
+		
+		if(laySideOddsJSONArray.length() > 0) {
 			
-			//prendo le informazioni relative al lato "Banco"
-			JSONArray laySideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, "availableToLay");
+			//prendo il prezzo più basso
+			JSONObject bestPriceLayOddsJSONObject = laySideOddsJSONArray.optJSONObject(0);
 			
-			if(laySideOddsJSONArray.length() > 0) {
-				int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
-				
-				//prendo il prezzo più basso
-				JSONObject bestPriceLayOddsJSONObject = laySideOddsJSONArray.getJSONObject(correctOddIndexByScommessa);
-				
-				double quotaLayMin = bestPriceLayOddsJSONObject.getDouble("price");
-				double liquidità = bestPriceLayOddsJSONObject.getDouble("size");
+			if(bestPriceLayOddsJSONObject != null) {
+				double quotaLayMin = bestPriceLayOddsJSONObject.getDouble(PRICE_JSON_STRING);
+				double liquidita = bestPriceLayOddsJSONObject.getDouble(SIZE_JSON_STRING);
 				
 				//mappo le informazioni nel record di input generico
 				BetfairExchangeInputRecord recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
 				recordToBeMapped.setQuota(quotaLayMin);
-				recordToBeMapped.setLiquidita(liquidità);
+				recordToBeMapped.setLiquidita(liquidita);
 				recordToBeMapped.setSport(sport);
 				recordToBeMapped.setTipoScommessa(scommessaTipo);
 				
@@ -106,7 +114,30 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	 * @return l'indice corretto da leggere, -1 in caso di errore
 	 */
 	private int getCorrectOddIndexInJSONObjectByScommessa(Scommessa scommessaTipo) {
-//		int correctIndex = -1;
-		return 0;
+		int index = -1;
+		switch(scommessaTipo) {
+		case NESSUNGOAL_U0X5:
+		case ALPIU1GOAL_U1X5:
+		case ALPIU2GOAL_U2X5:
+		case ALPIU3GOAL_U3X5:
+		case ALPIU4GOAL_U4X5:
+		case ENTRAMBISEGNANO_GOAL:
+		case SFIDANTE1VINCENTE_1:
+			index = 0;
+			break;
+		case ALMENO1GOAL_O0X5:
+		case ALMENO2GOAL_O1X5:
+		case ALMENO3GOAL_O2X5:
+		case ALMENO4G0AL_O3X5:
+		case ALMENO5GOAL_O4X5:
+		case NESSUNOSEGNA_NOGOAL:
+		case SFIDANTE2VINCENTE_2:
+			index = 1;
+			break;
+		case PAREGGIO_X:
+			index = 2;
+			break;
+		}
+		return index;
 	}
 }

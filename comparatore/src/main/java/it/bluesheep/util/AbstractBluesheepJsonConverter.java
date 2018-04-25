@@ -7,9 +7,7 @@ import org.json.JSONWriter;
 public abstract class AbstractBluesheepJsonConverter {
 	
 	protected static AbstractBluesheepJsonConverter instance;
-	
-	protected AbstractBluesheepJsonConverter() {}
-	
+		
 	/**
 	 * GD - 17/04/18 
 	 * Ritorna l'oggetto JSON relativo ad un nodo specifico dell'attuale stringa JSON in analisi

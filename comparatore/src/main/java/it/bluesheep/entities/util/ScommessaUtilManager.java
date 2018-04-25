@@ -35,6 +35,7 @@ public class ScommessaUtilManager {
 		
 		returnList.addAll(getScommessaListCalcio3WayOdds());
 		returnList.addAll(getScommessaListCalcioTotalOdds());
+		returnList.addAll(getScommessaListCalcioGoalNoGoal());
 		
 		return returnList;
 	}
@@ -50,8 +51,8 @@ public class ScommessaUtilManager {
 	
 	/**
 	 * GD - 18/04/18
-	 * Ritorna la lista di scommesse per lo sport CALCIO del tipo UNDER e OVER
-	 * @return la lista di scommesse per lo sport CALCIO del tipo UNDER e OVER
+	 * Ritorna la lista di scommesse per lo sport CALCIO del tipo UNDER/OVER e GOAL/NOGOAL
+	 * @return la lista di scommesse per lo sport CALCIO del tipo UNDER/OVER e GOAL/NOGOAL
 	 */
 	public static List<Scommessa> getScommessaListCalcioTotalOdds(){
 		return Arrays.asList(Scommessa.ALMENO1GOAL_O0X5, 
@@ -64,6 +65,15 @@ public class ScommessaUtilManager {
 				Scommessa.ALPIU3GOAL_U3X5,
 				Scommessa.ALPIU4GOAL_U4X5,
 				Scommessa.NESSUNGOAL_U0X5);
+	}
+	
+	/**
+	 * Ritorna la lista di scommesse per lo sport CALCIO del tipo GOAL/NOGOAL
+	 * @return la lista di scommesse per lo sport CALCIO del tipo GOAL/NOGOAL
+	 */
+	public static List<Scommessa> getScommessaListCalcioGoalNoGoal(){
+		return Arrays.asList(Scommessa.ENTRAMBISEGNANO_GOAL, 
+				Scommessa.NESSUNOSEGNA_NOGOAL);
 	}
 	
 	/**
@@ -100,15 +110,8 @@ public class ScommessaUtilManager {
 	 * @param sport lo sport dell'evento
 	 * @return la scommessa di tipo TOTAL opposta alla scommessa passata come parametro, null se non trovata
 	 */
-	public static Scommessa getOppositeScommessaByScommessaBookVsBook(Scommessa scommessa, Sport sport) {
-		Scommessa opposite = null;
-		if(Sport.CALCIO.equals(sport) && getScommessaListCalcioTotalOdds().contains(scommessa)) {
-			opposite = getOppositeScommessaTotalOdds(scommessa, sport);
-		}else if (Sport.TENNIS.equals(sport) && getScommessaListTennis2WayOdds().contains(scommessa)) {
-			opposite = getOppositeScommessaTotalOdds(scommessa, sport);
-		}
-		
-		return opposite;
+	public static Scommessa getOppositeScommessaByScommessa(Scommessa scommessa, Sport sport) {		
+		return getOppositeScommessaTotalOdds(scommessa, sport);
 	}
 
 	/**
@@ -150,6 +153,12 @@ public class ScommessaUtilManager {
 				break;
 			case ALPIU4GOAL_U4X5:
 				opposite = Scommessa.ALMENO5GOAL_O4X5;
+				break;
+			case ENTRAMBISEGNANO_GOAL:
+				opposite = Scommessa.NESSUNOSEGNA_NOGOAL;
+				break;
+			case NESSUNOSEGNA_NOGOAL:
+				opposite = Scommessa.ENTRAMBISEGNANO_GOAL;
 				break;
 			default:
 				break;

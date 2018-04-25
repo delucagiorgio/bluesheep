@@ -8,10 +8,10 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.betfair.foe.util.ISO8601DateTypeAdapter;
+import com.betfair.util.ISO8601DateTypeAdapter;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
-import it.bluesheep.entities.input.TxOddsInputRecord;
+import it.bluesheep.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.util.AbstractBluesheepJsonConverter;
@@ -23,6 +23,18 @@ import it.bluesheep.util.TxOddsBluesheepJsonConverter;
  */
 public final class TxOddsInputMappingProcessor extends AbstractInputMappingProcessor{
 
+	private static final String BOOKMAKER_JSON_STRING = "bookmaker";
+	private static final String OFFER_JSON_STRING = "offer";
+	private static final String ODDS_JSON_STRING = "odds";
+	private static final String O3_JSON_STRING = "o3";
+	private static final String O1_JSON_STRING = "o1";
+	private static final String O2_JSON_STRING = "o2";
+	private static final String TIME_JSON_STRING = "time";
+	private static final String HTEAM_JSON_STRING = "hteam";
+	private static final String GROUP_JSON_STRING = "group";
+	private static final String ATEAM_JSON_STRING = "ateam";
+	private static final String NAME_JSON_STRING = "name";
+	
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 		
@@ -78,14 +90,14 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 		AbstractBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
 		//Insieme di tutti i bookmaker che offrono quote sul match e scommessa in analisi 
-		JSONArray bookmakersArrayJSONObject = jsonConverter.getChildNodeArrayByKey(matchJsonObject, "bookmaker");
+		JSONArray bookmakersArrayJSONObject = jsonConverter.getChildNodeArrayByKey(matchJsonObject, BOOKMAKER_JSON_STRING);
 		
 		List<AbstractInputRecord> recordToBeReturned = new ArrayList<AbstractInputRecord>();
 		
 		for(int i = 0; i < bookmakersArrayJSONObject.length(); i++) {
 			//per ogni bookmaker, accedo all'offer e prendo le quote relative alla mia scommessa
 			JSONObject bookmakerJSONObject = bookmakersArrayJSONObject.getJSONObject(i);
-			JSONArray offerJSONArray = jsonConverter.getChildNodeArrayByKey(bookmakerJSONObject, "offer");
+			JSONArray offerJSONArray = jsonConverter.getChildNodeArrayByKey(bookmakerJSONObject, OFFER_JSON_STRING);
 			
 			for(int k = 0; k < offerJSONArray.length(); k++) {
 				JSONObject offerJSONObject = offerJSONArray.getJSONObject(k);
@@ -96,7 +108,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 					
 					//l'oggetto quota sarà sempre unico per bookmaker (le quote offerte per una determinata scommessa sono uniche e le ultime più aggiornate)
 					//prendo l'oggetto JSON delle quote e prendo il dato richiesto
-					JSONArray oddsJSONArray = jsonConverter.getChildNodeArrayByKey(offerJSONObject, "odds");
+					JSONArray oddsJSONArray = jsonConverter.getChildNodeArrayByKey(offerJSONObject, ODDS_JSON_STRING);
 					
 					//per ogni quota offerta dal bookmaker in analisi
 					for(int j = 0; j < oddsJSONArray.length(); j++) {
@@ -105,7 +117,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 						double quotaTotalUnderOver = getCorrectQuotaUnderOverByScommessa(scommessaTipo);
 						
 						//(se la quota non è totale) oppure (se la quota è totale e il campo o3 corrisponde alla quota cercata)
-						if(quotaTotalUnderOver < 0 || oddsJSONObject.getDouble("o3") == quotaTotalUnderOver) {
+						if(quotaTotalUnderOver < 0 || oddsJSONObject.getDouble(O3_JSON_STRING) == quotaTotalUnderOver) {
 							
 							double quotaScommessa = oddsJSONObject.getDouble(campoQuotaScommessa);
 						
@@ -114,7 +126,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 							
 							TxOddsBluesheepJsonConverter blusheepJsonConv = (TxOddsBluesheepJsonConverter) jsonConverter;
 							
-							newRecord.setBookmakerName(blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString("name"));
+							newRecord.setBookmakerName(blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING));
 							newRecord.setTipoScommessa(scommessaTipo);
 							newRecord.setQuota(quotaScommessa);
 							
@@ -163,28 +175,24 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 		switch(scommessaTipo) {
 		case SFIDANTE1VINCENTE_1:
 		case ENTRAMBISEGNANO_GOAL:
-			fieldByScommessa = "o1";
-			break;
-		case PAREGGIO_X:
-			fieldByScommessa = "o2";
-			break;
-		case SFIDANTE2VINCENTE_2:
-		case NESSUNOSEGNA_NOGOAL:
-			fieldByScommessa = "o3";
-			break;
 		case ALMENO1GOAL_O0X5:
 		case ALMENO2GOAL_O1X5:
 		case ALMENO3GOAL_O2X5:
 		case ALMENO4G0AL_O3X5:
 		case ALMENO5GOAL_O4X5:
-			fieldByScommessa = "o1";
+			fieldByScommessa = O1_JSON_STRING;
 			break;
+		case PAREGGIO_X:
 		case NESSUNGOAL_U0X5:
 		case ALPIU1GOAL_U1X5: 
 		case ALPIU2GOAL_U2X5:
 		case ALPIU3GOAL_U3X5:
 		case ALPIU4GOAL_U4X5:
-			fieldByScommessa = "o2";
+			fieldByScommessa = O2_JSON_STRING;
+			break;
+		case SFIDANTE2VINCENTE_2:
+		case NESSUNOSEGNA_NOGOAL:
+			fieldByScommessa = O3_JSON_STRING;
 			break;
 		default:
 			break;
@@ -203,21 +211,21 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private TxOddsInputRecord mapInfoMatchIntoAbstractInputRecord(JSONObject matchJsonObject, Sport sport) throws ParseException {		
 		//Mapping della data e dell'ora dell'evento
 		//"time": "2018-04-17T16:30:00+00:00"
-		String timeDateMatch = matchJsonObject.getString("time");
+		String timeDateMatch = matchJsonObject.getString(TIME_JSON_STRING);
 		ISO8601DateTypeAdapter adapterDate = new ISO8601DateTypeAdapter();
 		Date date = adapterDate.getDateFromString(timeDateMatch);
 		
 	    //Mapping del campionato e della lega
 	    //"group": "FBDUT Eredivisie > Regular Season-17"
-	    String group = matchJsonObject.getString("group");
+	    String group = matchJsonObject.getString(GROUP_JSON_STRING);
 		
 	    //Mapping partecipante 1
 	    //"hteam": "Twente"
-	    String homeTeam = matchJsonObject.getString("hteam");
+	    String homeTeam = matchJsonObject.getString(HTEAM_JSON_STRING);
 	    	
 	    //Mapping partecipante 2
 	    //"ateam": "Zwolle"
-	    String awayTeam = matchJsonObject.getString("ateam");
+	    String awayTeam = matchJsonObject.getString(ATEAM_JSON_STRING);
 	    
 	    TxOddsInputRecord record = new TxOddsInputRecord(date, sport, group, homeTeam, awayTeam, null);
 	    

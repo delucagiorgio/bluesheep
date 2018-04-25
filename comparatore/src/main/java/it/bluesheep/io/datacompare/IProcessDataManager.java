@@ -2,9 +2,9 @@ package it.bluesheep.io.datacompare;
 
 import java.util.List;
 
-import it.bluesheep.entities.input.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 
 public interface IProcessDataManager {
 	

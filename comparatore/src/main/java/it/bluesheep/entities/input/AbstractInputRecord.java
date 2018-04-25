@@ -125,6 +125,30 @@ public abstract class AbstractInputRecord {
 		this.filler = filler;
 	}
 	
+	/**
+	 * GD - metodo utilizzato per comparare due record e capire se si riferiscono allo stesso evento
+	 * @param abstractInputRecord record da comparare
+	 * @return true, se sono lo stesso evento, false altrimenti
+	 */
+	public abstract boolean isSameEventAbstractInputRecord (AbstractInputRecord abstractInputRecord);
+
 	
+	protected boolean isSameScommessa(Scommessa tipoScommessa2, Scommessa tipoScommessa3) {
+		return tipoScommessa2.getCode().equals(tipoScommessa3.getCode());
+	}
+
+	protected boolean compareSport(Sport sport2, Sport sport3) {
+		return sport2.getCode() == sport3.getCode();
+	}
+
+	protected boolean compareDate(Date dataOraEvento2, Date dataOraEvento3) {
+		return ((dataOraEvento2.getTime() >= dataOraEvento3.getTime()) && (dataOraEvento2.getTime() - dataOraEvento3.getTime() < 3600000))
+				|| ((dataOraEvento3.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento3.getTime() - dataOraEvento2.getTime() < 3600000));
+	}
+
+	protected boolean compareParticipants(String p11, String p12, String p21, String p22) {
+		return (p11.contains(p21) || p21.contains(p11)) && (p12.contains(p22) || p22.contains(p12));
+	}
+
 	
 }

@@ -1,10 +1,11 @@
 package it.bluesheep.io.datainput.operationmanager.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
-import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
@@ -19,18 +20,29 @@ import it.bluesheep.service.api.IApiInterface;
 public abstract class InputDataManagerImpl implements IInputDataManager {
 	
 	protected IApiInterface apiServiceInterface;
-	
-	
-	// TODO Da capire come gestire le azioni comuni
+	protected Map<String, List<String>> scommessaJsonListMap;
+
 	/**
-	 * 1. preparazione dei dati relativi alla connessione (metodo astratto da implementare nella sottoclasse)
-	 * 2. connessione (metodo astratto da implementare nella sottoclasse)
-	 * 3. elaborazione della risposta ed eventuale gestione di eccezioni
-	 * 4. collezionare i dati in maniera da renderli omogenei
+	 * Il metodo stabilisce quali sono i parametri da passare all'API e interroga il servizio restituendo 
+	 * i dati relativi alla sottomissione
+	 * @param scommessa la tipologia di scommessa da analizzare
+	 * @param sport lo sport da analizzare
+	 * @return la lista di JSON contenente i dati richiesti
 	 */
-	public abstract List<String> getDataFromService(Scommessa scommessa, Sport sport);
-	
-	
+	protected List<String> getDataFromService(Scommessa scommessa, Sport sport){	
+		List<String> result = new ArrayList<String>();
+		
+		String bet = identifyCorrectBetCode(scommessa, sport);
+		String game = identifyCorrectGameCode(sport);
+		
+	    if (game != null && bet != null) {
+	    	result.addAll(apiServiceInterface.getData(game, bet));
+		    scommessaJsonListMap.put(bet, result);
+	    }
+	    
+	    return result;
+	}
+		
 	@Override
 	public abstract List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport);
 	
@@ -42,27 +54,49 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * 		   e alle tipologie di scommessa previste per tale sport
 	 */
 	public List<AbstractInputRecord> processAllData(Sport sport){
+		
+		System.out.println("" + this.getClass().getSimpleName() + " is processing data for sport " + sport);
 						
 		//la lista di scommesse filtrata per possibili combinazioni sul determinato sport
 		List<Scommessa> sportScommessaList = getCombinazioniSportScommessa(sport);
 		
 		List<AbstractInputRecord> recordToBeReturned = new ArrayList<AbstractInputRecord>();
 		
+		List<String> resultJSONList = new ArrayList<String>();
+		scommessaJsonListMap = new HashMap<String,List<String>>();
 		//per ogni tipologia di scommessa
 		for(Scommessa scommessa : sportScommessaList) {
 			
-			//chiamo il servizio per ottenere i dati sullo sport e la relativa tipologia di scommessa
-			List<String> resultJSONList = getDataFromService(scommessa, sport);
-			
-			for(String resultJSON : resultJSONList) {
-				//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
-				recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
+			if (!isLastScommessaSameType(scommessa, sport)) {
+				//chiamo il servizio per ottenere i dati sullo sport e la relativa tipologia di scommessa
+				resultJSONList = getDataFromService(scommessa, sport);
 			}
+			
+			if (resultJSONList != null && !resultJSONList.isEmpty()) {
+				for(String resultJSON : resultJSONList) {
+					//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
+					recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
+				}	
+			}
+			
 		}
+		
+		scommessaJsonListMap = null;
 		
 		return recordToBeReturned;
 	}
-
+	/**
+	 * GD - 25/04/18
+	 * Controlla che l'ultima scommessa eseguita sia dello stessa tipologia della scommessa attuale
+	 * @param scommessa scommessa attuale
+	 * @param lastScommessa ultima scommessa
+	 * @return true, se scommessa e lastScommessa sono dello stesso tipo, false altrimenti
+	 */
+	protected boolean isLastScommessaSameType(Scommessa scommessa, Sport sport) {
+		String bet = identifyCorrectBetCode(scommessa, sport);
+		return scommessaJsonListMap.get(bet) != null;
+	}
+	
 	/**
 	 * GD - 18/04/18
 	 * Metodo per filtrare le tipologie di scommesse in base allo sport
@@ -70,17 +104,25 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * @param scommessaTipoList la lista di tutte le possibili quote volute
 	 * @return la lista di scommesse filtrate per lo sport passato come parametro
 	 */
-	private List<Scommessa> getCombinazioniSportScommessa(Sport sport) {
-		
-		List<Scommessa> scommessaList = new ArrayList<Scommessa>();
-		
-		if(sport.equals(Sport.TENNIS)) {
-			scommessaList = ScommessaUtilManager.getScommessaListTennis2WayOdds();
-		}else if(sport.equals(Sport.CALCIO)) {
-			scommessaList = ScommessaUtilManager.getScommessaListCalcioAllOdds();
-		}
-		
-		return scommessaList;
-	}
+	protected abstract List<Scommessa> getCombinazioniSportScommessa(Sport sport);
+	
+	/**
+	 * GD - 25/04/18
+	 * Identifica e assegna i corretti codici da passare all'api
+	 * @param scommessa la scommessa richiesta
+	 * @param sport lo sport richiesto
+	 * @return il codice da utilizzare nella chiamata dell'API
+	 */
+	protected abstract String identifyCorrectBetCode(Scommessa scommessa, Sport sport);
+	
+	/**
+	 * GD - 25/04/18
+	 * Identifica e assegna i corretti codici da passare all'api
+	 * @param scommessa la scommessa richiesta
+	 * @param sport lo sport richiesto
+	 * @return il codice da utilizzare nella chiamata dell'API
+	 */
+	protected abstract String identifyCorrectGameCode(Sport sport);
+
 
 }
