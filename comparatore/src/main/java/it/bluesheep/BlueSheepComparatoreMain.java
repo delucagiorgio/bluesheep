@@ -33,13 +33,15 @@ public class BlueSheepComparatoreMain {
         }
     }
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+	
+		long startTime = System.currentTimeMillis();
+		
 		//inizializzo le variabili necessarie per effettuare tutte le chiamate
 		IInputDataManager inputDataManager;
 		IProcessDataManager processDataManager;
 		ChiaveEventoScommessaInputRecordsMap eventoScommessaRecordMap = new ChiaveEventoScommessaInputRecordsMap();
-		
-		
+			
 		//interrogazione di TxOdds
 		inputDataManager = new BookmakerVsBookmakerInputDataManagerImpl();
 		List<AbstractInputRecord> txOddsMappedRecordsFromJson = new ArrayList<AbstractInputRecord>();
@@ -52,6 +54,8 @@ public class BlueSheepComparatoreMain {
 			}
 			txOddsMappedRecordsFromJson.addAll(txOddsMappedRecordsFromJsonBySport);
 		}
+		
+		
 		//Avvio comparazione quote tabella 1
 		List<RecordOutput> tabella1OutputList = new ArrayList<RecordOutput>();
 		processDataManager = new TxOddsProcessDataManager();
@@ -62,14 +66,26 @@ public class BlueSheepComparatoreMain {
 				e.printStackTrace(System.out);
 			}
 		}
-		
+
 		for(RecordOutput output : tabella1OutputList) {
+			
 			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
 							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
 							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
 							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
 							   output.getScommessaBookmaker2() + ";" + output.getRating());
+			
 		}
+    	
+//    	String jsonString1 = AbstractBluesheepJsonConverter.convertToJSON(tabella1OutputList);
+//    	
+//    	// Indico il path di destinazione dei miei dati
+//    	PrintWriter writer1 = new PrintWriter("result1.json", "UTF-8");
+//    	
+//    	// Scrivo
+//    	writer1.println(jsonString1);
+//    	writer1.close();
+		
 		
 		//Interrogazione Betfair
 		inputDataManager = new ExchangeVsBookmakerInputDataManagerImpl();
@@ -102,8 +118,21 @@ public class BlueSheepComparatoreMain {
 							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
 							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
 							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + ((RecordBookmakerVsExchangeOdds)output).getLiquidità());
+							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + ((RecordBookmakerVsExchangeOdds)output).getLiquidita());
 		}
+		
+		long endTime = System.currentTimeMillis();
+		
+//    	String jsonString2 = AbstractBluesheepJsonConverter.convertToJSON(tabella1OutputList);
+    	
+//    	// Indico il path di destinazione dei miei dati
+//    	PrintWriter writer2 = new PrintWriter("/result2.json", "UTF-8");
+//    	
+//    	// Scrivo
+//    	writer2.println(jsonString2);
+//    	writer2.close();
+    	
+		System.out.println("\n\nTotal execution time = " + (endTime - startTime)/1000);
 	}
 	
 	public static Properties getProperties() {

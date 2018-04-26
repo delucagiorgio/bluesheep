@@ -13,12 +13,12 @@ import it.bluesheep.service.api.impl.TxOddsApiImpl;
 
 public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataManagerImpl {
 	
-	private final static String SOCCERCODE = "1";
-	private final static String TENNISCODE = "5";
-	private final static String THREEWAY = "0";
-	private final static String MONEYLINE = "1";
-	private final static String TOTALS = "4";
-	private final static String GGNG = "11534337";
+//	private final static String SOCCERCODE = "1";
+//	private final static String TENNISCODE = "5";
+//	private final static String THREEWAY = "0";
+//	private final static String MONEYLINE = "1";
+//	private final static String TOTALS = "4";
+//	private final static String GGNG = "11534337";
 	
 	private AbstractInputMappingProcessor processor;
 	
@@ -46,35 +46,35 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 		return abstractInputRecordsList;
 	}
 
-	@Override
-	protected String identifyCorrectBetCode(Scommessa scommessa, Sport sport) {
-		String bet = null;
-		if (sport == Sport.CALCIO) {
-			if (ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) {
-		    	bet = THREEWAY;
-			} else if (ScommessaUtilManager.getScommessaListCalcioTotalOdds().contains(scommessa)) {
-		    	bet = TOTALS;
-			} else if (ScommessaUtilManager.getScommessaListCalcioGoalNoGoal().contains(scommessa)) {
-		    	bet = GGNG;
-			}	
-		} else if (sport == Sport.TENNIS) {
-			if (ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa)) {
-		    	bet = MONEYLINE;
-			}
-		}	
-		return bet;
-	}
-
-	@Override
-	protected String identifyCorrectGameCode(Sport sport) {
-		String game = null;
-		if (sport == Sport.CALCIO) {
-			game = SOCCERCODE;
-		} else if (sport == Sport.TENNIS) {
-			game = TENNISCODE;
-		}	
-		return game;
-	}
+//	@Override
+//	protected String identifyCorrectBetCode(Scommessa scommessa, Sport sport) {
+//		String bet = null;
+//		if (sport == Sport.CALCIO) {
+//			if (ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) {
+//		    	bet = THREEWAY;
+//			} else if (ScommessaUtilManager.getScommessaListCalcioTotalOdds().contains(scommessa)) {
+//		    	bet = TOTALS;
+//			} else if (ScommessaUtilManager.getScommessaListCalcioGoalNoGoal().contains(scommessa)) {
+//		    	bet = GGNG;
+//			}	
+//		} else if (sport == Sport.TENNIS) {
+//			if (ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa)) {
+//		    	bet = MONEYLINE;
+//			}
+//		}	
+//		return bet;
+//	}
+//
+//	@Override
+//	protected String identifyCorrectGameCode(Sport sport) {
+//		String game = null;
+//		if (sport == Sport.CALCIO) {
+//			game = SOCCERCODE;
+//		} else if (sport == Sport.TENNIS) {
+//			game = TENNISCODE;
+//		}	
+//		return game;
+//	}
 
 	@Override
 	protected List<Scommessa> getCombinazioniSportScommessa(Sport sport) {
@@ -83,7 +83,7 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 		if(sport.equals(Sport.TENNIS)) {
 			scommessaList = ScommessaUtilManager.getScommessaListTennis2WayOdds();
 		}else if(sport.equals(Sport.CALCIO)) {
-			scommessaList = ScommessaUtilManager.getScommessaListCalcioTotalOdds();
+			scommessaList = ScommessaUtilManager.getScommessaListCalcioAllOdds();
 		}
 		
 		return scommessaList;

@@ -100,7 +100,7 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 		recordOutput.setScommessaBookmaker2(scommessaInputRecord2.getTipoScommessa().getCode());
 		recordOutput.setSport(scommessaInputRecord1.getSport().getCode());
 		BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord)scommessaInputRecord2;
-		recordOutput.setLiquidità(exchangeRecord.getLiquidita());
+		recordOutput.setLiquidita(exchangeRecord.getLiquidita());
 		return recordOutput;
 	}
 

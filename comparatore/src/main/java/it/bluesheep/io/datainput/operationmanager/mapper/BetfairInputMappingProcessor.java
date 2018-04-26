@@ -26,6 +26,8 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 		
+		System.out.println("Mapping Betfair odds for sport " + sport + " and oddsType " + scommessaTipo);
+		
 		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 		
 		JSONObject jsonObject = new JSONObject(jsonString);

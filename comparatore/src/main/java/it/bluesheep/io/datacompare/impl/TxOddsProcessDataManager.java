@@ -42,11 +42,21 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 
 			
 			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
-				oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
-				if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-					List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa),inputRecordEventoScommessaMap.get(oppositeScommessa));
-					mappedOutputRecord.addAll(outputRecordsList);
-					processedScommessaTypes.put(scommessa, oppositeScommessa);
+				List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
+				if(!sport.equals(temp.get(0).getSport())) {
+					break;
+				}
+				if((Sport.CALCIO.equals(sport) && 
+						!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
+						(Sport.TENNIS.equals(sport) && 
+								ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
+					
+					oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
+					if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
+						List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
+						mappedOutputRecord.addAll(outputRecordsList);
+						processedScommessaTypes.put(scommessa, oppositeScommessa);
+					}
 				}
 			}
 			

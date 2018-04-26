@@ -16,6 +16,8 @@ public abstract class RecordOutput {
 	protected String scommessaBookmaker2;
 	protected double quotaScommessaBookmaker2;
 	
+	
+	
 	public Date getDataOraEvento() {
 		return dataOraEvento;
 	}

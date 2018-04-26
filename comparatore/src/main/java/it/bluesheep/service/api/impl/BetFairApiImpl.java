@@ -27,6 +27,9 @@ import com.betfair.util.ISO8601DateTypeAdapter;
 
 import it.bluesheep.entities.input.util.EventoBetfair;
 import it.bluesheep.entities.input.util.MercatoEventoBetfairMap;
+import it.bluesheep.entities.util.ScommessaUtilManager;
+import it.bluesheep.entities.util.scommessa.Scommessa;
+import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.service.api.IApiInterface;
 import it.bluesheep.util.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.BetfairBluesheepJsonConverter;
@@ -43,6 +46,16 @@ import it.bluesheep.util.BetfairBluesheepJsonConverter;
  */
 public class BetFairApiImpl implements IApiInterface {
 	
+	private final static String SOCCERCODE = "1";
+	private final static String TENNISCODE = "2";
+	private final static String THREEWAY = "MATCH_ODDS";
+	private final static String MONEYLINE = "MATCH_ODDS";
+	private final static String UO05 = "OVER_UNDER_05";
+	private final static String UO15 = "OVER_UNDER_15";
+	private final static String UO25 = "OVER_UNDER_25";
+	private final static String UO35 = "OVER_UNDER_35";
+	private final static String UO45 = "OVER_UNDER_45";
+	private final static String GGNG = "BOTH_TEAMS_TO_SCORE";
 	private static final String APPKEY ="txarSy4JZTpbX8OD";
 	private static final String RESULT_JSON_STRING = "result";
 	private static final String TOTALMATCHED_JSON_STRING = "totalMatched";
@@ -65,17 +78,19 @@ public class BetFairApiImpl implements IApiInterface {
 	
 
 	@Override
-	public List<String> getData(String sport, String oddsType) {
+	public List<String> getData(Sport sport, Scommessa scommessa) {
 		
 		System.out.println("Login with Betfair.it");
 		login();
 		
+		String sportCode = identifyCorrectGameCode(sport);
+		String oddsType = identifyCorrectBetCode(scommessa, sport);
 		
 		beom = BetfairExchangeOperationsManagerImpl.getInstance();
 		mercatoEventoBetfairMap = new MercatoEventoBetfairMap();
 
 		System.out.println("Richiedo la lista degli eventi...");
-		String resultEventsJSON = listEvents(sport, oddsType);
+		String resultEventsJSON = listEvents(sportCode, oddsType);
 		
 		//Mapping preliminare delle informazioni degli eventi		
 		List<EventoBetfair> eventoList = mapEventsIntoEventoBetfairClass(resultEventsJSON);
@@ -86,9 +101,9 @@ public class BetFairApiImpl implements IApiInterface {
 			idEventoMap.put(evento.getId(), evento);
 		}
 		
-		if (sport == "1") {
+		if (sportCode == "1") {
 			System.out.println("There are " + idEventoMap.keySet().size() + " events in Betfair exchange for sport SOCCER and odd type " + oddsType);
-		} else if (sport == "2"){			
+		} else if (sportCode == "2"){			
 			System.out.println("There are " + idEventoMap.keySet().size() + " events in Betfair exchange for sport TENNIS and odd type " + oddsType);
 		}
 
@@ -335,5 +350,43 @@ public class BetFairApiImpl implements IApiInterface {
 
 	public MercatoEventoBetfairMap getMercatoEventoBetfairMap() {
 		return mercatoEventoBetfairMap;
+	}
+
+	@Override
+	public String identifyCorrectBetCode(Scommessa scommessa, Sport sport) {
+		String bet = null;
+		if (sport == Sport.CALCIO) {
+			if (ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) {
+		    	bet = THREEWAY;
+			} else if (scommessa == Scommessa.ALMENO1GOAL_O0X5 || scommessa == Scommessa.NESSUNGOAL_U0X5) {
+		    	bet = UO05;
+			} else if (scommessa == Scommessa.ALMENO2GOAL_O1X5 || scommessa == Scommessa.ALPIU1GOAL_U1X5) {
+		    	bet = UO15;
+			} else if (scommessa == Scommessa.ALMENO3GOAL_O2X5 || scommessa == Scommessa.ALPIU2GOAL_U2X5) {
+		    	bet = UO25;
+			} else if (scommessa == Scommessa.ALMENO4G0AL_O3X5 || scommessa == Scommessa.ALPIU3GOAL_U3X5) {
+		    	bet = UO35;
+			} else if (scommessa == Scommessa.ALMENO5GOAL_O4X5 || scommessa == Scommessa.ALPIU4GOAL_U4X5) {
+		    	bet = UO45;
+			} else if (ScommessaUtilManager.getScommessaListCalcioGoalNoGoal().contains(scommessa)) {
+		    	bet = GGNG;
+			}	
+		} else if (sport == Sport.TENNIS) {
+			if (ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa)) {
+		    	bet = MONEYLINE;
+			}
+		}	
+		return bet;
+	}
+
+	@Override
+	public String identifyCorrectGameCode(Sport sport) {
+		String game = null;
+		if (sport == Sport.CALCIO) {
+			game = SOCCERCODE;
+		} else if (sport == Sport.TENNIS) {
+			game = TENNISCODE;
+		}			
+		return game;
 	}
 }

@@ -27,7 +27,7 @@ public abstract class BetfairExchangeOperationsManager implements IBetfairExchan
     protected final String PRICE_PROJECTION = "priceProjection";
     protected final String MATCH_PROJECTION = "matchProjection";
     protected final String ORDER_PROJECTION = "orderProjection";
-    protected final String locale = Locale.ITALIAN.toString();
+    protected final String locale = Locale.ENGLISH.toString();
 
 	public abstract String listEventTypes(MarketFilter filter, String appKey, String ssoId) throws BetFairAPIException;
 

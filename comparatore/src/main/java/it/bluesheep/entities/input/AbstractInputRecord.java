@@ -1,7 +1,10 @@
 package it.bluesheep.entities.input;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
@@ -147,7 +150,74 @@ public abstract class AbstractInputRecord {
 	}
 
 	protected boolean compareParticipants(String p11, String p12, String p21, String p22) {
-		return (p11.contains(p21) || p21.contains(p11)) && (p12.contains(p22) || p22.contains(p12));
+		
+		String participant11 = p11.toLowerCase();
+		String participant12 = p12.toLowerCase();
+		String participant21 = p21.toLowerCase();
+		String participant22 = p22.toLowerCase();
+		
+		if ((participant11.contains(participant21) || participant21.contains(participant11)) && ((participant12.contains(participant22) || participant22.contains(participant12)))){
+			return true;
+		} else {
+			
+			if (participant11.contains("&") && participant12.contains("&") && participant21.contains("/") && participant22.contains("/")) {
+				// bookmaker
+				String memberb11 = participant11.split(" & ")[0];
+				String memberb12 = participant11.split(" & ")[1];
+				
+				String memberb21 = participant12.split(" & ")[0];
+				String memberb22 = participant12.split(" & ")[1];
+
+				List<String> b1 = new ArrayList<String>();
+				b1.add(memberb11);
+				b1.add(memberb12);
+				
+				List<String> b2 = new ArrayList<String>();
+				b2.add(memberb21);
+				b2.add(memberb22);
+				
+				// betfair
+				String memberbet11 = participant21.split(" / ")[0];
+				String memberbet12 = participant21.split(" / ")[1];
+				
+				String memberbet21 = participant22.split(" / ")[0];
+				String memberbet22 = participant22.split(" / ")[1];
+				
+				List<String> bet1 = new ArrayList<String>();
+				bet1.add(memberbet11);
+				bet1.add(memberbet12);
+				
+				List<String> bet2 = new ArrayList<String>();
+				bet2.add(memberbet21);
+				bet2.add(memberbet22);
+							
+				return equalLists(b1, bet1) && equalLists(b2, bet2);
+				
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	private boolean equalLists(List<String> one, List<String> two){     
+	    if (one == null && two == null){
+	        return true;
+	    }
+
+	    if((one == null && two != null) 
+	      || one != null && two == null
+	      || one.size() != two.size()){
+	        return false;
+	    }
+
+	    //to avoid messing the order of the lists we will use a copy
+	    //as noted in comments by A. R. S.
+	    one = new ArrayList<String>(one); 
+	    two = new ArrayList<String>(two);   
+
+	    Collections.sort(one);
+	    Collections.sort(two);      
+	    return one.equals(two);
 	}
 
 	

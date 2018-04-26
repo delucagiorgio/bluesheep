@@ -32,12 +32,11 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	protected List<String> getDataFromService(Scommessa scommessa, Sport sport){	
 		List<String> result = new ArrayList<String>();
 		
-		String bet = identifyCorrectBetCode(scommessa, sport);
-		String game = identifyCorrectGameCode(sport);
+		String bet = apiServiceInterface.identifyCorrectBetCode(scommessa, sport);
 		
-	    if (game != null && bet != null) {
-	    	result.addAll(apiServiceInterface.getData(game, bet));
-		    scommessaJsonListMap.put(bet, result);
+	    if (bet != null) {
+	    	result.addAll(apiServiceInterface.getData(sport, scommessa));
+		    scommessaJsonListMap.put(bet + "_" + sport, result);
 	    }
 	    
 	    return result;
@@ -66,8 +65,8 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		scommessaJsonListMap = new HashMap<String,List<String>>();
 		//per ogni tipologia di scommessa
 		for(Scommessa scommessa : sportScommessaList) {
-			
-			if (!isLastScommessaSameType(scommessa, sport)) {
+			resultJSONList = scommessaJsonListMap.get(apiServiceInterface.identifyCorrectBetCode(scommessa, sport) + "_" + sport);
+			if (resultJSONList == null) {
 				//chiamo il servizio per ottenere i dati sullo sport e la relativa tipologia di scommessa
 				resultJSONList = getDataFromService(scommessa, sport);
 			}
@@ -85,17 +84,6 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		
 		return recordToBeReturned;
 	}
-	/**
-	 * GD - 25/04/18
-	 * Controlla che l'ultima scommessa eseguita sia dello stessa tipologia della scommessa attuale
-	 * @param scommessa scommessa attuale
-	 * @param lastScommessa ultima scommessa
-	 * @return true, se scommessa e lastScommessa sono dello stesso tipo, false altrimenti
-	 */
-	protected boolean isLastScommessaSameType(Scommessa scommessa, Sport sport) {
-		String bet = identifyCorrectBetCode(scommessa, sport);
-		return scommessaJsonListMap.get(bet) != null;
-	}
 	
 	/**
 	 * GD - 18/04/18
@@ -105,24 +93,4 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * @return la lista di scommesse filtrate per lo sport passato come parametro
 	 */
 	protected abstract List<Scommessa> getCombinazioniSportScommessa(Sport sport);
-	
-	/**
-	 * GD - 25/04/18
-	 * Identifica e assegna i corretti codici da passare all'api
-	 * @param scommessa la scommessa richiesta
-	 * @param sport lo sport richiesto
-	 * @return il codice da utilizzare nella chiamata dell'API
-	 */
-	protected abstract String identifyCorrectBetCode(Scommessa scommessa, Sport sport);
-	
-	/**
-	 * GD - 25/04/18
-	 * Identifica e assegna i corretti codici da passare all'api
-	 * @param scommessa la scommessa richiesta
-	 * @param sport lo sport richiesto
-	 * @return il codice da utilizzare nella chiamata dell'API
-	 */
-	protected abstract String identifyCorrectGameCode(Sport sport);
-
-
 }
