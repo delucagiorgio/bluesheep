@@ -25,7 +25,7 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
  */
 public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 
-	private static final String TXODDS_MINIMUM_RATING_AMOUT = "0.7";
+	private static final String TXODDS_MINIMUM_RATING_AMOUT = "0.8";
 	
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) {
@@ -109,7 +109,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 						//System.out.println("Evalutating Rating: value is  = " + rating);
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
 						if(rating  >= new Double(TXODDS_MINIMUM_RATING_AMOUT).doubleValue()) {
-							RecordOutput outputRecord = mapBookVsBookRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating);
+							RecordOutput outputRecord = mapRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating);
 							outputRecordList.add(outputRecord);
 						}
 					}
@@ -121,7 +121,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 	}
 
 	@Override
-	protected RecordOutput mapBookVsBookRecordOutput(AbstractInputRecord scommessaInputRecord, AbstractInputRecord oppositeScommessaInputRecord, double rating) {
+	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord, AbstractInputRecord oppositeScommessaInputRecord, double rating) {
 		RecordBookmakerVsBookmakerOdds output = new RecordBookmakerVsBookmakerOdds();		
 		output.setBookmakerName1(scommessaInputRecord.getBookmakerName());
 		output.setBookmakerName2(oppositeScommessaInputRecord.getBookmakerName());
@@ -133,7 +133,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		output.setRating(rating * 100);
 		output.setScommessaBookmaker1(scommessaInputRecord.getTipoScommessa().getCode());
 		output.setScommessaBookmaker2(oppositeScommessaInputRecord.getTipoScommessa().getCode());
-		output.setSport(scommessaInputRecord.getSport().getCode());		
+		output.setSport(scommessaInputRecord.getSport().getCode());
+		output = (RecordBookmakerVsBookmakerOdds) translateFieldAboutCountry(output);
 		return output;
 	}
 

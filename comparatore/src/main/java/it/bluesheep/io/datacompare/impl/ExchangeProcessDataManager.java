@@ -67,7 +67,7 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 				double rating = getRatingByScommessaPair(record, exchangeRecord);
 				//se il rating è sufficientemente alto
 				if(rating >= new Double(BETFAIR_EXCHANGE_MINIMUM_RATING_AMOUNT).doubleValue()) {
-					RecordOutput recordOutput = mapBookVsBookRecordOutput(record, exchangeRecord, rating);
+					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating);
 					outputRecordList.add(recordOutput);
 				}
 			}
@@ -86,7 +86,7 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 	}
 
 	@Override
-	protected RecordOutput mapBookVsBookRecordOutput(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2, double rating) {
+	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2, double rating) {
 		RecordBookmakerVsExchangeOdds recordOutput = new RecordBookmakerVsExchangeOdds();
 		recordOutput.setBookmakerName1(scommessaInputRecord1.getBookmakerName());
 		recordOutput.setBookmakerName2(scommessaInputRecord2.getBookmakerName());
@@ -101,6 +101,7 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 		recordOutput.setSport(scommessaInputRecord1.getSport().getCode());
 		BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord)scommessaInputRecord2;
 		recordOutput.setLiquidita(exchangeRecord.getLiquidita());
+		recordOutput = (RecordBookmakerVsExchangeOdds) translateFieldAboutCountry(recordOutput);
 		return recordOutput;
 	}
 

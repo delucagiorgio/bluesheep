@@ -73,7 +73,7 @@ public class BlueSheepComparatoreMain {
 							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
 							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
 							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating());
+							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + output.getNazione());
 			
 		}
     	
@@ -118,7 +118,7 @@ public class BlueSheepComparatoreMain {
 							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
 							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
 							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + ((RecordBookmakerVsExchangeOdds)output).getLiquidita());
+							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + ((RecordBookmakerVsExchangeOdds)output).getLiquidita() + ";" + output.getNazione());
 		}
 		
 		long endTime = System.currentTimeMillis();
