@@ -29,7 +29,6 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH);
 				Date dataOraEvento = sdf.parse(splittedEventoKey[0]);
-//				System.out.println(eventoTxOdds);
 				String sport = splittedEventoKey[1];
 				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
 				String partecipante1 = partecipantiSplitted[0];

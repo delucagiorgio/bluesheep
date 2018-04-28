@@ -9,8 +9,6 @@ import java.util.Properties;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
-import it.bluesheep.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
-import it.bluesheep.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.IProcessDataManager;
 import it.bluesheep.io.datacompare.impl.ExchangeProcessDataManager;
@@ -69,16 +67,16 @@ public class BlueSheepComparatoreMain {
 			}
 		}
 
-		for(RecordOutput output : tabella1OutputList) {
-			
-			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
-							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
-							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
-							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + 
-							   ((RecordBookmakerVsBookmakerOdds)output).getRating2() + ";" + output.getNazione());
-			
-		}
+//		for(RecordOutput output : tabella1OutputList) {
+//			
+//			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
+//							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
+//							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
+//							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
+//							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + 
+//							   ((RecordBookmakerVsBookmakerOdds)output).getRating2() + ";" + output.getNazione());
+//			
+//		}
     	
 //    	String jsonString1 = AbstractBluesheepJsonConverter.convertToJSON(tabella1OutputList);
 //    	
@@ -117,14 +115,14 @@ public class BlueSheepComparatoreMain {
 			}
 		}
 		
-		for(RecordOutput output : tabella2OutputList) {
-			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
-							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
-							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
-							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + 
-							   ((RecordBookmakerVsExchangeOdds)output).getLiquidita() + ";" + output.getNazione());
-		}
+//		for(RecordOutput output : tabella2OutputList) {
+//			System.out.println(output.getEvento() + ";" + output.getCampionato() + ";" + output.getDataOraEvento() + ";" +
+//							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
+//							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
+//							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
+//							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + 
+//							   ((RecordBookmakerVsExchangeOdds)output).getLiquidita() + ";" + output.getNazione());
+//		}
 		
 		long endTime = System.currentTimeMillis();
 		
