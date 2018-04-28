@@ -5,15 +5,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.gtranslate.Language;
-import com.gtranslate.Translator;
+import org.json.JSONArray;
 
 public class TranslatorUtil {
 	
 	private static Map<String, String> codeTranslationMap;
+	private static final String ENGLISH = "en";
+	private static final String ITALIAN = "it";
 	
 	static {
 			InputStream csvFileStream = TranslatorUtil.class.getResourceAsStream("/Country-Nazione_Code.csv");
@@ -50,11 +54,43 @@ public class TranslatorUtil {
 	private TranslatorUtil() {}
 	
 	public static String getItalianTranslation(String toBeTranslatedString) {
-		Translator translate = Translator.getInstance(); 
-		String translatedString = translate.translate(toBeTranslatedString, Language.ENGLISH, Language.ITALIAN);
+		String translatedString = null;
+		  
+		try {
+			String url = "https://translate.googleapis.com/translate_a/single?"+
+				    "client=gtx&"+
+				    "sl=" + ENGLISH + 
+				    "&tl=" + ITALIAN + 
+				    "&dt=t&q=" + URLEncoder.encode(toBeTranslatedString, "UTF-8");    
+				  
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
+			con.setRequestProperty("User-Agent", "Mozilla/5.0");
+			 
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+			 
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+				  
+			translatedString = parseResult(response.toString());
+		}catch(Exception e) {
+			System.out.println("Error during translation. No change is applied to string " + toBeTranslatedString);
+		}
+		 
 		return translatedString;
 	}
 	
+	private static String parseResult(String string) {
+		JSONArray jsonArray = new JSONArray(string);
+		JSONArray jsonArray2 = (JSONArray) jsonArray.get(0);
+		JSONArray jsonArray3 = (JSONArray) jsonArray2.get(0);
+		return jsonArray3.get(0).toString();
+	}
+
 	public static String getNationTranslation(String toBeTranslatedNationCode) {
 		return codeTranslationMap.get(toBeTranslatedNationCode);
 	}

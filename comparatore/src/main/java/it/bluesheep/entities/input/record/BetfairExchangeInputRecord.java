@@ -28,11 +28,10 @@ public class BetfairExchangeInputRecord extends AbstractInputRecord{
 	}
 	
 	@Override
-	public boolean isSameEventAbstractInputRecord (AbstractInputRecord abstractInputRecord) {
-		if(compareParticipants(this.partecipante1, this.partecipante2, abstractInputRecord.getPartecipante1(), abstractInputRecord.getPartecipante2())
-				&& compareSport(this.getSport(), abstractInputRecord.getSport())
-				&& compareDate(this.getDataOraEvento(), abstractInputRecord.getDataOraEvento())
-				&& isSameScommessa(this.tipoScommessa, abstractInputRecord.getTipoScommessa())) {
+	public boolean isSameEventAbstractInputRecord (Date dataOraEvento, String sport, String partecipante1, String partecipante2) {
+		if(compareParticipants(this.partecipante1, this.partecipante2, partecipante1, partecipante2)
+				&& this.sport.getCode().equals(sport)
+				&& compareDate(this.getDataOraEvento(), dataOraEvento)) {
 			return true;
 		}		
 		return false;

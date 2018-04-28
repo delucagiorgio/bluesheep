@@ -19,7 +19,7 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 /**
  * Classe utilizzata per definire i metodi su cui si basa la comparazione di quote tra i vari
  * bookmaker di TxOdds. Il fine è quello di processare una determinata quota con la sua
- * opposta per poi valutarne la giustezza d'abbinamento tramite il calcolo del rating (> 70%) 
+ * opposta per poi valutarne la giustezza d'abbinamento tramite il calcolo del rating1 (> 70%) 
  * @author Giorgio De Luca
  *
  */
@@ -35,7 +35,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		//per ogni evento in input
 		for(String evento : dataMap.keySet()) {
 			//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
-			//quella in analisi: valuto il rating e se è maggiore del 70%
+			//quella in analisi: valuto il rating1 e se è maggiore del 70%
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
 			Scommessa oppositeScommessa = null;
@@ -80,11 +80,11 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 	/**
 	 * GD - 18/04/18
 	 * Verifica che due liste di scommesse su stesso evento e tipo scommessa opposto siano comparabili secondo i criteri specificati
-	 * dal business (rating maggiore del 70%) e se così valida la coppia di record e li mappa in un record di output aggiungendolo
+	 * dal business (rating1 maggiore del 70%) e se così valida la coppia di record e li mappa in un record di output aggiungendolo
 	 * ad una lista
 	 * @param scommessaInputDataRecordList lista di quote sulla scommessa di iterazione principale
 	 * @param oppositeScommessaInputDataRecordList lista delle quote con scommessa opposta alla scommessa in analisi
-	 * @return tutti i record mappati secondo il record di output che superano un rating del 70%
+	 * @return tutti i record mappati secondo il record di output che superano un rating1 del 70%
 	 */
 	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(List<AbstractInputRecord> scommessaInputDataRecordList, List<AbstractInputRecord> oppositeScommessaInputDataRecordList) {
 		
@@ -105,11 +105,13 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 					AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
 					
 					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) {		
-						double rating = getRatingByScommessaPair(scommessaInputRecord, oppositeScommessaInputRecord);
-						//System.out.println("Evalutating Rating: value is  = " + rating);
+						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
+						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
+
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(rating  >= new Double(TXODDS_MINIMUM_RATING_AMOUT).doubleValue()) {
-							RecordOutput outputRecord = mapRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating);
+						if(rating1  >= new Double(TXODDS_MINIMUM_RATING_AMOUT).doubleValue() && rating2 >= new Double(TXODDS_MINIMUM_RATING_AMOUT).doubleValue()) {
+							RecordOutput outputRecord = mapRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating1);
+							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);
 						}
 					}
@@ -121,7 +123,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 	}
 
 	@Override
-	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord, AbstractInputRecord oppositeScommessaInputRecord, double rating) {
+	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord, AbstractInputRecord oppositeScommessaInputRecord, double rating1) {
 		RecordBookmakerVsBookmakerOdds output = new RecordBookmakerVsBookmakerOdds();		
 		output.setBookmakerName1(scommessaInputRecord.getBookmakerName());
 		output.setBookmakerName2(oppositeScommessaInputRecord.getBookmakerName());
@@ -130,7 +132,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		output.setEvento(scommessaInputRecord.getPartecipante1() + "|" + scommessaInputRecord.getPartecipante2());
 		output.setQuotaScommessaBookmaker1(scommessaInputRecord.getQuota());
 		output.setQuotaScommessaBookmaker2(oppositeScommessaInputRecord.getQuota());
-		output.setRating(rating * 100);
+		output.setRating(rating1 * 100);
 		output.setScommessaBookmaker1(scommessaInputRecord.getTipoScommessa().getCode());
 		output.setScommessaBookmaker2(oppositeScommessaInputRecord.getTipoScommessa().getCode());
 		output.setSport(scommessaInputRecord.getSport().getCode());
@@ -140,6 +142,6 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 
 	@Override
 	protected double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2)  {
-		return (new RatingCalculatorBookmakersOdds()).calculateRating(scommessaInputRecord1.getQuota(), scommessaInputRecord2.getQuota());
+		return 0;
 	}
 }

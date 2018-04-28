@@ -2,12 +2,14 @@ package it.bluesheep;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
+import it.bluesheep.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.IProcessDataManager;
@@ -33,7 +35,7 @@ public class BlueSheepComparatoreMain {
         }
     }
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ParseException {
 	
 		long startTime = System.currentTimeMillis();
 		
@@ -73,7 +75,8 @@ public class BlueSheepComparatoreMain {
 							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
 							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
 							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + output.getNazione());
+							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + 
+							   ((RecordBookmakerVsBookmakerOdds)output).getRating2() + ";" + output.getNazione());
 			
 		}
     	
@@ -96,7 +99,8 @@ public class BlueSheepComparatoreMain {
 		//Per ogni sport
 		for(Sport sport : Sport.values()) {
 			betfairMappedRecordsFromJson = inputDataManager.processAllData(sport);	
-			betfairMappedRecordsFromJson = ((ExchangeProcessDataManager) processDataManager).compareAndCollectSameEventsFromExchangeAndBookmakers(betfairMappedRecordsFromJson, txOddsMappedRecordsFromJson);
+			betfairMappedRecordsFromJson = ((ExchangeProcessDataManager) processDataManager).
+					compareAndCollectSameEventsFromExchangeAndBookmakers(betfairMappedRecordsFromJson, eventoScommessaRecordMap);
 			for(AbstractInputRecord record : betfairMappedRecordsFromJson) {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
@@ -118,7 +122,8 @@ public class BlueSheepComparatoreMain {
 							   output.getSport() + ";" + output.getBookmakerName1() + ";" + 
 							   output.getQuotaScommessaBookmaker1() + ";" + output.getScommessaBookmaker1() + ";" +
 							   output.getBookmakerName2() + ";" + output.getQuotaScommessaBookmaker2() + ";" + 
-							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + ((RecordBookmakerVsExchangeOdds)output).getLiquidita() + ";" + output.getNazione());
+							   output.getScommessaBookmaker2() + ";" + output.getRating() + ";" + 
+							   ((RecordBookmakerVsExchangeOdds)output).getLiquidita() + ";" + output.getNazione());
 		}
 		
 		long endTime = System.currentTimeMillis();

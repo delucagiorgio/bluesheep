@@ -32,7 +32,7 @@ public abstract class AbstractInputRecord {
 		this.partecipante2 = partecipante2;
 		this.sport = sport;
 		this.filler = filler;
-		this.keyEvento = "" + this.dataOraEvento + ":" + this.sport + ":" + this.partecipante1 + " vs " + this.partecipante2;
+		this.keyEvento = "" + this.dataOraEvento + "|" + this.sport.getCode() + "|" + this.partecipante1 + " vs " + this.partecipante2;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {
@@ -133,28 +133,53 @@ public abstract class AbstractInputRecord {
 	 * @param abstractInputRecord record da comparare
 	 * @return true, se sono lo stesso evento, false altrimenti
 	 */
-	public abstract boolean isSameEventAbstractInputRecord (AbstractInputRecord abstractInputRecord);
+	public abstract boolean isSameEventAbstractInputRecord (Date dataOraEvento, String sport, String partecipante1, String partecipante2);
 
-	
-	protected boolean isSameScommessa(Scommessa tipoScommessa2, Scommessa tipoScommessa3) {
-		return tipoScommessa2.getCode().equals(tipoScommessa3.getCode());
+	/**
+	 * GD - metodo che compara la tipologia di scommessa
+	 * @param tipoScommessa1 prima scommessa
+	 * @param tipoScommessa2 seconda scommessa
+	 * @return true, se le scommessa sono uguali, false altrimenti
+	 */
+	protected boolean isSameScommessa(Scommessa tipoScommessa1, Scommessa tipoScommessa2) {
+		return tipoScommessa1.getCode().equals(tipoScommessa2.getCode());
 	}
 
-	protected boolean compareSport(Sport sport2, Sport sport3) {
-		return sport2.getCode() == sport3.getCode();
+	/**
+	 * GD - metodo che compara la tipologia di sport
+	 * @param sport1 primo sport
+	 * @param sport2 secondo sport
+	 * @return true, se gli sport sono gli stessi, false altrimenti
+	 */
+	protected boolean compareSport(Sport sport1, Sport sport2) {
+		return sport1.getCode() == sport2.getCode();
 	}
 
-	protected boolean compareDate(Date dataOraEvento2, Date dataOraEvento3) {
-		return ((dataOraEvento2.getTime() >= dataOraEvento3.getTime()) && (dataOraEvento2.getTime() - dataOraEvento3.getTime() < 3600000))
-				|| ((dataOraEvento3.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento3.getTime() - dataOraEvento2.getTime() < 3600000));
+	/**
+	 * GD - metodo che compara le date
+	 * @param dataOraEvento1 prima data 
+	 * @param dataOraEvento2 seconda data
+	 * @return true, se le date sono identiche (con un errore di accettazione tra le due di UN'ORA), false altrimenti
+	 */
+	protected boolean compareDate(Date dataOraEvento1, Date dataOraEvento2) {
+		return ((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() < 3600000))
+				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() < 3600000));
 	}
 
-	protected boolean compareParticipants(String p11, String p12, String p21, String p22) {
+	/**
+	 * GD - Metodo che compara i partecipanti
+	 * @param exPartecipante1 partecipante1 del record di Exchange
+	 * @param exPartecipante2 partecipante2 del record di Exchange
+	 * @param bmPartecipante1 partecipante1 del record di Bookmaker
+	 * @param bmPartecipante2 partecipante2 del record di Bookmaker
+	 * @return
+	 */
+	protected boolean compareParticipants(String exPartecipante1, String exPartecipante2, String bmPartecipante1, String bmPartecipante2) {
 		
-		String participant11 = p11.toLowerCase();
-		String participant12 = p12.toLowerCase();
-		String participant21 = p21.toLowerCase();
-		String participant22 = p22.toLowerCase();
+		String participant11 = exPartecipante1.toLowerCase();
+		String participant12 = exPartecipante2.toLowerCase();
+		String participant21 = bmPartecipante1.toLowerCase();
+		String participant22 = bmPartecipante2.toLowerCase();
 		
 		if ((participant11.contains(participant21) || participant21.contains(participant11)) && ((participant12.contains(participant22) || participant22.contains(participant12)))){
 			return true;

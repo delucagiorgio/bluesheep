@@ -16,8 +16,7 @@ public class TxOddsInputRecord extends AbstractInputRecord{
 	}
 
 	@Override
-	public boolean isSameEventAbstractInputRecord(AbstractInputRecord abstractInputRecord) {
-		return this.keyEvento.equals(abstractInputRecord.getKeyEvento());
+	public boolean isSameEventAbstractInputRecord(Date dataOraEvento, String sport, String partecipante1, String partecipante2) {
+		return false;
 	}
-
 }

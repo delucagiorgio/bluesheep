@@ -8,7 +8,7 @@ public abstract class RecordOutput {
 	protected String sport;
 	protected String evento;
 	protected String campionato;
-	protected double rating;
+	protected double rating1;
 	protected String bookmakerName1;
 	protected String scommessaBookmaker1;
 	protected double quotaScommessaBookmaker1;
@@ -50,11 +50,11 @@ public abstract class RecordOutput {
 	}
 	
 	public double getRating() {
-		return rating;
+		return rating1;
 	}
 	
 	public void setRating(double rating) {
-		this.rating = rating;
+		this.rating1 = rating;
 	}
 	
 	public String getBookmakerName1() {

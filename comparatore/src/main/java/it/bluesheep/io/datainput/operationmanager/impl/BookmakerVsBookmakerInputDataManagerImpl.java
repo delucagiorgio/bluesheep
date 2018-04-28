@@ -46,36 +46,6 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 		return abstractInputRecordsList;
 	}
 
-//	@Override
-//	protected String identifyCorrectBetCode(Scommessa scommessa, Sport sport) {
-//		String bet = null;
-//		if (sport == Sport.CALCIO) {
-//			if (ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) {
-//		    	bet = THREEWAY;
-//			} else if (ScommessaUtilManager.getScommessaListCalcioTotalOdds().contains(scommessa)) {
-//		    	bet = TOTALS;
-//			} else if (ScommessaUtilManager.getScommessaListCalcioGoalNoGoal().contains(scommessa)) {
-//		    	bet = GGNG;
-//			}	
-//		} else if (sport == Sport.TENNIS) {
-//			if (ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa)) {
-//		    	bet = MONEYLINE;
-//			}
-//		}	
-//		return bet;
-//	}
-//
-//	@Override
-//	protected String identifyCorrectGameCode(Sport sport) {
-//		String game = null;
-//		if (sport == Sport.CALCIO) {
-//			game = SOCCERCODE;
-//		} else if (sport == Sport.TENNIS) {
-//			game = TENNISCODE;
-//		}	
-//		return game;
-//	}
-
 	@Override
 	protected List<Scommessa> getCombinazioniSportScommessa(Sport sport) {
 		List<Scommessa> scommessaList = new ArrayList<Scommessa>();

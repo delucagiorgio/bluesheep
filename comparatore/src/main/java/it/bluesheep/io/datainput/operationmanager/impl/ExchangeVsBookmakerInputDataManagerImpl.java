@@ -61,7 +61,7 @@ public final class ExchangeVsBookmakerInputDataManagerImpl extends InputDataMana
 				record.setDataOraEvento(evento.getDataOraEvento());
 				record.setPartecipante1(evento.getPartecipante1());
 				record.setPartecipante2(evento.getPartecipante2());
-				record.setKeyEvento("" + record.getDataOraEvento() + ":" + record.getSport() + ":" + record.getPartecipante1() + " vs " + record.getPartecipante2());
+				record.setKeyEvento("" + record.getDataOraEvento() + "|" + record.getSport() + "|" + record.getPartecipante1() + " vs " + record.getPartecipante2());
 			}
 		}
 		return returnItemsList;

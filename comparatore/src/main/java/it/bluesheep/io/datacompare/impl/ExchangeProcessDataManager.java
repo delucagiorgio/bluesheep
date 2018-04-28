@@ -1,7 +1,11 @@
 package it.bluesheep.io.datacompare.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -19,15 +23,28 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 	private static final String BETFAIR_EXCHANGE_MINIMUM_RATING_AMOUNT = "0.7";
 	
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromExchangeAndBookmakers
-					(List<AbstractInputRecord> exchangeList, List<AbstractInputRecord> bookmakerList) {
+					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws ParseException {
 		for(AbstractInputRecord exchangeRecord : exchangeList) {
-			for(AbstractInputRecord bookmakerRecord : bookmakerList) {
-				if(exchangeRecord.isSameEventAbstractInputRecord(bookmakerRecord)) {
+			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
+				String[] splittedEventoKey = eventoTxOdds.split("\\|");
+				SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH);
+				Date dataOraEvento = sdf.parse(splittedEventoKey[0]);
+//				System.out.println(eventoTxOdds);
+				String sport = splittedEventoKey[1];
+				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
+				String partecipante1 = partecipantiSplitted[0];
+				String partecipante2 = partecipantiSplitted[1];
+				
+				if(exchangeRecord.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
+					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
+					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
+					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
 					exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
 					exchangeRecord.setDataOraEvento(bookmakerRecord.getDataOraEvento());
 					exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
 					exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
 					exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
+					break;
 				}
 			}
 		}
@@ -64,10 +81,10 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 		for(AbstractInputRecord record : eventoScommessaRecordList) {
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
 			if(record != exchangeRecord) {
-				double rating = getRatingByScommessaPair(record, exchangeRecord);
-				//se il rating è sufficientemente alto
-				if(rating >= new Double(BETFAIR_EXCHANGE_MINIMUM_RATING_AMOUNT).doubleValue()) {
-					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating);
+				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
+				//se il rating1 è sufficientemente alto
+				if(rating1 >= new Double(BETFAIR_EXCHANGE_MINIMUM_RATING_AMOUNT).doubleValue()) {
+					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating1);
 					outputRecordList.add(recordOutput);
 				}
 			}
