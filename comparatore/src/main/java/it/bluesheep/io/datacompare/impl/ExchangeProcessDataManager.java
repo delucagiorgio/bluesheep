@@ -75,6 +75,9 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 				}
 			}
 		}
+		
+		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
+		
 		return mappedOutputRecord;
 			
 	}
@@ -120,7 +123,7 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 		recordOutput.setRating(rating * 100);
 		recordOutput.setScommessaBookmaker1(scommessaInputRecord1.getTipoScommessa().getCode());
 		recordOutput.setScommessaBookmaker2(scommessaInputRecord2.getTipoScommessa().getCode());
-		recordOutput.setSport(scommessaInputRecord1.getSport().getCode());
+		recordOutput.setSport(scommessaInputRecord1.getSport().toString());
 		BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord)scommessaInputRecord2;
 		recordOutput.setLiquidita(exchangeRecord.getLiquidita());
 		recordOutput = (RecordBookmakerVsExchangeOdds) translateFieldAboutCountry(recordOutput);

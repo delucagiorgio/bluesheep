@@ -65,7 +65,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 			
 		}
 		
-		logger.info("Comparison completed successfully. Total events for sport " + sport + " are " + dataMap.keySet().size() + ". Total comparison elaborated are " + mappedOutputRecord.size());
+		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
 
 		return mappedOutputRecord;
 	}
@@ -141,7 +141,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		output.setRating(rating1 * 100);
 		output.setScommessaBookmaker1(scommessaInputRecord.getTipoScommessa().getCode());
 		output.setScommessaBookmaker2(oppositeScommessaInputRecord.getTipoScommessa().getCode());
-		output.setSport(scommessaInputRecord.getSport().getCode());
+		output.setSport(scommessaInputRecord.getSport().toString());
 		output = (RecordBookmakerVsBookmakerOdds) translateFieldAboutCountry(output);
 		return output;
 	}
