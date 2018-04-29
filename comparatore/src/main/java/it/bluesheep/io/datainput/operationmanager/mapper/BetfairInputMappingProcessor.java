@@ -10,8 +10,8 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.util.AbstractBluesheepJsonConverter;
-import it.bluesheep.util.BetfairBluesheepJsonConverter;
+import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
+import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
 public final class BetfairInputMappingProcessor extends AbstractInputMappingProcessor{
 	
@@ -25,9 +25,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
-		
-		System.out.println("Mapping Betfair odds for sport " + sport + " and oddsType " + scommessaTipo);
-		
+				
 		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 		
 		JSONObject jsonObject = new JSONObject(jsonString);
@@ -43,6 +41,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		//per ogni risultato --> un "result" come oggetto rappresenta la risposta del servizio 
 		//e contiene tutte le quote relative ad un mercato (marketId)
 		for(int i = 0; i < resultArrayJSONObject.length(); i++) {
+			try {
 			resultJSONObject = resultArrayJSONObject.getJSONObject(i);
 			
 			marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
@@ -51,6 +50,9 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 			List<AbstractInputRecord> recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
 			
 			recordsToBeReturned.addAll(recordToBeMapped);
+			}catch(Exception e) {
+				logger.severe("Error during data extraction from JSON: exception is \n" + e.getStackTrace());	
+			}
 		}
 		
 		return recordsToBeReturned;

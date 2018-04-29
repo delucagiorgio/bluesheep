@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
@@ -24,18 +25,20 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
  *
  */
 public class TxOddsProcessDataManager extends AbstractProcessDataManager {
-
-	private static final String TXODDS_MINIMUM_RATING_AMOUT = "0.8";
+	
+	public TxOddsProcessDataManager() {
+		super();
+	}
 	
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) {
-				
+		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();	
 		
 		//per ogni evento in input
 		for(String evento : dataMap.keySet()) {
 			//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
-			//quella in analisi: valuto il rating1 e se è maggiore del 70%
+			//quella in analisi
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
 			Scommessa oppositeScommessa = null;
@@ -61,6 +64,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 			}
 			
 		}
+		
+		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
 
 		return mappedOutputRecord;
 	}
@@ -109,7 +114,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
 
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(rating1  >= new Double(TXODDS_MINIMUM_RATING_AMOUT).doubleValue() && rating2 >= new Double(TXODDS_MINIMUM_RATING_AMOUT).doubleValue()) {
+						if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue() && 
+						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue()) {
 							RecordOutput outputRecord = mapRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating1);
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);
@@ -135,7 +141,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		output.setRating(rating1 * 100);
 		output.setScommessaBookmaker1(scommessaInputRecord.getTipoScommessa().getCode());
 		output.setScommessaBookmaker2(oppositeScommessaInputRecord.getTipoScommessa().getCode());
-		output.setSport(scommessaInputRecord.getSport().getCode());
+		output.setSport(scommessaInputRecord.getSport().toString());
 		output = (RecordBookmakerVsBookmakerOdds) translateFieldAboutCountry(output);
 		return output;
 	}

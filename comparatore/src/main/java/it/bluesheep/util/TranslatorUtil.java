@@ -1,7 +1,6 @@
 package it.bluesheep.util;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,14 +9,18 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 
 public class TranslatorUtil {
 	
 	private static Map<String, String> codeTranslationMap;
+	private static Logger logger;
 	private static final String ENGLISH = "en";
 	private static final String ITALIAN = "it";
+	
+	
 	
 	static {
 			InputStream csvFileStream = TranslatorUtil.class.getResourceAsStream("/Country-Nazione_Code.csv");
@@ -36,22 +39,22 @@ public class TranslatorUtil {
 	                codeTranslationMap.put(countryDefinition[1], countryDefinition[0]);
 	            }
 
-	        } catch (FileNotFoundException e) {
-	            e.printStackTrace();
-	        } catch (IOException e) {
-	            e.printStackTrace();
+	        } catch (Exception e) {
+	            logger.severe("Error during translation initialization map. Error is\n" + e.getStackTrace());
 	        } finally {
 	            if (br != null) {
 	                try {
 	                    br.close();
 	                } catch (IOException e) {
-	                    e.printStackTrace();
+	    	            logger.severe("Error during translation initialization map. Error is\n" + e.getStackTrace());
 	                }
 	            }
 	        }
 	}
 	
-	private TranslatorUtil() {}
+	private TranslatorUtil() {
+		logger = (new BlueSheepLogger(TranslatorUtil.class)).getLogger();
+	}
 	
 	public static String getItalianTranslation(String toBeTranslatedString) {
 		String translatedString = null;
@@ -78,7 +81,7 @@ public class TranslatorUtil {
 				  
 			translatedString = parseResult(response.toString());
 		}catch(Exception e) {
-			System.out.println("Error during translation. No change is applied to string " + toBeTranslatedString);
+            logger.severe("Error during translation initialization map. No translation is applied. Error is\n" + e.getStackTrace());
 		}
 		 
 		return translatedString;

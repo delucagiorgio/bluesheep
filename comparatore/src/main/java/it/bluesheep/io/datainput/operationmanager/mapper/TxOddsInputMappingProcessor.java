@@ -14,8 +14,8 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.util.AbstractBluesheepJsonConverter;
-import it.bluesheep.util.TxOddsBluesheepJsonConverter;
+import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
+import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
 
 /**
  * La classe si occupa di mappare i dati in input sotto forma di JSON in oggetti della stessa morfologia (AbstractInputRecord)
@@ -70,7 +70,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 				
 				recordsToBeReturned.addAll(mappedRecordsWithOdds);
 			}catch(Exception e) {
-				e.printStackTrace();	
+				logger.severe("Error during data extraction from JSON: exception is \n" + e.getStackTrace());	
 			}
 		}
 		

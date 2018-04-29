@@ -26,12 +26,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+
+import it.bluesheep.BlueSheepComparatoreMain;
  
  
 public class HttpClientNonInteractiveLoginSSO {
  
     private static int port = 443;
-    private final static String CERTIFICATE_NAME = "BlueSheepCertificateJavaComparatore.p12";
+    //private final static String CERTIFICATE_NAME = "BlueSheepCertificateJavaComparatore.p12";
  
     public String login() throws Exception {
  
@@ -40,7 +42,7 @@ public class HttpClientNonInteractiveLoginSSO {
         String jsonSessionToken = null;
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
-            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File("/Users/giorgio/" + CERTIFICATE_NAME)), "FDSAfdsa11");
+            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_CERTIFICATE_PATH"))), BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_PASSWORD"));
             ctx.init(keyManagers, null, new SecureRandom());
             SSLSocketFactory factory = new SSLSocketFactory(ctx, new StrictHostnameVerifier());
  
@@ -49,11 +51,11 @@ public class HttpClientNonInteractiveLoginSSO {
             HttpPost httpPost = new HttpPost("https://identitysso.betfair.it/api/certlogin");
             
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-            nvps.add(new BasicNameValuePair("username", "fabiodisante@hotmail.it"));
-            nvps.add(new BasicNameValuePair("password", "FDSAfdsa11"));
+            nvps.add(new BasicNameValuePair("username", BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_USER")));
+            nvps.add(new BasicNameValuePair("password", BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_PASSWORD")));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
  
-            httpPost.setHeader("X-Application","txarSy4JZTpbX8OD");
+            httpPost.setHeader("X-Application", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"));
             httpPost.setHeader("Accept","application/json");
             httpPost.setHeader("Connection", "keep-alive");
             

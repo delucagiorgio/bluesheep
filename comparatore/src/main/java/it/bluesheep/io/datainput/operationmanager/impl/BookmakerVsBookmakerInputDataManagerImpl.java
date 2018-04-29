@@ -13,13 +13,6 @@ import it.bluesheep.service.api.impl.TxOddsApiImpl;
 
 public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataManagerImpl {
 	
-//	private final static String SOCCERCODE = "1";
-//	private final static String TENNISCODE = "5";
-//	private final static String THREEWAY = "0";
-//	private final static String MONEYLINE = "1";
-//	private final static String TOTALS = "4";
-//	private final static String GGNG = "11534337";
-	
 	private AbstractInputMappingProcessor processor;
 	
 	public BookmakerVsBookmakerInputDataManagerImpl() {
@@ -37,11 +30,13 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 	 * @return una lista di AbstractInputRecord contenente i dati relativi al tipo di scommessa scelto
 	 */
 	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport) {
-
+				
 		List<AbstractInputRecord> abstractInputRecordsList = null;
 	
 		//esegui mapping secondo TXODDS
 		abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+		
+		logger.info("Mapping JSON completed : events mapped from input JSON are " + abstractInputRecordsList.size());
 		
 		return abstractInputRecordsList;
 	}

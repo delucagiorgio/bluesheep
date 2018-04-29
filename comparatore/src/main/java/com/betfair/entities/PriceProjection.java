@@ -7,7 +7,6 @@ import com.betfair.enums.types.PriceData;
 
 public class PriceProjection {
 	private Set<PriceData> priceData;
-	private ExBestOfferOverRides exBestOfferOverRides;
 	private boolean virtualise;
 	private boolean rolloverStakes;
 
@@ -17,15 +16,6 @@ public class PriceProjection {
 
 	public void setPriceData(Set<PriceData> priceData) {
 		this.priceData = priceData;
-	}
-
-	public ExBestOfferOverRides getExBestOfferOverRides() {
-		return exBestOfferOverRides;
-	}
-
-	public void setExBestOfferOverRides(
-			ExBestOfferOverRides exBestOfferOverRides) {
-		this.exBestOfferOverRides = exBestOfferOverRides;
 	}
 
 	public boolean isVirtualise() {
