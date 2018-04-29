@@ -20,7 +20,6 @@ public class MarketFilter {
     private Set<MarketBettingType> marketBettingTypes;
     private Set<String> marketCountries;
     private Set<String> marketTypeCodes;
-    private TimeRange marketStartTime;
 
     public String getTextQuery() {
         return textQuery;
@@ -118,14 +117,6 @@ public class MarketFilter {
         this.marketTypeCodes = marketTypeCodes;
     }
 
-    public TimeRange getMarketStartTime() {
-        return marketStartTime;
-    }
-
-    public void setMarketStartTime(TimeRange marketStartTime) {
-        this.marketStartTime = marketStartTime;
-    }
-
     public String toString() {
         return "{" + "" + "textQuery=" + getTextQuery() + "," + "eventTypeIds=" + getEventTypeIds()
                 + "," + "eventIds=" + getEventIds() + "," + "competitionIds="
@@ -136,8 +127,7 @@ public class MarketFilter {
                 + getInPlayOnly() + "," + "marketBettingTypes="
                 + getMarketBettingTypes() + "," + "marketCountries="
                 + getMarketCountries() + "," + "marketTypeCodes="
-                + getMarketTypeCodes() + "," + "marketStartTime="
-                + getMarketStartTime() + "," + "}";
+                + getMarketTypeCodes() + "," + "}";
     }
 
 }

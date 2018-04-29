@@ -1,4 +1,4 @@
-package it.bluesheep.util;
+package it.bluesheep.util.json;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

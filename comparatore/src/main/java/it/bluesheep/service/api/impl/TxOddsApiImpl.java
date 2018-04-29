@@ -3,17 +3,19 @@ package it.bluesheep.service.api.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.service.api.IApiInterface;
+import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * In questa classe si stabilisce la connessione con il servizio txodds e si ottiene il file json contenente le
@@ -24,6 +26,7 @@ import it.bluesheep.service.api.IApiInterface;
  */
 public class TxOddsApiImpl implements IApiInterface {
 
+	private static Logger logger;
 	private final static String SOCCERCODE = "1";
 	private final static String TENNISCODE = "5";
 	private final static String THREEWAY = "0";
@@ -31,15 +34,23 @@ public class TxOddsApiImpl implements IApiInterface {
 	private final static String TOTALS = "4";
 	private final static String GGNG = "11534337";
 	
+	public TxOddsApiImpl() {
+		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();;
+	}
+	
 	public List<String> getData(Sport sport, Scommessa scommessa) {
 		
 		String sportCode = identifyCorrectGameCode(sport);
 		String oddsType = identifyCorrectBetCode(scommessa, sport);
 		
-		String u = "fabiodisante";
+		
+		logger.info("Setting parameters for TxOdds API request");
+		
+		
+		String u = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_USER");
 		// random 
-		String p = "1282mdm38cjnbdcjcnddfdsa19932933ncd".substring(20, 28);
-		String days = "0,7";
+		String p = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_PASSWORD");
+		String days = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
 
 		String active = "1";
 		String json = "1";
@@ -59,10 +70,8 @@ public class TxOddsApiImpl implements IApiInterface {
 		   //dump all the content
 		   result.add(get_result(con));
 				
-		} catch (MalformedURLException e) {
-		   e.printStackTrace();
-		} catch (IOException e) {
-		   e.printStackTrace();
+		} catch (Exception e) {
+		   logger.severe("Error during request data on TxOdds. Error is\n" + e.getStackTrace());
 		}
 		
 		return result;	
@@ -81,11 +90,8 @@ public class TxOddsApiImpl implements IApiInterface {
 				   result += input;
 			   }
 			   br.close();
-			   
-			  // Print in console just to test 
-		      //System.out.println(result);		   
 			} catch (IOException e) {
-			   e.printStackTrace();
+				logger.severe("Error during request data on TxOdds. Error is\n" + e.getStackTrace());
 			}
 				
 		}

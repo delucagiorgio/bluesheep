@@ -33,6 +33,10 @@ public final class ExchangeVsBookmakerInputDataManagerImpl extends InputDataMana
 		
 		List<AbstractInputRecord> returnItemsList = new ArrayList<AbstractInputRecord>();
 		returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+		
+		logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
+		
+		logger.info("Merging events information with odds information");
 		String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
 		Map<String, EventoBetfair> mercatoEventoBetfairMap = scommessaMapMarketIdEventoMap.get(oddsType + "_" + sport);
 	    if(mercatoEventoBetfairMap == null) {
@@ -41,6 +45,8 @@ public final class ExchangeVsBookmakerInputDataManagerImpl extends InputDataMana
 	    }
 	    returnItemsList = mergeInfoEventoBetfairWithInfoOdds(returnItemsList, mercatoEventoBetfairMap);
 	    
+		logger.info("Merge events information with odds information completed successfully");
+
 		return returnItemsList;
 	}
 
@@ -55,7 +61,6 @@ public final class ExchangeVsBookmakerInputDataManagerImpl extends InputDataMana
 		for(AbstractInputRecord record : returnItemsList) {
 			String marketId = record.getFiller();
 			EventoBetfair evento = mercatoEventoBetfairMap.get(marketId);
-			
 			if(evento != null) {
 				record.setCampionato(evento.getCampionato());
 				record.setDataOraEvento(evento.getDataOraEvento());

@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.service.api.IApiInterface;
+import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * Classe di interfaccia tra il servizio e l'applicazione, mediante la quale si ottengono i dati richiesti
@@ -21,6 +23,11 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	
 	protected IApiInterface apiServiceInterface;
 	protected Map<String, List<String>> scommessaJsonListMap;
+	protected static Logger logger;
+	
+	protected InputDataManagerImpl() {
+		logger = (new BlueSheepLogger(InputDataManagerImpl.class)).getLogger();
+	}
 
 	/**
 	 * Il metodo stabilisce quali sono i parametri da passare all'API e interroga il servizio restituendo 
@@ -35,7 +42,9 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		String bet = apiServiceInterface.identifyCorrectBetCode(scommessa, sport);
 		
 	    if (bet != null) {
+			logger.info("Call API " + apiServiceInterface.getClass().getName() + " to retrieve data for service code bet = " + bet);
 	    	result.addAll(apiServiceInterface.getData(sport, scommessa));
+			logger.info("Data retrivied successfully");
 		    scommessaJsonListMap.put(bet + "_" + sport, result);
 	    }
 	    
@@ -53,9 +62,9 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * 		   e alle tipologie di scommessa previste per tale sport
 	 */
 	public List<AbstractInputRecord> processAllData(Sport sport){
+				
+		logger.info("Starting processing data for sport " + sport);
 		
-		System.out.println("" + this.getClass().getSimpleName() + " is processing data for sport " + sport);
-						
 		//la lista di scommesse filtrata per possibili combinazioni sul determinato sport
 		List<Scommessa> sportScommessaList = getCombinazioniSportScommessa(sport);
 		
@@ -65,6 +74,8 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		scommessaJsonListMap = new HashMap<String,List<String>>();
 		//per ogni tipologia di scommessa
 		for(Scommessa scommessa : sportScommessaList) {
+			logger.info("Query on data for scommessa " + scommessa);
+
 			resultJSONList = scommessaJsonListMap.get(apiServiceInterface.identifyCorrectBetCode(scommessa, sport) + "_" + sport);
 			if (resultJSONList == null) {
 				//chiamo il servizio per ottenere i dati sullo sport e la relativa tipologia di scommessa
@@ -72,6 +83,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 			}
 			
 			if (resultJSONList != null && !resultJSONList.isEmpty()) {
+				logger.info("Mapping oddsType " + scommessa);
 				for(String resultJSON : resultJSONList) {
 					//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
 					recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
