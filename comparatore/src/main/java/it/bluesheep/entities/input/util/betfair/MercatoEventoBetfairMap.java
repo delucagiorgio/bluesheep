@@ -1,4 +1,4 @@
-package it.bluesheep.entities.input.util;
+package it.bluesheep.entities.input.util.betfair;
 
 import java.util.TreeMap;
 

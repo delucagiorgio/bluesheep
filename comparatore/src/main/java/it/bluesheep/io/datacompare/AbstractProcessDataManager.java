@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
+import it.bluesheep.entities.input.util.TranslatorUtil;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.util.BlueSheepLogger;
-import it.bluesheep.util.TranslatorUtil;
 
 public abstract class AbstractProcessDataManager implements IProcessDataManager {
 
@@ -17,10 +17,9 @@ public abstract class AbstractProcessDataManager implements IProcessDataManager 
 	protected AbstractProcessDataManager() {
 		logger = (new BlueSheepLogger(AbstractProcessDataManager.class)).getLogger();	
 	}
-
 	
 	@Override
-	public abstract List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport);
+	public abstract List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) throws Exception;
 	
 	/**
 	 * GD - 18/04/18
@@ -28,8 +27,9 @@ public abstract class AbstractProcessDataManager implements IProcessDataManager 
 	 * @param scommessaInputRecord1 record scommessa
 	 * @param scommessaInputRecord2 record scommessa opposta
 	 * @return true, se il rating1 è >= al valore richiesto dal business, false altrimenti
+	 * @throws Exception 
 	 */
-	protected abstract double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2);
+	protected abstract double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2) throws Exception;
 	
 	/**
 	 * GD - 25/04/18
@@ -38,9 +38,19 @@ public abstract class AbstractProcessDataManager implements IProcessDataManager 
 	 * @param scommessaInputRecord2 record 2
 	 * @param rating1 il rating1 tra le due scommesse
 	 * @return il record di output con le informazioni relative alle due scommesse e al loro rating1
+	 * @throws Exception 
 	 */
-	protected abstract RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2, double rating);
+	protected abstract RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2, double rating) throws Exception;
 	
+	/**
+	 * GD - 30/04/2018
+	 * Metodo che si occupa di fornire le traduzioni relative alle nazioni:
+	 * in caso di partite di campionato nazionale, viene popolato il campo "Nazione"
+	 * con il relativo nome italiano del paese; nel caso di competizione internazionale di calcio,
+	 * vengono tradotti i nomi dei partecipanti (nazionali) con il loro nome italiano
+	 * @param recordOutput il record su cui effettuare le traduzioni
+	 * @return il record con i campi tradotti
+	 */
 	protected RecordOutput translateFieldAboutCountry(RecordOutput recordOutput) {
 		String campionato = recordOutput.getCampionato();
 		if(campionato.startsWith("FB") || campionato.startsWith("WFB")) {

@@ -15,8 +15,4 @@ public class TxOddsInputRecord extends AbstractInputRecord{
 		super(recordToBeMapped);
 	}
 
-	@Override
-	public boolean isSameEventAbstractInputRecord(Date dataOraEvento, String sport, String partecipante1, String partecipante2) {
-		return false;
-	}
 }

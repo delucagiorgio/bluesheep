@@ -13,13 +13,14 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.IProcessDataManager;
-import it.bluesheep.io.datacompare.impl.ExchangeProcessDataManager;
+import it.bluesheep.io.datacompare.impl.BetfairExchangeProcessDataManager;
 import it.bluesheep.io.datacompare.impl.TxOddsProcessDataManager;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datainput.IInputDataManager;
-import it.bluesheep.io.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
-import it.bluesheep.io.datainput.operationmanager.impl.ExchangeVsBookmakerInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.impl.TxOddsInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.impl.BetfairExchangeInputDataManagerImpl;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.zip.ZipUtil;
 
@@ -39,14 +40,17 @@ public class BlueSheepComparatoreMain {
             System.exit(-1);
         }
 	}
-	
-	
-	public static void main(String[] args) throws IOException{
+		
+	public static void main(String[] args) throws Exception{
 				
 		logger = (new BlueSheepLogger(BlueSheepComparatoreMain.class)).getLogger();
 		
 		long startTime = System.currentTimeMillis();
-		
+		/**
+		 * 										TXODDS 
+		 * 										
+		 * 										START
+		 */
 		//inizializzo le variabili necessarie per effettuare tutte le chiamate
 		IInputDataManager inputDataManager;
 		IProcessDataManager processDataManager;
@@ -55,7 +59,7 @@ public class BlueSheepComparatoreMain {
 		logger.info("Initializing TxOdds API query");
 			
 		//interrogazione di TxOdds
-		inputDataManager = new BookmakerVsBookmakerInputDataManagerImpl();
+		inputDataManager = new TxOddsInputDataManagerImpl();
 		List<AbstractInputRecord> txOddsMappedRecordsFromJson = new ArrayList<AbstractInputRecord>();
 
 		//Per ogni sport
@@ -66,10 +70,9 @@ public class BlueSheepComparatoreMain {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
 			txOddsMappedRecordsFromJson.addAll(txOddsMappedRecordsFromJsonBySport);
-		}
+		}	
 		
-		
-		//Avvio comparazione quote tabella 1
+		//Avvio comparazione quote tabella 2
 		List<RecordOutput> tabella2OutputList = new ArrayList<RecordOutput>();
 		processDataManager = new TxOddsProcessDataManager();
 		for(Sport sport : Sport.values()) {
@@ -88,6 +91,8 @@ public class BlueSheepComparatoreMain {
 	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2") + new Timestamp(System.currentTimeMillis()).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
 	    	// Indico il path di destinazione dei miei dati
 	    	try {
+				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2"));
+	    		
 				writer1 = new PrintWriter(outputFilenameTabella2, "UTF-8");    	
 		    	// Scrivo
 		    	writer1.println(jsonString1);
@@ -99,11 +104,26 @@ public class BlueSheepComparatoreMain {
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella2);
 		}
 		
+		/**
+		 * 										TXODDS 
+		 * 										
+		 * 										 END
+		 */
+		
+		
+		
+		
+		/**
+		 * 										BETFAIR 
+		 * 										
+		 * 										 START
+		 */
+		
 		logger.info("Initializing Betfair API query");
     	
 		//Interrogazione Betfair
-		inputDataManager = new ExchangeVsBookmakerInputDataManagerImpl();
-		processDataManager = new ExchangeProcessDataManager();
+		inputDataManager = new BetfairExchangeInputDataManagerImpl();
+		processDataManager = new BetfairExchangeProcessDataManager();
 		
 		List<AbstractInputRecord> betfairMappedRecordsFromJson = new ArrayList<AbstractInputRecord>();
 		
@@ -111,8 +131,8 @@ public class BlueSheepComparatoreMain {
 		for(Sport sport : Sport.values()) {
 			logger.info("Delegate Betfair request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
 			betfairMappedRecordsFromJson = inputDataManager.processAllData(sport);	
-			betfairMappedRecordsFromJson = ((ExchangeProcessDataManager) processDataManager).
-					compareAndCollectSameEventsFromExchangeAndBookmakers(betfairMappedRecordsFromJson, eventoScommessaRecordMap);
+			betfairMappedRecordsFromJson = ((BetfairExchangeProcessDataManager) processDataManager).
+					compareAndCollectSameEventsFromBookmakerAndTxOdds(betfairMappedRecordsFromJson, eventoScommessaRecordMap);
 			for(AbstractInputRecord record : betfairMappedRecordsFromJson) {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
@@ -120,7 +140,7 @@ public class BlueSheepComparatoreMain {
 		
 		//Avvio comparazione quote tabella 2
 		List<RecordOutput> tabella1OutputList = new ArrayList<RecordOutput>();
-		processDataManager = new ExchangeProcessDataManager();
+		processDataManager = new BetfairExchangeProcessDataManager();
 		for(Sport sport : Sport.values()) {
 			try{
 				logger.info("Starting odds comparison for Tabella1 (TxOdds vs Exchange) for sport " + sport);
@@ -141,6 +161,9 @@ public class BlueSheepComparatoreMain {
 	    	// Indico il path di destinazione dei miei dati
 	    	PrintWriter writer2 = null;
 			try {
+				
+				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE1"));
+				
 				writer2 = new PrintWriter(outputFilenameTabella1, "UTF-8");
 		    	// Scrivo
 		    	writer2.println(jsonString2);
@@ -151,8 +174,14 @@ public class BlueSheepComparatoreMain {
 	    	
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella1);
 		}
+		
+		/**
+		 * 										BETFAIR 
+		 * 										
+		 * 										  END
+		 */
     	
-		logger.info("Total execution time = " + (endTime - startTime)/1000);
+		logger.info("Total execution time = " + (endTime - startTime)/1000 + " seconds");
 		
 		ZipUtil zipUtil = new ZipUtil();
 		zipUtil.zipLastRunLogFiles();

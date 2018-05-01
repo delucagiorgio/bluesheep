@@ -38,9 +38,11 @@ public abstract class AbstractBluesheepJsonConverter {
 		
 		//se il nodo figlio non è un array allora è un oggetto, lo aggiungo ad un array e ritorno l'oggetto
 		if(arrayNodes == null) {
-			JSONObject objectNode = obj.getJSONObject(childNodeKey);
+			JSONObject objectNode = obj.optJSONObject(childNodeKey);
 			arrayNodes = new JSONArray();
-			arrayNodes.put(objectNode.toMap());
+			if(objectNode != null) {
+				arrayNodes.put(objectNode.toMap());
+			}
 		}
 		
 		return arrayNodes;

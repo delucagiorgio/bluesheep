@@ -1,4 +1,4 @@
-package it.bluesheep.service.api;
+package it.bluesheep.serviceapi;
 
 import java.util.List;
 

@@ -1,42 +1,57 @@
 package comparatore.test.json;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.ParseException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import it.bluesheep.entities.util.scommessa.Scommessa;
-import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
-import it.bluesheep.io.datainput.operationmanager.impl.BookmakerVsBookmakerInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.impl.Bet365InputDataManagerImpl;
 
 public class TestJsonConversion {
 	
 	@Test
 	public void testJsonConversion() {
-		String inputJson = "";
-		InputStream inStream = null;
-		BufferedReader br = null;
-		try {
-			inStream = TestJsonConversion.class.getResourceAsStream("/CALCIO_TOTAL.txt");
-			br = new BufferedReader(new InputStreamReader(inStream));
-			String inputLine = br.readLine();
-			while(inputLine != null) {
-				inputJson = inputJson + inputLine;
-				inputLine = br.readLine();
-			}
-			br.close();
-			inStream.close();
-		}catch(Exception e) {
-			System.out.println("Exception is " + e.getMessage());
-		}
+//		String inputJson = "";
+//		InputStream inStream = null;
+//		BufferedReader br = null;
+//		try {
+//			inStream = TestJsonConversion.class.getResourceAsStream("/BET365_upcomingEvent.json");
+//			br = new BufferedReader(new InputStreamReader(inStream));
+//			String inputLine = br.readLine();
+//			while(inputLine != null) {
+//				inputJson = inputJson + inputLine;
+//				inputLine = br.readLine();
+//			}
+//			br.close();
+//			inStream.close();
+//		}catch(Exception e) {
+//			System.out.println("Exception is " + e.getMessage());
+//		}
+		
+        String result = "";
+            JSONObject obj = new JSONObject("{\"success\":1,\"pager\":{\"page\":7,\"per_page\":50,\"total\":781},\"results\":[{\"id\":\"73556059\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"676\",\"name\":\"Serbia Prva Liga\"},\"home\":{\"id\":\"9700\",\"name\":\"FK Bezanija\"},\"away\":{\"id\":\"50566\",\"name\":\"CSK Pivara Celarevo\"},\"ss\":null,\"our_event_id\":\"723371\"},{\"id\":\"73556061\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"676\",\"name\":\"Serbia Prva Liga\"},\"home\":{\"id\":\"54606\",\"name\":\"Buducnost Dobanovci\"},\"away\":{\"id\":\"181181\",\"name\":\"FK Backa Topola\"},\"ss\":null,\"our_event_id\":\"723367\"},{\"id\":\"73556063\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"676\",\"name\":\"Serbia Prva Liga\"},\"home\":{\"id\":\"54093\",\"name\":\"FK Indija\"},\"away\":{\"id\":\"49691\",\"name\":\"FK Teleoptik Zemun\"},\"ss\":null,\"our_event_id\":\"723370\"},{\"id\":\"73556066\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"676\",\"name\":\"Serbia Prva Liga\"},\"home\":{\"id\":\"48617\",\"name\":\"FK Proleter Novi Sad\"},\"away\":{\"id\":\"48612\",\"name\":\"Jagodina\"},\"ss\":null,\"our_event_id\":\"723369\"},{\"id\":\"73556069\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"676\",\"name\":\"Serbia Prva Liga\"},\"home\":{\"id\":\"48613\",\"name\":\"Sloboda Uzice\"},\"away\":{\"id\":\"8883\",\"name\":\"FK Radnicki 1923\"},\"ss\":null,\"our_event_id\":\"741064\"},{\"id\":\"73556071\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"676\",\"name\":\"Serbia Prva Liga\"},\"home\":{\"id\":\"7073\",\"name\":\"Radnicki Pirot\"},\"away\":{\"id\":\"195409\",\"name\":\"FK Sindjelic Beograd\"},\"ss\":null,\"our_event_id\":\"723368\"},{\"id\":\"73556353\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"23\",\"name\":\"Czech Republic 4. Ligy\"},\"home\":{\"id\":\"171004\",\"name\":\"MSK Breclav\"},\"away\":{\"id\":\"674\",\"name\":\"FK Trebic\"},\"ss\":null,\"our_event_id\":\"740543\"},{\"id\":\"73556367\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"23\",\"name\":\"Czech Republic 4. Ligy\"},\"home\":{\"id\":\"51167\",\"name\":\"FK Sumperk\"},\"away\":{\"id\":\"5971\",\"name\":\"FK Blansko\"},\"ss\":null,\"our_event_id\":\"740544\"},{\"id\":\"73556379\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"23\",\"name\":\"Czech Republic 4. Ligy\"},\"home\":{\"id\":\"3597\",\"name\":\"FK Bohumin\"},\"away\":{\"id\":\"61906\",\"name\":\"MFK Havirov\"},\"ss\":null,\"our_event_id\":\"740545\"},{\"id\":\"73556381\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"23\",\"name\":\"Czech Republic 4. Ligy\"},\"home\":{\"id\":\"5536\",\"name\":\"FK Kozlovice\"},\"away\":{\"id\":\"45487\",\"name\":\"TJ Novy Jicin\"},\"ss\":null,\"our_event_id\":\"740546\"},{\"id\":\"73556384\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"23\",\"name\":\"Czech Republic 4. Ligy\"},\"home\":{\"id\":\"164661\",\"name\":\"Lokomotiva Petrovice\"},\"away\":{\"id\":\"10160\",\"name\":\"FK Nove Sady\"},\"ss\":null,\"our_event_id\":\"740547\"},{\"id\":\"73557698\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"503\",\"name\":\"Ukraine Persha Liga\"},\"home\":{\"id\":\"4988\",\"name\":\"Ingulets Petrovo\"},\"away\":{\"id\":\"177905\",\"name\":\"FC Rukh Vynnyky\"},\"ss\":null,\"our_event_id\":\"723571\"},{\"id\":\"73557712\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"503\",\"name\":\"Ukraine Persha Liga\"},\"home\":{\"id\":\"6029\",\"name\":\"FK Naftovyk-Ukrnafta\"},\"away\":{\"id\":\"177159\",\"name\":\"FC Zhemchuzhyna Odessa\"},\"ss\":null,\"our_event_id\":\"722915\"},{\"id\":\"73557714\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"503\",\"name\":\"Ukraine Persha Liga\"},\"home\":{\"id\":\"43943\",\"name\":\"Volyn Lutsk\"},\"away\":{\"id\":\"6018\",\"name\":\"Kolos Kovalivka\"},\"ss\":null,\"our_event_id\":\"722916\"},{\"id\":\"73557918\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"194\",\"name\":\"Hungary NB II\"},\"home\":{\"id\":\"44056\",\"name\":\"Budaorsi SC\"},\"away\":{\"id\":\"861\",\"name\":\"Csakvari Tk\"},\"ss\":null,\"our_event_id\":\"723152\"},{\"id\":\"73557920\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"194\",\"name\":\"Hungary NB II\"},\"home\":{\"id\":\"43987\",\"name\":\"Dorogi FC\"},\"away\":{\"id\":\"63323\",\"name\":\"Kisvarda FC\"},\"ss\":null,\"our_event_id\":\"723153\"},{\"id\":\"73557924\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"194\",\"name\":\"Hungary NB II\"},\"home\":{\"id\":\"195269\",\"name\":\"Kazincbarcikai BSC\"},\"away\":{\"id\":\"59330\",\"name\":\"Gyor Eto FC\"},\"ss\":null,\"our_event_id\":\"723155\"},{\"id\":\"73557928\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"194\",\"name\":\"Hungary NB II\"},\"home\":{\"id\":\"860\",\"name\":\"Soroksar\"},\"away\":{\"id\":\"191324\",\"name\":\"Zalaegerszeg Te\"},\"ss\":null,\"our_event_id\":\"723154\"},{\"id\":\"73557930\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"194\",\"name\":\"Hungary NB II\"},\"home\":{\"id\":\"43986\",\"name\":\"Szeged 2011\"},\"away\":{\"id\":\"80405\",\"name\":\"MTE 1904\"},\"ss\":null,\"our_event_id\":\"723156\"},{\"id\":\"73557934\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"194\",\"name\":\"Hungary NB II\"},\"home\":{\"id\":\"43998\",\"name\":\"Szolnoki Mav FC\"},\"away\":{\"id\":\"859\",\"name\":\"Bekescsabai Elore SE\"},\"ss\":null,\"our_event_id\":\"723150\"},{\"id\":\"73559573\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"188\",\"name\":\"Ghana Premier League\"},\"home\":{\"id\":\"808\",\"name\":\"Ashanti Gold\"},\"away\":{\"id\":\"160456\",\"name\":\"Eleven Wonders\"},\"ss\":null,\"our_event_id\":\"732788\"},{\"id\":\"73559575\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"188\",\"name\":\"Ghana Premier League\"},\"home\":{\"id\":\"160509\",\"name\":\"Karela\"},\"away\":{\"id\":\"44034\",\"name\":\"Asante Kotoko\"},\"ss\":null,\"our_event_id\":\"732792\"},{\"id\":\"73559578\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"188\",\"name\":\"Ghana Premier League\"},\"home\":{\"id\":\"818\",\"name\":\"Bechem FC\"},\"away\":{\"id\":\"83338\",\"name\":\"Elmina Sharks\"},\"ss\":null,\"our_event_id\":\"732791\"},{\"id\":\"73559936\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"675\",\"name\":\"Bosnia & Herzegovina 1st League\"},\"home\":{\"id\":\"46702\",\"name\":\"FK Sloboda Mrkonjic Grad\"},\"away\":{\"id\":\"46706\",\"name\":\"FK Kozara Gradiska\"},\"ss\":null,\"our_event_id\":\"726652\"},{\"id\":\"73560074\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"211\",\"name\":\"Morocco GNF 1\"},\"home\":{\"id\":\"54130\",\"name\":\"Rapide Oued Zem\"},\"away\":{\"id\":\"998\",\"name\":\"Raja Casablanca\"},\"ss\":null,\"our_event_id\":\"731238\"},{\"id\":\"73565576\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"23\",\"name\":\"Czech Republic 4. Ligy\"},\"home\":{\"id\":\"165684\",\"name\":\"Zdar nad Sazavou\"},\"away\":{\"id\":\"168360\",\"name\":\"FC Spartak Velka Bites\"},\"ss\":null,\"our_event_id\":\"740549\"},{\"id\":\"73565711\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"35\",\"name\":\"Serbia U19 League\"},\"home\":{\"id\":\"46725\",\"name\":\"FK Brodarac U19\"},\"away\":{\"id\":\"99\",\"name\":\"OFK Belgrade U19\"},\"ss\":null,\"our_event_id\":\"740886\"},{\"id\":\"73565713\",\"time\":\"1525273200\",\"time_status\":\"0\",\"league\":{\"id\":\"35\",\"name\":\"Serbia U19 League\"},\"home\":{\"id\":\"66470\",\"name\":\"FK Internacional U19\"},\"away\":{\"id\":\"170244\",\"name\":\"FK Spartak Zdrepceva Krv U19\"},\"ss\":null,\"our_event_id\":\"740887\"},{\"id\":\"73215461\",\"time\":\"1525275000\",\"time_status\":\"0\",\"league\":{\"id\":\"7\",\"name\":\"USA USL Pro\"},\"home\":{\"id\":\"6529\",\"name\":\"Rio Grande Valley FC\"},\"away\":{\"id\":\"82829\",\"name\":\"Reno 1868 FC\"},\"ss\":null,\"our_event_id\":\"696721\"},{\"id\":\"73545454\",\"time\":\"1525275000\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"54363\",\"name\":\"Junkeren\"},\"away\":{\"id\":\"483\",\"name\":\"Levanger\"},\"ss\":null,\"our_event_id\":\"728405\"},{\"id\":\"73556253\",\"time\":\"1525275000\",\"time_status\":\"0\",\"league\":{\"id\":\"32\",\"name\":\"Finland Kolmonen\"},\"home\":{\"id\":\"862\",\"name\":\"FC Futura\"},\"away\":{\"id\":\"163514\",\"name\":\"POHU\"},\"ss\":null,\"our_event_id\":\"740937\"},{\"id\":\"73556258\",\"time\":\"1525275000\",\"time_status\":\"0\",\"league\":{\"id\":\"32\",\"name\":\"Finland Kolmonen\"},\"home\":{\"id\":\"46839\",\"name\":\"FC Santa Claus\"},\"away\":{\"id\":\"169529\",\"name\":\"TP-47 II\"},\"ss\":null,\"our_event_id\":\"741057\"},{\"id\":\"73217205\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"867\",\"name\":\"Estonia Meistriliiga\"},\"home\":{\"id\":\"78746\",\"name\":\"Parnu JK Vaprus\"},\"away\":{\"id\":\"9725\",\"name\":\"Paide Linnameeskond\"},\"ss\":null,\"our_event_id\":\"652778\"},{\"id\":\"73217207\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"867\",\"name\":\"Estonia Meistriliiga\"},\"home\":{\"id\":\"43883\",\"name\":\"JK Tallinna Kalev\"},\"away\":{\"id\":\"173\",\"name\":\"JK Viljandi Tulevik\"},\"ss\":null,\"our_event_id\":\"652447\"},{\"id\":\"73411552\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"75\",\"name\":\"Denmark Division 1\"},\"home\":{\"id\":\"279\",\"name\":\"FC Fredericia\"},\"away\":{\"id\":\"6854\",\"name\":\"FC Roskilde\"},\"ss\":null,\"our_event_id\":\"702926\"},{\"id\":\"73429482\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"174\",\"name\":\"Slovenia Prva Liga\"},\"home\":{\"id\":\"9941\",\"name\":\"NK Domzale\"},\"away\":{\"id\":\"53993\",\"name\":\"Ankaran Hrvatini\"},\"ss\":null,\"our_event_id\":\"487342\"},{\"id\":\"73545457\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"12149\",\"name\":\"Lysekloster\"},\"away\":{\"id\":\"44138\",\"name\":\"Haugesund\"},\"ss\":null,\"our_event_id\":\"727727\"},{\"id\":\"73545459\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"9928\",\"name\":\"Sotra\"},\"away\":{\"id\":\"22318\",\"name\":\"SK Brann\"},\"ss\":null,\"our_event_id\":\"727995\"},{\"id\":\"73545462\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"352\",\"name\":\"Strommen\"},\"away\":{\"id\":\"43854\",\"name\":\"Baerum\"},\"ss\":null,\"our_event_id\":\"727821\"},{\"id\":\"73545464\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"46772\",\"name\":\"Orn Horten\"},\"away\":{\"id\":\"44073\",\"name\":\"Sarpsborg\"},\"ss\":null,\"our_event_id\":\"727622\"},{\"id\":\"73545471\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"17577\",\"name\":\"Arendal\"},\"away\":{\"id\":\"889\",\"name\":\"IK Start\"},\"ss\":null,\"our_event_id\":\"728074\"},{\"id\":\"73545473\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"44261\",\"name\":\"Fredrikstad\"},\"away\":{\"id\":\"1154\",\"name\":\"Odd BK\"},\"ss\":null,\"our_event_id\":\"727831\"},{\"id\":\"73545476\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"47755\",\"name\":\"Elverum\"},\"away\":{\"id\":\"345\",\"name\":\"KFUM\"},\"ss\":null,\"our_event_id\":\"727822\"},{\"id\":\"73545478\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"46760\",\"name\":\"Skeid\"},\"away\":{\"id\":\"350\",\"name\":\"Sandefjord\"},\"ss\":null,\"our_event_id\":\"727621\"},{\"id\":\"73545480\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"9852\",\"name\":\"Steinkjer\"},\"away\":{\"id\":\"894\",\"name\":\"Rosenborg\"},\"ss\":null,\"our_event_id\":\"728384\"},{\"id\":\"73545482\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"211740\",\"name\":\"Egersunds\"},\"away\":{\"id\":\"43880\",\"name\":\"FK Jerv\"},\"ss\":null,\"our_event_id\":\"728258\"},{\"id\":\"73545484\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"46774\",\"name\":\"Notodden\"},\"away\":{\"id\":\"49386\",\"name\":\"Asker\"},\"ss\":null,\"our_event_id\":\"728259\"},{\"id\":\"73555139\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"921\",\"name\":\"Hodd\"},\"away\":{\"id\":\"12150\",\"name\":\"Flor\\u00f8\"},\"ss\":null,\"our_event_id\":\"728260\"},{\"id\":\"73555141\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"10273\",\"name\":\"Brattv\\u00e5g\"},\"away\":{\"id\":\"44137\",\"name\":\"Molde\"},\"ss\":null,\"our_event_id\":\"728075\"},{\"id\":\"73555144\",\"time\":\"1525276800\",\"time_status\":\"0\",\"league\":{\"id\":\"1288\",\"name\":\"Norway Cup\"},\"home\":{\"id\":\"46834\",\"name\":\"Bergs\\u00f8y\"},\"away\":{\"id\":\"484\",\"name\":\"Kristiansund BK\"},\"ss\":null,\"our_event_id\":\"740381\"}]}");
+
+		    JSONArray results = obj.getJSONArray("results");
+			
+			for (Object o : results)
+			  {
+			    JSONObject match = (JSONObject) o;
+
+			    String id = (String) match.get("our_event_id");
+
+		        result = result + "\n" + id ; 			  
+			  }
+
+		    System.out.println(result);
 		
 		
+		IInputDataManager inputDataManager = new Bet365InputDataManagerImpl();
 		
-		IInputDataManager inputDataManager = new BookmakerVsBookmakerInputDataManagerImpl();
-		
-		inputDataManager.mapJsonToAbstractInputRecord(inputJson, Scommessa.ALMENO1GOAL_O0X5, Sport.CALCIO);	
+//		inputDataManager.mapJsonToAbstractInputRecord(inputJson, Scommessa.ALMENO1GOAL_O0X5, Sport.CALCIO);	
 	}
 
 }

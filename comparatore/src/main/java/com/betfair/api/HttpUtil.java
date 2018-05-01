@@ -1,10 +1,8 @@
 package com.betfair.api;
 
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
@@ -16,6 +14,7 @@ import org.apache.http.params.HttpParams;
 import com.betfair.util.RescriptResponseHandler;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.util.BlueSheepLogger;
 
 public class HttpUtil {
 
@@ -24,9 +23,11 @@ public class HttpUtil {
     private static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
     private static final String HTTP_HEADER_ACCEPT = "Accept";
     private static final String HTTP_HEADER_ACCEPT_CHARSET = "Accept-Charset";
+    private static Logger logger;
 
     public HttpUtil() {
         super();
+        logger = (new BlueSheepLogger(HttpUtil.class)).getLogger();
     }
 
     private String sendPostRequest(String param, String appKey, String ssoToken, String URL, ResponseHandler<String> reqHandler) {
@@ -49,12 +50,8 @@ public class HttpUtil {
 
             resp = httpClient.execute(post, reqHandler);
 
-        } catch (UnsupportedEncodingException unsupportedEncodingEx) {
-            unsupportedEncodingEx.printStackTrace();
-        } catch (ClientProtocolException clientProtocolEx) {
-            clientProtocolEx.printStackTrace();
-        } catch (IOException ioEx) {
-            ioEx.printStackTrace();
+        } catch (Exception e) {
+            logger.severe("Error occurred during HTTP request execution: error is\n" + e.getStackTrace());
         }
 
         return resp;

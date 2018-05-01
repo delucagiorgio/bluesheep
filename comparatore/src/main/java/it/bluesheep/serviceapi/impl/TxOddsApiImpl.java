@@ -1,4 +1,4 @@
-package it.bluesheep.service.api.impl;
+package it.bluesheep.serviceapi.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,14 +14,14 @@ import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.service.api.IApiInterface;
+import it.bluesheep.serviceapi.IApiInterface;
 import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * In questa classe si stabilisce la connessione con il servizio txodds e si ottiene il file json contenente le
  * quote relative allo sport e al tipo di scommessa richiesti
  * 
- * @author random
+ * @author Fabio Catania
  *
  */
 public class TxOddsApiImpl implements IApiInterface {
@@ -50,29 +50,42 @@ public class TxOddsApiImpl implements IApiInterface {
 		String u = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_USER");
 		// random 
 		String p = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_PASSWORD");
-		String days = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
+		String daysInterval = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
+		
+		String[] dayIntervalSplitted = daysInterval.split(",");
+		
+		int startDay = Integer.parseInt(dayIntervalSplitted[0]);
+		int endDay = Integer.parseInt(dayIntervalSplitted[1]);
 
-		String active = "1";
-		String json = "1";
-		String allOdds = "2";
-		String odds_format = "0";
-		
-		String https_url = "https://xml2.txodds.com/feed/odds/xml.php?ident="+u+"&passwd="+p+"&active="+active+"&spid="+sportCode+"&ot="+oddsType+"&days="+days+"&json="+json+"&all_odds="+ allOdds + "&odds_format=" + odds_format;
 		List<String> result = new ArrayList<String>();
-		
-		URL url;
-		HttpsURLConnection con;
-		try {
-		
-		   url = new URL(https_url);
-		   con = (HttpsURLConnection)url.openConnection();
-		     
-		   //dump all the content
-		   result.add(get_result(con));
+
+		do {
+			String days = "" + startDay + "," + 1;
+			String active = "1";
+			String json = "1";
+			String allOdds = "2";
+			String odds_format = "0";
+			
+			String https_url = "https://xml2.txodds.com/feed/odds/xml.php?ident="+u+"&passwd="+p+"&active="+active+"&spid="+sportCode+"&ot="+oddsType+"&days="+days+"&json="+json+"&all_odds="+ allOdds + "&odds_format=" + odds_format;
+			
+			URL url;
+			HttpsURLConnection con;
+			try {
 				
-		} catch (Exception e) {
-		   logger.severe("Error during request data on TxOdds. Error is\n" + e.getStackTrace());
-		}
+				logger.info("Retrieving data for time interval " + days);
+				url = new URL(https_url);
+				con = (HttpsURLConnection)url.openConnection();
+			     
+			   //dump all the content
+			   result.add(get_result(con));
+					
+			} catch (Exception e) {
+			   logger.severe("Error during request data on TxOdds. Error is\n" + e.getStackTrace());
+			}
+			
+			startDay++;
+			
+		}while(startDay <= endDay);
 		
 		return result;	
 	}

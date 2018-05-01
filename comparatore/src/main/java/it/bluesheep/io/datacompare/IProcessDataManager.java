@@ -8,6 +8,6 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 
 public interface IProcessDataManager {
 	
-	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport);
+	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) throws Exception;
 
 }

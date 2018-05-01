@@ -1,4 +1,4 @@
-package it.bluesheep.service.api.impl;
+package it.bluesheep.serviceapi.impl;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -27,12 +27,12 @@ import com.betfair.exceptions.BetFairAPIException;
 import com.betfair.util.ISO8601DateTypeAdapter;
 
 import it.bluesheep.BlueSheepComparatoreMain;
-import it.bluesheep.entities.input.util.EventoBetfair;
-import it.bluesheep.entities.input.util.MercatoEventoBetfairMap;
+import it.bluesheep.entities.input.util.betfair.EventoBetfair;
+import it.bluesheep.entities.input.util.betfair.MercatoEventoBetfairMap;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.service.api.IApiInterface;
+import it.bluesheep.serviceapi.IApiInterface;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;

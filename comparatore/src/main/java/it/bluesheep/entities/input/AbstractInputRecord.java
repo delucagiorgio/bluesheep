@@ -129,13 +129,6 @@ public abstract class AbstractInputRecord {
 	}
 	
 	/**
-	 * GD - metodo utilizzato per comparare due record e capire se si riferiscono allo stesso evento
-	 * @param abstractInputRecord record da comparare
-	 * @return true, se sono lo stesso evento, false altrimenti
-	 */
-	public abstract boolean isSameEventAbstractInputRecord (Date dataOraEvento, String sport, String partecipante1, String partecipante2);
-
-	/**
 	 * GD - metodo che compara la tipologia di scommessa
 	 * @param tipoScommessa1 prima scommessa
 	 * @param tipoScommessa2 seconda scommessa

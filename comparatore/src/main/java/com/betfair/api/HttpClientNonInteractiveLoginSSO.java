@@ -7,6 +7,7 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -28,13 +29,18 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.util.BlueSheepLogger;
  
  
 public class HttpClientNonInteractiveLoginSSO {
  
-    private static int port = 443;
-    //private final static String CERTIFICATE_NAME = "BlueSheepCertificateJavaComparatore.p12";
- 
+    private static int port = 443; 
+    private static Logger logger;
+    
+    public HttpClientNonInteractiveLoginSSO() {
+    	logger = (new BlueSheepLogger(HttpClientNonInteractiveLoginSSO.class)).getLogger();
+    }
+    
     public String login() throws Exception {
  
         HttpClient httpClient = new DefaultHttpClient();
@@ -68,7 +74,7 @@ public class HttpClientNonInteractiveLoginSSO {
             
             jsonSessionToken = (new JSONObject(responseString)).getString("sessionToken");
         }catch(Exception e) {
-            
+        	logger.severe("Error occurred during login on Betfair.it non interactive login: error is \n" + e.getStackTrace());
         }finally {
             httpClient.getConnectionManager().shutdown();
         }

@@ -10,7 +10,7 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
-import it.bluesheep.service.api.IApiInterface;
+import it.bluesheep.serviceapi.IApiInterface;
 import it.bluesheep.util.BlueSheepLogger;
 
 /**

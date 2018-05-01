@@ -26,9 +26,9 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String BOOKMAKER_JSON_STRING = "bookmaker";
 	private static final String OFFER_JSON_STRING = "offer";
 	private static final String ODDS_JSON_STRING = "odds";
-	private static final String O3_JSON_STRING = "o3";
 	private static final String O1_JSON_STRING = "o1";
 	private static final String O2_JSON_STRING = "o2";
+	private static final String O3_JSON_STRING = "o3";
 	private static final String TIME_JSON_STRING = "time";
 	private static final String HTEAM_JSON_STRING = "hteam";
 	private static final String GROUP_JSON_STRING = "group";

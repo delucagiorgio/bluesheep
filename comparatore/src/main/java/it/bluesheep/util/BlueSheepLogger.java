@@ -40,12 +40,25 @@ public class BlueSheepLogger {
 	        if("CONSOLE".equalsIgnoreCase(loggingMode)) {
 	     		handler = new ConsoleHandler();
 	     	}else if("FILE_OUTPUT".equalsIgnoreCase(loggingMode)){
-	     		Date today = new Date(System.currentTimeMillis());
-	     		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HH-mm-ss");
+	     		
+	     		SimpleDateFormat sdfFile = new SimpleDateFormat("yyyyMMdd_HH-mm-ss");
+	     		SimpleDateFormat sdfFileDir = new SimpleDateFormat("yyyyMMdd");
+	     		SimpleDateFormat sdfWeekFileDir = new SimpleDateFormat("yyyyMM");
+	     		
+	     		String fileDateFormatString = sdfFile.format(DirectoryFileUtilManager.TODAY);
+	     		String fileDirDateFormatString = sdfFileDir.format(DirectoryFileUtilManager.TODAY);
+	     		String weekFileDirDateFormatString = sdfWeekFileDir.format(DirectoryFileUtilManager.TODAY) + "_" + DirectoryFileUtilManager.WEEK_OF_MONTH;
+	     		
 	     		String logFileNamePrefix = BlueSheepComparatoreMain.getProperties().getProperty("LOG_PREFIX_FILENAME");
-	     		String logOutputFileName = logFileNamePrefix + sdf.format(today) + "_" + name + ".log";
+	     		String logOutputFileName = logFileNamePrefix + fileDateFormatString + "_" + name + ".log";
 	     		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_PATH");
-	     		handler = new FileHandler(logOutputPath + logOutputFileName, true);
+	     		
+	     		String weekLogOutputPath = logOutputPath + "/" + weekFileDirDateFormatString + "/";
+	     		String fileWeekLogOutputPath = weekLogOutputPath + "/" + fileDirDateFormatString + "/";
+	     		
+	     		DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(fileWeekLogOutputPath);
+	     		
+	     		handler = new FileHandler(fileWeekLogOutputPath + logOutputFileName, true);
 	     	}
 	        
 	     	handler.setFormatter(new SimpleFormatter() {

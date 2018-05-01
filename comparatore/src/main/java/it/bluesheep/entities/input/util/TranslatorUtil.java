@@ -1,6 +1,8 @@
-package it.bluesheep.util;
+package it.bluesheep.entities.input.util;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +15,9 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 
+import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.util.BlueSheepLogger;
+
 public class TranslatorUtil {
 	
 	private static Map<String, String> codeTranslationMap;
@@ -20,15 +25,19 @@ public class TranslatorUtil {
 	private static final String ENGLISH = "en";
 	private static final String ITALIAN = "it";
 	
-	
-	
 	static {
-			InputStream csvFileStream = TranslatorUtil.class.getResourceAsStream("/Country-Nazione_Code.csv");
-	        BufferedReader br = null;
-	        String line = "";
-	        String cvsSplitBy = ";";
-	        codeTranslationMap = new HashMap<String, String>();
-
+		InputStream csvFileStream = null;
+		try {
+			csvFileStream = new FileInputStream(BlueSheepComparatoreMain.getProperties().getProperty("PATH_NAZIONI_TRADUZIONE_CSV"));
+		} catch (FileNotFoundException e1) {
+			logger.severe("Error during initialization of codeTranslationMap : error is\n" + e1.getStackTrace());
+		}
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ";";
+        codeTranslationMap = new HashMap<String, String>();
+        
+        if(csvFileStream != null) {
 	        try {
 
 	            br = new BufferedReader(new InputStreamReader(csvFileStream));
@@ -44,18 +53,26 @@ public class TranslatorUtil {
 	        } finally {
 	            if (br != null) {
 	                try {
+	                	csvFileStream.close();
 	                    br.close();
 	                } catch (IOException e) {
 	    	            logger.severe("Error during translation initialization map. Error is\n" + e.getStackTrace());
 	                }
 	            }
 	        }
+        }
 	}
 	
 	private TranslatorUtil() {
 		logger = (new BlueSheepLogger(TranslatorUtil.class)).getLogger();
 	}
 	
+	/**
+	 * GD - 30/04/2018
+	 * Traduce dall'inglese all'italiano una parola passata come parametro
+	 * @param toBeTranslatedString parola inglese da tradurre
+	 * @return parola tradotta in italiano, la parola inglese se non riesce ad effettuare la traduzione
+	 */
 	public static String getItalianTranslation(String toBeTranslatedString) {
 		String translatedString = null;
 		  
@@ -82,6 +99,7 @@ public class TranslatorUtil {
 			translatedString = parseResult(response.toString());
 		}catch(Exception e) {
             logger.severe("Error during translation initialization map. No translation is applied. Error is\n" + e.getStackTrace());
+            translatedString = toBeTranslatedString;
 		}
 		 
 		return translatedString;
@@ -94,6 +112,12 @@ public class TranslatorUtil {
 		return jsonArray3.get(0).toString();
 	}
 
+	/**
+	 * GD - 30/04/2018
+	 * Assegna in base al codice trovato nella definizione della lega il nome della nazione
+	 * @param toBeTranslatedNationCode il codice della lega
+	 * @return la nazione relativa al codice passato come parametro, null se non trovato
+	 */
 	public static String getNationTranslation(String toBeTranslatedNationCode) {
 		return codeTranslationMap.get(toBeTranslatedNationCode);
 	}

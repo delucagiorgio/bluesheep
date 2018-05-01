@@ -6,21 +6,21 @@ import java.util.List;
 import java.util.Map;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
-import it.bluesheep.entities.input.util.EventoBetfair;
+import it.bluesheep.entities.input.util.betfair.EventoBetfair;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
 import it.bluesheep.io.datainput.operationmanager.mapper.BetfairInputMappingProcessor;
-import it.bluesheep.service.api.impl.BetFairApiImpl;
+import it.bluesheep.serviceapi.impl.BetFairApiImpl;
 
-public final class ExchangeVsBookmakerInputDataManagerImpl extends InputDataManagerImpl {
+public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerImpl {
 	
 	private AbstractInputMappingProcessor processor;
 	private Map<String, Map<String, EventoBetfair>> scommessaMapMarketIdEventoMap;
 
 
-	public ExchangeVsBookmakerInputDataManagerImpl() {
+	public BetfairExchangeInputDataManagerImpl() {
 		super();
 		processor = new BetfairInputMappingProcessor();
 		apiServiceInterface = new BetFairApiImpl();

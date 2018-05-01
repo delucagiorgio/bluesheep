@@ -42,14 +42,14 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		//e contiene tutte le quote relative ad un mercato (marketId)
 		for(int i = 0; i < resultArrayJSONObject.length(); i++) {
 			try {
-			resultJSONObject = resultArrayJSONObject.getJSONObject(i);
-			
-			marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
-			BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode);
-			
-			List<AbstractInputRecord> recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
-			
-			recordsToBeReturned.addAll(recordToBeMapped);
+				resultJSONObject = resultArrayJSONObject.getJSONObject(i);
+				
+				marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
+				BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode);
+				
+				List<AbstractInputRecord> recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
+				
+				recordsToBeReturned.addAll(recordToBeMapped);
 			}catch(Exception e) {
 				logger.severe("Error during data extraction from JSON: exception is \n" + e.getStackTrace());	
 			}
@@ -78,32 +78,33 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 		//Solitamente più di uno, rappresentano i dettagli delle quote
 		JSONArray runnerJSONArray = jsonConverter.getChildNodeArrayByKey(resultJSONObject, RUNNERS_JSON_STRING);
 		int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
-
-		//per ogni runner
-		JSONObject runnerJSONObject = runnerJSONArray.getJSONObject(correctOddIndexByScommessa);
-		//prendo le informazioni relative alle quote di exchange
-		JSONObject exchangeOddsJSONObject = jsonConverter.getChildNodeByKey(runnerJSONObject, EXCHANGE_JSON_STRING);
-		
-		//prendo le informazioni relative al lato "Banco"
-		JSONArray laySideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, LAY_SIDE_JSON_STRING);
-		
-		if(laySideOddsJSONArray.length() > 0) {
+		if(runnerJSONArray.length() != 0) {
+			//per ogni runner
+			JSONObject runnerJSONObject = runnerJSONArray.getJSONObject(correctOddIndexByScommessa);
+			//prendo le informazioni relative alle quote di exchange
+			JSONObject exchangeOddsJSONObject = jsonConverter.getChildNodeByKey(runnerJSONObject, EXCHANGE_JSON_STRING);
 			
-			//prendo il prezzo più basso
-			JSONObject bestPriceLayOddsJSONObject = laySideOddsJSONArray.optJSONObject(0);
+			//prendo le informazioni relative al lato "Banco"
+			JSONArray laySideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, LAY_SIDE_JSON_STRING);
 			
-			if(bestPriceLayOddsJSONObject != null) {
-				double quotaLayMin = bestPriceLayOddsJSONObject.getDouble(PRICE_JSON_STRING);
-				double liquidita = bestPriceLayOddsJSONObject.getDouble(SIZE_JSON_STRING);
+			if(laySideOddsJSONArray.length() > 0) {
 				
-				//mappo le informazioni nel record di input generico
-				BetfairExchangeInputRecord recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
-				recordToBeMapped.setQuota(quotaLayMin);
-				recordToBeMapped.setLiquidita(liquidita);
-				recordToBeMapped.setSport(sport);
-				recordToBeMapped.setTipoScommessa(scommessaTipo);
+				//prendo il prezzo più basso
+				JSONObject bestPriceLayOddsJSONObject = laySideOddsJSONArray.optJSONObject(0);
 				
-				recordsToBeReturned.add(recordToBeMapped);
+				if(bestPriceLayOddsJSONObject != null) {
+					double quotaLayMin = bestPriceLayOddsJSONObject.getDouble(PRICE_JSON_STRING);
+					double liquidita = bestPriceLayOddsJSONObject.getDouble(SIZE_JSON_STRING);
+					
+					//mappo le informazioni nel record di input generico
+					BetfairExchangeInputRecord recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
+					recordToBeMapped.setQuota(quotaLayMin);
+					recordToBeMapped.setLiquidita(liquidita);
+					recordToBeMapped.setSport(sport);
+					recordToBeMapped.setTipoScommessa(scommessaTipo);
+					
+					recordsToBeReturned.add(recordToBeMapped);
+				}
 			}
 		}
 		

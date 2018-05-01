@@ -9,13 +9,13 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
 import it.bluesheep.io.datainput.operationmanager.mapper.TxOddsInputMappingProcessor;
-import it.bluesheep.service.api.impl.TxOddsApiImpl;
+import it.bluesheep.serviceapi.impl.TxOddsApiImpl;
 
-public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataManagerImpl {
+public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 	
 	private AbstractInputMappingProcessor processor;
 	
-	public BookmakerVsBookmakerInputDataManagerImpl() {
+	public TxOddsInputDataManagerImpl() {
 		super();
 		processor = new TxOddsInputMappingProcessor();
 		apiServiceInterface = new TxOddsApiImpl();
@@ -33,9 +33,13 @@ public final class BookmakerVsBookmakerInputDataManagerImpl extends InputDataMan
 				
 		List<AbstractInputRecord> abstractInputRecordsList = null;
 	
-		//esegui mapping secondo TXODDS
-		abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
-		
+		try {
+			//esegui mapping secondo TXODDS
+			abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+		}catch(Exception e) {
+			System.out.println(jsonString);
+			e.printStackTrace();
+		}
 		logger.info("Mapping JSON completed : events mapped from input JSON are " + abstractInputRecordsList.size());
 		
 		return abstractInputRecordsList;

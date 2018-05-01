@@ -3,9 +3,10 @@ package it.bluesheep.entities.input.record;
 import java.util.Date;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
+import it.bluesheep.entities.input.util.IKeyEventoComparator;
 import it.bluesheep.entities.util.sport.Sport;
 
-public class BetfairExchangeInputRecord extends AbstractInputRecord{
+public class BetfairExchangeInputRecord extends AbstractInputRecord implements IKeyEventoComparator{
 
 	private double liquidita;
 	

@@ -18,14 +18,16 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
+import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
-public class ExchangeProcessDataManager extends AbstractProcessDataManager{
+public class BetfairExchangeProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents{
 	
 	private static final String OUTPUT_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
 	
-	public List<AbstractInputRecord> compareAndCollectSameEventsFromExchangeAndBookmakers
-					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap){
-		for(AbstractInputRecord exchangeRecord : exchangeList) {
+	@Override
+	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds
+					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception{
+		for(AbstractInputRecord record : exchangeList) {
 			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
 				SimpleDateFormat sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.ENGLISH);
@@ -39,6 +41,8 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
 				String partecipante1 = partecipantiSplitted[0];
 				String partecipante2 = partecipantiSplitted[1];
+				
+				BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) record;
 				
 				if(dataOraEvento != null && exchangeRecord.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
 					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
@@ -67,6 +71,11 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
 				List<AbstractInputRecord> eventoScommessaRecordList = inputRecordEventoScommessaMap.get(scommessa);
+				if(eventoScommessaRecordList != null && 
+						!eventoScommessaRecordList.isEmpty() && 
+						!eventoScommessaRecordList.get(0).getSport().equals(sport)) {
+					break;
+				}
 				AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
 				//Se trovato
 				if(exchangeRecord != null) {
@@ -82,6 +91,14 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 			
 	}
 
+	/**
+	 * GD - 30/04/18
+	 * Metodo che verifica i requisiti minimi affinchè la comparazione tra la lista di eventi-bookmaker e l'evento-Betfair 
+	 * siano mappati in OUTPUT
+	 * @param eventoScommessaRecordList la lista di quote offerte dai bookmaker relativi ad uno specifico evento-scommessa
+	 * @param exchangeRecord la quota offerta da Betfair Exchange relativa all'evento-scommessa in analisi 
+	 * @return la lista di comparazioni mappate in base ai requisiti minimi
+	 */
 	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(List<AbstractInputRecord> eventoScommessaRecordList, AbstractInputRecord exchangeRecord) {
 		
 		List<RecordOutput> outputRecordList = new ArrayList<RecordOutput>();
@@ -100,11 +117,18 @@ public class ExchangeProcessDataManager extends AbstractProcessDataManager{
 		return outputRecordList;
 	}
 
+	/**
+	 * GD - 30/04/2018	
+	 * Metodo che cerca e ritorna (se trovato) il record relativo alle quote offerte da Betfair Exchange
+	 * @param scommessaRecordList lista di offerte quote
+	 * @return il record relativo alle quote offerte da Betfair Exchange, null se non trovato
+	 */
 	private AbstractInputRecord findExchangeRecord(List<AbstractInputRecord> scommessaRecordList) {
 		AbstractInputRecord exchangeRecord = null;
 		for(AbstractInputRecord record : scommessaRecordList) {
 			if("Betfair Exchange".equals(record.getBookmakerName())) {
 				exchangeRecord = record;
+				break;
 			}
 		}
 		return exchangeRecord;
