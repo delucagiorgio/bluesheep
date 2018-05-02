@@ -115,7 +115,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
 						if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue() && 
-						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue()) {
+						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue()
+						   ) {
 							RecordOutput outputRecord = mapRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating1);
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);

@@ -74,7 +74,7 @@ public class HttpClientNonInteractiveLoginSSO {
             
             jsonSessionToken = (new JSONObject(responseString)).getString("sessionToken");
         }catch(Exception e) {
-        	logger.severe("Error occurred during login on Betfair.it non interactive login: error is \n" + e.getStackTrace());
+        	logger.severe("Error occurred during login on Betfair.it non interactive login: error is " + e.getMessage());
         }finally {
             httpClient.getConnectionManager().shutdown();
         }

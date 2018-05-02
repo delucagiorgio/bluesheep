@@ -1,9 +1,5 @@
 package comparatore.test.json;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.ParseException;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;

@@ -19,5 +19,4 @@ public abstract class AbstractInputMappingProcessor {
 	
 	public abstract List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport);
 
-	
 }

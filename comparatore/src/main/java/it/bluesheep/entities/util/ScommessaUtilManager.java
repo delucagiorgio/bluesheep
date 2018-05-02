@@ -95,11 +95,11 @@ public class ScommessaUtilManager {
 	 * @return la lista di scommesse per lo sport CALCIO del tipo UNDER
 	 */
 	public static List<Scommessa> getScommessaListCalcioUnderOdds(){
-		return Arrays.asList(Scommessa.ALMENO1GOAL_O0X5, 
-				Scommessa.ALMENO2GOAL_O1X5, 
-				Scommessa.ALMENO3GOAL_O2X5,
-				Scommessa.ALMENO4G0AL_O3X5,
-				Scommessa.ALMENO5GOAL_O4X5);
+		return Arrays.asList(Scommessa.ALPIU1GOAL_U1X5, 
+				Scommessa.ALPIU2GOAL_U2X5, 
+				Scommessa.ALPIU3GOAL_U3X5,
+				Scommessa.ALPIU4GOAL_U4X5,
+				Scommessa.NESSUNGOAL_U0X5);
 	}
 	
 	/**

@@ -30,7 +30,7 @@ public class TranslatorUtil {
 		try {
 			csvFileStream = new FileInputStream(BlueSheepComparatoreMain.getProperties().getProperty("PATH_NAZIONI_TRADUZIONE_CSV"));
 		} catch (FileNotFoundException e1) {
-			logger.severe("Error during initialization of codeTranslationMap : error is\n" + e1.getStackTrace());
+			logger.severe("Error during initialization of codeTranslationMap : error is " + e1.getMessage());
 		}
         BufferedReader br = null;
         String line = "";
@@ -49,14 +49,14 @@ public class TranslatorUtil {
 	            }
 
 	        } catch (Exception e) {
-	            logger.severe("Error during translation initialization map. Error is\n" + e.getStackTrace());
+	            logger.severe("Error during translation initialization map. Error is " + e.getMessage());
 	        } finally {
 	            if (br != null) {
 	                try {
 	                	csvFileStream.close();
 	                    br.close();
 	                } catch (IOException e) {
-	    	            logger.severe("Error during translation initialization map. Error is\n" + e.getStackTrace());
+	    	            logger.severe("Error during translation initialization map. Error is " + e.getMessage());
 	                }
 	            }
 	        }
@@ -98,7 +98,7 @@ public class TranslatorUtil {
 				  
 			translatedString = parseResult(response.toString());
 		}catch(Exception e) {
-            logger.severe("Error during translation initialization map. No translation is applied. Error is\n" + e.getStackTrace());
+            logger.severe("Error during translation initialization map. No translation is applied. Error is " + e.getMessage());
             translatedString = toBeTranslatedString;
 		}
 		 

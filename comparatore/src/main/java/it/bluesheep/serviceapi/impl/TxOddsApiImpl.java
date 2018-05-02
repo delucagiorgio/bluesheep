@@ -80,7 +80,7 @@ public class TxOddsApiImpl implements IApiInterface {
 			   result.add(get_result(con));
 					
 			} catch (Exception e) {
-			   logger.severe("Error during request data on TxOdds. Error is\n" + e.getStackTrace());
+			   logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
 			}
 			
 			startDay++;
@@ -104,7 +104,7 @@ public class TxOddsApiImpl implements IApiInterface {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.severe("Error during request data on TxOdds. Error is\n" + e.getStackTrace());
+				logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
 			}
 				
 		}

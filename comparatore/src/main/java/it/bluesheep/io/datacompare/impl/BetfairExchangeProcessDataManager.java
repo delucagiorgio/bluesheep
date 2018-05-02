@@ -35,7 +35,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 				try {
 					dataOraEvento = sdf.parse(splittedEventoKey[0]);
 				} catch (ParseException e) {
-					logger.warning("Event with keyEvento " + eventoTxOdds + " cannot be parsed on date : error is\n" + e.getStackTrace());
+					logger.warning("Event with keyEvento " + eventoTxOdds + " cannot be parsed on date : error is " + e.getMessage());
 				}
 				String sport = splittedEventoKey[1];
 				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");

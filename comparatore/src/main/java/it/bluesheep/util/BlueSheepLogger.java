@@ -74,7 +74,7 @@ public class BlueSheepLogger {
 	     			returnString.append(record.getMessage());
 	     			
 	     			if(record.getThrown() != null) {
-	     				returnString.append("Exception trown details :\n").append(record.getThrown().getStackTrace());
+	     				returnString.append("Exception trown details : ").append(record.getThrown().getMessage());
 	     			}
 	     			returnString.append("\n");
 	     			return returnString.toString();

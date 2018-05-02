@@ -13,11 +13,13 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.IProcessDataManager;
+import it.bluesheep.io.datacompare.impl.Bet365ProcessDataManager;
 import it.bluesheep.io.datacompare.impl.BetfairExchangeProcessDataManager;
 import it.bluesheep.io.datacompare.impl.TxOddsProcessDataManager;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.io.datainput.operationmanager.impl.TxOddsInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.impl.Bet365InputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.impl.BetfairExchangeInputDataManagerImpl;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
@@ -70,7 +72,36 @@ public class BlueSheepComparatoreMain {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
 			txOddsMappedRecordsFromJson.addAll(txOddsMappedRecordsFromJsonBySport);
-		}	
+		}
+		
+		/**
+		 * 										BET365 
+		 * 										
+		 * 										START
+		 */
+		//inizializzo le variabili necessarie per effettuare tutte le chiamate
+		inputDataManager = new Bet365InputDataManagerImpl();
+		processDataManager = new Bet365ProcessDataManager();
+		
+		logger.info("Initializing Bet365 API query");
+			
+		//Per ogni sport
+		for(Sport sport : Sport.values()) {
+			logger.info("Delegate Bet365 request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
+			List<AbstractInputRecord> bet365MappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
+			bet365MappedRecordsFromJsonBySport = ((Bet365ProcessDataManager) processDataManager).
+					compareAndCollectSameEventsFromBookmakerAndTxOdds(bet365MappedRecordsFromJsonBySport, eventoScommessaRecordMap);
+			for(AbstractInputRecord record : bet365MappedRecordsFromJsonBySport) {
+				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
+			}
+			txOddsMappedRecordsFromJson.addAll(bet365MappedRecordsFromJsonBySport);
+		}
+		
+		/**
+		 * 										BET365 
+		 * 										
+		 * 										 END
+		 */
 		
 		//Avvio comparazione quote tabella 2
 		List<RecordOutput> tabella2OutputList = new ArrayList<RecordOutput>();
@@ -80,7 +111,7 @@ public class BlueSheepComparatoreMain {
 				logger.info("Starting odds comparison for Tabella2 (TxOdds vs TxOdds) for sport " + sport);
 				tabella2OutputList.addAll(processDataManager.compareOdds(eventoScommessaRecordMap, sport));
 			}catch(Exception e) {
-				logger.severe("Error with odds comparison: error is\n" + e.getStackTrace());
+				logger.severe("Error with odds comparison: error is " + e.getMessage());
 			}
 		}
     	
@@ -98,25 +129,25 @@ public class BlueSheepComparatoreMain {
 		    	writer1.println(jsonString1);
 		    	writer1.close();
 			} catch (IOException e) {
-				logger.severe("Error with file during saving : error is\n" + e.getStackTrace());
+				logger.severe("Error with file during saving : error is " + e.getMessage());
 			}
 
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella2);
 		}
 		
 		/**
-		 * 										TXODDS 
+		 * 										 TXODDS 
 		 * 										
-		 * 										 END
+		 * 										  END
 		 */
 		
 		
 		
 		
 		/**
-		 * 										BETFAIR 
+		 * 										 BETFAIR 
 		 * 										
-		 * 										 START
+		 * 										  START
 		 */
 		
 		logger.info("Initializing Betfair API query");
@@ -146,7 +177,7 @@ public class BlueSheepComparatoreMain {
 				logger.info("Starting odds comparison for Tabella1 (TxOdds vs Exchange) for sport " + sport);
 				tabella1OutputList.addAll(processDataManager.compareOdds(eventoScommessaRecordMap, sport));
 			}catch(Exception e) {
-				logger.severe("Error with odds comparison: error is\n" + e.getStackTrace());
+				logger.severe("Error with odds comparison: error is " + e.getMessage());
 			}
 		}
 		
@@ -169,7 +200,7 @@ public class BlueSheepComparatoreMain {
 		    	writer2.println(jsonString2);
 		    	writer2.close();
 			} catch (IOException e) {
-				logger.severe("Error with file during saving : error is\n" + e.getStackTrace());
+				logger.severe("Error with file during saving : error is " + e.getMessage());
 			}
 	    	
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella1);

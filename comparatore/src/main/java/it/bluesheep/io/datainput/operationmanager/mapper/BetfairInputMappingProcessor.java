@@ -47,11 +47,12 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 				marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
 				BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode);
 				
-				List<AbstractInputRecord> recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
-				
-				recordsToBeReturned.addAll(recordToBeMapped);
+				AbstractInputRecord recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
+				if(recordToBeMapped != null) {
+					recordsToBeReturned.add(recordToBeMapped);
+				}
 			}catch(Exception e) {
-				logger.severe("Error during data extraction from JSON: exception is \n" + e.getStackTrace());	
+				logger.severe("Error during data extraction from JSON: exception is " + e.getMessage());	
 			}
 		}
 		
@@ -68,13 +69,12 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	 * @param sport lo sport
 	 * @return Insieme di record in cui sono mappate le informazioni relative alle quote e alla loro tipologia
 	 */
-	private List<AbstractInputRecord> mapOddsIntoAbstractInputRecord(BetfairExchangeInputRecord tempRecord, 
+	private AbstractInputRecord mapOddsIntoAbstractInputRecord(BetfairExchangeInputRecord tempRecord, 
 			JSONObject resultJSONObject, Scommessa scommessaTipo, Sport sport) {
 		
 		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 		
-		List<AbstractInputRecord> recordsToBeReturned = new ArrayList<AbstractInputRecord>();
-		
+		BetfairExchangeInputRecord recordToBeMapped  = null;
 		//Solitamente più di uno, rappresentano i dettagli delle quote
 		JSONArray runnerJSONArray = jsonConverter.getChildNodeArrayByKey(resultJSONObject, RUNNERS_JSON_STRING);
 		int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
@@ -97,18 +97,17 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 					double liquidita = bestPriceLayOddsJSONObject.getDouble(SIZE_JSON_STRING);
 					
 					//mappo le informazioni nel record di input generico
-					BetfairExchangeInputRecord recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
+					recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
 					recordToBeMapped.setQuota(quotaLayMin);
 					recordToBeMapped.setLiquidita(liquidita);
 					recordToBeMapped.setSport(sport);
 					recordToBeMapped.setTipoScommessa(scommessaTipo);
 					
-					recordsToBeReturned.add(recordToBeMapped);
 				}
 			}
 		}
 		
-		return recordsToBeReturned;
+		return recordToBeMapped;
 	}
 	
 	/**

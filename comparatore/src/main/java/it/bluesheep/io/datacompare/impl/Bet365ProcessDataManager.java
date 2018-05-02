@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -18,6 +19,9 @@ import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
 public class Bet365ProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
 
+	private static final String OUTPUT_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
+
+	
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) throws Exception {
 		throw new Exception("Incorrect implementation of compareOdds");
@@ -44,12 +48,12 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
 				//Bet365 non fornisce il dettagli dell'ora : ci baseremo solo sulla data
-				SimpleDateFormat bet365Sdf = new SimpleDateFormat("yyyyMMdd");
+				SimpleDateFormat bet365Sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.ENGLISH);
 				Date dataOraEvento = null;
 				try {
 					dataOraEvento = bet365Sdf.parse(splittedEventoKey[0]);
 				} catch (ParseException e) {
-					logger.warning("Event with keyEvento " + eventoTxOdds + " cannot be parsed on date : error is\n" + e.getStackTrace());
+					logger.warning("Event with keyEvento " + eventoTxOdds + " cannot be parsed on date : error is " + e.getMessage());
 				}
 				String sport = splittedEventoKey[1];
 				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");

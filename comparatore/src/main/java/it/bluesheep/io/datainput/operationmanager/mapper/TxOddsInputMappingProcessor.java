@@ -10,10 +10,12 @@ import org.json.JSONObject;
 
 import com.betfair.util.ISO8601DateTypeAdapter;
 
+import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
 
@@ -34,6 +36,14 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String GROUP_JSON_STRING = "group";
 	private static final String ATEAM_JSON_STRING = "ateam";
 	private static final String NAME_JSON_STRING = "name";
+	
+	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
+	private static Long updateFrequencyDiff;
+	
+	public TxOddsInputMappingProcessor() {
+		super();
+		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
+	}
 	
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
@@ -65,15 +75,16 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 				//le informazioni del match vengono mappate nell'entità
 				TxOddsInputRecord recordToBeMapped = mapInfoMatchIntoAbstractInputRecord(matchJsonObject, sport);
 				
-				//Ora il match è definito e devo prendere le relative quote per la scommessa in analisi (esempio UNDER 2,5)
-				List<AbstractInputRecord> mappedRecordsWithOdds = mapInfoBookmakersIntoAbstractInputRecordList(recordToBeMapped, matchJsonObject, scommessaTipo, sport);
-				
-				recordsToBeReturned.addAll(mappedRecordsWithOdds);
+				if(recordToBeMapped.getDataOraEvento() != null && (recordToBeMapped.getDataOraEvento().getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
+					//Ora il match è definito e devo prendere le relative quote per la scommessa in analisi (esempio UNDER 2,5)
+					List<AbstractInputRecord> mappedRecordsWithOdds = mapInfoBookmakersIntoAbstractInputRecordList(recordToBeMapped, matchJsonObject, scommessaTipo, sport);
+					
+					recordsToBeReturned.addAll(mappedRecordsWithOdds);
+				}
 			}catch(Exception e) {
-				logger.severe("Error during data extraction from JSON: exception is \n" + e.getStackTrace());	
+				logger.severe("Error during data extraction from JSON: exception is " + e.getMessage());	
 			}
 		}
-		
 		return recordsToBeReturned;
 	}
 

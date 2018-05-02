@@ -34,6 +34,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.serviceapi.IApiInterface;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
@@ -72,6 +73,10 @@ public class BetFairApiImpl implements IApiInterface {
 	private static final String ALTER_REGEX_NAME_EVENT = " - ";
 	private static final int QUERY_SIZE_EVENT = 200;
 	private static final int QUERY_SIZE_MARKET = 40;
+	
+	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
+	private static Long updateFrequencyDiff;
+	
 	private String sessionToken;
 	private MercatoEventoBetfairMap mercatoEventoBetfairMap;
 	private MarketFilter filter;
@@ -81,7 +86,8 @@ public class BetFairApiImpl implements IApiInterface {
 	
 
 	public BetFairApiImpl() {
-		logger = (new BlueSheepLogger(BetFairApiImpl.class)).getLogger();;
+		logger = (new BlueSheepLogger(BetFairApiImpl.class)).getLogger();
+		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
 	@Override
@@ -141,7 +147,7 @@ public class BetFairApiImpl implements IApiInterface {
 			try {				
 				responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
 			} catch (BetFairAPIException e) {
-				logger.severe("Error retrieving data from ListMarketBook: the error is \n" + e.getStackTrace());
+				logger.severe("Error retrieving data from ListMarketBook: the error is " + e.getMessage());
 			}
 			
 			//colleziono JSON da ritornare
@@ -183,7 +189,7 @@ public class BetFairApiImpl implements IApiInterface {
 			try {
 				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
 			} catch (BetFairAPIException e) {
-				logger.severe("Error retrieving data from listMarketCatalouge: the error is \n" + e.getStackTrace());
+				logger.severe("Error retrieving data from listMarketCatalouge: the error is " + e.getMessage());
 			}
 			
 			//va a completare il mapping sugli oggetti EventoBetfair, 
@@ -294,23 +300,27 @@ public class BetFairApiImpl implements IApiInterface {
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
-				evento.setDataOraEvento(dataOraEvento);
 				
-				String regexSplitName = DEFAULT_REGEX_NAME_EVENT;
-				String partitaString = eventJSONObject.getString(NAME_JSON_STRING);
-				if(!partitaString.contains(regexSplitName)) {
-					regexSplitName = ALTER_REGEX_NAME_EVENT;
+				if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
+
+					evento.setDataOraEvento(dataOraEvento);
+					
+					String regexSplitName = DEFAULT_REGEX_NAME_EVENT;
+					String partitaString = eventJSONObject.getString(NAME_JSON_STRING);
+					if(!partitaString.contains(regexSplitName)) {
+						regexSplitName = ALTER_REGEX_NAME_EVENT;
+					}
+					String[] splittedPartitaString = partitaString.split(regexSplitName);
+					String partecipante1 = splittedPartitaString[0].trim();
+					String partecipante2 = splittedPartitaString[1].trim();
+					
+					evento.setPartecipante1(partecipante1);
+					evento.setPartecipante2(partecipante2);
+					
+					evento.setId(eventJSONObject.getString(ID_JSON_STRING));
+					
+					mappedEvents.add(evento);
 				}
-				String[] splittedPartitaString = partitaString.split(regexSplitName);
-				String partecipante1 = splittedPartitaString[0].trim();
-				String partecipante2 = splittedPartitaString[1].trim();
-				
-				evento.setPartecipante1(partecipante1);
-				evento.setPartecipante2(partecipante2);
-				
-				evento.setId(eventJSONObject.getString(ID_JSON_STRING));
-				
-				mappedEvents.add(evento);
 			}
 		}
 		
@@ -331,7 +341,7 @@ public class BetFairApiImpl implements IApiInterface {
 		try {
 			resultEventsJSON = beom.listEvents(filter, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
 		} catch (BetFairAPIException e) {
-			logger.severe("Error retrieving data from ListEvents: the error is \n" + e.getStackTrace());
+			logger.severe("Error retrieving data from ListEvents: the error is " + e.getMessage());
 		}
 		
 		return resultEventsJSON;
@@ -346,7 +356,7 @@ public class BetFairApiImpl implements IApiInterface {
 	        	logger.info("Login successfully into Betfair.it");
 	        	logger.config("SessionToken = " + sessionToken);
 			} catch (Exception e1) {
-				logger.severe("Login with Betfair.it exception: the error is \n" + e1.getStackTrace());
+				logger.severe("Login with Betfair.it exception: the error is " + e1.getMessage());
 			}
 		}
 	}

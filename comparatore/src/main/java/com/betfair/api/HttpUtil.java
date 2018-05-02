@@ -51,7 +51,7 @@ public class HttpUtil {
             resp = httpClient.execute(post, reqHandler);
 
         } catch (Exception e) {
-            logger.severe("Error occurred during HTTP request execution: error is\n" + e.getStackTrace());
+            logger.severe("Error occurred during HTTP request execution: error is " + e.getMessage());
         }
 
         return resp;
