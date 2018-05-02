@@ -19,8 +19,6 @@ import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
 public class Bet365ProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
 
-	private static final String OUTPUT_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
-
 	
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) throws Exception {

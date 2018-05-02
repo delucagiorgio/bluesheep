@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +10,8 @@ import it.bluesheep.entities.input.util.bet365.EventoBet365;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
-import it.bluesheep.io.datainput.operationmanager.mapper.Bet365InputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.Bet365InputMappingProcessor;
 import it.bluesheep.serviceapi.impl.Bet365ApiImpl;
 
 public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {

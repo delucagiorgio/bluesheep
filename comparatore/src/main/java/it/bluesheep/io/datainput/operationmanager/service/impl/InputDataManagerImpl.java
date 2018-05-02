@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -2,6 +2,11 @@ package it.bluesheep.entities.input.util;
 
 import java.util.Date;
 
+/**
+ * La classe permette di definire le modalità di comparazione dei campi che vanno ad identificare un evento sportivo.
+ * @author Giorgio De Luca
+ *
+ */
 public interface IKeyEventoComparator {
 	/**
 	 * GD - 30/04/2018

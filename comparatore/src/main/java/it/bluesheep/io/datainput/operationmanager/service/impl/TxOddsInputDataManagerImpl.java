@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
-import it.bluesheep.io.datainput.operationmanager.mapper.TxOddsInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.TxOddsInputMappingProcessor;
 import it.bluesheep.serviceapi.impl.TxOddsApiImpl;
 
 public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {

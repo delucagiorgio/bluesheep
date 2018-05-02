@@ -18,9 +18,9 @@ import it.bluesheep.io.datacompare.impl.BetfairExchangeProcessDataManager;
 import it.bluesheep.io.datacompare.impl.TxOddsProcessDataManager;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datainput.IInputDataManager;
-import it.bluesheep.io.datainput.operationmanager.impl.TxOddsInputDataManagerImpl;
-import it.bluesheep.io.datainput.operationmanager.impl.Bet365InputDataManagerImpl;
-import it.bluesheep.io.datainput.operationmanager.impl.BetfairExchangeInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.impl.Bet365InputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.impl.BetfairExchangeInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.impl.TxOddsInputDataManagerImpl;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -119,7 +119,7 @@ public class BlueSheepComparatoreMain {
 			logger.info("Tabella 2 (TxOdds vs TxOdds) process calculation completed. Exporting data in JSON");
 	    	String jsonString1 = AbstractBluesheepJsonConverter.convertToJSON(tabella2OutputList);
 	    	PrintWriter writer1 = null;
-	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2") + new Timestamp(System.currentTimeMillis()).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
+	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2") + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
 	    	// Indico il path di destinazione dei miei dati
 	    	try {
 				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2"));
@@ -187,7 +187,7 @@ public class BlueSheepComparatoreMain {
 			logger.info("Tabella 1 (TxOdds vs Exchange) process calculation completed. Exporting data in JSON");
 	
 	    	String jsonString2 = AbstractBluesheepJsonConverter.convertToJSON(tabella1OutputList);
-	    	String outputFilenameTabella1 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE1") + new Timestamp(System.currentTimeMillis()).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
+	    	String outputFilenameTabella1 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE1") + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
 	
 	    	// Indico il path di destinazione dei miei dati
 	    	PrintWriter writer2 = null;

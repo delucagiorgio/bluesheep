@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.mapper;
+package it.bluesheep.io.datainput.operationmanager.service.mapper;
 
 import java.util.List;
 import java.util.logging.Logger;

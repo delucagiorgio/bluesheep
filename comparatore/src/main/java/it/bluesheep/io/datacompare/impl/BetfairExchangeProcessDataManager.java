@@ -22,8 +22,6 @@ import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
 public class BetfairExchangeProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents{
 	
-	private static final String OUTPUT_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
-	
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds
 					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception{
