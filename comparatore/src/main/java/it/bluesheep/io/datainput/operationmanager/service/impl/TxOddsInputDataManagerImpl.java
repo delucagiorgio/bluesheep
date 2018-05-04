@@ -31,14 +31,15 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 	 */
 	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport) {
 				
-		List<AbstractInputRecord> abstractInputRecordsList = null;
+		List<AbstractInputRecord> abstractInputRecordsList = new ArrayList<AbstractInputRecord>();
 	
 		try {
-			//esegui mapping secondo TXODDS
-			abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+			if(jsonString != null && !jsonString.isEmpty()) {
+				//esegui mapping secondo TXODDS
+				abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+			}
 		}catch(Exception e) {
-			System.out.println(jsonString);
-			e.printStackTrace();
+			logger.severe("Exception in mapJsonToAbstractInputRecord : exception is " + e.getMessage());
 		}
 		logger.info("Mapping JSON completed : events mapped from input JSON are " + abstractInputRecordsList.size());
 		

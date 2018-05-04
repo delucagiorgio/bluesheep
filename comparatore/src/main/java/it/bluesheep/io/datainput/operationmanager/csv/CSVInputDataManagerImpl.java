@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
-import it.bluesheep.entities.input.record.TxOddsInputRecord;
+import it.bluesheep.entities.input.record.CSVInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.util.BlueSheepLogger;
@@ -25,7 +25,7 @@ import it.bluesheep.util.DirectoryFileUtilManager;
  * @author Giorgio De Luca	
  *
  */
-public class CsvInputDataManagerImpl {
+public class CSVInputDataManagerImpl {
 
 	private static Logger logger;
 	private static final String SEPARATOR = ";";
@@ -46,8 +46,8 @@ public class CsvInputDataManagerImpl {
 	private String csvFilenamePath;
 	
 	
-	public CsvInputDataManagerImpl() {
-		logger = (new BlueSheepLogger(CsvInputDataManagerImpl.class)).getLogger();
+	public CSVInputDataManagerImpl() {
+		logger = (new BlueSheepLogger(CSVInputDataManagerImpl.class)).getLogger();
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
 		csvFilenamePath = BlueSheepComparatoreMain.getProperties().getProperty(PATH_INPUT_FILE);
 		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
@@ -60,13 +60,15 @@ public class CsvInputDataManagerImpl {
 	 */
 	public List<AbstractInputRecord> processManualOddsByCsv(){
 		
+		logger.info("Starting CSV input process");
+		
 		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>();
 		
 		//ottengo tutte le linee del csv
 		try {
 			idLineMapKeyValues = getLines();
 		} catch (IOException e) {
-			logger.severe("Exception occurred during getLines in CsvInputDataManagerImpl : exception is :" + e.getMessage());
+			logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
 		}
 		
 		for(Integer idLine : idLineMapKeyValues.keySet()) {
@@ -87,7 +89,7 @@ public class CsvInputDataManagerImpl {
 	 */
 	private AbstractInputRecord mapSplittedInfoIntoAbstractInputRecord(Map<Integer, String> map, Integer id) {
 		String dataOraEventoString = map.get(DATA_ORA_EVENTO);
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm"); 
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		AbstractInputRecord record = null;
 		
 		Date dataOraEvento = null;
@@ -103,9 +105,11 @@ public class CsvInputDataManagerImpl {
 			String bookmaker = map.get(BOOKMAKER);
 			String partecipante1 = map.get(PARTECIPANTE1);
 			String partecipante2 = map.get(PARTECIPANTE2);
-			record = new TxOddsInputRecord(dataOraEvento, sport, campionato, partecipante1, partecipante2, id.toString());
+			double quota = new Double(map.get(QUOTA));
+			record = new CSVInputRecord(dataOraEvento, sport, campionato, partecipante1, partecipante2, id.toString());
 			record.setBookmakerName(bookmaker);
 			record.setTipoScommessa(scommessa);
+			record.setQuota(quota);
 		}
 		return record;
 	}
@@ -197,7 +201,7 @@ public class CsvInputDataManagerImpl {
 				line = br.readLine();
 			}
 		}catch(Exception e) {
-			logger.severe("Exception occurred during getLines in CsvInputDataManagerImpl : exception is :" + e.getMessage());
+			logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
 		}finally {
 			if(br != null) {
 				br.close();

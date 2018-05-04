@@ -28,7 +28,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		for(AbstractInputRecord record : exchangeList) {
 			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
-				SimpleDateFormat sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.ENGLISH);
+				SimpleDateFormat sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.UK);
 				Date dataOraEvento = null;
 				try {
 					dataOraEvento = sdf.parse(splittedEventoKey[0]);

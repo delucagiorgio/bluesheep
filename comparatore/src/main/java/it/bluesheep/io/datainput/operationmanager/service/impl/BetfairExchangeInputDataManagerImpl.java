@@ -32,21 +32,22 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport) {
 		
 		List<AbstractInputRecord> returnItemsList = new ArrayList<AbstractInputRecord>();
-		returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
-		
-		logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
-		
-		logger.info("Merging events information with odds information");
-		String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
-		Map<String, EventoBetfair> mercatoEventoBetfairMap = scommessaMapMarketIdEventoMap.get(oddsType + "_" + sport);
-	    if(mercatoEventoBetfairMap == null) {
-	    	mercatoEventoBetfairMap = ((BetFairApiImpl) apiServiceInterface).getMercatoEventoBetfairMap();
-	    	scommessaMapMarketIdEventoMap.put(oddsType + "_" + sport, mercatoEventoBetfairMap);
-	    }
-	    returnItemsList = mergeInfoEventoBetfairWithInfoOdds(returnItemsList, mercatoEventoBetfairMap);
-	    
-		logger.info("Merge events information with odds information completed successfully");
-
+		if(jsonString != null && !jsonString.isEmpty()) {
+			returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+			
+			logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
+			
+			logger.info("Merging events information with odds information");
+			String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
+			Map<String, EventoBetfair> mercatoEventoBetfairMap = scommessaMapMarketIdEventoMap.get(oddsType + "_" + sport);
+		    if(mercatoEventoBetfairMap == null) {
+		    	mercatoEventoBetfairMap = ((BetFairApiImpl) apiServiceInterface).getMercatoEventoBetfairMap();
+		    	scommessaMapMarketIdEventoMap.put(oddsType + "_" + sport, mercatoEventoBetfairMap);
+		    }
+		    returnItemsList = mergeInfoEventoBetfairWithInfoOdds(returnItemsList, mercatoEventoBetfairMap);
+		    
+			logger.info("Merge events information with odds information completed successfully");
+		}
 		return returnItemsList;
 	}
 

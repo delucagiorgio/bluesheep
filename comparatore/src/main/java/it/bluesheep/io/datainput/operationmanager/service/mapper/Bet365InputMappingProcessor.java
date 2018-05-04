@@ -42,7 +42,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 		JSONArray resultArrayJSONObject = jsonUtil.getChildNodeArrayByKey(jsonObject, RESULT_JSON_STRING);
 		int successString = jsonObject.getInt(SUCCESS_JSON_STRING);
 		
-		JSONObject resultJSONObject = null;
+
 		String eventoId = null;
 
 		List<AbstractInputRecord> recordsToBeReturned = new ArrayList<AbstractInputRecord>();
@@ -51,7 +51,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 		if(successString == 1) {
 			for(int i = 0; i < resultArrayJSONObject.length(); i++) {
 				try {
-					resultJSONObject = resultArrayJSONObject.getJSONObject(i);
+					JSONObject resultJSONObject = resultArrayJSONObject.getJSONObject(i);
 					eventoId = resultJSONObject.getString(EVENTO_ID_JSON_STRING);
 					
 					Bet365InputRecord tempRecord = new Bet365InputRecord(null, sport, null, null, null, eventoId);
@@ -133,31 +133,33 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	
 	private String getCorrectCodeHandicap(Scommessa scommessaTipo) {
 		String scommessaHandicap = null;
-		if(ScommessaUtilManager.getScommessaListCalcioUnderOdds().contains(scommessaTipo)) {
-			scommessaHandicap = "Under";
-		}else if(ScommessaUtilManager.getScommessaListCalcioOverOdds().contains(scommessaTipo)) {
-			scommessaHandicap = "Over";
-		}
-		
-		switch(scommessaTipo) {
-		case ALMENO1GOAL_O0X5:
-		case NESSUNGOAL_U0X5:
-			scommessaHandicap += "_0.5";
-			break;
-		case ALMENO2GOAL_O1X5:
-		case ALPIU1GOAL_U1X5:
-			scommessaHandicap += "_1.5";
-			break;
-		case ALMENO4G0AL_O3X5:
-		case ALPIU3GOAL_U3X5:
-			scommessaHandicap += "_3.5";
-			break;
-		case ALMENO5GOAL_O4X5:
-		case ALPIU4GOAL_U4X5:
-			scommessaHandicap += "_4.5";
-			break;
-		default:
-			break;
+		if(ScommessaUtilManager.getScommessaListCalcioTotalOdds().contains(scommessaTipo)) {
+			if(ScommessaUtilManager.getScommessaListCalcioUnderOdds().contains(scommessaTipo)) {
+				scommessaHandicap = "Under";
+			}else if(ScommessaUtilManager.getScommessaListCalcioOverOdds().contains(scommessaTipo)) {
+				scommessaHandicap = "Over";
+			}
+			
+			switch(scommessaTipo) {
+			case ALMENO1GOAL_O0X5:
+			case NESSUNGOAL_U0X5:
+				scommessaHandicap += "_0.5";
+				break;
+			case ALMENO2GOAL_O1X5:
+			case ALPIU1GOAL_U1X5:
+				scommessaHandicap += "_1.5";
+				break;
+			case ALMENO4G0AL_O3X5:
+			case ALPIU3GOAL_U3X5:
+				scommessaHandicap += "_3.5";
+				break;
+			case ALMENO5GOAL_O4X5:
+			case ALPIU4GOAL_U4X5:
+				scommessaHandicap += "_4.5";
+				break;
+			default:
+				break;
+			}
 		}
 		return scommessaHandicap;
 	}

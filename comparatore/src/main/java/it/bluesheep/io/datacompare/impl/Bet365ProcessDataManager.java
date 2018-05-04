@@ -46,7 +46,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
 				//Bet365 non fornisce il dettagli dell'ora : ci baseremo solo sulla data
-				SimpleDateFormat bet365Sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.ENGLISH);
+				SimpleDateFormat bet365Sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.UK);
 				Date dataOraEvento = null;
 				try {
 					dataOraEvento = bet365Sdf.parse(splittedEventoKey[0]);
