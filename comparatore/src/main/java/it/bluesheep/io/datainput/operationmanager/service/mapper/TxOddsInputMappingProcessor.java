@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.mapper;
+package it.bluesheep.io.datainput.operationmanager.service.mapper;
 
 import java.text.ParseException;
 import java.util.ArrayList;

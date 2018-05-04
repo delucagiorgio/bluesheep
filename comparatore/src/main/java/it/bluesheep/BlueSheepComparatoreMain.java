@@ -1,5 +1,6 @@
 package it.bluesheep;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -15,12 +16,14 @@ import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.IProcessDataManager;
 import it.bluesheep.io.datacompare.impl.Bet365ProcessDataManager;
 import it.bluesheep.io.datacompare.impl.BetfairExchangeProcessDataManager;
+import it.bluesheep.io.datacompare.impl.CSVProcessDataManager;
 import it.bluesheep.io.datacompare.impl.TxOddsProcessDataManager;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datainput.IInputDataManager;
-import it.bluesheep.io.datainput.operationmanager.impl.TxOddsInputDataManagerImpl;
-import it.bluesheep.io.datainput.operationmanager.impl.Bet365InputDataManagerImpl;
-import it.bluesheep.io.datainput.operationmanager.impl.BetfairExchangeInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.csv.CSVInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.impl.Bet365InputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.impl.BetfairExchangeInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.impl.TxOddsInputDataManagerImpl;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -30,10 +33,12 @@ public class BlueSheepComparatoreMain {
 	
 	private static Properties properties = new Properties(); 
 	private static Logger logger;
-	
-	static {
+
+	public static void main(String[] args) throws Exception{
+				
+		
         try {
-            InputStream in = BlueSheepComparatoreMain.class.getResourceAsStream("/bluesheepComparatore.properties");
+        	InputStream in = new FileInputStream(args[0]);
             properties.load(in);
         	// va stabilito un path per il file delle proprieta'    	
             in.close();
@@ -41,10 +46,7 @@ public class BlueSheepComparatoreMain {
         	System.out.println("Error retrieving properties\n" + exception.getMessage());
             System.exit(-1);
         }
-	}
 		
-	public static void main(String[] args) throws Exception{
-				
 		logger = (new BlueSheepLogger(BlueSheepComparatoreMain.class)).getLogger();
 		
 		long startTime = System.currentTimeMillis();
@@ -62,16 +64,14 @@ public class BlueSheepComparatoreMain {
 			
 		//interrogazione di TxOdds
 		inputDataManager = new TxOddsInputDataManagerImpl();
-		List<AbstractInputRecord> txOddsMappedRecordsFromJson = new ArrayList<AbstractInputRecord>();
-
+		List<AbstractInputRecord> txOddsMappedRecordsFromJsonBySport = null;
 		//Per ogni sport
 		for(Sport sport : Sport.values()) {
 			logger.info("Delegate TxOdds request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
-			List<AbstractInputRecord> txOddsMappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
+			txOddsMappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
 			for(AbstractInputRecord record : txOddsMappedRecordsFromJsonBySport) {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
-			txOddsMappedRecordsFromJson.addAll(txOddsMappedRecordsFromJsonBySport);
 		}
 		
 		/**
@@ -91,16 +91,39 @@ public class BlueSheepComparatoreMain {
 			List<AbstractInputRecord> bet365MappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
 			bet365MappedRecordsFromJsonBySport = ((Bet365ProcessDataManager) processDataManager).
 					compareAndCollectSameEventsFromBookmakerAndTxOdds(bet365MappedRecordsFromJsonBySport, eventoScommessaRecordMap);
+			
 			for(AbstractInputRecord record : bet365MappedRecordsFromJsonBySport) {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
-			txOddsMappedRecordsFromJson.addAll(bet365MappedRecordsFromJsonBySport);
 		}
 		
 		/**
 		 * 										BET365 
 		 * 										
 		 * 										 END
+		 */
+		
+		/**
+		 * 								MANUAL INPUT ODDS BY CSV 
+		 * 										
+		 * 										  START
+		 */
+		
+		CSVInputDataManagerImpl csvInputDataManager = new CSVInputDataManagerImpl();
+		CSVProcessDataManager csvProcessDataManager = new CSVProcessDataManager();
+		List<AbstractInputRecord> csvRecordList = csvInputDataManager.processManualOddsByCsv();
+		
+		List<AbstractInputRecord> csvRecordListUpdatedInfo = csvProcessDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(csvRecordList, eventoScommessaRecordMap);
+		List<AbstractInputRecord> toBeIteratedList = csvRecordListUpdatedInfo != null && !csvRecordListUpdatedInfo.isEmpty() ? csvRecordListUpdatedInfo : csvRecordList;
+		
+		for(AbstractInputRecord csvRecord : toBeIteratedList) {
+			eventoScommessaRecordMap.addToMapEventoScommessaRecord(csvRecord);
+		}
+		
+		/**
+		 * 								MANUAL INPUT ODDS BY CSV 
+		 * 										
+		 * 										  END
 		 */
 		
 		//Avvio comparazione quote tabella 2
@@ -119,7 +142,7 @@ public class BlueSheepComparatoreMain {
 			logger.info("Tabella 2 (TxOdds vs TxOdds) process calculation completed. Exporting data in JSON");
 	    	String jsonString1 = AbstractBluesheepJsonConverter.convertToJSON(tabella2OutputList);
 	    	PrintWriter writer1 = null;
-	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2") + new Timestamp(System.currentTimeMillis()).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
+	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2") + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
 	    	// Indico il path di destinazione dei miei dati
 	    	try {
 				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE2"));
@@ -140,9 +163,6 @@ public class BlueSheepComparatoreMain {
 		 * 										
 		 * 										  END
 		 */
-		
-		
-		
 		
 		/**
 		 * 										 BETFAIR 
@@ -187,7 +207,7 @@ public class BlueSheepComparatoreMain {
 			logger.info("Tabella 1 (TxOdds vs Exchange) process calculation completed. Exporting data in JSON");
 	
 	    	String jsonString2 = AbstractBluesheepJsonConverter.convertToJSON(tabella1OutputList);
-	    	String outputFilenameTabella1 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE1") + new Timestamp(System.currentTimeMillis()).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
+	    	String outputFilenameTabella1 = BlueSheepComparatoreMain.getProperties().getProperty("PATH_OUTPUT_TABLE1") + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
 	
 	    	// Indico il path di destinazione dei miei dati
 	    	PrintWriter writer2 = null;

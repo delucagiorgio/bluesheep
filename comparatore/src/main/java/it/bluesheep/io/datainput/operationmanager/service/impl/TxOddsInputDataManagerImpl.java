@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
-import it.bluesheep.io.datainput.operationmanager.mapper.TxOddsInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.TxOddsInputMappingProcessor;
 import it.bluesheep.serviceapi.impl.TxOddsApiImpl;
 
 public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
@@ -31,14 +31,15 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 	 */
 	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport) {
 				
-		List<AbstractInputRecord> abstractInputRecordsList = null;
+		List<AbstractInputRecord> abstractInputRecordsList = new ArrayList<AbstractInputRecord>();
 	
 		try {
-			//esegui mapping secondo TXODDS
-			abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+			if(jsonString != null && !jsonString.isEmpty()) {
+				//esegui mapping secondo TXODDS
+				abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+			}
 		}catch(Exception e) {
-			System.out.println(jsonString);
-			e.printStackTrace();
+			logger.severe("Exception in mapJsonToAbstractInputRecord : exception is " + e.getMessage());
 		}
 		logger.info("Mapping JSON completed : events mapped from input JSON are " + abstractInputRecordsList.size());
 		

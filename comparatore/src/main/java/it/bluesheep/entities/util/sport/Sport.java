@@ -2,8 +2,8 @@ package it.bluesheep.entities.util.sport;
 
 public enum Sport {
 
-	CALCIO("calcio_1"),
-	TENNIS("tennis_5");
+	CALCIO("calcio"),
+	TENNIS("tennis");
 	
 	private String code;
 	

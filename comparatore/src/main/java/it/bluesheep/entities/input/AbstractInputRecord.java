@@ -32,7 +32,7 @@ public abstract class AbstractInputRecord {
 		this.partecipante2 = partecipante2;
 		this.sport = sport;
 		this.filler = filler;
-		this.keyEvento = "" + this.dataOraEvento + "|" + this.sport.getCode() + "|" + this.partecipante1 + " vs " + this.partecipante2;
+		this.keyEvento = "" + this.dataOraEvento + "|" + this.sport + "|" + this.partecipante1 + " vs " + this.partecipante2;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {

@@ -41,6 +41,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	private static final String PAGER = "pager";
 	private static final String PAGE = "page";
 	private static final String PAGESIZE = "per_page";
+	private static final String CHARSET = "utf-8";
 	
 	private static final String EVENTSNUMBER = "total";
 	private static final String RESULT_JSON_STRING = "results";
@@ -121,9 +122,9 @@ public class Bet365ApiImpl implements IApiInterface {
 				temp += idEventoMap.get(i);
 				j++;
 			} else {
-				j = 0;
+				j = 1;
 				ids.add(temp);
-				temp = "";
+				temp = idEventoMap.get(i);
 			}
 		}
 		
@@ -143,8 +144,8 @@ public class Bet365ApiImpl implements IApiInterface {
 				do {
 					i++;
 					// URL composition
-					logger.info("Retrieving odds: iteration = " + j + "; ids subselection from " + j * 10 + " to " + ((j*10) + ids.get(j).split(",").length));
-					String https_url = "https://api.betsapi.com/v1/bet365/start_sp?token="+token+"&event_id="+ids.get(j)+"&page="+i;
+					logger.info("Retrieving odds: iteration = " + j + "; ids subselection from " + j * BET365APILIMIT + " to " + ((j*BET365APILIMIT) + ids.get(j).split(",").length));
+					String https_url = "https://api.betsapi.com/v1/bet365/start_sp?token="+token+"&event_id="+ids.get(j)+"&page="+i+"&charset="+CHARSET;
 					
 					URL url;
 					HttpsURLConnection con;
@@ -207,7 +208,8 @@ public class Bet365ApiImpl implements IApiInterface {
 				do {
 					i++;
 					// URL composition
-					String https_url = "https://api.betsapi.com/v1/bet365/upcoming?token="+token+"&sport_id="+sport+"&day="+date+"&page="+i;
+					logger.info("Retrieving events list: page = " + i + "; querying on date = " + date);
+					String https_url = "https://api.betsapi.com/v1/bet365/upcoming?token="+token+"&sport_id="+sport+"&day="+date+"&page="+i+"&charset="+CHARSET;
 					
 					URL url;
 					HttpsURLConnection con;

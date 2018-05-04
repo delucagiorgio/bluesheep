@@ -1,4 +1,4 @@
-package it.bluesheep.io.datainput.operationmanager.impl;
+package it.bluesheep.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +10,8 @@ import it.bluesheep.entities.input.util.bet365.EventoBet365;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.io.datainput.operationmanager.mapper.AbstractInputMappingProcessor;
-import it.bluesheep.io.datainput.operationmanager.mapper.Bet365InputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
+import it.bluesheep.io.datainput.operationmanager.service.mapper.Bet365InputMappingProcessor;
 import it.bluesheep.serviceapi.impl.Bet365ApiImpl;
 
 public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
@@ -30,22 +30,22 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport) {
 		
 		List<AbstractInputRecord> returnItemsList = new ArrayList<AbstractInputRecord>();
-		returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
-
-		logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
-
-		logger.info("Merging events information with odds information");
-		String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
-		Map<String, EventoBet365> mercatoEventoBet365 = eventoIdEventoBet365Map.get(oddsType + "_" + sport);
-	    if(mercatoEventoBet365 == null) {
-	    	mercatoEventoBet365 = ((Bet365ApiImpl) apiServiceInterface).getEventoIdMap();
-	    	eventoIdEventoBet365Map.put(oddsType + "_" + sport, mercatoEventoBet365);
-	    }
-	    returnItemsList = mergeInfoEventoBet365WithInfoOdds(returnItemsList, mercatoEventoBet365);
-	    
-		logger.info("Merge events information with odds information completed successfully");
-		
-		
+		if(jsonString != null && !jsonString.isEmpty()) {
+			returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
+	
+			logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
+	
+			logger.info("Merging events information with odds information");
+			String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
+			Map<String, EventoBet365> mercatoEventoBet365 = eventoIdEventoBet365Map.get(oddsType + "_" + sport);
+		    if(mercatoEventoBet365 == null) {
+		    	mercatoEventoBet365 = ((Bet365ApiImpl) apiServiceInterface).getEventoIdMap();
+		    	eventoIdEventoBet365Map.put(oddsType + "_" + sport, mercatoEventoBet365);
+		    }
+		    returnItemsList = mergeInfoEventoBet365WithInfoOdds(returnItemsList, mercatoEventoBet365);
+		    
+			logger.info("Merge events information with odds information completed successfully");
+		}
 		return returnItemsList;
 	}
 
