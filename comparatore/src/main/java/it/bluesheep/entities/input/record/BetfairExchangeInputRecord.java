@@ -31,7 +31,7 @@ public class BetfairExchangeInputRecord extends AbstractInputRecord implements I
 	@Override
 	public boolean isSameEventAbstractInputRecord (Date dataOraEvento, String sport, String partecipante1, String partecipante2) {
 		if(compareParticipants(this.partecipante1, this.partecipante2, partecipante1, partecipante2)
-				&& this.sport.getCode().equals(sport)
+				&& this.sport.getCode().equalsIgnoreCase(sport)
 				&& compareDate(this.getDataOraEvento(), dataOraEvento)) {
 			return true;
 		}		

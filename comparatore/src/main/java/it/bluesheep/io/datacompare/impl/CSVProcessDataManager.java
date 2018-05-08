@@ -38,9 +38,6 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 				String sport = splittedEventoKey[1];
 				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
 				String partecipante1 = partecipantiSplitted[0];
-				if("Napoli".equals(partecipante1)) {
-					System.out.print("TROVATO\n");
-				}
 				String partecipante2 = partecipantiSplitted[1];
 				
 				CSVInputRecord csvRecord = (CSVInputRecord) record;
