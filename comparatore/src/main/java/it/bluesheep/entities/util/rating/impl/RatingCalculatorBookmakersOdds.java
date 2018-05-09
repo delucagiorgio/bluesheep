@@ -11,13 +11,13 @@ public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 
 	@Override
 	public double calculateRating(double quotaBookmaker1, double quotaBookmaker2) {
-		double y = quotaBookmaker1/quotaBookmaker2;
+		double y = (100 * quotaBookmaker1)/quotaBookmaker2;
 		
 		y = Math.round(y);
 		
-		double approxRating = quotaBookmaker1 - y;
+		double approxRating = (100 * quotaBookmaker1) - y;
 		
-		return approxRating;		
+		return approxRating / 100.00;		
 	}
 
 	@Override
@@ -34,15 +34,14 @@ public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 		return returnValue;
 	}
 	
-	public double calculateRatingApprox(double quotaBookmaker1, double quotaBookmaker2) {
-		
-		double y = quotaBookmaker1/quotaBookmaker2;
+	public double calculateRatingApprox(double quotaBookmaker1, double quotaBookmaker2) {		
+		double y = (100 * quotaBookmaker1)/quotaBookmaker2;
 		
 		y = Math.round(y);
 		
 		double approxRating = y * (quotaBookmaker2 - 1);
 		
-		return approxRating;
+		return approxRating / 100.00;
 	}
 
 }

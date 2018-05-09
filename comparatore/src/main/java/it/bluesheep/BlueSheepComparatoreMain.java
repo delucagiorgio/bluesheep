@@ -38,7 +38,8 @@ public class BlueSheepComparatoreMain {
 				
 		
         try {
-        	InputStream in = new FileInputStream(args[0]);
+//        	InputStream in = new FileInputStream(args[0]);
+        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
             properties.load(in);
         	// va stabilito un path per il file delle proprieta'    	
             in.close();
@@ -48,6 +49,7 @@ public class BlueSheepComparatoreMain {
         }
 		
 		logger = (new BlueSheepLogger(BlueSheepComparatoreMain.class)).getLogger();
+		logger.info(properties.entrySet().toString());
 		
 		long startTime = System.currentTimeMillis();
 		/**
