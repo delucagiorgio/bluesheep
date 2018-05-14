@@ -38,8 +38,8 @@ public class BlueSheepComparatoreMain {
 				
 		
         try {
-//        	InputStream in = new FileInputStream(args[0]);
-        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
+        	InputStream in = new FileInputStream(args[0]);
+//        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
             properties.load(in);
         	// va stabilito un path per il file delle proprieta'    	
             in.close();
@@ -191,7 +191,7 @@ public class BlueSheepComparatoreMain {
 			}
 		}
 		
-		//Avvio comparazione quote tabella 2
+		//Avvio comparazione quote tabella 1
 		List<RecordOutput> tabella1OutputList = new ArrayList<RecordOutput>();
 		processDataManager = new BetfairExchangeProcessDataManager();
 		for(Sport sport : Sport.values()) {

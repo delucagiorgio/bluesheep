@@ -1,6 +1,7 @@
 package it.bluesheep.io.datacompare.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,8 +43,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
 			Scommessa oppositeScommessa = null;
-
-			
+				
 			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
 				List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
 				if(!sport.equals(temp.get(0).getSport())) {
@@ -109,7 +109,9 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 					
 					AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
 					
-					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) {		
+					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName()) && 
+							Arrays.asList("Gioco Digitale", "Betfair SB").contains(oppositeScommessaInputRecord.getBookmakerName()) &&
+							Arrays.asList("Gioco Digitale", "Betfair SB").contains(scommessaInputRecord.getBookmakerName())) {		
 						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
 						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
 

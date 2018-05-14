@@ -60,7 +60,8 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 				
 				Bet365InputRecord bet365Record = (Bet365InputRecord) record;
 				
-				if(dataOraEvento != null && bet365Record.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
+				if(dataOraEvento != null && 
+						bet365Record.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
 					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
 					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
