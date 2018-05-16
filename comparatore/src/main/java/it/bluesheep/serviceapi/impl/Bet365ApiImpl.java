@@ -88,7 +88,6 @@ public class Bet365ApiImpl implements IApiInterface {
 		List<String> ids = new ArrayList<String>();
 		eventoIdMap = new EventoIdMap();
 		for(EventoBet365 evento : eventoList) {
-			//System.out.println(evento.getPartecipante1() + " v" + evento.getPartecipante2());
 			eventoIdMap.addEventoBet365ByEventoId(evento, evento.getId());
 			ids.add(evento.getId());
 		}

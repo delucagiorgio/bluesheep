@@ -46,11 +46,6 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 		String eventoId = null;
 
 		List<AbstractInputRecord> recordsToBeReturned = new ArrayList<AbstractInputRecord>();
-
-		if(ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessaTipo)) {
-			System.out.println("X");
-		}
-		
 		
 		if(successString == 1) {
 			for(int i = 0; i < resultArrayJSONObject.length(); i++) {
