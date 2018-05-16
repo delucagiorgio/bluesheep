@@ -1,7 +1,6 @@
 package it.bluesheep.io.datacompare.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -42,27 +41,33 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 			//quella in analisi
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
-			Scommessa oppositeScommessa = null;
-				
-			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
-				List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
-				if(!sport.equals(temp.get(0).getSport())) {
-					break;
-				}
-				if((Sport.CALCIO.equals(sport) && 
-						!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
-						(Sport.TENNIS.equals(sport) && 
-								ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
-					
-					oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
-					if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-						List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
-						mappedOutputRecord.addAll(outputRecordsList);
-						processedScommessaTypes.put(scommessa, oppositeScommessa);
+			Scommessa oppositeScommessa = null;			
+			/*String[] splittedEventoKey = evento.split("\\|");
+			String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
+			String partecipante1 = partecipantiSplitted[0];
+			String partecipante2 = partecipantiSplitted[1];
+			
+			if(!(partecipante1.contains("U21") || partecipante1.contains("u21") || partecipante2.contains("U21") || partecipante2.contains("u21"))) {
+			*/	
+				for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
+					List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
+					if(!sport.equals(temp.get(0).getSport())) {
+						break;
+					}
+					if((Sport.CALCIO.equals(sport) && 
+							!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
+							(Sport.TENNIS.equals(sport) && 
+									ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
+						
+						oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
+						if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
+							List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
+							mappedOutputRecord.addAll(outputRecordsList);
+							processedScommessaTypes.put(scommessa, oppositeScommessa);
+						}
 					}
 				}
-			}
-			
+			/*}*/
 		}
 		
 		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
@@ -109,9 +114,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 					
 					AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
 					
-					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName()) && 
-							Arrays.asList("Gioco Digitale", "Betfair SB").contains(oppositeScommessaInputRecord.getBookmakerName()) &&
-							Arrays.asList("Gioco Digitale", "Betfair SB").contains(scommessaInputRecord.getBookmakerName())) {		
+					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) { 
 						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
 						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
 

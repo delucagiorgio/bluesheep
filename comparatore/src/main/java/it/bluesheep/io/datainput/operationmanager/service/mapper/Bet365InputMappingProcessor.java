@@ -26,7 +26,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	private static final String GOALS_UNDER_OVER_25_JSON_STRING = "goals_over_under";
 	private static final String ALTERNATIVE_TOTAL_GOALS_JSON_STRING = "alternative_total_goals";
 	private static final String BOTH_TEAMS_TO_SCORE_JSON_STRING = "both_teams_to_score";
-	private static final String FULL_TIME_RESULT_JSON_STRING = "full_time_results";
+	private static final String FULL_TIME_RESULT_JSON_STRING = "full_time_result";
 	private static final String ODDS_JSON_STRING = "odds";
 	private static final String HEADER_JSON_STRING = "header";
 	
@@ -47,6 +47,10 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 
 		List<AbstractInputRecord> recordsToBeReturned = new ArrayList<AbstractInputRecord>();
 
+		if(ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessaTipo)) {
+			System.out.println("X");
+		}
+		
 		
 		if(successString == 1) {
 			for(int i = 0; i < resultArrayJSONObject.length(); i++) {
