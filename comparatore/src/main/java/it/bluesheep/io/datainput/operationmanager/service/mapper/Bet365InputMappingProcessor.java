@@ -62,7 +62,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 					}
 					
 				}catch(Exception e) {
-					logger.severe("Error during data extraction from JSON: exception is " + e.getMessage());	
+					logger.severe("Error during data extraction from JSON: exception is " + e.getMessage());
 				}
 			}
 			
@@ -113,8 +113,10 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 						
 						String[] splittedHandicap = underOverHandicap.split("_");
 						
+						String headerString = underOverJSONObject.getString(HEADER_JSON_STRING).trim();
+						
 						if(splittedHandicap[1].equals(underOverJSONObject.getString(GOALS_CAT_JSON_STRING)) &&
-								splittedHandicap[0].equals(underOverJSONObject.getString(HEADER_JSON_STRING))) {
+								splittedHandicap[0].equals(headerString)) {
 							double quota = underOverJSONObject.getDouble(ODDS_JSON_STRING);
 							recordToBeMapped = new Bet365InputRecord(tempRecord);
 							recordToBeMapped.setQuota(quota);
@@ -140,6 +142,10 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 			}
 			
 			switch(scommessaTipo) {
+			case ALMENO3GOAL_O2X5:
+			case ALPIU2GOAL_U2X5:
+				scommessaHandicap += "_2.5";
+				break;
 			case ALMENO1GOAL_O0X5:
 			case NESSUNGOAL_U0X5:
 				scommessaHandicap += "_0.5";

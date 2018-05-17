@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -22,6 +26,7 @@ import it.bluesheep.entities.input.util.bet365.EventoIdMap;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.serviceapi.IApiInterface;
+import it.bluesheep.serviceapi.util.Bet365RequestThreadHelper;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -58,12 +63,66 @@ public class Bet365ApiImpl implements IApiInterface {
 	// Map useful to get the info about the events at a second step
 	private EventoIdMap eventoIdMap;
 
+	private  class Bet365ExecutorServiceHelper {
+		
+		private ExecutorService executor;
+		private Map<String, String> mapThreadResponse;
+
+		private Bet365ExecutorServiceHelper() {
+			super();
+		}
+		
+		public List<String> startMultithreadMarketRequests(String token, List<String> ids){
+
+			long startTime = System.currentTimeMillis();
+			
+			mapThreadResponse = new ConcurrentHashMap<String, String>();
+			executor = Executors.newFixedThreadPool(ids.size());
+			logger.info("Ids 10-event list size is = " + ids.size());
+			for(int j = 0; j < ids.size() ; j++) {
+				executor.submit(new Bet365RequestThreadHelper(j, ids, token, mapThreadResponse));
+			}
+			
+			boolean allFinished = false;
+			
+			int sizeWait = ids.size() <= 50 ? ids.size() * 2 : ids.size();
+			
+			do{
+				logger.info("Actual size of completed request list is " + mapThreadResponse.keySet().size());
+				logger.info("Remains " + (sizeWait - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
+				if(System.currentTimeMillis() - startTime >= sizeWait * 1000L || mapThreadResponse.keySet().size() == ids.size()) {
+					allFinished = true;
+				}
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					logger.severe(e.getMessage());				
+				}
+			}while(!allFinished);
+
+			executor.shutdown();
+			
+			List<String> resultList = new ArrayList<String>();
+			for(String idJSON : mapThreadResponse.keySet()) {
+				resultList.add(mapThreadResponse.get(idJSON));
+			}
+			mapThreadResponse.clear();
+			mapThreadResponse = null;
+			
+			return resultList;
+		}
+		
+		
+		
+	};
+	
 	/**
 	 * Logger initialization
 	 */
 	public Bet365ApiImpl() {
 		logger = (new BlueSheepLogger(Bet365ApiImpl.class)).getLogger();
 		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
+
 	}
 	
 	/**
@@ -111,20 +170,23 @@ public class Bet365ApiImpl implements IApiInterface {
 		final int BET365APILIMIT = 10;
 		List<String> ids = new ArrayList<String>();
 		String temp = "";
-		int j = 0;
+		int j = 1;
 		for (int i = 0; i < idEventoMap.size(); i++) {
-			if (j < BET365APILIMIT - 1) {
-								
+			if (j < BET365APILIMIT) {
 				temp += idEventoMap.get(i) + ",";
 				j++;
-			} else if (j == BET365APILIMIT - 1) {
+			} else if (j == BET365APILIMIT) {
 				temp += idEventoMap.get(i);
 				j++;
 			} else {
 				j = 1;
 				ids.add(temp);
 				temp = idEventoMap.get(i);
+				j++;
 			}
+		}
+		if(idEventoMap.size() % BET365APILIMIT != 0) {
+			ids.add(temp.substring(0, temp.length() - 2));
 		}
 		
 		// The application token
@@ -132,34 +194,9 @@ public class Bet365ApiImpl implements IApiInterface {
 		
 		// The retrieved pages collection containing all the requested available events
 		List<String> result = new ArrayList<String>();
-		// Temporal support for page handling
-		String partialResult = null;
+		Bet365ExecutorServiceHelper helper = new Bet365ExecutorServiceHelper();
 		
-		for (j = 0; j < ids.size(); j++) {
-			// the page number of the answer by the provider
-			int i = 0;
-
-			try {
-				do {
-					i++;
-					// URL composition
-					logger.info("Retrieving odds: iteration = " + j + "; ids subselection from " + j * BET365APILIMIT + " to " + ((j*BET365APILIMIT) + ids.get(j).split(",").length));
-					String https_url = "https://api.betsapi.com/v1/bet365/start_sp?token="+token+"&event_id="+ids.get(j)+"&page="+i+"&charset="+CHARSET;
-					
-					URL url;
-					HttpsURLConnection con;
-						url = new URL(https_url);
-						con = (HttpsURLConnection)url.openConnection();
-						partialResult = get_result(con); 
-						//dump all the content
-						result.add(partialResult);
-								
-				} while((partialResult != null) && loopCheck(partialResult));
-				
-			} catch (Exception e) {
-				   logger.severe("Error during request data on Bet365. Error is" + e.getMessage());
-			}
-		}
+		result.addAll(helper.startMultithreadMarketRequests(token, ids));
 		
 		return result;
 	}
@@ -252,7 +289,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	 * It checks whether to exit or not from the loop of API requests
 	 *
 	 */
-	private boolean loopCheck(String result) {
+	private static boolean loopCheck(String result) {
 		AbstractBluesheepJsonConverter jsonUtil = Bet365BluesheepJsonConverter.getBet365BluesheepJsonConverter();
 		JSONObject resultJSON = new JSONObject(result);
 		JSONObject pager = jsonUtil.getChildNodeByKey(resultJSON, PAGER);
@@ -272,7 +309,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	/*
 	 * It reads the returned results by the API
 	 */
-	private String get_result(HttpsURLConnection con){
+	private static String get_result(HttpsURLConnection con){
 		String result = "";
 		if(con!=null){	
 			try {
@@ -341,4 +378,6 @@ public class Bet365ApiImpl implements IApiInterface {
 	public EventoIdMap getEventoIdMap() {
 		return eventoIdMap;
 	}
+	
+	
 }
