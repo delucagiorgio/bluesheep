@@ -8,6 +8,7 @@ import java.util.List;
 
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datacompare.util.CosineSimilarityUtil;
 
 public abstract class AbstractInputRecord {
 
@@ -238,5 +239,15 @@ public abstract class AbstractInputRecord {
 	    return one.equals(two);
 	}
 
+	public boolean isSameEventSecondaryMatch(Date date, String sport, String partecipante1, String partecipante2) {
+		if(this.sport.getCode().equals(sport) && compareDate(this.dataOraEvento, date)) {		
+			CosineSimilarityUtil csu = new CosineSimilarityUtil();
+			double cosSimPartecipant1 = csu.similarity(this.partecipante1, partecipante1);
+			double cosSimPartecipant2 = csu.similarity(this.partecipante2, partecipante2);
+			return cosSimPartecipant1 >= 0.8 && cosSimPartecipant2 >= 0.8;
+		
+		}
+		return false;
+	}
 	
 }

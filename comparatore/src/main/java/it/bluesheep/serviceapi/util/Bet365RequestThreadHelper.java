@@ -31,7 +31,6 @@ public class Bet365RequestThreadHelper extends Thread {
 	
 	@Override
 	public void run() {
-		logger.info("Retrieving odds: iteration = " + iteration + "; ids subselection from " + iteration * 10 + " to " + ((iteration*10) + eventsIds.get(iteration).split(",").length));
 		String https_url = "https://api.betsapi.com/v1/bet365/start_sp?token="+token+"&event_id="+eventsIds.get(iteration)+"&charset=utf-8";
 		
 		String partialResult;
@@ -44,12 +43,8 @@ public class Bet365RequestThreadHelper extends Thread {
 			logger.severe(e.getMessage());
 		}
 
-		partialResult = get_result(con); 
-		
-		logger.info("Result for iteration " + iteration + " retrieved successfully");
-		
+		partialResult = get_result(con); 		
 		addResultToApiCollection(partialResult);
-		resultThreadRequest.notifyAll();
 	}
 
 	

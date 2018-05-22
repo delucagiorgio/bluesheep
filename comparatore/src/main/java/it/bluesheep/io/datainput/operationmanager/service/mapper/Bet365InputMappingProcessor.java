@@ -29,6 +29,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	private static final String FULL_TIME_RESULT_JSON_STRING = "full_time_result";
 	private static final String ODDS_JSON_STRING = "odds";
 	private static final String HEADER_JSON_STRING = "header";
+	private static final String TO_WIN_MATCH_JSON_STRING = "to_win_match";
 	
 	
 	@Override
@@ -88,8 +89,8 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 		Bet365InputRecord recordToBeMapped = null;
 		
 		String correctCategory = getCorrectCategoryByScommessa(scommessaTipo);
-		String correctSubCategory = getCorrectSubCategoryByScommessa(scommessaTipo);
-		int specificTypeOdds = getCorrectSpecificTypeByScommessa(scommessaTipo);
+		String correctSubCategory = getCorrectSubCategoryByScommessa(scommessaTipo, sport);
+		int specificTypeOdds = getCorrectSpecificTypeByScommessa(scommessaTipo, sport);
 		String underOverHandicap = getCorrectCodeHandicap(scommessaTipo);
 	
 		if(correctCategory != null && correctSubCategory != null && (specificTypeOdds > -1 || underOverHandicap != null)) {		
@@ -176,7 +177,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	 * @param scommessaTipo la tipologia di scommessa che si vuole ottenere
 	 * @return l'indice corrispondente alla quota desiderata
 	 */
-	private int getCorrectSpecificTypeByScommessa(Scommessa scommessaTipo) {
+	private int getCorrectSpecificTypeByScommessa(Scommessa scommessaTipo, Sport sport) {
 		int correctIndex = -1;
 		switch(scommessaTipo) {
 		case SFIDANTE1VINCENTE_1:
@@ -188,7 +189,11 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 			correctIndex = 1;
 			break;
 		case SFIDANTE2VINCENTE_2:
-			correctIndex = 2;
+			if(sport == Sport.CALCIO) {
+				correctIndex = 2;
+			}else if(sport == Sport.TENNIS) {
+				correctIndex = 1;
+			}
 			break;
 		default:
 			break;
@@ -200,9 +205,10 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	 * GD - 01/04/18
 	 * Stabilisce la corretta sottocategoria di scommessa da analizzare all'interno del JSON
 	 * @param scommessaTipo la tipologia di scommessa che si vuole ottenere
+	 * @param sport 
 	 * @return la sottocategoria da analizzare 
 	 */
-	private String getCorrectSubCategoryByScommessa(Scommessa scommessaTipo) {
+	private String getCorrectSubCategoryByScommessa(Scommessa scommessaTipo, Sport sport) {
 		String subCategory = null;
 		switch(scommessaTipo) {
 		case ALMENO3GOAL_O2X5:
@@ -226,7 +232,11 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 		case PAREGGIO_X:
 		case SFIDANTE1VINCENTE_1:
 		case SFIDANTE2VINCENTE_2:
-			subCategory = FULL_TIME_RESULT_JSON_STRING;
+			if(sport == Sport.CALCIO) {
+				subCategory = FULL_TIME_RESULT_JSON_STRING;
+			}else if(sport == Sport.TENNIS) {
+				subCategory = TO_WIN_MATCH_JSON_STRING;
+			}
 			break;
 		}
 		return subCategory;

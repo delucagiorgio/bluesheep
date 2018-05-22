@@ -59,6 +59,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
+	private static final int maxThreadPoolSize = 30;
 
 	// Map useful to get the info about the events at a second step
 	private EventoIdMap eventoIdMap;
@@ -74,39 +75,51 @@ public class Bet365ApiImpl implements IApiInterface {
 		
 		public List<String> startMultithreadMarketRequests(String token, List<String> ids){
 
-			long startTime = System.currentTimeMillis();
-			
-			mapThreadResponse = new ConcurrentHashMap<String, String>();
-			executor = Executors.newFixedThreadPool(ids.size());
-			logger.info("Ids 10-event list size is = " + ids.size());
-			for(int j = 0; j < ids.size() ; j++) {
-				executor.submit(new Bet365RequestThreadHelper(j, ids, token, mapThreadResponse));
-			}
-			
-			boolean allFinished = false;
-			
-			int sizeWait = ids.size() <= 50 ? ids.size() * 2 : ids.size();
-			
-			do{
-				logger.info("Actual size of completed request list is " + mapThreadResponse.keySet().size());
-				logger.info("Remains " + (sizeWait - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
-				if(System.currentTimeMillis() - startTime >= sizeWait * 1000L || mapThreadResponse.keySet().size() == ids.size()) {
-					allFinished = true;
-				}
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					logger.severe(e.getMessage());				
-				}
-			}while(!allFinished);
-
-			executor.shutdown();
 			
 			List<String> resultList = new ArrayList<String>();
-			for(String idJSON : mapThreadResponse.keySet()) {
-				resultList.add(mapThreadResponse.get(idJSON));
+			
+			mapThreadResponse = new ConcurrentHashMap<String, String>();
+			executor = Executors.newFixedThreadPool(maxThreadPoolSize);
+			logger.info("Ids 10-event list size is = " + ids.size());
+			int sizeWait = ids.size() < 30 ? ids.size()/2 : ids.size()/4;
+			for(int j = 0; j < ids.size() ; j++) {
+				
+				executor.submit(new Bet365RequestThreadHelper(j, ids, token, mapThreadResponse));
+				
+				if((j + 1) % maxThreadPoolSize == 0 || (j + 1) == ids.size()) {
+				
+					boolean allFinished = false;
+					boolean isLastQueueRequest = (j + 1) == ids.size();
+					long startTime = System.currentTimeMillis();
+					int sizeMapParameter = maxThreadPoolSize;
+					
+					if(isLastQueueRequest) {
+						sizeMapParameter = (j + 1) % maxThreadPoolSize;
+					}
+					
+					do{
+
+						logger.info("WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + sizeMapParameter);
+						logger.info("Remains " + (sizeWait - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
+						
+						if(System.currentTimeMillis() - startTime >= sizeWait * 1000L || mapThreadResponse.keySet().size() == sizeMapParameter) {
+							allFinished = true;
+						}
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							logger.severe(e.getMessage());				
+						}
+					}while(!allFinished);
+					
+					for(String idJSON : mapThreadResponse.keySet()) {
+						resultList.add(mapThreadResponse.get(idJSON));
+					}
+					mapThreadResponse.clear();
+				}
 			}
-			mapThreadResponse.clear();
+			
+			executor.shutdown();
 			mapThreadResponse = null;
 			
 			return resultList;

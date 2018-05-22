@@ -42,7 +42,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 				
 				BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) record;
 				
-				if(dataOraEvento != null && exchangeRecord.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
+				if(dataOraEvento != null && (exchangeRecord.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2) || 
+											exchangeRecord.isSameEventSecondaryMatch(dataOraEvento, sport, partecipante1, partecipante2))) {
 					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
 					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 

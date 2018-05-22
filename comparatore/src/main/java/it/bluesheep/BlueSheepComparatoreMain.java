@@ -38,8 +38,8 @@ public class BlueSheepComparatoreMain {
 				
 		
         try {
-        	InputStream in = new FileInputStream(args[0]);
-//        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
+//        	InputStream in = new FileInputStream(args[0]);
+        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
             properties.load(in);
         	// va stabilito un path per il file delle proprieta'    	
             in.close();
@@ -91,8 +91,12 @@ public class BlueSheepComparatoreMain {
 		for(Sport sport : Sport.values()) {
 			logger.info("Delegate Bet365 request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
 			List<AbstractInputRecord> bet365MappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
-			bet365MappedRecordsFromJsonBySport = ((Bet365ProcessDataManager) processDataManager).
+			List<AbstractInputRecord> bet365MatchedEventsTxOdds = ((Bet365ProcessDataManager) processDataManager).
 					compareAndCollectSameEventsFromBookmakerAndTxOdds(bet365MappedRecordsFromJsonBySport, eventoScommessaRecordMap);
+			
+			if(bet365MatchedEventsTxOdds != null && !bet365MatchedEventsTxOdds.isEmpty()) {
+				bet365MappedRecordsFromJsonBySport = bet365MatchedEventsTxOdds;
+			}
 			
 			for(AbstractInputRecord record : bet365MappedRecordsFromJsonBySport) {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);

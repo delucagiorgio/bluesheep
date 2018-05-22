@@ -42,6 +42,10 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception {
+		logger.info("Start matching informartion for Bet365 on TxOdds events : "
+				+ "input size Bet365 events is " + bookmakerList.size() 
+				+ "; input size TxOdds events is " + eventiTxOddsMap.keySet().size());
+		int matchedCountEvents = 0;
 		for(AbstractInputRecord record : bookmakerList) {
 			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
@@ -60,7 +64,8 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 				Bet365InputRecord bet365Record = (Bet365InputRecord) record;
 				
 				if(dataOraEvento != null && 
-						bet365Record.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
+						(bet365Record.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2) ||
+						bet365Record.isSameEventSecondaryMatch(dataOraEvento, sport, partecipante1, partecipante2))) {
 					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
 					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
@@ -69,10 +74,14 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 					bet365Record.setKeyEvento(bookmakerRecord.getKeyEvento());
 					bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
 					bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
+					matchedCountEvents++;
 					break;
 				}
 			}
 		}
+		
+		logger.info("Matching process completed. MAtched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
+		
 		return bookmakerList;
 	}
 
