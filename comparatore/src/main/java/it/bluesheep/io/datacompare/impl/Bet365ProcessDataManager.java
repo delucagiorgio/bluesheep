@@ -80,7 +80,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			}
 		}
 		
-		logger.info("Matching process completed. MAtched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
+		logger.info("Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
 		
 		return bookmakerList;
 	}

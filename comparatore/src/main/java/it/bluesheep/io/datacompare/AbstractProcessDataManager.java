@@ -64,7 +64,7 @@ public abstract class AbstractProcessDataManager implements IProcessDataManager 
 				String countryCodeFootball = splittedCampionato[0].substring(startIndex, splittedCampionato[0].length());
 				String nation = getTraduzioneByNationCode(countryCodeFootball);
 				if("INT".equalsIgnoreCase(countryCodeFootball)) {
-					String[] eventoSplitted = recordOutput.getEvento().split("|");
+					String[] eventoSplitted = recordOutput.getEvento().split("\\|");
 					String partecipante1 = getTraduzioneItaliana(eventoSplitted[0]);
 					String partecipante2 = getTraduzioneItaliana(eventoSplitted[1]);
 					recordOutput.setEvento(partecipante1 + "|" + partecipante2); 
@@ -80,6 +80,13 @@ public abstract class AbstractProcessDataManager implements IProcessDataManager 
 	}
 
 	private String getTraduzioneItaliana(String toBeTranslatedString) {
+		if("Turkey".equalsIgnoreCase(toBeTranslatedString)) {
+			return "Turchia";
+		}
+		if("Iran".equalsIgnoreCase(toBeTranslatedString)) {
+			return toBeTranslatedString;
+		}
+		
 		return TranslatorUtil.getItalianTranslation(toBeTranslatedString);
 	}
 

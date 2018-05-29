@@ -42,32 +42,24 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
 			Scommessa oppositeScommessa = null;			
-			/*String[] splittedEventoKey = evento.split("\\|");
-			String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
-			String partecipante1 = partecipantiSplitted[0];
-			String partecipante2 = partecipantiSplitted[1];
-			
-			if(!(partecipante1.contains("U21") || partecipante1.contains("u21") || partecipante2.contains("U21") || partecipante2.contains("u21"))) {
-			*/	
-				for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
-					List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
-					if(!sport.equals(temp.get(0).getSport())) {
-						break;
-					}
-					if((Sport.CALCIO.equals(sport) && 
-							!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
-							(Sport.TENNIS.equals(sport) && 
-									ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
-						
-						oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
-						if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-							List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
-							mappedOutputRecord.addAll(outputRecordsList);
-							processedScommessaTypes.put(scommessa, oppositeScommessa);
-						}
+			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
+				List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
+				if(!sport.equals(temp.get(0).getSport())) {
+					break;
+				}
+				if((Sport.CALCIO.equals(sport) && 
+						!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
+						(Sport.TENNIS.equals(sport) && 
+								ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
+					
+					oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
+					if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
+						List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
+						mappedOutputRecord.addAll(outputRecordsList);
+						processedScommessaTypes.put(scommessa, oppositeScommessa);
 					}
 				}
-			/*}*/
+			}
 		}
 		
 		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
@@ -115,14 +107,17 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 					AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
 					
 					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) { 
-						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
-						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(scommessaInputRecord.getQuota(), oppositeScommessaInputRecord.getQuota());
+						
+						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
+						
+						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
 
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
 						if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue() && 
 						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue()
 						   ) {
-							RecordOutput outputRecord = mapRecordOutput(scommessaInputRecord,oppositeScommessaInputRecord,rating1);
+							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);
 						}
@@ -132,6 +127,28 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		}
 		
 		return outputRecordList;
+	}
+
+	/**
+	 * GD - 29/05/18
+	 * Ordina i record di input in base al valore di quota
+	 * @param scommessaInputRecord input1
+	 * @param oppositeScommessaInputRecord input2
+	 * @return la lista in cui il primo elemento è quello con la quota superiore, il secondo quello con la quota inferiore.
+	 */
+	private List<AbstractInputRecord> getOrderedQuotaList(AbstractInputRecord scommessaInputRecord,
+			AbstractInputRecord oppositeScommessaInputRecord) {
+		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>(2);
+		
+		if(scommessaInputRecord.getQuota() >= oppositeScommessaInputRecord.getQuota()) {
+			returnList.add(0, scommessaInputRecord);
+			returnList.add(1, oppositeScommessaInputRecord);
+		}else {
+			returnList.add(0, oppositeScommessaInputRecord);
+			returnList.add(1, scommessaInputRecord);
+		}
+		
+		return returnList;
 	}
 
 	@Override
