@@ -86,14 +86,14 @@ public class Bet365ApiImpl implements IApiInterface {
 				
 				executor.submit(new Bet365RequestThreadHelper(j, ids, token, mapThreadResponse));
 				
-				if((j + 1) % maxThreadPoolSize == 0 || (j + 1) == ids.size()) {
+				boolean isLastQueueRequest = (j + 1) == ids.size();
+				if((j + 1) % maxThreadPoolSize == 0 || isLastQueueRequest) {
 				
 					boolean allFinished = false;
-					boolean isLastQueueRequest = (j + 1) == ids.size();
 					long startTime = System.currentTimeMillis();
 					int sizeMapParameter = maxThreadPoolSize;
 					
-					if(isLastQueueRequest) {
+					if(isLastQueueRequest && (j + 1) % maxThreadPoolSize != 0) {
 						sizeMapParameter = (j + 1) % maxThreadPoolSize;
 					}
 					
@@ -198,6 +198,7 @@ public class Bet365ApiImpl implements IApiInterface {
 				j++;
 			}
 		}
+		//to cancel to "," in case of non-multiple of 10 list size
 		if(idEventoMap.size() % BET365APILIMIT != 0) {
 			ids.add(temp.substring(0, temp.length() - 2));
 		}
