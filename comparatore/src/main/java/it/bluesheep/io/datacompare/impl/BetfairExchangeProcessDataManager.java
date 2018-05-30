@@ -107,7 +107,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 			if(record != exchangeRecord) {
 				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
 				//se il rating1 è sufficientemente alto
-				if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_THRESHOLD")).doubleValue()) {
+				if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_MIN_THRESHOLD")).doubleValue() &&
+				   rating1 <= new Double(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_MAX_THRESHOLD")).doubleValue()) {
 					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating1);
 					outputRecordList.add(recordOutput);
 				}

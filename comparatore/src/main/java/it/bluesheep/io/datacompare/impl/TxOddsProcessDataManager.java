@@ -114,8 +114,10 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
 
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue() && 
-						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_THRESHOLD")).doubleValue()
+						if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue() && 
+						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue() &&
+						   rating1 <= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MAX_THRESHOLD")).doubleValue() && 
+						   rating2 <= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MAX_THRESHOLD")).doubleValue()
 						   ) {
 							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
