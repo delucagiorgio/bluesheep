@@ -69,9 +69,7 @@ public class Bet365ApiImpl implements IApiInterface {
 		private ExecutorService executor;
 		private Map<String, String> mapThreadResponse;
 
-		private Bet365ExecutorServiceHelper() {
-			super();
-		}
+		private Bet365ExecutorServiceHelper() {}
 		
 		public List<String> startMultithreadMarketRequests(String token, List<String> ids){
 			
