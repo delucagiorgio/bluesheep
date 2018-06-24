@@ -24,6 +24,7 @@ import it.bluesheep.io.datainput.operationmanager.csv.CSVInputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.service.impl.Bet365InputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.service.impl.BetfairExchangeInputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.service.impl.TxOddsInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -50,6 +51,8 @@ public class BlueSheepComparatoreMain {
 		
 		logger = (new BlueSheepLogger(BlueSheepComparatoreMain.class)).getLogger();
 		logger.info(properties.entrySet().toString());
+		
+		InputDataHelper inputDataHelper = new InputDataHelper();
 		
 		long startTime = System.currentTimeMillis();
 		/**
@@ -86,21 +89,24 @@ public class BlueSheepComparatoreMain {
 		processDataManager = new Bet365ProcessDataManager();
 		
 		logger.info("Initializing Bet365 API query");
-			
-		//Per ogni sport
-		for(Sport sport : Sport.values()) {
-			logger.info("Delegate Bet365 request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
-			List<AbstractInputRecord> bet365MappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
-			List<AbstractInputRecord> bet365MatchedEventsTxOdds = ((Bet365ProcessDataManager) processDataManager).
-					compareAndCollectSameEventsFromBookmakerAndTxOdds(bet365MappedRecordsFromJsonBySport, eventoScommessaRecordMap);
-			
-			if(bet365MatchedEventsTxOdds != null && !bet365MatchedEventsTxOdds.isEmpty()) {
-				bet365MappedRecordsFromJsonBySport = bet365MatchedEventsTxOdds;
+		if(!inputDataHelper.isBlockedBookmaker("Bet365")) {
+			//Per ogni sport
+			for(Sport sport : Sport.values()) {
+				logger.info("Delegate Bet365 request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
+				List<AbstractInputRecord> bet365MappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
+				List<AbstractInputRecord> bet365MatchedEventsTxOdds = ((Bet365ProcessDataManager) processDataManager).
+						compareAndCollectSameEventsFromBookmakerAndTxOdds(bet365MappedRecordsFromJsonBySport, eventoScommessaRecordMap);
+				
+				if(bet365MatchedEventsTxOdds != null && !bet365MatchedEventsTxOdds.isEmpty()) {
+					bet365MappedRecordsFromJsonBySport = bet365MatchedEventsTxOdds;
+				}
+				
+				for(AbstractInputRecord record : bet365MappedRecordsFromJsonBySport) {
+					eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
+				}
 			}
-			
-			for(AbstractInputRecord record : bet365MappedRecordsFromJsonBySport) {
-				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
-			}
+		}else {
+			logger.warning("Bet365 retrivial data process excluded.");
 		}
 		
 		/**
@@ -197,7 +203,6 @@ public class BlueSheepComparatoreMain {
 		
 		//Avvio comparazione quote tabella 1
 		List<RecordOutput> tabella1OutputList = new ArrayList<RecordOutput>();
-		processDataManager = new BetfairExchangeProcessDataManager();
 		for(Sport sport : Sport.values()) {
 			try{
 				logger.info("Starting odds comparison for Tabella1 (TxOdds vs Exchange) for sport " + sport);

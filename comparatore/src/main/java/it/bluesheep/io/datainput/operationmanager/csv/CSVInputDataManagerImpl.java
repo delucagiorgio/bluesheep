@@ -33,14 +33,14 @@ public class CSVInputDataManagerImpl {
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
 	
-	private static final Integer BOOKMAKER = 7;
-	private static final Integer QUOTA = 6;
-	private static final Integer PARTECIPANTE1 = 3;
-	private static final Integer PARTECIPANTE2 = 4;
+	private static final Integer SPORT = 0;
 	private static final Integer CAMPIONATO = 1;
 	private static final Integer DATA_ORA_EVENTO = 2;
+	private static final Integer PARTECIPANTE1 = 3;
+	private static final Integer PARTECIPANTE2 = 4;
 	private static final Integer SCOMMESSA = 5;
-	private static final Integer SPORT = 0;
+	private static final Integer QUOTA = 6;
+	private static final Integer BOOKMAKER = 7;
 	
 	private Map<Integer, Map<Integer, String>> idLineMapKeyValues;
 	private String csvFilenamePath;
@@ -89,7 +89,7 @@ public class CSVInputDataManagerImpl {
 	 */
 	private AbstractInputRecord mapSplittedInfoIntoAbstractInputRecord(Map<Integer, String> map, Integer id) {
 		String dataOraEventoString = map.get(DATA_ORA_EVENTO);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
 		AbstractInputRecord record = null;
 		
 		Date dataOraEvento = null;
@@ -189,23 +189,23 @@ public class CSVInputDataManagerImpl {
 		Map<Integer, Map<Integer, String>> mapToBeReturned = new HashMap<Integer, Map<Integer, String>>();;
 		BufferedReader br = null;
 		
-		try {
-			br = new BufferedReader(new FileReader(csvFilenamePath));
-			String line = br.readLine();
-			Integer i = new Integer(0);
-			while(line != null) {
+
+		br = new BufferedReader(new FileReader(csvFilenamePath));
+		String line = br.readLine();
+		Integer i = new Integer(0);
+		while(line != null) {
+			try {
 				logger.info("Reading line : " + line);
 				Map<Integer, String> keyValuesMap = getKeyValuesMapFromLine(line);
 				mapToBeReturned.put(i, keyValuesMap);
 				i = new Integer(i + 1);
-				line = br.readLine();
+			}catch(Exception e) {
+				logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
 			}
-		}catch(Exception e) {
-			logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
-		}finally {
-			if(br != null) {
-				br.close();
-			}
+			line = br.readLine();
+		}
+		if(br != null) {
+			br.close();
 		}
 		
 		logger.info("CSV parsing process completed");

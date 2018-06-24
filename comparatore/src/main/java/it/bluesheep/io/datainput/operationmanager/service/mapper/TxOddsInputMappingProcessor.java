@@ -15,6 +15,7 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
@@ -39,6 +40,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
+	private InputDataHelper inputDataHelper = new InputDataHelper();
 	
 	public TxOddsInputMappingProcessor() {
 		super();
@@ -136,12 +138,14 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 							TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
 							
 							TxOddsBluesheepJsonConverter blusheepJsonConv = (TxOddsBluesheepJsonConverter) jsonConverter;
+							String bookmakerName = blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING);
+							if(!inputDataHelper.isBlockedBookmaker(bookmakerName)) {
+								newRecord.setBookmakerName(bookmakerName);
+								newRecord.setTipoScommessa(scommessaTipo);
+								newRecord.setQuota(quotaScommessa);
 							
-							newRecord.setBookmakerName(blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING));
-							newRecord.setTipoScommessa(scommessaTipo);
-							newRecord.setQuota(quotaScommessa);
-							
-							recordToBeReturned.add(newRecord);
+								recordToBeReturned.add(newRecord);
+							}
 						}
 					}
 				}

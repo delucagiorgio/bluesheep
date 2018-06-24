@@ -64,7 +64,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	// Map useful to get the info about the events at a second step
 	private EventoIdMap eventoIdMap;
 
-	private  class Bet365ExecutorServiceHelper {
+	private class Bet365ExecutorServiceHelper {
 		
 		private ExecutorService executor;
 		private Map<String, String> mapThreadResponse;
@@ -74,7 +74,6 @@ public class Bet365ApiImpl implements IApiInterface {
 		}
 		
 		public List<String> startMultithreadMarketRequests(String token, List<String> ids){
-
 			
 			List<String> resultList = new ArrayList<String>();
 			
@@ -124,9 +123,6 @@ public class Bet365ApiImpl implements IApiInterface {
 			
 			return resultList;
 		}
-		
-		
-		
 	};
 	
 	/**
