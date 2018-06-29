@@ -66,6 +66,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 
 		//per ogni evento in input
 		for(String evento : dataMap.keySet()) {
+			
 			//per ogni scommessa, cerco il record relativo alle quote dell'Exchange
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
 			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
@@ -83,8 +84,6 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 				}
 			}
 		}
-		
-		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
 		
 		return mappedOutputRecord;
 			

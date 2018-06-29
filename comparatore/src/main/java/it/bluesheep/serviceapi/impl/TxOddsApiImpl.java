@@ -1,20 +1,16 @@
 package it.bluesheep.serviceapi.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.serviceapi.IApiInterface;
+import it.bluesheep.serviceapi.multirequesthandler.TxOddsRequestHandler;
 import it.bluesheep.util.BlueSheepLogger;
 
 /**
@@ -34,8 +30,13 @@ public class TxOddsApiImpl implements IApiInterface {
 	private final static String TOTALS = "4";
 	private final static String GGNG = "11534337";
 	
+	private TxOddsRequestHandler txOddsRequestHandler;
+	private String daysInterval;
+	
 	public TxOddsApiImpl() {
-		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();;
+		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();
+
+		daysInterval = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
 	}
 	
 	public List<String> getData(Sport sport, Scommessa scommessa) {
@@ -43,74 +44,25 @@ public class TxOddsApiImpl implements IApiInterface {
 		String sportCode = identifyCorrectGameCode(sport);
 		String oddsType = identifyCorrectBetCode(scommessa, sport);
 		
-		
 		logger.info("Setting parameters for TxOdds API request");
 		
+		String[] dayIntervalSplitted = daysInterval.split(",");		
+		int endDay = Integer.parseInt(dayIntervalSplitted[1]);
+		
+		List<String> result = new ArrayList<String>();
 		
 		String u = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_USER");
-		// random 
 		String p = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_PASSWORD");
-		String daysInterval = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
+		txOddsRequestHandler = new TxOddsRequestHandler(endDay, u + ";" + p);
 		
-		String[] dayIntervalSplitted = daysInterval.split(",");
-		
-		int startDay = Integer.parseInt(dayIntervalSplitted[0]);
-		int endDay = Integer.parseInt(dayIntervalSplitted[1]);
-
-		List<String> result = new ArrayList<String>();
-
-		do {
-			String days = "" + startDay + "," + 1;
-			String active = "1";
-			String json = "1";
-			String allOdds = "2";
-			String odds_format = "0";
-			
-			String https_url = "https://xml2.txodds.com/feed/odds/xml.php?ident="+u+"&passwd="+p+"&active="+active+"&spid="+sportCode+"&ot="+oddsType+"&days="+days+"&json="+json+"&all_odds="+ allOdds + "&odds_format=" + odds_format;
-			
-			URL url;
-			HttpsURLConnection con;
-			try {
-				
-				logger.info("Retrieving data for time interval " + days);
-				url = new URL(https_url);
-				con = (HttpsURLConnection)url.openConnection();
-			     
-			   //dump all the content
-			   result.add(get_result(con));
-					
-			} catch (Exception e) {
-			   logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
-			}
-			
-			startDay++;
-			
-		}while(startDay <= endDay);
+		result.addAll(txOddsRequestHandler.startMultithreadMarketRequests(
+				Arrays.asList(sportCode, 
+							  oddsType, 
+							  dayIntervalSplitted[0],
+							  dayIntervalSplitted[1])));
 		
 		return result;	
 	}
-	
-	private String get_result(HttpsURLConnection con){
-		String result = "";
-		if(con!=null){	
-			try {
-			   BufferedReader br = 
-				new BufferedReader(
-					new InputStreamReader(con.getInputStream()));
-			
-			   String input;
-			   while ((input = br.readLine()) != null){
-				   result += input;
-			   }
-			   br.close();
-			} catch (IOException e) {
-				logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
-			}
-				
-		}
-	
-		return result;
-	}	
 	
 	@Override
 	public String identifyCorrectBetCode(Scommessa scommessa, Sport sport) {

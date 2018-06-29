@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -26,7 +22,7 @@ import it.bluesheep.entities.input.util.bet365.EventoIdMap;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.serviceapi.IApiInterface;
-import it.bluesheep.serviceapi.util.Bet365RequestThreadHelper;
+import it.bluesheep.serviceapi.multirequesthandler.Bet365RequestHandler;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -63,65 +59,7 @@ public class Bet365ApiImpl implements IApiInterface {
 
 	// Map useful to get the info about the events at a second step
 	private EventoIdMap eventoIdMap;
-
-	private class Bet365ExecutorServiceHelper {
-		
-		private ExecutorService executor;
-		private Map<String, String> mapThreadResponse;
-
-		private Bet365ExecutorServiceHelper() {}
-		
-		public List<String> startMultithreadMarketRequests(String token, List<String> ids){
-			
-			List<String> resultList = new ArrayList<String>();
-			
-			mapThreadResponse = new ConcurrentHashMap<String, String>();
-			executor = Executors.newFixedThreadPool(maxThreadPoolSize);
-			logger.info("Ids 10-event list size is = " + ids.size());
-			int sizeWait = ids.size() < 30 ? ids.size()/2 : ids.size()/4;
-			for(int j = 0; j < ids.size() ; j++) {
-				
-				executor.submit(new Bet365RequestThreadHelper(j, ids, token, mapThreadResponse));
-				
-				boolean isLastQueueRequest = (j + 1) == ids.size();
-				if((j + 1) % maxThreadPoolSize == 0 || isLastQueueRequest) {
-				
-					boolean allFinished = false;
-					long startTime = System.currentTimeMillis();
-					int sizeMapParameter = maxThreadPoolSize;
-					
-					if(isLastQueueRequest && (j + 1) % maxThreadPoolSize != 0) {
-						sizeMapParameter = (j + 1) % maxThreadPoolSize;
-					}
-					
-					do{
-
-						logger.info("WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + sizeMapParameter);
-						logger.info("Remains " + (sizeWait - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
-						
-						if(System.currentTimeMillis() - startTime >= sizeWait * 1000L || mapThreadResponse.keySet().size() == sizeMapParameter) {
-							allFinished = true;
-						}
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e) {
-							logger.severe(e.getMessage());				
-						}
-					}while(!allFinished);
-					
-					for(String idJSON : mapThreadResponse.keySet()) {
-						resultList.add(mapThreadResponse.get(idJSON));
-					}
-					mapThreadResponse.clear();
-				}
-			}
-			
-			executor.shutdown();
-			mapThreadResponse = null;
-			
-			return resultList;
-		}
-	};
+	private Bet365RequestHandler bet365RequestHandler;
 	
 	/**
 	 * Logger initialization
@@ -202,9 +140,9 @@ public class Bet365ApiImpl implements IApiInterface {
 		
 		// The retrieved pages collection containing all the requested available events
 		List<String> result = new ArrayList<String>();
-		Bet365ExecutorServiceHelper helper = new Bet365ExecutorServiceHelper();
+		bet365RequestHandler= new Bet365RequestHandler(maxThreadPoolSize, token);
 		
-		result.addAll(helper.startMultithreadMarketRequests(token, ids));
+		result.addAll(bet365RequestHandler.startMultithreadMarketRequests(ids));
 		
 		return result;
 	}

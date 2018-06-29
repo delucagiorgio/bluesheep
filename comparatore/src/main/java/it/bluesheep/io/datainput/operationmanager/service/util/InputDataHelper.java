@@ -23,11 +23,15 @@ public class InputDataHelper {
 	 */
 	private List<String> getListBlockedBookmakers() {
 		List<String> blockedBookmakerList = new ArrayList<String>();
-		String[] splittedInputList = BlueSheepComparatoreMain.getProperties().getProperty("BLOCKED_BOOKMAKER").split(";");
-		for(int i = 0; i < splittedInputList.length; i++) {
-			String blockedBookmaker = splittedInputList[i];
-			if(blockedBookmaker != null && !blockedBookmaker.isEmpty()) {
-				blockedBookmakerList.add(blockedBookmaker.toLowerCase());
+		String propertyString = BlueSheepComparatoreMain.getProperties().getProperty("BLOCKED_BOOKMAKER");
+		
+		if(propertyString != null && !propertyString.isEmpty()) {
+			String[] splittedInputList = propertyString.split(";");
+			for(int i = 0; i < splittedInputList.length; i++) {
+				String blockedBookmaker = splittedInputList[i];
+				if(blockedBookmaker != null && !blockedBookmaker.isEmpty()) {
+					blockedBookmakerList.add(blockedBookmaker.toLowerCase());
+				}
 			}
 		}
 		return blockedBookmakerList;

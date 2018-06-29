@@ -38,6 +38,10 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String ATEAM_JSON_STRING = "ateam";
 	private static final String NAME_JSON_STRING = "name";
 	
+	private static final String STANLEYBET_BOOKMAKER_VALUE = "StanleyBet.it";
+	private static final String SKYBET_BOOKMAKER_VALUE = "SkyBet.it";
+	private static final String SPORTPESA_BOOKMAKER_VALUE = "SportPesa.it";
+	
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
 	private InputDataHelper inputDataHelper = new InputDataHelper();
@@ -140,6 +144,11 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 							TxOddsBluesheepJsonConverter blusheepJsonConv = (TxOddsBluesheepJsonConverter) jsonConverter;
 							String bookmakerName = blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING);
 							if(!inputDataHelper.isBlockedBookmaker(bookmakerName)) {
+								if(STANLEYBET_BOOKMAKER_VALUE.equals(bookmakerName)  || 
+										SKYBET_BOOKMAKER_VALUE.equals(bookmakerName) ||
+										SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName)) {
+									bookmakerName = bookmakerName.substring(0, bookmakerName.length() - 3);
+								}
 								newRecord.setBookmakerName(bookmakerName);
 								newRecord.setTipoScommessa(scommessaTipo);
 								newRecord.setQuota(quotaScommessa);

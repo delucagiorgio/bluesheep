@@ -17,12 +17,9 @@ import com.betfair.api.BetfairExchangeOperationsManagerImpl;
 import com.betfair.api.HttpClientNonInteractiveLoginSSO;
 import com.betfair.api.IBetfairExchangeOperationsManager;
 import com.betfair.entities.MarketFilter;
-import com.betfair.entities.PriceProjection;
 import com.betfair.enums.dao.MarketBettingTypeEnumDao;
 import com.betfair.enums.types.MarketProjection;
 import com.betfair.enums.types.MarketSort;
-import com.betfair.enums.types.MatchProjection;
-import com.betfair.enums.types.PriceData;
 import com.betfair.exceptions.BetFairAPIException;
 import com.betfair.util.ISO8601DateTypeAdapter;
 
@@ -33,6 +30,7 @@ import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.serviceapi.IApiInterface;
+import it.bluesheep.serviceapi.multirequesthandler.BetfairRequestHandler;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -72,7 +70,6 @@ public class BetFairApiImpl implements IApiInterface {
 	private static final String DEFAULT_REGEX_NAME_EVENT = " v ";
 	private static final String ALTER_REGEX_NAME_EVENT = " - ";
 	private static final int QUERY_SIZE_EVENT = 200;
-	private static final int QUERY_SIZE_MARKET = 40;
 	
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
@@ -83,6 +80,7 @@ public class BetFairApiImpl implements IApiInterface {
 	
 	//Inizializzazione variabili
 	private IBetfairExchangeOperationsManager beom;
+	private BetfairRequestHandler betfairRequestHandler;
 	
 
 	public BetFairApiImpl() {
@@ -126,35 +124,13 @@ public class BetFairApiImpl implements IApiInterface {
 	
 	private List<String> getMarketsInfo(List<String> marketIdsList) {
 
-		//Preparazione del filtro per la chiamata sul marketBook
-		PriceProjection priceProjection = new PriceProjection();
-		
-		Set<PriceData> priceDataSet = new HashSet<PriceData>();
-		priceDataSet.add(PriceData.EX_BEST_OFFERS);
-		priceProjection.setPriceData(priceDataSet);
+		int sizePoolRequests = marketIdsList.size();
 		
 		List<String> returnJsonResponseList = new ArrayList<String>();
 		
-		//inizializzazione variabili query paginata
-		int cyclesQuery = 0;
-		do {
-			String responseJson = null;
-			List<String> idsSublist = getPortionIdsBySize(QUERY_SIZE_MARKET, marketIdsList, cyclesQuery);
-			
-			filter.setEventIds(new HashSet<String>(idsSublist));
-			
-			//chiamata sul marketBook 
-			try {				
-				responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
-			} catch (BetFairAPIException e) {
-				logger.severe("Error retrieving data from ListMarketBook: the error is " + e.getMessage());
-			}
-			
-			//colleziono JSON da ritornare
-			returnJsonResponseList.add(responseJson);
-			
-			cyclesQuery++;
-		} while(cyclesQuery * QUERY_SIZE_MARKET < marketIdsList.size());
+		betfairRequestHandler = new BetfairRequestHandler(sizePoolRequests, filter, sessionToken);
+
+		returnJsonResponseList.addAll(betfairRequestHandler.startMultithreadMarketRequests(marketIdsList));
 		
 		return returnJsonResponseList;
 	}
@@ -250,7 +226,7 @@ public class BetFairApiImpl implements IApiInterface {
 				JSONObject resultJSONObject = resultJSONArray.getJSONObject(i);
 				double totalMatched = resultJSONObject.getDouble(TOTALMATCHED_JSON_STRING);
 				
-				if(totalMatched > 0) {
+				if(totalMatched > 0) { //TODO : da togliere probabilmente
 					JSONObject eventoJSONObject = resultJSONObject.getJSONObject(EVENT_JSON_STRING);
 					String idEvento = eventoJSONObject.getString(ID_JSON_STRING);
 					

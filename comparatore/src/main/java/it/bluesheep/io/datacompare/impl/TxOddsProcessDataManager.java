@@ -26,17 +26,23 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
  */
 public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 	
+	private double minThreshold;
+	private double maxThreshold;
+	
 	public TxOddsProcessDataManager() {
 		super();
+		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue();
+		this.maxThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MAX_THRESHOLD")).doubleValue();
+
 	}
 	
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) {
 		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();	
-		
 		//per ogni evento in input
 		for(String evento : dataMap.keySet()) {
+			
 			//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
 			//quella in analisi
 			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
@@ -61,8 +67,6 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 				}
 			}
 		}
-		
-		logger.info("Comparison completed successfully. Total events are " + dataMap.keySet().size() + ". Total comparison elaborated for sport " + sport + " are " + mappedOutputRecord.size());
 
 		return mappedOutputRecord;
 	}
@@ -114,10 +118,10 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
 
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(rating1 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue() && 
-						   rating2 >= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue() &&
-						   rating1 <= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MAX_THRESHOLD")).doubleValue() && 
-						   rating2 <= new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MAX_THRESHOLD")).doubleValue()
+						if(rating1 >= minThreshold && 
+						   rating2 >= minThreshold &&
+						   rating1 <= maxThreshold && 
+						   rating2 <= maxThreshold
 						   ) {
 							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);

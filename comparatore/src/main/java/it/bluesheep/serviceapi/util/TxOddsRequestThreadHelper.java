@@ -11,43 +11,44 @@ import javax.net.ssl.HttpsURLConnection;
 
 import it.bluesheep.util.BlueSheepLogger;
 
-public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
-	
+public class TxOddsRequestThreadHelper extends AbstractRequestThreadHelper {
+
 	private static Logger logger;
 	private String urlRequest;
 	
-	public Bet365RequestThreadHelper(String urlRequest, String token, Map<String, String> mapThreadResponse) {
+	public TxOddsRequestThreadHelper(String urlRequest, Map<String, String> mapThreadResponse) {
 		super();
+		this.urlRequest = urlRequest;
+		
 		logger = (new BlueSheepLogger(Bet365RequestThreadHelper.class)).getLogger();
 		this.urlRequest = urlRequest;
-		this.token = token;
 		this.resultThreadRequest = mapThreadResponse;
 	}
 	
 	@Override
 	public void run() {
-		String partialResult;
+
 		URL url;
-		HttpsURLConnection con = null;
+		HttpsURLConnection con;
 		try {
+			
 			url = new URL(urlRequest);
 			con = (HttpsURLConnection)url.openConnection();
-		} catch (IOException e) {
-			logger.severe(e.getMessage());
+		     
+		   //dump all the content
+			resultThreadRequest.put("" + this.getId(), get_result(con));
+				
+		} catch (Exception e) {
+		   logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
 		}
-
-		partialResult = get_result(con); 		
-		addResultToApiCollection(partialResult);
+		
 	}
-
 	
-	private synchronized void addResultToApiCollection(String partialResult) {
-		resultThreadRequest.put(""+this.getId(), partialResult);
-	}
-
 	private String get_result(HttpsURLConnection con){
 		String result = "";
+
 		if(con!=null){	
+		
 			try {
 			   BufferedReader br = 
 				new BufferedReader(
@@ -57,14 +58,14 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 			   while ((input = br.readLine()) != null){
 				   result += input;
 			   }
+			
 			   br.close();
 			} catch (IOException e) {
-				logger.severe("Error during request data on Bet365. Error is " + e.getMessage());
+				logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
 			}
-				
 		}
 	
 		return result;
-	}
+	}	
 
 }
