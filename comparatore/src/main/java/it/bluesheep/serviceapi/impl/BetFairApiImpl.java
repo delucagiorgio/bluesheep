@@ -60,7 +60,6 @@ public class BetFairApiImpl implements IApiInterface {
 	private final static String UO45 = "OVER_UNDER_45";
 	private final static String GGNG = "BOTH_TEAMS_TO_SCORE";
 	private static final String RESULT_JSON_STRING = "result";
-	private static final String TOTALMATCHED_JSON_STRING = "totalMatched";
 	private static final String EVENT_JSON_STRING = "event";
 	private static final String ID_JSON_STRING = "id";
 	private static final String COMPETITION_JSON_STRING = "competition";
@@ -224,24 +223,21 @@ public class BetFairApiImpl implements IApiInterface {
 			
 			for(int i = 0; i < resultJSONArray.length(); i++) {
 				JSONObject resultJSONObject = resultJSONArray.getJSONObject(i);
-				double totalMatched = resultJSONObject.getDouble(TOTALMATCHED_JSON_STRING);
 				
-				if(totalMatched > 0) { //TODO : da togliere probabilmente
-					JSONObject eventoJSONObject = resultJSONObject.getJSONObject(EVENT_JSON_STRING);
-					String idEvento = eventoJSONObject.getString(ID_JSON_STRING);
-					
-					EventoBetfair eventoBetfairById = idEventoMap.get(idEvento);
-					if(eventoBetfairById != null) {
-						JSONObject competitionJSONObject = jsonUtil.getChildNodeByKey(resultJSONObject, COMPETITION_JSON_STRING);
-						if(competitionJSONObject != null) {
-							eventoBetfairById.setCampionato(competitionJSONObject.getString(NAME_JSON_STRING));
-						}
-						String marketId = resultJSONObject.getString(MARKETID_JSON_STRING);
-						eventoBetfairById.setMarketId(marketId);
-						
-						marketIds.add(marketId);
-						mercatoEventoBetfairMap.put(marketId, eventoBetfairById);
+				JSONObject eventoJSONObject = resultJSONObject.getJSONObject(EVENT_JSON_STRING);
+				String idEvento = eventoJSONObject.getString(ID_JSON_STRING);
+				
+				EventoBetfair eventoBetfairById = idEventoMap.get(idEvento);
+				if(eventoBetfairById != null) {
+					JSONObject competitionJSONObject = jsonUtil.getChildNodeByKey(resultJSONObject, COMPETITION_JSON_STRING);
+					if(competitionJSONObject != null) {
+						eventoBetfairById.setCampionato(competitionJSONObject.getString(NAME_JSON_STRING));
 					}
+					String marketId = resultJSONObject.getString(MARKETID_JSON_STRING);
+					eventoBetfairById.setMarketId(marketId);
+					
+					marketIds.add(marketId);
+					mercatoEventoBetfairMap.put(marketId, eventoBetfairById);
 				}
 			}
 		}

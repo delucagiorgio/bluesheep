@@ -148,6 +148,7 @@ public class BlueSheepComparatoreMain {
 			}catch(Exception e) {
 				logger.severe("Error with odds comparison: error is " + e.getMessage());
 			}
+			logger.info("Odds comparison for Tabella2 (TxOdds vs TxOdds) completed. Rows mapped = " + tabella2OutputList.size());
 		}
     	
 		if(tabella2OutputList != null && !tabella2OutputList.isEmpty()) {
@@ -162,9 +163,12 @@ public class BlueSheepComparatoreMain {
 				writer1 = new PrintWriter(outputFilenameTabella2, "UTF-8");    	
 		    	// Scrivo
 		    	writer1.println(jsonString1);
-		    	writer1.close();
 			} catch (IOException e) {
 				logger.severe("Error with file during saving : error is " + e.getMessage());
+			}finally {
+				if(writer1 != null) {
+					writer1.close();
+				}
 			}
 
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella2);
@@ -229,9 +233,12 @@ public class BlueSheepComparatoreMain {
 				writer2 = new PrintWriter(outputFilenameTabella1, "UTF-8");
 		    	// Scrivo
 		    	writer2.println(jsonString2);
-		    	writer2.close();
 			} catch (IOException e) {
 				logger.severe("Error with file during saving : error is " + e.getMessage());
+			}finally {
+				if(writer2 != null) {
+					writer2.close();
+				}
 			}
 	    	
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella1);
