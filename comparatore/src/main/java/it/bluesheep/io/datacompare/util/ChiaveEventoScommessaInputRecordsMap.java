@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
+import it.bluesheep.entities.util.sport.Sport;
 
 /**
  * Classe utile a collezionare i dati secondo il criterio:
@@ -23,7 +24,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
  * @author Giorgio De Luca
  *
  */
-public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<String,Map<Scommessa, List<AbstractInputRecord>>>{
+public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Map<String,Map<Scommessa, List<AbstractInputRecord>>>>{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -31,10 +32,17 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<String,M
 		super();
 	}
 
-	public void addToMapEventoScommessaRecord(AbstractInputRecord record) {
+	public void addToMapEventoScommessaRecord(AbstractInputRecord record, Sport sport) {
+		
+		Map<String, Map<Scommessa,List<AbstractInputRecord>>> sportMap = get(sport);
+		
+		if(sportMap == null) {
+			sportMap = new TreeMap<String, Map<Scommessa,List<AbstractInputRecord>>>();
+			put(sport, sportMap);
+		}
 		
 		//mappa relativa alle scommesse di un evento
-		Map<Scommessa,List<AbstractInputRecord>> eventoScommessaRecordsMap = get(record.getKeyEvento());
+		Map<Scommessa,List<AbstractInputRecord>> eventoScommessaRecordsMap = sportMap.get(record.getKeyEvento());
 		
 		//key non esiste, va aggiunta per la prima volta
 		if(eventoScommessaRecordsMap == null) {
@@ -43,7 +51,7 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<String,M
 			newList.add(record);
 			Map<Scommessa, List<AbstractInputRecord>> scommessaRecordsMap = new HashMap<Scommessa, List<AbstractInputRecord>>();
 			scommessaRecordsMap.put(record.getTipoScommessa(), newList);
-			put(record.getKeyEvento(), scommessaRecordsMap);
+			sportMap.put(record.getKeyEvento(), scommessaRecordsMap);
 			
 		}else{
 			//ci sono già delle scommesse all'interno della mappa, il record di input 
@@ -62,5 +70,11 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<String,M
 				inputRecordListScommessa.add(record);
 			}
 		}
+	}
+
+	public void addToMapEventoScommessaRecord(AbstractInputRecord csvRecord) {
+		String keyEventoString = csvRecord.getKeyEvento();
+		String[] splittedKeyEvento = keyEventoString.split("\\|");
+		addToMapEventoScommessaRecord(csvRecord, Sport.valueOf(splittedKeyEvento[1]));
 	}	
 }

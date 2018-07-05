@@ -27,27 +27,16 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	}
 
 	@Override
-	protected double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2) throws Exception {
-		throw new Exception("Incorrect implementation getRatingByScommessaPair");
-		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
-
-	}
-
-	@Override
-	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2, double rating) throws Exception {
-		throw new Exception("Incorrect implementation of mapRecordOutput");
-		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
-
-	}
-
-	@Override
-	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception {
+	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap sportMap) throws Exception {
 		logger.info("Start matching informartion for Bet365 on TxOdds events : "
 				+ "input size Bet365 events is " + bookmakerList.size() 
-				+ "; input size TxOdds events is " + eventiTxOddsMap.keySet().size());
+				+ "; input size TxOdds events is " + sportMap.keySet().size());
 		int matchedCountEvents = 0;
 		for(AbstractInputRecord record : bookmakerList) {
-			for(String eventoTxOdds : eventiTxOddsMap.keySet()) {
+			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
+			String key = splittedEventoKeyRecord[1];
+			Map<String, Map<Scommessa,List<AbstractInputRecord>>> dataMap = sportMap.get(Sport.valueOf(key));
+			for(String eventoTxOdds : dataMap.keySet()) {
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
 				SimpleDateFormat bet365Sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.UK);
 				Date dataOraEvento = null;
@@ -66,7 +55,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 				if(dataOraEvento != null && 
 						(bet365Record.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2) ||
 						bet365Record.isSameEventSecondaryMatch(dataOraEvento, sport, partecipante1, partecipante2))) {
-					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
+					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = dataMap.get(eventoTxOdds);
 					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
 					bet365Record.setCampionato(bookmakerRecord.getCampionato());

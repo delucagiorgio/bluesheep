@@ -41,7 +41,7 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 	}
 
 	
-	private synchronized void addResultToApiCollection(String partialResult) {
+	private void addResultToApiCollection(String partialResult) {
 		resultThreadRequest.put(""+this.getId(), partialResult);
 	}
 

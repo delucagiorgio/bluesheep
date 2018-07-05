@@ -26,7 +26,10 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 		
 		List<AbstractInputRecord> csvEventListUpdatedInfo = new ArrayList<AbstractInputRecord>();
 		for(AbstractInputRecord record : csvEventList) {
-			for(String eventoTxOdds : eventiTxOddsMap.keySet()) { 
+			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
+			String key = splittedEventoKeyRecord[1];
+			Map<String, Map<Scommessa,List<AbstractInputRecord>>> dataMap = eventiTxOddsMap.get(Sport.valueOf(key));
+			for(String eventoTxOdds : dataMap.keySet()) { 
 				String[] splittedEventoKey = eventoTxOdds.split("\\|");
 				SimpleDateFormat bet365Sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.UK);
 				Date dataOraEvento = null;
@@ -43,7 +46,7 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 				CSVInputRecord csvRecord = (CSVInputRecord) record;
 				
 				if(dataOraEvento != null && csvRecord.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
-					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = eventiTxOddsMap.get(eventoTxOdds);
+					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = dataMap.get(eventoTxOdds);
 					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
 					AbstractInputRecord csvRecordCopy = new CSVInputRecord(csvRecord); 
@@ -66,20 +69,6 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) throws Exception {
 		throw new Exception("Incorrect implementation of getRatingByScommessaPair");
-		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
-	}
-
-	@Override
-	protected double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1,
-			AbstractInputRecord scommessaInputRecord2) throws Exception {
-		throw new Exception("Incorrect implementation of getRatingByScommessaPair");
-		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
-	}
-
-	@Override
-	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord1,
-			AbstractInputRecord scommessaInputRecord2, double rating) throws Exception {
-		throw new Exception("Incorrect implementation of mapRecordOutput");
 		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
 	}
 

@@ -75,9 +75,11 @@ public class BlueSheepComparatoreMain {
 			logger.info("Delegate TxOdds request and mapping odds process of sport " + sport + " to " + inputDataManager.getClass().getName());
 			txOddsMappedRecordsFromJsonBySport = inputDataManager.processAllData(sport);	
 			for(AbstractInputRecord record : txOddsMappedRecordsFromJsonBySport) {
-				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
+				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record, sport);
 			}
 		}
+		
+		txOddsMappedRecordsFromJsonBySport = null;
 		
 		/**
 		 * 										BET365 
@@ -102,8 +104,10 @@ public class BlueSheepComparatoreMain {
 				}
 				
 				for(AbstractInputRecord record : bet365MappedRecordsFromJsonBySport) {
-					eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
+					eventoScommessaRecordMap.addToMapEventoScommessaRecord(record, sport);
 				}
+				bet365MappedRecordsFromJsonBySport = null;
+				bet365MatchedEventsTxOdds = null;
 			}
 		}else {
 			logger.warning("Bet365 retrivial data process excluded.");
@@ -132,6 +136,10 @@ public class BlueSheepComparatoreMain {
 			eventoScommessaRecordMap.addToMapEventoScommessaRecord(csvRecord);
 		}
 		
+		csvRecordList = null;
+		csvRecordListUpdatedInfo = null;
+		toBeIteratedList = null;
+		
 		/**
 		 * 								MANUAL INPUT ODDS BY CSV 
 		 * 										
@@ -142,13 +150,15 @@ public class BlueSheepComparatoreMain {
 		List<RecordOutput> tabella2OutputList = new ArrayList<RecordOutput>();
 		processDataManager = new TxOddsProcessDataManager();
 		for(Sport sport : Sport.values()) {
+			List<RecordOutput> oddsComparisonList = new ArrayList<RecordOutput>();
 			try{
 				logger.info("Starting odds comparison for Tabella2 (TxOdds vs TxOdds) for sport " + sport);
-				tabella2OutputList.addAll(processDataManager.compareOdds(eventoScommessaRecordMap, sport));
+				oddsComparisonList = processDataManager.compareOdds(eventoScommessaRecordMap, sport);
+				tabella2OutputList.addAll(oddsComparisonList);
 			}catch(Exception e) {
 				logger.severe("Error with odds comparison: error is " + e.getMessage());
 			}
-			logger.info("Odds comparison for Tabella2 (TxOdds vs TxOdds) completed. Rows mapped = " + tabella2OutputList.size());
+			logger.info("Odds comparison for Tabella2 (TxOdds vs TxOdds) completed. Rows mapped = " + oddsComparisonList.size());
 		}
     	
 		if(tabella2OutputList != null && !tabella2OutputList.isEmpty()) {
@@ -169,10 +179,13 @@ public class BlueSheepComparatoreMain {
 				if(writer1 != null) {
 					writer1.close();
 				}
+				jsonString1 = null;
 			}
 
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella2);
 		}
+		
+		tabella2OutputList = null;
 		
 		/**
 		 * 										 TXODDS 
@@ -204,16 +217,22 @@ public class BlueSheepComparatoreMain {
 				eventoScommessaRecordMap.addToMapEventoScommessaRecord(record);
 			}
 		}
+		betfairMappedRecordsFromJson = null;
+		
 		
 		//Avvio comparazione quote tabella 1
 		List<RecordOutput> tabella1OutputList = new ArrayList<RecordOutput>();
 		for(Sport sport : Sport.values()) {
+			List<RecordOutput> oddsComparisonList = new ArrayList<RecordOutput>();
 			try{
 				logger.info("Starting odds comparison for Tabella1 (TxOdds vs Exchange) for sport " + sport);
-				tabella1OutputList.addAll(processDataManager.compareOdds(eventoScommessaRecordMap, sport));
+				oddsComparisonList = processDataManager.compareOdds(eventoScommessaRecordMap, sport);
+				tabella1OutputList.addAll(oddsComparisonList);
 			}catch(Exception e) {
 				logger.severe("Error with odds comparison: error is " + e.getMessage());
 			}
+			logger.info("Odds comparison for Tabella1 (TxOdds vs Exchange) completed. Rows mapped = " + oddsComparisonList.size());
+
 		}
 		
 		long endTime = System.currentTimeMillis();
@@ -239,10 +258,13 @@ public class BlueSheepComparatoreMain {
 				if(writer2 != null) {
 					writer2.close();
 				}
+				jsonString2 = null;
 			}
 	    	
 	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella1);
 		}
+		
+		tabella1OutputList = null;
 		
 		/**
 		 * 										BETFAIR 

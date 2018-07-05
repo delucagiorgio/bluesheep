@@ -181,11 +181,11 @@ public abstract class AbstractInputRecord {
 			
 			if (participant11.contains("&") && participant12.contains("&") && participant21.contains("/") && participant22.contains("/")) {
 				// bookmaker
-				String memberb11 = participant11.split(" & ")[0];
-				String memberb12 = participant11.split(" & ")[1];
+				String memberb11 = participant11.split("&")[0].trim();
+				String memberb12 = participant11.split("&")[1].trim();
 				
-				String memberb21 = participant12.split(" & ")[0];
-				String memberb22 = participant12.split(" & ")[1];
+				String memberb21 = participant12.split("&")[0].trim();
+				String memberb22 = participant12.split("&")[1].trim();
 
 				List<String> b1 = new ArrayList<String>();
 				b1.add(memberb11);
@@ -196,11 +196,11 @@ public abstract class AbstractInputRecord {
 				b2.add(memberb22);
 				
 				// betfair
-				String memberbet11 = participant21.split(" / ")[0];
-				String memberbet12 = participant21.split(" / ")[1];
+				String memberbet11 = participant21.split("/")[0].trim();
+				String memberbet12 = participant21.split("/")[1].trim();
 				
-				String memberbet21 = participant22.split(" / ")[0];
-				String memberbet22 = participant22.split(" / ")[1];
+				String memberbet21 = participant22.split("/")[0].trim();
+				String memberbet22 = participant22.split("/")[1].trim();
 				
 				List<String> bet1 = new ArrayList<String>();
 				bet1.add(memberbet11);
