@@ -1,5 +1,6 @@
 package it.bluesheep.io.datacompare.multithreadcompare.comparehelper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -16,18 +17,18 @@ public abstract class CompareThreadHelper extends Thread {
 	protected static final int LOGGER_COMPARE_SIZE_PARTIAL_RESULT = 100;
 	
 	protected Map<String, List<RecordOutput>> oddsComparisonThreadMap;
-	protected List<String> keyList;
-	protected Map<String, Map<Scommessa, List<AbstractInputRecord>>> dataMap;
+	protected List<Date> keyList;
+	protected Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dateMap;
 	protected Sport sport;
 	protected int processedComparisonCounter;
 	
 	protected CompareThreadHelper(Map<String, List<RecordOutput>> oddsComparisonThreadMap, 
-			List<String> keyList, 
-			Map<String, Map<Scommessa, List<AbstractInputRecord>>> dataMap, 
+			List<Date> keyList2, 
+			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dateMap, 
 			Sport sport) {
 		super();
-		this.keyList = keyList;
-		this.dataMap = dataMap;
+		this.keyList = keyList2;
+		this.dateMap = dateMap;
 		this.oddsComparisonThreadMap = oddsComparisonThreadMap;
 		this.sport = sport;
 		logger = (new BlueSheepLogger(CompareThreadHelper.class)).getLogger();

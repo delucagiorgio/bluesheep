@@ -1,5 +1,6 @@
 package it.bluesheep.io.datacompare.multithreadcompare.comparehelper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +14,8 @@ public class CompareThreadHelperFactory {
 	private CompareThreadHelperFactory() {}
 	
 	public static CompareThreadHelper getCorrectCompareThreadHelperByString(String comparisonType, 
-			List<String> keyList, 
-			Map<String, Map<Scommessa, List<AbstractInputRecord>>> dataMap,
+			List<Date> keyList, 
+			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataMap,
 			Map<String, List<RecordOutput>> oddsComparisonThreadMap, 
 			Sport sport) {
 		if("TX_ODDS".equalsIgnoreCase(comparisonType)) {

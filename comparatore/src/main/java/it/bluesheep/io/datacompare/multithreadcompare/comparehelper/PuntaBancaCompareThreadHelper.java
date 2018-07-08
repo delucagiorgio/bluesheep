@@ -1,6 +1,7 @@
 package it.bluesheep.io.datacompare.multithreadcompare.comparehelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +21,8 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 	private double maxThreshold;
 	
 	protected PuntaBancaCompareThreadHelper(Map<String, List<RecordOutput>> oddsComparisonThreadMap,
-			List<String> keyList,
-			Map<String, Map<Scommessa, List<AbstractInputRecord>>> dataMap,
+			List<Date> keyList,
+			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataMap,
 			Sport sport) {
 		super(oddsComparisonThreadMap, keyList, dataMap, sport);
 		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_MIN_THRESHOLD")).doubleValue();
@@ -32,23 +33,25 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 	public void run() {
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();
 		processedComparisonCounter = 0;
-		//per ogni evento in input
-		for(String evento : keyList) {
-			
-			//per ogni scommessa, cerco il record relativo alle quote dell'Exchange
-			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
-			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
-				List<AbstractInputRecord> eventoScommessaRecordList = inputRecordEventoScommessaMap.get(scommessa);
-				AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
-				//Se trovato
-				if(exchangeRecord != null) {
-					List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(eventoScommessaRecordList,exchangeRecord);
-					mappedOutputRecord.addAll(outputRecordsList);	
+		for(Date date : keyList) {
+			//per ogni evento in input
+			for(String evento : dateMap.get(date).keySet()) {
+				
+				//per ogni scommessa, cerco il record relativo alle quote dell'Exchange
+				Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dateMap.get(date).get(evento);
+				for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
+					List<AbstractInputRecord> eventoScommessaRecordList = inputRecordEventoScommessaMap.get(scommessa);
+					AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
+					//Se trovato
+					if(exchangeRecord != null) {
+						List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(eventoScommessaRecordList,exchangeRecord);
+						mappedOutputRecord.addAll(outputRecordsList);	
+					}
 				}
-			}
-			processedComparisonCounter++;
-			if(processedComparisonCounter % LOGGER_COMPARE_SIZE_PARTIAL_RESULT == 0) {
-				logger.info("Thread " + this.getId() + ": already compared events = " + processedComparisonCounter);
+				processedComparisonCounter++;
+				if(processedComparisonCounter % LOGGER_COMPARE_SIZE_PARTIAL_RESULT == 0) {
+					logger.info("Thread " + this.getId() + ": already compared events = " + processedComparisonCounter);
+				}
 			}
 		}
 

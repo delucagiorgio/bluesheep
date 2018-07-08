@@ -1,6 +1,7 @@
 package it.bluesheep.io.datacompare.multithreadcompare;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,8 +33,8 @@ public class OddsComparisonSplitter {
 		
 		List<RecordOutput> returnList = new ArrayList<RecordOutput>();
 		
-		Map<String, Map<Scommessa,List<AbstractInputRecord>>> dataToBeSplitted = map.get(sport);
-		List<String> keysList = new ArrayList<String>(dataToBeSplitted.keySet());
+		Map<Date, Map<String, Map<Scommessa,List<AbstractInputRecord>>>> dataToBeSplitted = map.get(sport);
+		List<Date> keysList = new ArrayList<Date>(dataToBeSplitted.keySet());
 		
 		logger.info("Events to be compared are " + keysList.size());
 		
@@ -70,8 +71,8 @@ public class OddsComparisonSplitter {
 		
 	}
 
-	private void startNewComparisonThread(List<String> subList,
-			Map<String, Map<Scommessa, List<AbstractInputRecord>>> dataToBeSplitted, 
+	private void startNewComparisonThread(List<Date> subList,
+			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataToBeSplitted, 
 			Map<String, List<RecordOutput>> threadComparisonResultMap,
 			String comparisonType, Sport sport) {
 		

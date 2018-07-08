@@ -1,11 +1,8 @@
 package it.bluesheep.io.datacompare.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -28,38 +25,35 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 		for(AbstractInputRecord record : csvEventList) {
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
 			String key = splittedEventoKeyRecord[1];
-			Map<String, Map<Scommessa,List<AbstractInputRecord>>> dataMap = eventiTxOddsMap.get(Sport.valueOf(key));
-			for(String eventoTxOdds : dataMap.keySet()) { 
-				String[] splittedEventoKey = eventoTxOdds.split("\\|");
-				SimpleDateFormat bet365Sdf = new SimpleDateFormat(OUTPUT_DATE_FORMAT, Locale.UK);
-				Date dataOraEvento = null;
-				try {
-					dataOraEvento = bet365Sdf.parse(splittedEventoKey[0]);
-				} catch (ParseException e) {
-					logger.warning("Event with keyEvento " + eventoTxOdds + " cannot be parsed on date : error is " + e.getMessage());
-				}
-				String sport = splittedEventoKey[1];
-				String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
-				String partecipante1 = partecipantiSplitted[0];
-				String partecipante2 = partecipantiSplitted[1];
-				
-				CSVInputRecord csvRecord = (CSVInputRecord) record;
-				
-				if(dataOraEvento != null && csvRecord.isSameEventAbstractInputRecord(dataOraEvento, sport, partecipante1, partecipante2)) {
-					Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = dataMap.get(eventoTxOdds);
-					List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
-					AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
-					AbstractInputRecord csvRecordCopy = new CSVInputRecord(csvRecord); 
-					csvRecordCopy.setCampionato(bookmakerRecord.getCampionato());
-					csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-					csvRecordCopy.setKeyEvento(bookmakerRecord.getKeyEvento());
-					csvRecordCopy.setPartecipante1(bookmakerRecord.getPartecipante1());
-					csvRecordCopy.setPartecipante2(bookmakerRecord.getPartecipante2());
-					csvRecordCopy.setBookmakerName(csvRecord.getBookmakerName());
-					csvRecordCopy.setQuota(csvRecord.getQuota());
-					csvRecordCopy.setTipoScommessa(csvRecord.getTipoScommessa());
-					csvEventListUpdatedInfo.add(csvRecordCopy);
-					break;
+			Map<Date, Map<String, Map<Scommessa,List<AbstractInputRecord>>>> dataMap = eventiTxOddsMap.get(Sport.valueOf(key));
+			for(Date date : dataMap.keySet()) {
+				if(record.compareDate(date, record.getDataOraEvento())) {
+					for(String eventoTxOdds : dataMap.get(date).keySet()) { 
+						String[] splittedEventoKey = eventoTxOdds.split("\\|");
+						String sport = splittedEventoKey[1];
+						String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
+						String partecipante1 = partecipantiSplitted[0];
+						String partecipante2 = partecipantiSplitted[1];
+						
+						CSVInputRecord csvRecord = (CSVInputRecord) record;
+						
+						if(csvRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2)) {
+							Map<Scommessa, List<AbstractInputRecord>> mapScommessaRecord = dataMap.get(date).get(eventoTxOdds);
+							List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
+							AbstractInputRecord bookmakerRecord = mapScommessaRecord.get(scommessaSet.get(0)).get(0); 
+							AbstractInputRecord csvRecordCopy = new CSVInputRecord(csvRecord); 
+							csvRecordCopy.setCampionato(bookmakerRecord.getCampionato());
+							csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+							csvRecordCopy.setKeyEvento(bookmakerRecord.getKeyEvento());
+							csvRecordCopy.setPartecipante1(bookmakerRecord.getPartecipante1());
+							csvRecordCopy.setPartecipante2(bookmakerRecord.getPartecipante2());
+							csvRecordCopy.setBookmakerName(csvRecord.getBookmakerName());
+							csvRecordCopy.setQuota(csvRecord.getQuota());
+							csvRecordCopy.setTipoScommessa(csvRecord.getTipoScommessa());
+							csvEventListUpdatedInfo.add(csvRecordCopy);
+							break;
+						}
+					}
 				}
 			}
 		}

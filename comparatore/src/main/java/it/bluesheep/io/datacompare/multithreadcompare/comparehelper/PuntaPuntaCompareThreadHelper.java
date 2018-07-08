@@ -1,6 +1,7 @@
 package it.bluesheep.io.datacompare.multithreadcompare.comparehelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,8 +23,8 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 	private double maxThreshold;
 	
 	protected PuntaPuntaCompareThreadHelper(Map<String, List<RecordOutput>> oddsComparisonThreadMap,
-			List<String> keyList,
-			Map<String, Map<Scommessa, List<AbstractInputRecord>>> dataMap,
+			List<Date> keyList,
+			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataMap,
 			Sport sport) {
 		super(oddsComparisonThreadMap, keyList, dataMap, sport);
 		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue();
@@ -35,31 +36,32 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();
 		//per ogni evento in input
-		for(String evento : keyList) {
-			
-			//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
-			//quella in analisi
-			Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dataMap.get(evento);
-			Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
-			Scommessa oppositeScommessa = null;			
-			for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
-				List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
-				if((Sport.CALCIO.equals(sport) && 
-						!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
-						(Sport.TENNIS.equals(sport) && 
-								ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
-					
-					oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
-					if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-						List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
-						mappedOutputRecord.addAll(outputRecordsList);
-						processedScommessaTypes.put(scommessa, oppositeScommessa);
+		for(Date date : keyList) {
+			for(String evento : dateMap.get(date).keySet()) {
+				//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
+				//quella in analisi
+				Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dateMap.get(date).get(evento);
+				Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
+				Scommessa oppositeScommessa = null;			
+				for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
+					List<AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
+					if((Sport.CALCIO.equals(sport) && 
+							!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
+							(Sport.TENNIS.equals(sport) && 
+									ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
+						
+						oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
+						if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
+							List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
+							mappedOutputRecord.addAll(outputRecordsList);
+							processedScommessaTypes.put(scommessa, oppositeScommessa);
+						}
 					}
 				}
-			}
-			processedComparisonCounter++;
-			if(processedComparisonCounter % LOGGER_COMPARE_SIZE_PARTIAL_RESULT == 0) {
-				logger.info("Thread " + this.getId() + ": already compared events = " + processedComparisonCounter);
+				processedComparisonCounter++;
+				if(processedComparisonCounter % LOGGER_COMPARE_SIZE_PARTIAL_RESULT == 0) {
+					logger.info("Thread " + this.getId() + ": already compared events = " + processedComparisonCounter);
+				}
 			}
 		}
 
