@@ -170,6 +170,10 @@ public abstract class AbstractInputRecord {
 	 */
 	protected boolean compareParticipants(String exPartecipante1, String exPartecipante2, String bmPartecipante1, String bmPartecipante2) {
 		
+		if(exPartecipante1 == null || exPartecipante2 == null || bmPartecipante1 == null || bmPartecipante2 == null) {
+			return false;
+		}
+		
 		String participant11 = exPartecipante1.toLowerCase();
 		String participant12 = exPartecipante2.toLowerCase();
 		String participant21 = bmPartecipante1.toLowerCase();
@@ -179,13 +183,28 @@ public abstract class AbstractInputRecord {
 			return true;
 		} else {
 			
-			if (participant11.contains("&") && participant12.contains("&") && participant21.contains("/") && participant22.contains("/")) {
+			String regex1 = null;
+			String regex2 = null;
+			
+			if (participant11.contains("&") && participant12.contains("&")) {
+				regex1 = "&";
+			}else if(participant11.contains("/") && participant12.contains("/")) {
+				regex1 = "/";
+			}
+			
+			if (participant21.contains("&") && participant22.contains("&")) {
+				regex2 = "&";
+			}else if(participant21.contains("/") && participant22.contains("/")) {
+				regex2 = "/";
+			}
+			
+			if(regex1 != null && regex2 != null) {
 				// bookmaker
-				String memberb11 = participant11.split("&")[0].trim();
-				String memberb12 = participant11.split("&")[1].trim();
+				String memberb11 = participant11.split(regex1)[0].trim();
+				String memberb12 = participant11.split(regex1)[1].trim();
 				
-				String memberb21 = participant12.split("&")[0].trim();
-				String memberb22 = participant12.split("&")[1].trim();
+				String memberb21 = participant12.split(regex1)[0].trim();
+				String memberb22 = participant12.split(regex1)[1].trim();
 
 				List<String> b1 = new ArrayList<String>();
 				b1.add(memberb11);
@@ -196,11 +215,11 @@ public abstract class AbstractInputRecord {
 				b2.add(memberb22);
 				
 				// betfair
-				String memberbet11 = participant21.split("/")[0].trim();
-				String memberbet12 = participant21.split("/")[1].trim();
+				String memberbet11 = participant21.split(regex2)[0].trim();
+				String memberbet12 = participant21.split(regex2)[1].trim();
 				
-				String memberbet21 = participant22.split("/")[0].trim();
-				String memberbet22 = participant22.split("/")[1].trim();
+				String memberbet21 = participant22.split(regex2)[0].trim();
+				String memberbet22 = participant22.split(regex2)[1].trim();
 				
 				List<String> bet1 = new ArrayList<String>();
 				bet1.add(memberbet11);
@@ -240,11 +259,13 @@ public abstract class AbstractInputRecord {
 	}
 
 	public boolean isSameEventSecondaryMatch(Date date, String sport, String partecipante1, String partecipante2) {
-		if(this.sport.getCode().equals(sport) && compareDate(this.dataOraEvento, date)) {		
+		if(partecipante1 != null && partecipante2 != null && 
+				this.partecipante1 != null && this.partecipante2 != null &&
+				this.sport.getCode().equals(sport) && compareDate(this.dataOraEvento, date)) {		
 			CosineSimilarityUtil csu = new CosineSimilarityUtil();
 			double cosSimPartecipant1 = csu.similarity(this.partecipante1, partecipante1);
 			double cosSimPartecipant2 = csu.similarity(this.partecipante2, partecipante2);
-			return cosSimPartecipant1 >= 0.8 && cosSimPartecipant2 >= 0.8;
+			return cosSimPartecipant1 >= 0.5 && cosSimPartecipant2 >= 0.5;
 		
 		}
 		return false;
