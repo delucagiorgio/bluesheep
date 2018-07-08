@@ -155,9 +155,10 @@ public abstract class AbstractInputRecord {
 	 * @param dataOraEvento2 seconda data
 	 * @return true, se le date sono identiche (con un errore di accettazione tra le due di UN'ORA), false altrimenti
 	 */
-	protected boolean compareDate(Date dataOraEvento1, Date dataOraEvento2) {
-		return ((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() < 3600000))
-				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() < 3600000));
+	public boolean compareDate(Date dataOraEvento1, Date dataOraEvento2) {
+		return dataOraEvento1 != null && dataOraEvento2 != null && 
+				((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() < 60*60*1000L))
+				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() < 60*60*1000L));
 	}
 
 	/**
@@ -169,7 +170,9 @@ public abstract class AbstractInputRecord {
 	 * @return
 	 */
 	protected boolean compareParticipants(String exPartecipante1, String exPartecipante2, String bmPartecipante1, String bmPartecipante2) {
-		
+		if(exPartecipante1 == null || exPartecipante2 == null || bmPartecipante1 == null || bmPartecipante2 == null) {
+			return false;
+		}
 		String participant11 = exPartecipante1.toLowerCase();
 		String participant12 = exPartecipante2.toLowerCase();
 		String participant21 = bmPartecipante1.toLowerCase();
@@ -179,13 +182,28 @@ public abstract class AbstractInputRecord {
 			return true;
 		} else {
 			
-			if (participant11.contains("&") && participant12.contains("&") && participant21.contains("/") && participant22.contains("/")) {
+			if (participant11.contains(" & ") && participant12.contains(" & ") && participant21.contains(" / ") && participant22.contains(" / ")) {
 				// bookmaker
-				String memberb11 = participant11.split("&")[0].trim();
-				String memberb12 = participant11.split("&")[1].trim();
+				String memberb11;
+				String memberb12;
+				String[] bookmakerSplitted11 = participant11.split(" & ");
+				if(bookmakerSplitted11.length == 2) {
+					memberb11 = bookmakerSplitted11[0];
+					memberb12 = bookmakerSplitted11[1];
+				}else {
+					return false;
+				}
 				
-				String memberb21 = participant12.split("&")[0].trim();
-				String memberb22 = participant12.split("&")[1].trim();
+				
+				String memberb21;
+				String memberb22;
+				String[] bookmakerSplitted12 = participant12.split(" & ");
+				if(bookmakerSplitted12.length == 2) {
+					memberb21 = bookmakerSplitted12[0];
+					memberb22 = bookmakerSplitted12[1];
+				}else {
+					return false;	
+				}
 
 				List<String> b1 = new ArrayList<String>();
 				b1.add(memberb11);
@@ -240,7 +258,8 @@ public abstract class AbstractInputRecord {
 	}
 
 	public boolean isSameEventSecondaryMatch(Date date, String sport, String partecipante1, String partecipante2) {
-		if(this.sport.getCode().equals(sport) && compareDate(this.dataOraEvento, date)) {		
+		if(compareDate(this.dataOraEvento, date) && 
+				partecipante1 != null && partecipante2 != null && this.partecipante1 != null && this.partecipante2 != null) {		
 			CosineSimilarityUtil csu = new CosineSimilarityUtil();
 			double cosSimPartecipant1 = csu.similarity(this.partecipante1, partecipante1);
 			double cosSimPartecipant2 = csu.similarity(this.partecipante2, partecipante2);

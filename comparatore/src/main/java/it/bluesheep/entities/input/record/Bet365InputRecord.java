@@ -20,9 +20,8 @@ public class Bet365InputRecord extends AbstractInputRecord implements IKeyEvento
 	
 	@Override
 	public boolean isSameEventAbstractInputRecord(Date dataOraEvento, String sport, String partecipante1, String partecipante2) throws Exception {
-		if(compareParticipants(this.partecipante1, this.partecipante2, partecipante1, partecipante2)
-				&& this.sport.getCode().equals(sport)
-				&& compareDate(this.dataOraEvento, dataOraEvento)) {
+		if(compareDate(this.dataOraEvento, dataOraEvento)
+				&& compareParticipants(this.partecipante1, this.partecipante2, partecipante1, partecipante2)) {
 			return true;
 		}		
 		return false;

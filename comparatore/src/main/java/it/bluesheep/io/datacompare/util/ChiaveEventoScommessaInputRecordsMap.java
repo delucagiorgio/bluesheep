@@ -1,10 +1,12 @@
 package it.bluesheep.io.datacompare.util;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
@@ -24,7 +26,7 @@ import it.bluesheep.entities.util.sport.Sport;
  * @author Giorgio De Luca
  *
  */
-public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Map<String,Map<Scommessa, List<AbstractInputRecord>>>>{
+public final class ChiaveEventoScommessaInputRecordsMap extends ConcurrentHashMap<Sport,Map<Date,Map<String,Map<Scommessa, List<AbstractInputRecord>>>>>{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -34,15 +36,22 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 
 	public void addToMapEventoScommessaRecord(AbstractInputRecord record, Sport sport) {
 		
-		Map<String, Map<Scommessa,List<AbstractInputRecord>>> sportMap = get(sport);
+		Map<Date,Map<String, Map<Scommessa,List<AbstractInputRecord>>>> sportMap = get(sport);
 		
 		if(sportMap == null) {
-			sportMap = new TreeMap<String, Map<Scommessa,List<AbstractInputRecord>>>();
+			sportMap = new TreeMap<Date,Map<String, Map<Scommessa,List<AbstractInputRecord>>>>();
 			put(sport, sportMap);
 		}
 		
+		Map<String, Map<Scommessa,List<AbstractInputRecord>>> dateMap = sportMap.get(record.getDataOraEvento());
+
+		if(dateMap == null) {
+			dateMap = new TreeMap<String, Map<Scommessa,List<AbstractInputRecord>>>();
+			sportMap.put(record.getDataOraEvento(), dateMap);
+		}
+		
 		//mappa relativa alle scommesse di un evento
-		Map<Scommessa,List<AbstractInputRecord>> eventoScommessaRecordsMap = sportMap.get(record.getKeyEvento());
+		Map<Scommessa,List<AbstractInputRecord>> eventoScommessaRecordsMap = dateMap.get(record.getKeyEvento());
 		
 		//key non esiste, va aggiunta per la prima volta
 		if(eventoScommessaRecordsMap == null) {
@@ -51,7 +60,7 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 			newList.add(record);
 			Map<Scommessa, List<AbstractInputRecord>> scommessaRecordsMap = new HashMap<Scommessa, List<AbstractInputRecord>>();
 			scommessaRecordsMap.put(record.getTipoScommessa(), newList);
-			sportMap.put(record.getKeyEvento(), scommessaRecordsMap);
+			dateMap.put(record.getKeyEvento(), scommessaRecordsMap);
 			
 		}else{
 			//ci sono già delle scommesse all'interno della mappa, il record di input 
