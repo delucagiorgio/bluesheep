@@ -15,6 +15,10 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
 public class CSVProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
+	
+	protected CSVProcessDataManager() {
+		super();
+	}
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(

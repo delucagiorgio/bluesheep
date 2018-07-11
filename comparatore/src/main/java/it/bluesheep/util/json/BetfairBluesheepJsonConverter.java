@@ -5,15 +5,8 @@ import org.json.JSONObject;
 
 public class BetfairBluesheepJsonConverter extends AbstractBluesheepJsonConverter {
 	
-	private BetfairBluesheepJsonConverter() {
+	public BetfairBluesheepJsonConverter() {
 		super();
-	}
-	
-	public synchronized static AbstractBluesheepJsonConverter getBetfairBluesheepJsonConverter() {
-		if(instance == null) {
-			instance = new BetfairBluesheepJsonConverter();
-		}
-		return instance;
 	}
 
 	@Override

@@ -17,6 +17,10 @@ import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
 public class BetfairExchangeProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents{
 		
+	protected BetfairExchangeProcessDataManager() {
+		super();
+	}
+	
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds
 					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception{

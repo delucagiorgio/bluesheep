@@ -43,7 +43,7 @@ public class InputDataHelper {
 		boolean excluded = false;
 		
 		while(itr.hasNext() && !excluded){
-			excluded = itr.next().equals(bookmakerRecordInput.toLowerCase());
+			excluded = itr.next().equalsIgnoreCase(bookmakerRecordInput.toLowerCase());
 		}
 		
 		return excluded;

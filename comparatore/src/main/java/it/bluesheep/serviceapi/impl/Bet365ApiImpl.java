@@ -236,7 +236,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	 *
 	 */
 	private static boolean loopCheck(String result) {
-		AbstractBluesheepJsonConverter jsonUtil = Bet365BluesheepJsonConverter.getBet365BluesheepJsonConverter();
+		AbstractBluesheepJsonConverter jsonUtil = new Bet365BluesheepJsonConverter();
 		JSONObject resultJSON = new JSONObject(result);
 		JSONObject pager = jsonUtil.getChildNodeByKey(resultJSON, PAGER);
 
@@ -284,7 +284,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	 * @return una collezione di eventi mappati con le informazioni necessarie
 	 */
 	private List<EventoBet365> mapEventsIntoEventoClass(List<String> resultEventsJSON) {
-		AbstractBluesheepJsonConverter jsonUtil = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
+		AbstractBluesheepJsonConverter jsonUtil = new BetfairBluesheepJsonConverter();
 		List<EventoBet365> mappedEvents = new ArrayList<EventoBet365>();
 		
 		for (int j = 0; j < resultEventsJSON.size();j++) {

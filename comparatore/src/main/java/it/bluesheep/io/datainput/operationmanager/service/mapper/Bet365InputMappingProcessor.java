@@ -11,9 +11,7 @@ import it.bluesheep.entities.input.record.Bet365InputRecord;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.Bet365BluesheepJsonConverter;
-import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
 public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 
@@ -31,16 +29,20 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	private static final String HEADER_JSON_STRING = "header";
 	private static final String TO_WIN_MATCH_JSON_STRING = "to_win_match";
 	
+	public Bet365InputMappingProcessor() {
+		super();
+		jsonConverter = new Bet365BluesheepJsonConverter();
+	}
+	
 	
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 		
-		AbstractBluesheepJsonConverter jsonUtil = Bet365BluesheepJsonConverter.getBet365BluesheepJsonConverter();
 		
 		JSONObject jsonObject = new JSONObject(jsonString);
 		
 		//Ottieni risultati della chiamata relativi alle quote
-		JSONArray resultArrayJSONObject = jsonUtil.getChildNodeArrayByKey(jsonObject, RESULT_JSON_STRING);
+		JSONArray resultArrayJSONObject = jsonConverter.getChildNodeArrayByKey(jsonObject, RESULT_JSON_STRING);
 		int successString = jsonObject.getInt(SUCCESS_JSON_STRING);
 		
 
@@ -84,7 +86,6 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	 * @return insieme di record in cui sono mappate le informazioni relative alle quote e alla loro tipologia
 	 */
 	private AbstractInputRecord mapOddsIntoAbstractInputRecord(Bet365InputRecord tempRecord, JSONObject resultJSONObject, Scommessa scommessaTipo, Sport sport) {
-		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 
 		Bet365InputRecord recordToBeMapped = null;
 		

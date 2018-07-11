@@ -17,6 +17,8 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.CSVInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datainput.IInputDataManager;
+import it.bluesheep.io.datainput.operationmanager.service.impl.InputDataManagerImpl;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
@@ -25,7 +27,7 @@ import it.bluesheep.util.DirectoryFileUtilManager;
  * @author Giorgio De Luca	
  *
  */
-public class CSVInputDataManagerImpl {
+public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IInputDataManager{
 
 	private static Logger logger;
 	private static final String SEPARATOR = ";";
@@ -46,11 +48,13 @@ public class CSVInputDataManagerImpl {
 	private String csvFilenamePath;
 	
 	
-	public CSVInputDataManagerImpl() {
+	public CSVInputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+		super(sport, allServiceApiMapResult);
 		logger = (new BlueSheepLogger(CSVInputDataManagerImpl.class)).getLogger();
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
 		csvFilenamePath = BlueSheepComparatoreMain.getProperties().getProperty(PATH_INPUT_FILE);
 		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
+		this.serviceName = "CSV";
 	}
 	
 	/**
@@ -58,7 +62,8 @@ public class CSVInputDataManagerImpl {
 	 * Avvia il processo di input dati da CSV
 	 * @return una lista di record pronti per la comparazione quote
 	 */
-	public List<AbstractInputRecord> processManualOddsByCsv(){
+	@Override
+	public List<AbstractInputRecord> processAllData() {
 		
 		logger.info("Starting CSV input process");
 		
@@ -235,5 +240,16 @@ public class CSVInputDataManagerImpl {
 			keyValueMap.put(SPORT, splittedLine[SPORT]);
 		}
 		return keyValueMap;
+	}
+
+	@Override
+	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa,
+			Sport sport) {
+		return null;
+	}
+
+	@Override
+	protected List<Scommessa> getCombinazioniSportScommessa(Sport sport) {
+		return null;
 	}
 }

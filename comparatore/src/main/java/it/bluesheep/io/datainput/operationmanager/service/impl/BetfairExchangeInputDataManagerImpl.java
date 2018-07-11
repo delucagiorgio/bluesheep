@@ -20,11 +20,12 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 	private Map<String, Map<String, EventoBetfair>> scommessaMapMarketIdEventoMap;
 
 
-	public BetfairExchangeInputDataManagerImpl() {
-		super();
+	protected BetfairExchangeInputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+		super(sport, allServiceApiMapResult);
 		processor = new BetfairInputMappingProcessor();
 		apiServiceInterface = new BetFairApiImpl();
 		scommessaMapMarketIdEventoMap = new HashMap<String, Map<String,EventoBetfair>>();
+		this.serviceName = "BETFAIR";
 	}
 
 

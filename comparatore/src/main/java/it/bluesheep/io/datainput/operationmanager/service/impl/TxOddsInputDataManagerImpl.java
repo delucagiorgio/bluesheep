@@ -2,6 +2,7 @@ package it.bluesheep.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.ScommessaUtilManager;
@@ -15,8 +16,9 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 	
 	private AbstractInputMappingProcessor processor;
 	
-	public TxOddsInputDataManagerImpl() {
-		super();
+	protected TxOddsInputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+		super(sport, allServiceApiMapResult);
+		this.serviceName = "TX_ODDS";
 		processor = new TxOddsInputMappingProcessor();
 		apiServiceInterface = new TxOddsApiImpl();
 	}

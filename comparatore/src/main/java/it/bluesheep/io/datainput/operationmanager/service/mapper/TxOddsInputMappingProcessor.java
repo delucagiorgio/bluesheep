@@ -17,7 +17,6 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.util.DirectoryFileUtilManager;
-import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
 
 /**
@@ -49,12 +48,13 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	public TxOddsInputMappingProcessor() {
 		super();
 		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
+		jsonConverter = new TxOddsBluesheepJsonConverter();
+
 	}
 	
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 		
-		AbstractBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
 		JSONObject jsonRootObject = new JSONObject(jsonString);
 		
@@ -103,8 +103,6 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	 * @return i record omologati relativi al match passato come parametro sulla determinata scommessa
 	 */
 	private List<AbstractInputRecord> mapInfoBookmakersIntoAbstractInputRecordList(TxOddsInputRecord recordToBeMapped, JSONObject matchJsonObject, Scommessa scommessaTipo, Sport sport) {
-		
-		AbstractBluesheepJsonConverter jsonConverter = TxOddsBluesheepJsonConverter.getTxOddsBluesheepJsonConverter();
 		
 		//Insieme di tutti i bookmaker che offrono quote sul match e scommessa in analisi 
 		JSONArray bookmakersArrayJSONObject = jsonConverter.getChildNodeArrayByKey(matchJsonObject, BOOKMAKER_JSON_STRING);

@@ -35,7 +35,6 @@ public class TxOddsApiImpl implements IApiInterface {
 	
 	public TxOddsApiImpl() {
 		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();
-
 		daysInterval = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
 	}
 	

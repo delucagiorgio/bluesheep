@@ -18,7 +18,7 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
  */
 public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 	
-	public TxOddsProcessDataManager() {
+	protected TxOddsProcessDataManager() {
 		super();
 	}
 	

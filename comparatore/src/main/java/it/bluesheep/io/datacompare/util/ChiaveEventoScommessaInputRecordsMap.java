@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
@@ -25,7 +26,7 @@ import it.bluesheep.entities.util.sport.Sport;
  * @author Giorgio De Luca
  *
  */
-public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Map<Date,Map<String,Map<Scommessa, List<AbstractInputRecord>>>>>{
+public final class ChiaveEventoScommessaInputRecordsMap extends ConcurrentHashMap<Sport,Map<Date,Map<String,Map<Scommessa, List<AbstractInputRecord>>>>>{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -33,9 +34,12 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 		super();
 	}
 
-	public void addToMapEventoScommessaRecord(AbstractInputRecord record, Sport sport) {
+	public void addToMapEventoScommessaRecord(AbstractInputRecord record) {
+		
+		Sport sport = record.getSport();
 		
 		Map<Date, Map<String, Map<Scommessa,List<AbstractInputRecord>>>> sportMap = get(sport);
+		
 		
 		if(sportMap == null) {
 			sportMap = new TreeMap<Date, Map<String, Map<Scommessa,List<AbstractInputRecord>>>>();
@@ -79,10 +83,4 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 			}
 		}
 	}
-
-	public void addToMapEventoScommessaRecord(AbstractInputRecord csvRecord) {
-		String keyEventoString = csvRecord.getKeyEvento();
-		String[] splittedKeyEvento = keyEventoString.split("\\|");
-		addToMapEventoScommessaRecord(csvRecord, Sport.valueOf(splittedKeyEvento[1]));
-	}	
 }

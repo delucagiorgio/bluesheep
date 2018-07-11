@@ -15,7 +15,10 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 
 public class Bet365ProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
-
+	
+	protected Bet365ProcessDataManager() {
+		super();
+	}
 	
 	@Override
 	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport) throws Exception {

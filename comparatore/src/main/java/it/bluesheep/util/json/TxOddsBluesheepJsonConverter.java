@@ -5,15 +5,8 @@ import org.json.JSONObject;
 
 public class TxOddsBluesheepJsonConverter extends AbstractBluesheepJsonConverter {
 	
-	private TxOddsBluesheepJsonConverter() {
+	public TxOddsBluesheepJsonConverter() {
 		super();
-	}
-	
-	public synchronized static AbstractBluesheepJsonConverter getTxOddsBluesheepJsonConverter() {
-		if(instance == null) {
-			instance = new TxOddsBluesheepJsonConverter();
-		}
-		return instance;
 	}
 	
 	/**

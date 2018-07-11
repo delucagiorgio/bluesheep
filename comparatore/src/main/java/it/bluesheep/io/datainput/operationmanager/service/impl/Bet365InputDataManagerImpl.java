@@ -19,11 +19,12 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 	private AbstractInputMappingProcessor processor;
 	private Map<String,Map<String, EventoBet365>> eventoIdEventoBet365Map;
 	
-	public Bet365InputDataManagerImpl() {
-		super();
+	protected Bet365InputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+		super(sport, allServiceApiMapResult);
 		processor = new Bet365InputMappingProcessor();
 		apiServiceInterface = new Bet365ApiImpl();
 		eventoIdEventoBet365Map = new HashMap<String, Map<String, EventoBet365>>();
+		this.serviceName = "BET365";
 	}
 	
 	@Override

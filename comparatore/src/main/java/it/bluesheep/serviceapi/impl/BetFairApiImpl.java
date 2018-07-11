@@ -215,7 +215,7 @@ public class BetFairApiImpl implements IApiInterface {
 	 */
 	private List<String> mergeInfoEventoAndReturnMarketIdsList(Map<String, EventoBetfair> idEventoMap, String resultMarketIdJSON) {
 		
-		AbstractBluesheepJsonConverter jsonUtil = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
+		AbstractBluesheepJsonConverter jsonUtil = new BetfairBluesheepJsonConverter();
 		List<String> marketIds = new ArrayList<String>();
 		if(idEventoMap != null && !idEventoMap.isEmpty()) {
 			JSONObject catMarketJSON = new JSONObject(resultMarketIdJSON);
@@ -251,7 +251,7 @@ public class BetFairApiImpl implements IApiInterface {
 	 * @return una collezione di eventi mappati con le informazioni necessarie
 	 */
 	private List<EventoBetfair> mapEventsIntoEventoBetfairClass(String resultEventsJSON) {
-		AbstractBluesheepJsonConverter jsonUtil = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
+		AbstractBluesheepJsonConverter jsonUtil = new BetfairBluesheepJsonConverter();
 		
 		List<EventoBetfair> mappedEvents = new ArrayList<EventoBetfair>();
 		

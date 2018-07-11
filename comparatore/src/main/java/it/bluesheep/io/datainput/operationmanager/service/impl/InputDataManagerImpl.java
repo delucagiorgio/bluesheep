@@ -24,9 +24,14 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	protected IApiInterface apiServiceInterface;
 	protected Map<String, List<String>> scommessaJsonListMap;
 	protected static Logger logger;
+	protected Sport sport;
+	protected String serviceName;
+	private Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
 	
-	protected InputDataManagerImpl() {
+	protected InputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		logger = (new BlueSheepLogger(InputDataManagerImpl.class)).getLogger();
+		this.sport = sport;
+		this.allServiceApiMapResult = allServiceApiMapResult;
 	}
 
 	/**
@@ -61,7 +66,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * @return una lista di AbstractInputRecord relativi allo sport passato come parametro 
 	 * 		   e alle tipologie di scommessa previste per tale sport
 	 */
-	public List<AbstractInputRecord> processAllData(Sport sport){
+	public List<AbstractInputRecord> processAllData(){
 				
 		logger.info("Starting processing data for sport " + sport);
 		
@@ -105,4 +110,23 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 * @return la lista di scommesse filtrate per lo sport passato come parametro
 	 */
 	protected abstract List<Scommessa> getCombinazioniSportScommessa(Sport sport);
+	
+	@Override
+	public void run() {
+		
+		List<AbstractInputRecord> resultList = processAllData();
+		
+		logger.info("X123: Service name = " + serviceName + ", resultList size " + resultList.size() + ", sport " + sport);
+		
+		Map<Sport, List<AbstractInputRecord>> sportByManagerName = allServiceApiMapResult.get(serviceName);
+		
+		if(sportByManagerName == null) {
+			sportByManagerName = new HashMap<Sport, List<AbstractInputRecord>>();
+			allServiceApiMapResult.put(serviceName, sportByManagerName);
+		}
+		
+		sportByManagerName.put(sport, resultList);
+		
+	}
+	
 }

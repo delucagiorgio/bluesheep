@@ -109,7 +109,9 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 					
 					AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
 					
-					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) { 
+					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName()) 
+							&& !"Betfair Exchange".equalsIgnoreCase(oppositeScommessaInputRecord.getBookmakerName()) 
+							&& !"Betfair Exchange".equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) { 
 						
 						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
 						

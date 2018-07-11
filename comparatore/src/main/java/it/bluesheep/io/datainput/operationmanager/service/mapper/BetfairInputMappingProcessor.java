@@ -10,7 +10,6 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
-import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
 public final class BetfairInputMappingProcessor extends AbstractInputMappingProcessor{
@@ -23,10 +22,14 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	private static final String PRICE_JSON_STRING = "price";
 	private static final String SIZE_JSON_STRING = "size";
 
+	public BetfairInputMappingProcessor() {
+		super();
+		jsonConverter = new BetfairBluesheepJsonConverter();
+	}
+	
 	@Override
 	public List<AbstractInputRecord> mapInputRecordIntoAbstractInputRecord(String jsonString, Scommessa scommessaTipo, Sport sport) {
 				
-		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 		
 		JSONObject jsonObject = new JSONObject(jsonString);
 		
@@ -71,8 +74,6 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	 */
 	private AbstractInputRecord mapOddsIntoAbstractInputRecord(BetfairExchangeInputRecord tempRecord, 
 			JSONObject resultJSONObject, Scommessa scommessaTipo, Sport sport) {
-		
-		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 		
 		BetfairExchangeInputRecord recordToBeMapped  = null;
 		//Solitamente più di uno, rappresentano i dettagli delle quote
