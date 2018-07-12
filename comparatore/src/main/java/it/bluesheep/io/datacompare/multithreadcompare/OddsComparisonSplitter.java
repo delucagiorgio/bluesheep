@@ -15,6 +15,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.multithreadcompare.comparehelper.CompareThreadHelperFactory;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.util.BlueSheepLogger;
 
 public class OddsComparisonSplitter {
@@ -29,7 +30,7 @@ public class OddsComparisonSplitter {
 		threadComparisonResultMap = new ConcurrentHashMap<String, List<RecordOutput>>();
 	}
 	
-	public List<RecordOutput> startComparisonOdds(ChiaveEventoScommessaInputRecordsMap map, Sport sport, String comparisonType) {
+	public List<RecordOutput> startComparisonOdds(ChiaveEventoScommessaInputRecordsMap map, Sport sport, Service txoddsServicename) {
 		
 		List<RecordOutput> returnList = new ArrayList<RecordOutput>();
 		
@@ -45,7 +46,7 @@ public class OddsComparisonSplitter {
 			
 			int startIndex = i * pageSize;
 			int endIndex = i == (CONCURRENT_COMPARISON_THREAD - 1) ? keysList.size() : startIndex + pageSize;
-			startNewComparisonThread(keysList.subList(startIndex, endIndex), dataToBeSplitted, threadComparisonResultMap, comparisonType, sport);
+			startNewComparisonThread(keysList.subList(startIndex, endIndex), dataToBeSplitted, threadComparisonResultMap, txoddsServicename, sport);
 		}
 		
 		//Attende il tempo di timeout o la completa esecuzione corretta delle richieste
@@ -74,7 +75,7 @@ public class OddsComparisonSplitter {
 	private void startNewComparisonThread(List<Date> subList,
 			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataToBeSplitted, 
 			Map<String, List<RecordOutput>> threadComparisonResultMap,
-			String comparisonType, Sport sport) {
+			Service comparisonType, Sport sport) {
 		
 		executor.submit(CompareThreadHelperFactory.
 				getCorrectCompareThreadHelperByString(comparisonType, 

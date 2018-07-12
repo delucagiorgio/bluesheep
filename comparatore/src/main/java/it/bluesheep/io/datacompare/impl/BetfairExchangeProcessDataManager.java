@@ -14,6 +14,7 @@ import it.bluesheep.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.io.datacompare.multithreadcompare.OddsComparisonSplitter;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
+import it.bluesheep.serviceapi.Service;
 
 public class BetfairExchangeProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents{
 		
@@ -63,7 +64,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();	
 		OddsComparisonSplitter oddsComparisonSplitter = new OddsComparisonSplitter();
-		mappedOutputRecord = oddsComparisonSplitter.startComparisonOdds(sportMap, sport, "BETFAIR");
+		mappedOutputRecord = oddsComparisonSplitter.startComparisonOdds(sportMap, sport, Service.BETFAIR_SERVICENAME);
 		
 		return mappedOutputRecord;
 			

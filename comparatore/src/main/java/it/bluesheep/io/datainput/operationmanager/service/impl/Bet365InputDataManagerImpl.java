@@ -12,6 +12,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
 import it.bluesheep.io.datainput.operationmanager.service.mapper.Bet365InputMappingProcessor;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.serviceapi.impl.Bet365ApiImpl;
 
 public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
@@ -19,12 +20,12 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 	private AbstractInputMappingProcessor processor;
 	private Map<String,Map<String, EventoBet365>> eventoIdEventoBet365Map;
 	
-	protected Bet365InputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	protected Bet365InputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		super(sport, allServiceApiMapResult);
 		processor = new Bet365InputMappingProcessor();
 		apiServiceInterface = new Bet365ApiImpl();
 		eventoIdEventoBet365Map = new HashMap<String, Map<String, EventoBet365>>();
-		this.serviceName = "BET365";
+		this.serviceName = Service.BET365_SERVICENAME;
 	}
 	
 	@Override

@@ -8,6 +8,7 @@ import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.io.datacompare.multithreadcompare.OddsComparisonSplitter;
 import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
+import it.bluesheep.serviceapi.Service;
 
 /**
  * Classe utilizzata per definire i metodi su cui si basa la comparazione di quote tra i vari
@@ -27,7 +28,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();
 		OddsComparisonSplitter oddsComparisonSplitter = new OddsComparisonSplitter();
-		mappedOutputRecord = oddsComparisonSplitter.startComparisonOdds(sportMap, sport, "TX_ODDS");
+		mappedOutputRecord = oddsComparisonSplitter.startComparisonOdds(sportMap, sport, Service.TXODDS_SERVICENAME);
 
 		return mappedOutputRecord;
 	}

@@ -48,5 +48,9 @@ public class InputDataHelper {
 		
 		return excluded;
 	}
+
+	public List<String> getExcludedBookmakers() {
+		return excludedBookmakers;
+	}
 	
 }

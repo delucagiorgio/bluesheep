@@ -11,6 +11,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.serviceapi.IApiInterface;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.util.BlueSheepLogger;
 
 /**
@@ -25,10 +26,10 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	protected Map<String, List<String>> scommessaJsonListMap;
 	protected static Logger logger;
 	protected Sport sport;
-	protected String serviceName;
-	private Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
+	protected Service serviceName;
+	private Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
 	
-	protected InputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	protected InputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		logger = (new BlueSheepLogger(InputDataManagerImpl.class)).getLogger();
 		this.sport = sport;
 		this.allServiceApiMapResult = allServiceApiMapResult;

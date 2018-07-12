@@ -19,6 +19,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.io.datainput.operationmanager.service.impl.InputDataManagerImpl;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
@@ -48,13 +49,13 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 	private String csvFilenamePath;
 	
 	
-	public CSVInputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	public CSVInputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		super(sport, allServiceApiMapResult);
 		logger = (new BlueSheepLogger(CSVInputDataManagerImpl.class)).getLogger();
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
 		csvFilenamePath = BlueSheepComparatoreMain.getProperties().getProperty(PATH_INPUT_FILE);
 		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
-		this.serviceName = "CSV";
+		this.serviceName = Service.CSV_SERVICENAME;
 	}
 	
 	/**

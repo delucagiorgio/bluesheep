@@ -10,15 +10,16 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
 import it.bluesheep.io.datainput.operationmanager.service.mapper.TxOddsInputMappingProcessor;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.serviceapi.impl.TxOddsApiImpl;
 
 public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 	
 	private AbstractInputMappingProcessor processor;
 	
-	protected TxOddsInputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	protected TxOddsInputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		super(sport, allServiceApiMapResult);
-		this.serviceName = "TX_ODDS";
+		this.serviceName = Service.TXODDS_SERVICENAME;
 		processor = new TxOddsInputMappingProcessor();
 		apiServiceInterface = new TxOddsApiImpl();
 	}

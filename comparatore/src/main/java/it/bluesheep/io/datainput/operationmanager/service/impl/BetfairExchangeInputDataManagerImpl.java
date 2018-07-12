@@ -12,6 +12,7 @@ import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
 import it.bluesheep.io.datainput.operationmanager.service.mapper.BetfairInputMappingProcessor;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.serviceapi.impl.BetFairApiImpl;
 
 public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerImpl {
@@ -20,12 +21,12 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 	private Map<String, Map<String, EventoBetfair>> scommessaMapMarketIdEventoMap;
 
 
-	protected BetfairExchangeInputDataManagerImpl(Sport sport, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	protected BetfairExchangeInputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		super(sport, allServiceApiMapResult);
 		processor = new BetfairInputMappingProcessor();
 		apiServiceInterface = new BetFairApiImpl();
 		scommessaMapMarketIdEventoMap = new HashMap<String, Map<String,EventoBetfair>>();
-		this.serviceName = "BETFAIR";
+		this.serviceName = Service.BETFAIR_SERVICENAME;
 	}
 
 

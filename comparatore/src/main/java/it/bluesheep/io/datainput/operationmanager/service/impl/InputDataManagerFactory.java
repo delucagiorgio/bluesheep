@@ -7,20 +7,21 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datainput.IInputDataManager;
 import it.bluesheep.io.datainput.operationmanager.csv.CSVInputDataManagerImpl;
+import it.bluesheep.serviceapi.Service;
 
 public class InputDataManagerFactory {
 	
 	private InputDataManagerFactory() {}
 	
-	public static IInputDataManager getInputDataManagerByString(Sport sport, String serviceApiName, Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	public static IInputDataManager getInputDataManagerByString(Sport sport, Service serviceApiName, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		switch(serviceApiName){
-			case "TX_ODDS":
+			case TXODDS_SERVICENAME:
 				return new TxOddsInputDataManagerImpl(sport, allServiceApiMapResult);
-			case "BETFAIR":
+			case BETFAIR_SERVICENAME:
 				return new BetfairExchangeInputDataManagerImpl(sport, allServiceApiMapResult);
-			case "BET365":
+			case BET365_SERVICENAME:
 				return new Bet365InputDataManagerImpl(sport, allServiceApiMapResult);
-			case "CSV":
+			case CSV_SERVICENAME:
 				return new CSVInputDataManagerImpl(sport, allServiceApiMapResult);
 			default:
 				return null;

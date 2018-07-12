@@ -23,6 +23,7 @@ import it.bluesheep.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.io.datainput.operationmanager.service.impl.InputDataManagerFactory;
 import it.bluesheep.io.datainput.operationmanager.service.util.InputDataHelper;
+import it.bluesheep.serviceapi.Service;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -31,9 +32,9 @@ public class ComparisonOperationManager {
 	
 	private static Logger logger;
 	private static ComparisonOperationManager instance;
-	private static Map<String, List<Sport>> serviceSportMap;
-	private static Map<String, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
-	private static String[] splittedServiceName;
+	private static Map<Service, List<Sport>> serviceSportMap;
+	private static Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
+	private static String[] activeServiceAPI;
 	private static long startTime;
 
 	private ExecutorService executor;
@@ -48,33 +49,40 @@ public class ComparisonOperationManager {
 			instance = new ComparisonOperationManager();
 			logger.info("ComparisonOperationManager initialized");
 			logger.info(BlueSheepComparatoreMain.getProperties().entrySet().toString());
-			allServiceApiMapResult = new ConcurrentHashMap<String, Map<Sport,List<AbstractInputRecord>>>();
-			splittedServiceName = BlueSheepComparatoreMain.getProperties().getProperty("SERVICE_NAME").split(",");
+			allServiceApiMapResult = new ConcurrentHashMap<Service, Map<Sport,List<AbstractInputRecord>>>();
+			activeServiceAPI = BlueSheepComparatoreMain.getProperties().getProperty("SERVICE_NAME").split(",");
 		}
 		return instance;
 	}
 	
+	/**
+	 * GD - 12/07/18
+	 * Prepara la mappa dei servizi con i relativi sport da calcolare, ignorando quelli esclusi dalle proprietà
+	 */
 	private void populateServiceSportMap() {
 		
-		if(splittedServiceName != null) {
-			for(String serviceName : splittedServiceName) {
+		InputDataHelper inputDataHelper = new InputDataHelper();
+		
+		if(activeServiceAPI != null) {
+			for(String serviceNameString : activeServiceAPI) {
 				List<Sport> sportList = new ArrayList<Sport>();
-				if(serviceName != null) {
+				Service serviceName = Service.getServiceFromString(serviceNameString);
+				if(serviceName != null && !inputDataHelper.isBlockedBookmaker(serviceNameString)) {
 					switch(serviceName) {
-						case "TX_ODDS":
-						case "BETFAIR":
-						case "BET365":
+						case TXODDS_SERVICENAME:
+						case BETFAIR_SERVICENAME:
+						case BET365_SERVICENAME:
 							sportList = Arrays.asList(Sport.CALCIO, Sport.TENNIS);
-							serviceSportMap.put(serviceName, sportList);
 							break;
-						case "CSV":
+						case CSV_SERVICENAME:
 							//Generico, per dare omogeneità al processo
 							sportList = Arrays.asList(Sport.CALCIO);
-							serviceSportMap.put(serviceName, sportList);
 							break;
 						default:
-							break;
+							//La mappa non viene inizializzata, nessun processo prende luogo.
+							return;
 					}
+					serviceSportMap.put(serviceName, sportList);
 				}
 			}
 		}
@@ -89,7 +97,7 @@ public class ComparisonOperationManager {
 	public void startProcess() {
 		
 		if(serviceSportMap == null) {
-			serviceSportMap = new HashMap<String, List<Sport>>();
+			serviceSportMap = new HashMap<Service, List<Sport>>();
 			populateServiceSportMap();
 		}
 	
@@ -107,47 +115,61 @@ public class ComparisonOperationManager {
 		
 	}
 
+	/**
+	 * GD - 11/07/18
+	 * Avvia la comparazione delle quote del punta-punta e del punta banca per gli sport attivi. Salva i risultati in nel file JSON
+	 * con filename uguale al timestamp dello start
+	 */
 	private void startComparisonOddsAndSaveOnFileJSON() {
 		
 		IProcessDataManager processDataManager;
 		List<RecordOutput> tabellaOutputList = new ArrayList<RecordOutput>();
 		
-		processDataManager = ProcessDataManagerFactory.getProcessDataManagerByString("TX_ODDS");
+		processDataManager = ProcessDataManagerFactory.getProcessDataManagerByString(Service.TXODDS_SERVICENAME);
 		for(Sport sport : Sport.values()) {
 			try {
-				tabellaOutputList.addAll(processDataManager.compareOdds(eventoScommessaRecordMap, sport));
+				List<RecordOutput> outputRecord = processDataManager.compareOdds(eventoScommessaRecordMap, sport);
+				tabellaOutputList.addAll(outputRecord);
+				logger.info("Punta-Punta :: Odds comparison result size for sport " + sport + " is " + outputRecord.size());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				logger.severe(e.getMessage());
 			}
 		}
 		
-		saveOutputOnFile("TX_ODDS", tabellaOutputList);
+		logger.info("Punta-Punta odds comparison size for all sport is " + tabellaOutputList.size());
+		
+		saveOutputOnFile(Service.TXODDS_SERVICENAME, tabellaOutputList);
 		
 		tabellaOutputList.clear();
 		
-		processDataManager = ProcessDataManagerFactory.getProcessDataManagerByString("BETFAIR");
+		processDataManager = ProcessDataManagerFactory.getProcessDataManagerByString(Service.BETFAIR_SERVICENAME);
 
 		for(Sport sport : Sport.values()) {
 			try {
-				tabellaOutputList.addAll(processDataManager.compareOdds(eventoScommessaRecordMap, sport));
+				List<RecordOutput> outputRecord = processDataManager.compareOdds(eventoScommessaRecordMap, sport);
+				tabellaOutputList.addAll(outputRecord);
+				logger.info("Punta-Banca :: Odds comparison result size for sport " + sport + " is " + outputRecord.size());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				logger.severe(e.getMessage());
 			}
 		}
 		
-		saveOutputOnFile("BETFAIR", tabellaOutputList);
+		logger.info("Punta-Banca odds comparison size for all sport is " + tabellaOutputList.size());
+
+		
+		saveOutputOnFile(Service.BETFAIR_SERVICENAME, tabellaOutputList);
 		
 		tabellaOutputList.clear();
 	}
 
-	private void saveOutputOnFile(String string, List<RecordOutput> tabellaOutputList) {
+	private void saveOutputOnFile(Service serviceName, List<RecordOutput> tabellaOutputList) {
 		
 		String pathTable = null;
-		if("BETFAIR".equalsIgnoreCase(string)) {
+		if(Service.BETFAIR_SERVICENAME.equals(serviceName)) {
 			pathTable = "PATH_OUTPUT_TABLE1";
-		}else if("TX_ODDS".equalsIgnoreCase(string)) {
+		}else if(Service.TXODDS_SERVICENAME.equals(serviceName)) {
 			pathTable = "PATH_OUTPUT_TABLE2";
 		}
 		
@@ -177,10 +199,12 @@ public class ComparisonOperationManager {
 
 	private void startProcessingDataTransformation() {
 		
-		if(splittedServiceName != null) {
-			for(String serviceName : splittedServiceName) {
+		if(activeServiceAPI != null) {
+			for(Service serviceName : serviceSportMap.keySet()) {
 
-				if("BETFAIR".equals(serviceName) || "BET365".equals(serviceName) || "CSV".equals(serviceName)) {
+				if(Service.BETFAIR_SERVICENAME.equals(serviceName) 
+						|| Service.BET365_SERVICENAME.equals(serviceName)
+						|| Service.CSV_SERVICENAME.equals(serviceName)) {
 					ICompareInformationEvents processDataManager = ProcessDataManagerFactory.getICompareInformationEventsByString(serviceName);
 					Map<Sport,List<AbstractInputRecord>> serviceNameInputData = allServiceApiMapResult.get(serviceName);
 					List<AbstractInputRecord> allRecords = new ArrayList<AbstractInputRecord>();
@@ -196,9 +220,18 @@ public class ComparisonOperationManager {
 						} catch (Exception e) {
 							logger.severe("Error in processingDataTransformation. Error message is : " + e.getMessage());
 						}
-
 					}
 				}
+			}
+			
+			//TODO: da modificare
+			ICompareInformationEvents processDataManager = ProcessDataManagerFactory.getICompareInformationEventsByString(Service.CSV_SERVICENAME);
+			List<AbstractInputRecord> transformedRecords = new ArrayList<AbstractInputRecord>();
+			try {
+				transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(allServiceApiMapResult.get(Service.CSV_SERVICENAME).get(Sport.TENNIS), eventoScommessaRecordMap);
+				addToChiaveEventoScommessaMap(transformedRecords);
+			} catch (Exception e) {
+				logger.severe("Error in processingDataTransformation. Error message is : " + e.getMessage());
 			}
 		}
 		
@@ -212,7 +245,7 @@ public class ComparisonOperationManager {
 
 	private void startDataRetrivial() {
 
-		executor = Executors.newFixedThreadPool(splittedServiceName.length);
+		executor = Executors.newFixedThreadPool(activeServiceAPI.length);
 		
 		//inizializzo le variabili necessarie per effettuare tutte le chiamate
 		eventoScommessaRecordMap = new ChiaveEventoScommessaInputRecordsMap();
@@ -224,10 +257,10 @@ public class ComparisonOperationManager {
 	}
 
 	private void populateMapWithInputRecord() {
-		InputDataHelper inputDataHelper = new InputDataHelper();
 
-		for(String apiServiceName : serviceSportMap.keySet()) {
-			if(!inputDataHelper.isBlockedBookmaker(apiServiceName)) {
+		InputDataHelper inputDataHelper = new InputDataHelper();		
+		for(Service apiServiceName : serviceSportMap.keySet()) {
+			if(!inputDataHelper.getExcludedBookmakers().contains(apiServiceName.getCode().toLowerCase())) {
 				for(Sport sport : serviceSportMap.get(apiServiceName)) {
 					executor.submit(InputDataManagerFactory.getInputDataManagerByString(sport, apiServiceName, allServiceApiMapResult));
 				}
@@ -237,49 +270,23 @@ public class ComparisonOperationManager {
 		long startWaitTime = System.currentTimeMillis();
 		int maxMinWait = 3;
 		
-		List<String> serviceNameList = new ArrayList<String>();
+		Map<Service, Boolean> serviceNameStatusMap = new HashMap<Service, Boolean>();
 		
-		for(String string : splittedServiceName) {
-			serviceNameList.add(string);
+		for(Service serviceName : serviceSportMap.keySet()) {
+			serviceNameStatusMap.put(serviceName, Boolean.FALSE);
 		}
-		
-		boolean txOddsFinished = !serviceNameList.contains("TX_ODDS");
-		boolean bet365Finished = !serviceNameList.contains("BET365");
-		boolean csvFinished = !serviceNameList.contains("CSV");
-		boolean betfairFinished = !serviceNameList.contains("BETFAIR");
-		
+		Boolean atLeastOneNotFinished;
 		do {
-			if(!txOddsFinished) {
-				String name = "TX_ODDS";
-				txOddsFinished = allServiceApiMapResult.get(name) != null && 
-						allServiceApiMapResult.get(name).keySet().size() == serviceSportMap.get(name).size();
+			verifyStatusServiceQuery(serviceNameStatusMap);
+			
+			atLeastOneNotFinished = true;
+			
+			for(Service statusService : serviceNameStatusMap.keySet()) {
+				atLeastOneNotFinished = atLeastOneNotFinished && serviceNameStatusMap.get(statusService);
 			}
 			
-			if(!bet365Finished) {
-				String name = "BET365";
-				bet365Finished = allServiceApiMapResult.get(name) != null && 
-						allServiceApiMapResult.get(name).keySet().size() == serviceSportMap.get(name).size();
-			}
-			
-			if(!csvFinished) {
-				String name = "CSV";
-				csvFinished = allServiceApiMapResult.get(name) != null && 
-						allServiceApiMapResult.get(name).keySet().size() == serviceSportMap.get(name).size();
-			}
-			
-			if(!betfairFinished) {
-				String name = "BETFAIR";
-				betfairFinished = allServiceApiMapResult.get(name) != null && 
-						allServiceApiMapResult.get(name).keySet().size() == serviceSportMap.get(name).size();
-			}
-			
-			boolean atLeastOneNotFinished =  !(betfairFinished && csvFinished && bet365Finished && txOddsFinished);
-			
-			if(atLeastOneNotFinished) {
-				logger.info("Status input data: TxOdds " + txOddsFinished
-						+ " Bet365 " + bet365Finished
-						+ " CSV " + csvFinished
-						+ " Betfair " + betfairFinished);
+			if(!atLeastOneNotFinished) {
+				logger.info("Status input data: " +  serviceNameStatusMap);
 				logger.info("WAITING FOR INPUT RETRIVIAL PHASE: remaining time to close pool thread " + ((
 						maxMinWait * 60 * 1000L + startWaitTime) - System.currentTimeMillis())/1000 + " seconds");
 				try {
@@ -289,18 +296,34 @@ public class ComparisonOperationManager {
 				}
 			}
 			
-		}while((!txOddsFinished || !bet365Finished || !csvFinished || !betfairFinished) 
+		}while(!atLeastOneNotFinished 
 				&& System.currentTimeMillis() - startWaitTime < maxMinWait * 60 * 1000L);
 		
 		logger.info("Data retrieval terminated. Adding to chiaveEventoScommessaMap TxOdds events");
 		
 		for(Sport sport : Sport.values()) {
-			addToChiaveEventoScommessaMap(allServiceApiMapResult.get("TX_ODDS").get(sport));
+			addToChiaveEventoScommessaMap(allServiceApiMapResult.get(Service.TXODDS_SERVICENAME).get(sport));
 		}
 		
 		logger.info("Add to chiaveEventoScommessaMap TxOdds events finished");
 
 		
+	}
+
+	private void verifyStatusServiceQuery(Map<Service, Boolean> serviceNameStatusMap) {
+		
+		for(Service service : serviceNameStatusMap.keySet()) {
+			if(!serviceNameStatusMap.get(service)) {
+				Boolean finished = allServiceApiMapResult.get(service) != null && 
+						allServiceApiMapResult.get(service).keySet().size() == serviceSportMap.get(service).size();
+				
+				if(finished) {
+					logger.info("Service " + service + " has terminated");
+				}
+				
+				serviceNameStatusMap.put(service, finished);
+			}
+		}
 	}
 	
 }
