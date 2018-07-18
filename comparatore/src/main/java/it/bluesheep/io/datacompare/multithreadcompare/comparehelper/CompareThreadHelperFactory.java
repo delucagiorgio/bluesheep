@@ -14,7 +14,7 @@ public class CompareThreadHelperFactory {
 
 	private CompareThreadHelperFactory() {}
 	
-	public static CompareThreadHelper getCorrectCompareThreadHelperByString(Service comparisonType, 
+	public static synchronized CompareThreadHelper getCorrectCompareThreadHelperByString(Service comparisonType, 
 			List<Date> keyList, 
 			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataMap,
 			Map<String, List<RecordOutput>> oddsComparisonThreadMap, 

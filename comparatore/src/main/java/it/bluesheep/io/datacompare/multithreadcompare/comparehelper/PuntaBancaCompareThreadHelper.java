@@ -99,7 +99,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 		
 		for(AbstractInputRecord record : eventoScommessaRecordList) {
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord) {
+			if(!record.getBookmakerName().equals(exchangeRecord.getBookmakerName())) {
 				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
 				//se il rating1 è sufficientemente alto
 				if(rating1 >= minThreshold && 

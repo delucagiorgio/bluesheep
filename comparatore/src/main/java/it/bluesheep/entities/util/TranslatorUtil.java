@@ -43,7 +43,7 @@ public class TranslatorUtil {
         if(csvFileStream != null) {
 	        try {
 
-	            br = new BufferedReader(new InputStreamReader(csvFileStream));
+	            br = new BufferedReader(new InputStreamReader(csvFileStream, "UTF-8"));
 	            while ((line = br.readLine()) != null) {
 
 	                // use comma as separator
@@ -145,13 +145,17 @@ public class TranslatorUtil {
 				}
 				String countryCodeFootball = splittedCampionato[0].substring(startIndex, splittedCampionato[0].length());
 				String nation = TranslatorUtil.getNationTranslation(countryCodeFootball);
+				if(nation == null) {
+					nation = "";
+				}
+				recordOutput.setNazione(nation);
+
 				if("INT".equalsIgnoreCase(countryCodeFootball)) {
 					String[] eventoSplitted = recordOutput.getEvento().split("\\|");
 					String partecipante1 = getTraduzioneItaliana(eventoSplitted[0]);
 					String partecipante2 = getTraduzioneItaliana(eventoSplitted[1]);
 					recordOutput.setEvento(partecipante1 + "|" + partecipante2); 
 				}
-				recordOutput.setNazione(nation);
 			}
 		}
 		return recordOutput;

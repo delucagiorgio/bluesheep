@@ -58,7 +58,7 @@ public class CSVInputRecord extends AbstractInputRecord implements IKeyEventoCom
 			double cosSimPartecipant1 = csu.similarity(this.partecipante1, partecipante1);
 			double cosSimPartecipant2 = csu.similarity(this.partecipante2, partecipante2);
 			logger.info("Comparing players similarity: similarity for P1 = " + cosSimPartecipant1 + "; similarity for P2 = " + cosSimPartecipant2);
-			if(cosSimPartecipant1 < 0.8 || cosSimPartecipant2 < 0.8) {
+			if(cosSimPartecipant1 < 0.65 || cosSimPartecipant2 < 0.65) {
 				logger.warning("Similarity check doesn't achieve minimum score");
 				return false;
 			}else {

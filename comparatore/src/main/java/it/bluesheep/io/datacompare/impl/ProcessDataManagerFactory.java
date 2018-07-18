@@ -8,7 +8,7 @@ public class ProcessDataManagerFactory {
 	
 	private ProcessDataManagerFactory() {}
 	
-	public static IProcessDataManager getProcessDataManagerByString(Service service) {
+	public static synchronized IProcessDataManager getProcessDataManagerByString(Service service) {
 		switch(service) {
 		case TXODDS_SERVICENAME:
 			return new TxOddsProcessDataManager();
@@ -23,7 +23,7 @@ public class ProcessDataManagerFactory {
 		}
 	}
 	
-	public static ICompareInformationEvents getICompareInformationEventsByString(Service service) {
+	public static synchronized ICompareInformationEvents getICompareInformationEventsByString(Service service) {
 		switch(service) {
 		case BETFAIR_SERVICENAME:
 			return new BetfairExchangeProcessDataManager();

@@ -265,7 +265,7 @@ public abstract class AbstractInputRecord {
 			CosineSimilarityUtil csu = new CosineSimilarityUtil();
 			double cosSimPartecipant1 = csu.similarity(this.partecipante1, partecipante1);
 			double cosSimPartecipant2 = csu.similarity(this.partecipante2, partecipante2);
-			return cosSimPartecipant1 >= 0.5 && cosSimPartecipant2 >= 0.5;
+			return cosSimPartecipant1 >= 0.65 && cosSimPartecipant2 >= 0.65;
 		
 		}
 		return false;

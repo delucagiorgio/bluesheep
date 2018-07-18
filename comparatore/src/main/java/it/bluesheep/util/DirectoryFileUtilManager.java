@@ -14,7 +14,7 @@ import java.util.Date;
 public class DirectoryFileUtilManager {
 	
 	public static final int WEEK_OF_MONTH = Calendar.getInstance().get(Calendar.WEEK_OF_MONTH);
-	public static final Date TODAY = new Date();
+	public static Date TODAY = new Date();
 	
 	/**
 	 * GD - 30/04/18
@@ -24,6 +24,7 @@ public class DirectoryFileUtilManager {
 	 * @param fileWeekLogOutputPath path da verificare e nel caso da creare
 	 */
 	public static void verifyDirectoryAndCreatePathIfNecessary(String fileWeekLogOutputPath) {
+		TODAY = new Date();
 		File directory = new File(fileWeekLogOutputPath);
 		if(!directory.exists()) {
 			directory.mkdirs();

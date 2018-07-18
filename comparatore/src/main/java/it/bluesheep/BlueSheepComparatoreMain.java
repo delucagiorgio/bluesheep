@@ -25,13 +25,14 @@ public class BlueSheepComparatoreMain {
         	System.out.println("Error retrieving properties\n" + exception.getMessage());
             System.exit(-1);
         }
-        
+
         ComparisonOperationManager om = ComparisonOperationManager.getComparisonOperationManagerFactory();
         
         om.startProcess();
-        
+	        
 		ZipUtil zipUtil = new ZipUtil();
 		zipUtil.zipLastRunLogFiles();
+			
 	}
 	
 	public static Properties getProperties() {

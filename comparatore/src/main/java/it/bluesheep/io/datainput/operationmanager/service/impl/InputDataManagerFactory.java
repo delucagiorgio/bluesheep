@@ -13,7 +13,7 @@ public class InputDataManagerFactory {
 	
 	private InputDataManagerFactory() {}
 	
-	public static IInputDataManager getInputDataManagerByString(Sport sport, Service serviceApiName, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	public static synchronized IInputDataManager getInputDataManagerByString(Sport sport, Service serviceApiName, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
 		switch(serviceApiName){
 			case TXODDS_SERVICENAME:
 				return new TxOddsInputDataManagerImpl(sport, allServiceApiMapResult);
