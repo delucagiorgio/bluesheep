@@ -41,6 +41,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String STANLEYBET_BOOKMAKER_VALUE = "StanleyBet.it";
 	private static final String SKYBET_BOOKMAKER_VALUE = "SkyBet.it";
 	private static final String SPORTPESA_BOOKMAKER_VALUE = "SportPesa.it";
+	private static final String LEOVEGAS_BOOKMAKER_VALUE = "LeoVegas.it";
 	
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
@@ -146,7 +147,8 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 							if(!inputDataHelper.isBlockedBookmaker(bookmakerName)) {
 								if(STANLEYBET_BOOKMAKER_VALUE.equals(bookmakerName)  || 
 										SKYBET_BOOKMAKER_VALUE.equals(bookmakerName) ||
-										SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName)) {
+										SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName) || 
+										LEOVEGAS_BOOKMAKER_VALUE.equals(bookmakerName)) {
 									bookmakerName = bookmakerName.substring(0, bookmakerName.length() - 3);
 								}
 								newRecord.setBookmakerName(bookmakerName);
