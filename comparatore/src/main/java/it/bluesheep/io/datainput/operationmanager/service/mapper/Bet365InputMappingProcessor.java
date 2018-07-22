@@ -2,6 +2,7 @@ package it.bluesheep.io.datainput.operationmanager.service.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -65,7 +66,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 					}
 					
 				}catch(Exception e) {
-					logger.severe("Error during data extraction from JSON: exception is " + e.getMessage());
+					logger.log(Level.SEVERE, e.getMessage(), e);
 				}
 			}
 			

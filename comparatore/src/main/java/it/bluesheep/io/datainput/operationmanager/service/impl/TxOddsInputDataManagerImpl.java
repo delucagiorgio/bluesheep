@@ -3,6 +3,7 @@ package it.bluesheep.io.datainput.operationmanager.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.util.ScommessaUtilManager;
@@ -42,9 +43,8 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 				abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
 			}
 		}catch(Exception e) {
-			logger.severe("Exception in mapJsonToAbstractInputRecord : exception is " + e.getMessage());
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
-		logger.info("Mapping JSON completed : events mapped from input JSON are " + abstractInputRecordsList.size());
 		
 		return abstractInputRecordsList;
 	}

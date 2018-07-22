@@ -1,6 +1,7 @@
 package com.betfair.util;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
@@ -23,14 +24,14 @@ public class RescriptResponseHandler implements ResponseHandler<String> {
 	
     public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
         StatusLine statusLine = response.getStatusLine();
-        logger.warning("Response status line = " + statusLine);
+        logger.config("Response status line = " + statusLine);
         HttpEntity entity = response.getEntity();
         if (statusLine.getStatusCode() != 200) {
 
             String s = entity == null ? null : EntityUtils.toString(entity, ENCODING_UTF_8);
             logger.warning("Call to api-ng failed");
 
-            logger.info("Error returned is " + s);
+            logger.log(Level.SEVERE, s);
             System.exit(0);
 
         }

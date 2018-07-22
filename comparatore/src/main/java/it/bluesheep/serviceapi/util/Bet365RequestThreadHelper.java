@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -33,7 +34,7 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 			url = new URL(urlRequest);
 			con = (HttpsURLConnection)url.openConnection();
 		} catch (IOException e) {
-			logger.severe(e.getMessage());
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 
 		partialResult = get_result(con); 		
@@ -59,7 +60,7 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.severe("Error during request data on Bet365. Error is " + e.getMessage());
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
 				
 		}

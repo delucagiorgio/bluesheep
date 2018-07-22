@@ -3,6 +3,7 @@ package it.bluesheep.serviceapi.multirequesthandler;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.betfair.entities.MarketFilter;
 
@@ -51,7 +52,7 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				logger.severe(e.getMessage());				
+				logger.log(Level.SEVERE, e.getMessage(), e);			
 			}
 		}
 		

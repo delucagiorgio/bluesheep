@@ -2,6 +2,7 @@ package it.bluesheep.serviceapi.multirequesthandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import it.bluesheep.serviceapi.util.Bet365RequestThreadHelper;
 
@@ -44,7 +45,7 @@ public class Bet365RequestHandler extends AbstractRequestHandler {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
-						logger.severe(e.getMessage());				
+						logger.log(Level.SEVERE, e.getMessage(), e);				
 					}
 				}while(!allFinished);
 				

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -39,7 +40,7 @@ public class TxOddsRequestThreadHelper extends AbstractRequestThreadHelper {
 			resultThreadRequest.put("" + this.getId(), get_result(con));
 				
 		} catch (Exception e) {
-		   logger.severe("Error during request data on TxOdds. Error is " + e.getMessage());
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
 	}

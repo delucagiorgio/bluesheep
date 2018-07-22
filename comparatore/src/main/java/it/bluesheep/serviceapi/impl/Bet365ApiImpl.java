@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -190,7 +191,6 @@ public class Bet365ApiImpl implements IApiInterface {
 				do {
 					i++;
 					// URL composition
-					logger.info("Retrieving events list: page = " + i + "; querying on date = " + date);
 					String https_url = "https://api.betsapi.com/v1/bet365/upcoming?token="+token+"&sport_id="+sport+"&day="+date+"&page="+i+"&charset="+CHARSET;
 					
 					URL url;
@@ -203,7 +203,7 @@ public class Bet365ApiImpl implements IApiInterface {
 						result.add(partialResult);
 				} while((partialResult != null) && loopCheck(partialResult));			
 			} catch (Exception e) {
-			   logger.severe("Error during request data on Bet365. Error is " + e.getMessage());
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
 		}
 		
@@ -269,7 +269,7 @@ public class Bet365ApiImpl implements IApiInterface {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.severe("Error during request data on Bet365. Error is " + e.getMessage());
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
 				
 		}

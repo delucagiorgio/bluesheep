@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import it.bluesheep.BlueSheepComparatoreMain;
@@ -74,7 +75,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		try {
 			idLineMapKeyValues = getLines();
 		} catch (IOException e) {
-			logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
 		for(Integer idLine : idLineMapKeyValues.keySet()) {
@@ -102,7 +103,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		try {
 			dataOraEvento = sdf.parse(dataOraEventoString);
 		} catch (ParseException e) {
-			logger.warning("Line " + id + ": date cannot be parsed : error is " + e.getMessage());
+			logger.log(Level.SEVERE, "Line " + id + ": date cannot be parsed : error is " + e.getMessage(), e);
 		}	
 		if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
 			Sport sport = getCorrectSport(map.get(SPORT), id);
@@ -201,12 +202,12 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		Integer i = new Integer(0);
 		while(line != null) {
 			try {
-				logger.info("Reading line : " + line);
+				logger.config("Reading line : " + line);
 				Map<Integer, String> keyValuesMap = getKeyValuesMapFromLine(line);
 				mapToBeReturned.put(i, keyValuesMap);
 				i = new Integer(i + 1);
 			}catch(Exception e) {
-				logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
+				logger.log(Level.SEVERE, "Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage(), e);
 			}
 			line = br.readLine();
 		}

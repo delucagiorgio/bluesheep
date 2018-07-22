@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -37,8 +38,6 @@ public class OddsComparisonSplitter {
 		Map<Date, Map<String, Map<Scommessa,List<AbstractInputRecord>>>> dataToBeSplitted = map.get(sport);
 		List<Date> keysList = new ArrayList<Date>(dataToBeSplitted.keySet());
 		
-		logger.info("Events to be compared are " + keysList.size());
-		
 		int pageSize = keysList.size()/CONCURRENT_COMPARISON_THREAD;
 		executor = Executors.newFixedThreadPool(CONCURRENT_COMPARISON_THREAD);
 		
@@ -55,9 +54,9 @@ public class OddsComparisonSplitter {
 			logger.info("WAITING FOR ODDS COMPARISONS COMPLETION: threads have already processed data are " + threadComparisonResultMap.keySet().size());
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(2000);
 			} catch (InterruptedException e) {
-				logger.severe(e.getMessage());				
+				logger.log(Level.SEVERE, e.getMessage(), e);				
 			}
 		}
 		

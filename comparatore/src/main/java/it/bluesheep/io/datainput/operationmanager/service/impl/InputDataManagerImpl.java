@@ -89,7 +89,6 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 			}
 			
 			if (resultJSONList != null && !resultJSONList.isEmpty()) {
-				logger.info("Mapping oddsType " + scommessa);
 				for(String resultJSON : resultJSONList) {
 					//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
 					recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
@@ -116,8 +115,6 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	public void run() {
 		
 		List<AbstractInputRecord> resultList = processAllData();
-		
-		logger.info("X123: Service name = " + serviceName + ", resultList size " + resultList.size() + ", sport " + sport);
 		
 		Map<Sport, List<AbstractInputRecord>> sportByManagerName = allServiceApiMapResult.get(serviceName);
 		

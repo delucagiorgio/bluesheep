@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONArray;
@@ -98,13 +99,10 @@ public class BetFairApiImpl implements IApiInterface {
 		beom = BetfairExchangeOperationsManagerImpl.getInstance();
 		mercatoEventoBetfairMap = new MercatoEventoBetfairMap();
 
-		logger.info("Retrieving list events for sport " + sport + " and oddsType " + oddsType);
 		String resultEventsJSON = listEvents(sportCode, oddsType);
 		
 		//Mapping preliminare delle informazioni degli eventi		
 		List<EventoBetfair> eventoList = mapEventsIntoEventoBetfairClass(resultEventsJSON);
-		
-		logger.info("Available events for sport " + sport + " with oddsType " + oddsType + " are " + eventoList.size());
 		
 		//Salvo gli id degli eventi per poter effettuare le chiamate sul marketCatalogue
 		Map<String, EventoBetfair> idEventoMap = new HashMap<String, EventoBetfair>();
@@ -112,10 +110,8 @@ public class BetFairApiImpl implements IApiInterface {
 			idEventoMap.put(evento.getId(), evento);
 		}
 
-		logger.info("Searching for markets on retrieved events");
 		List<String> marketIdsList = getMarkets(idEventoMap);
 
-		logger.info("Searching for odds related to retrivied markets");
 		List<String> returnJsonResponseList = getMarketsInfo(marketIdsList);
 		
 		return returnJsonResponseList;	
@@ -164,7 +160,7 @@ public class BetFairApiImpl implements IApiInterface {
 			try {
 				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
 			} catch (BetFairAPIException e) {
-				logger.severe("Error retrieving data from listMarketCatalouge: the error is " + e.getMessage());
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
 			
 			//va a completare il mapping sugli oggetti EventoBetfair, 
@@ -313,7 +309,7 @@ public class BetFairApiImpl implements IApiInterface {
 		try {
 			resultEventsJSON = beom.listEvents(filter, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
 		} catch (BetFairAPIException e) {
-			logger.severe("Error retrieving data from ListEvents: the error is " + e.getMessage());
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
 		return resultEventsJSON;
@@ -321,14 +317,12 @@ public class BetFairApiImpl implements IApiInterface {
 
 	private void login() {
 		if(BlueSheepComparatoreMain.getProperties().getProperty("APPKEY") == null || sessionToken == null) {
-			logger.info("Login with Betfair.it");
 	        HttpClientNonInteractiveLoginSSO loginHttpHelper = new HttpClientNonInteractiveLoginSSO();
 	        try {
 	        	sessionToken = loginHttpHelper.login();
-	        	logger.info("Login successfully into Betfair.it");
 	        	logger.config("SessionToken = " + sessionToken);
-			} catch (Exception e1) {
-				logger.severe("Login with Betfair.it exception: the error is " + e1.getMessage());
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
 		}
 	}

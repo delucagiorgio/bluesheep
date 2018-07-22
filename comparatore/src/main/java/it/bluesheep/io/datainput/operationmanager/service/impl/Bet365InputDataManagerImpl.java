@@ -35,9 +35,6 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 		if(jsonString != null && !jsonString.isEmpty()) {
 			returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
 	
-			logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
-	
-			logger.info("Merging events information with odds information");
 			String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
 			Map<String, EventoBet365> mercatoEventoBet365 = eventoIdEventoBet365Map.get(oddsType + "_" + sport);
 		    if(mercatoEventoBet365 == null) {
@@ -45,8 +42,6 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 		    	eventoIdEventoBet365Map.put(oddsType + "_" + sport, mercatoEventoBet365);
 		    }
 		    returnItemsList = mergeInfoEventoBet365WithInfoOdds(returnItemsList, mercatoEventoBet365);
-		    
-			logger.info("Merge events information with odds information completed successfully");
 		}
 		return returnItemsList;
 	}

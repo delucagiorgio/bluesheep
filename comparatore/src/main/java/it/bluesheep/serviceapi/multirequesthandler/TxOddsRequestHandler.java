@@ -2,6 +2,7 @@ package it.bluesheep.serviceapi.multirequesthandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import it.bluesheep.serviceapi.util.TxOddsRequestThreadHelper;
 
@@ -42,7 +43,7 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				logger.severe("Error during request number " + startDay + ". Error message : " + e.getMessage());
+				logger.log(Level.SEVERE, "Error during request number " + startDay + ". Error message : " + e.getMessage(), e);
 			}
 			
 			startDay++;

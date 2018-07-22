@@ -7,6 +7,7 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
@@ -74,7 +75,7 @@ public class HttpClientNonInteractiveLoginSSO {
             
             jsonSessionToken = (new JSONObject(responseString)).getString("sessionToken");
         }catch(Exception e) {
-        	logger.severe("Error occurred during login on Betfair.it non interactive login: error is " + e.getMessage());
+        	logger.log(Level.SEVERE, e.getMessage(), e);
         }finally {
             httpClient.getConnectionManager().shutdown();
         }

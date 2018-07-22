@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.betfair.api.BetfairExchangeOperationsManagerImpl;
@@ -52,7 +53,7 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 		try {				
 			responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), token);
 		} catch (BetFairAPIException e) {
-			logger.severe("Error in Betfair retrivial data: error is " + e.getMessage());
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 		
 		//colleziono JSON da ritornare
