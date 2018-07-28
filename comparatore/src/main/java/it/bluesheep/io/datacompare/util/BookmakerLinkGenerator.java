@@ -100,7 +100,7 @@ public class BookmakerLinkGenerator {
 		case "SkyBet":
 			link = "https://www.skybet.it/" + sport;
 			break;
-		case "SportPesa.it":
+		case "SportPesa":
 			link = "https://www.sportpesa.it/scommesse";
 			break;
 		case "SportYes.it":

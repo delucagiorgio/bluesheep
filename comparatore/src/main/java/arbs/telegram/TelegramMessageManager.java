@@ -1,10 +1,13 @@
 package arbs.telegram;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import arbs.imagegeneration.ImageGenerator;
@@ -40,7 +43,6 @@ public class TelegramMessageManager {
 		
 		List<String> chat_ids = new ArrayList<String>();
 		chat_ids.add(BlueSheepComparatoreMain.getProperties().getProperty("CHAT_ID"));
-		chat_ids.add("656422136");
 		
 		String pictureFormat = ".png";
 		
@@ -51,15 +53,20 @@ public class TelegramMessageManager {
 	    	String idFile = eventoIdLink.split(ArbsConstants.IMAGE_ID)[1];
 	    	int i = Integer.parseInt(idFile);
 	    	
-	    	caption = createCaptionDescription(eventoIdLink, eventsIdLinkMap.get(eventoIdLink));  // Aggiungere la parte della didascalia coi link
+	    	// Aggiungere la parte della didascalia coi link
+	    	try {
+				caption = createCaptionDescription(eventoIdLink, eventsIdLinkMap.get(eventoIdLink));
+			} catch (ParseException e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);			
+			}
 	    	
 	    	for (int j = 0; j < chat_ids.size(); j++) {
 				
-	    		telegramHandler.sendPicture("../xhtml/" + i + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + i, chat_ids.get(j));
+	    		telegramHandler.sendPicture("../xhtml/" + (i - 1) + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + i, chat_ids.get(j));
 				telegramHandler.sendMessage(caption, chat_ids.get(j));
 	    	}
 	    	
-		    imageGenerator.delete("../xhtml/" + i + pictureFormat);
+		    imageGenerator.delete("../xhtml/" + (i - 1) + pictureFormat);
 
 	    }
 	    
@@ -70,10 +77,12 @@ public class TelegramMessageManager {
 	    }
 	}
 
-	private String createCaptionDescription(String eventoIdLink, List<String> linkBookmakerList) {
+	private String createCaptionDescription(String eventoIdLink, List<String> linkBookmakerList) throws ParseException {
 		String[] eventoIdLinkSplitted = eventoIdLink.split(ArbsConstants.IMAGE_ID);
 		String[] eventoSplittedKey = eventoIdLinkSplitted[0].split(ArbsConstants.VALUE_SEPARATOR);
-		
+		SimpleDateFormat sdfOutput = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		SimpleDateFormat sdfInput = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH);
+
 		String linkBookmakers = "";
 		for(String bookmakerLink : linkBookmakerList) {
 			String[] splittedBookmakerLink = bookmakerLink.split(ArbsConstants.KEY_SEPARATOR);
@@ -82,7 +91,7 @@ public class TelegramMessageManager {
 		
 		return ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + eventoIdLinkSplitted[1] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Evento:") + " " + eventoSplittedKey[0] + " vs " + eventoSplittedKey[1] + System.lineSeparator() + 
-				ArbsUtil.getTelegramBoldString("Data e ora:") + " " + eventoSplittedKey[2] + System.lineSeparator() + 
+				ArbsUtil.getTelegramBoldString("Data e ora:") + " " + sdfOutput.format(sdfInput.parse(eventoSplittedKey[2])) + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Links:") + System.lineSeparator() + 
 				linkBookmakers;
 	}

@@ -43,15 +43,20 @@ public class Bet implements Comparable<Bet>{
 		DecimalFormat df = new DecimalFormat("#.##");
 		df.setRoundingMode(RoundingMode.DOWN);
 		
-		if (bookmaker2.equals("Betfair Exchange")) {
-			float odd1sNumber = Float.parseFloat(odd1.replace(",", "."));
-			float odd2sNumber = Float.parseFloat(odd2.replace(",", "."));
-			this.setIncomePercentage(df.format((1 - ((1/odd1sNumber) + (1-(1/odd2sNumber)))) * 100));
+		Float betAmount1 = new Float(1000.00);
+		Float betAmount2 = null;
+		Float odd1sNumber = Float.parseFloat(odd1.replace(",", "."));
+		Float odd2sNumber = Float.parseFloat(odd2.replace(",", "."));
+		
+		if (bookmaker2.equalsIgnoreCase("Betfair Exchange")) {
+			Float probabilityOfLay = (1 - (1 / odd2sNumber));
+			betAmount2 = new Float(betAmount1 * odd1sNumber * probabilityOfLay);
 		} else {
-			float odd1sNumber = Float.parseFloat(odd1.replace(",", "."));
-			float odd2sNumber = Float.parseFloat(odd2.replace(",", "."));
-			this.setIncomePercentage(df.format((1 - ((1/odd1sNumber) + (1/odd2sNumber))) * 100));
+			betAmount2 = new Float(betAmount1 * odd1sNumber / odd2sNumber);
 		}
+		
+		Float percentageOfIncomeFloat = (betAmount1 * (odd1sNumber) / (betAmount1 + betAmount2)) - 1;
+		this.incomePercentage = df.format(percentageOfIncomeFloat * 100);
 	}
 	
 	public String getBookmaker1() {
@@ -115,16 +120,10 @@ public class Bet implements Comparable<Bet>{
 	@Override
 	public int compareTo(Bet arg0) {
 				
-		float income1 = Float.parseFloat(this.incomePercentage.replace(",", "."));
-		float income2 = Float.parseFloat(arg0.getIncomePercentage().replace(",", "."));
+		Float income1 = Float.parseFloat(this.incomePercentage.replace(",", "."));
+		Float income2 = Float.parseFloat(arg0.getIncomePercentage().replace(",", "."));
 		
-		if (income1 > income2){
-			return 1;
-		} else if (income1 < income2) {
-			return -1;
-		} else {
-			return 0;
-		}
+		return income1.compareTo(income2);
 	}
 
 }

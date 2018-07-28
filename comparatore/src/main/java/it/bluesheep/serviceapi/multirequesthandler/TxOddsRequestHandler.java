@@ -29,7 +29,14 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 		String json = "1";
 		String allOdds = "2";
 		String odds_format = "0";
-		String baseHttpsUrl = "https://xml2.txodds.com/feed/odds/xml.php?ident="+u+"&passwd="+p+"&active="+active+"&spid="+sportCode+"&ot="+oddsType+"&json="+json+"&all_odds="+ allOdds + "&odds_format=" + odds_format;
+		String baseHttpsUrl = "https://xml2.txodds.com/feed/odds/xml.php?ident="+u+
+				"&passwd="+p+
+				"&active="+active+
+				"&spid="+sportCode+
+				"&ot="+oddsType+
+				"&json="+json+
+				"&all_odds="+allOdds+
+				"&odds_format="+odds_format;
 
 		
 		//Lancia tutte le richieste

@@ -19,6 +19,7 @@ import it.bluesheep.util.BlueSheepLogger;
 public class TelegramHandler {
 
 	private final static String SEND_PHOTO = "sendPhoto";
+	private final static String SEND_MESSAGE = "sendMessage";
 	private final static String TELEGRAM_BASIC_URL = "https://api.telegram.org/bot";
 	private final static String MARKDOWN_URL = "Markdown";
 	private final static String BOT_KEY = "618342797:AAEHIeL4dxNgp4_giX8C6VU9bOraCu-n7S8";
@@ -67,7 +68,12 @@ public class TelegramHandler {
 		}
 		
 		if(caption != null) {
-            String url = "https://api.telegram.org/bot618342797:AAEHIeL4dxNgp4_giX8C6VU9bOraCu-n7S8/sendMessage?chat_id=" + chatId  + "&parse_mode=Markdown" + "&text=" + caption;
+            String url = TELEGRAM_BASIC_URL + BOT_KEY + SLASH + SEND_MESSAGE + 
+            		"?chat_id=" + chatId  + 
+            		"&parse_mode=Markdown" +
+            		"&disable_web_page_preview=true" + 
+            		"&text=" + caption;
+            
             BufferedReader in = null;
             try {
 				HttpsURLConnection httpsConnection = (HttpsURLConnection) new URL(url).openConnection();

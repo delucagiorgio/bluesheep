@@ -36,7 +36,6 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 		List<AbstractInputRecord> returnItemsList = new ArrayList<AbstractInputRecord>();
 		if(jsonString != null && !jsonString.isEmpty()) {
 			returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
-			
 			String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
 			Map<String, EventoBetfair> mercatoEventoBetfairMap = scommessaMapMarketIdEventoMap.get(oddsType + "_" + sport);
 		    if(mercatoEventoBetfairMap == null) {

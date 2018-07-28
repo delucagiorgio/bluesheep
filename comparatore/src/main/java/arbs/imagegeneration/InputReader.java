@@ -47,8 +47,8 @@ public class InputReader {
     		if (splittedKeyPart.length == 4) {
 	    		money2 = splittedKeyPart[2];	    			
     		}
-    		String linkBook1 = null;
-    		String linkBook2 = null;
+    		String linkBook1 = "";
+    		String linkBook2 = "";
     		String[] linksSplitted = splittedKeyPart[splittedKeyPart.length - 1].split(ArbsConstants.VALUE_SEPARATOR);
 			if(!"null".equals(linksSplitted[0])) {
 				linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linksSplitted[0]);

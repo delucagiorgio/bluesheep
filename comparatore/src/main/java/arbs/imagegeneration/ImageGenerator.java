@@ -36,7 +36,7 @@ public class ImageGenerator {
 		List<String> xhtmlEvents = new ArrayList<String>();
 	    for (int i = 0; i < events.size(); i++) {
     		xhtmlEvents.add(eventToXhtml.convert(events.get(i), i + 1, events.size()));
-    		eventXHTMLStringMap.put(events.get(i).getUnifiedKeyAndLinks() + ArbsConstants.IMAGE_ID + i, events.get(i).getLinkBook());
+    		eventXHTMLStringMap.put(events.get(i).getUnifiedKeyAndLinks() + ArbsConstants.IMAGE_ID + (i + 1), events.get(i).getLinkBook());
 	    }
 	    
 	    // Converto l'xhtml in immagine .png
