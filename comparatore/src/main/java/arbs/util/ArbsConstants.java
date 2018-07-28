@@ -10,6 +10,7 @@ public class ArbsConstants {
 	public static final String PREVIOUS_RUN_PATH = "PREVIOUS_RUN_PATH";
 	public static final String CHAT_ID = "CHAT_ID";
 	public static final int STORED_RUNS_MAX = 40;
+	public static final String IMAGE_ID = "IMAGEID";
 
 	private ArbsConstants() {};	
 

@@ -37,6 +37,8 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String GROUP_JSON_STRING = "group";
 	private static final String ATEAM_JSON_STRING = "ateam";
 	private static final String NAME_JSON_STRING = "name";
+	private static final String LAST_UPDATED_JSON_STRING = "last_updated";
+	private static final String BMOID_JSON_STRING = "bmoid";
 	
 	private static final String STANLEYBET_BOOKMAKER_VALUE = "StanleyBet.it";
 	private static final String SKYBET_BOOKMAKER_VALUE = "SkyBet.it";
@@ -117,42 +119,63 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 			
 			for(int k = 0; k < offerJSONArray.length(); k++) {
 				JSONObject offerJSONObject = offerJSONArray.getJSONObject(k);
+
+				boolean isValid = true;
+				JSONObject attributesOfferJSONObject = ((TxOddsBluesheepJsonConverter) jsonConverter).getAttributesNodeFromJSONObject(offerJSONObject);
+
+				try {
+					String lastUpdatedString = attributesOfferJSONObject.getString(LAST_UPDATED_JSON_STRING);
+					ISO8601DateTypeAdapter adapterDate = new ISO8601DateTypeAdapter();
+					Date date = adapterDate.getDateFromString(lastUpdatedString);
+					
+					//Valorizza a falso il campo se la quota è vecchia almeno di 5 min
+					isValid = System.currentTimeMillis() - date.getTime() <= 5 * 60 * 1000L;
+				} catch (ParseException e) {
+					logger.log(Level.SEVERE, e.getMessage(), e);
+				}
 				
-				//in base al tipo di offerta, devo prendere il primo, il secondo o il terzo campo
-				String campoQuotaScommessa = getCorrectFieldByScommessa(scommessaTipo);
-				if(campoQuotaScommessa != null) {
-					
-					//l'oggetto quota sarà sempre unico per bookmaker (le quote offerte per una determinata scommessa sono uniche e le ultime più aggiornate)
-					//prendo l'oggetto JSON delle quote e prendo il dato richiesto
-					JSONArray oddsJSONArray = jsonConverter.getChildNodeArrayByKey(offerJSONObject, ODDS_JSON_STRING);
-					
-					//per ogni quota offerta dal bookmaker in analisi
-					for(int j = 0; j < oddsJSONArray.length(); j++) {
-						JSONObject oddsJSONObject = oddsJSONArray.getJSONObject(j);
+				if(isValid) {
+					//in base al tipo di offerta, devo prendere il primo, il secondo o il terzo campo
+					String campoQuotaScommessa = getCorrectFieldByScommessa(scommessaTipo);
+					if(campoQuotaScommessa != null) {
 						
-						double quotaTotalUnderOver = getCorrectQuotaUnderOverByScommessa(scommessaTipo);
+						//l'oggetto quota sarà sempre unico per bookmaker (le quote offerte per una determinata scommessa sono uniche e le ultime più aggiornate)
+						//prendo l'oggetto JSON delle quote e prendo il dato richiesto
+						JSONArray oddsJSONArray = jsonConverter.getChildNodeArrayByKey(offerJSONObject, ODDS_JSON_STRING);
 						
-						//(se la quota non è totale) oppure (se la quota è totale e il campo o3 corrisponde alla quota cercata)
-						if(quotaTotalUnderOver < 0 || oddsJSONObject.getDouble(O3_JSON_STRING) == quotaTotalUnderOver) {
+						//per ogni quota offerta dal bookmaker in analisi
+						for(int j = 0; j < oddsJSONArray.length(); j++) {
+							JSONObject oddsJSONObject = oddsJSONArray.getJSONObject(j);
 							
-							double quotaScommessa = oddsJSONObject.getDouble(campoQuotaScommessa);
-						
-							//mappo le informazioni rimanenti nel nuovo oggetto
-							TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
+							double quotaTotalUnderOver = getCorrectQuotaUnderOverByScommessa(scommessaTipo);
 							
-							TxOddsBluesheepJsonConverter blusheepJsonConv = (TxOddsBluesheepJsonConverter) jsonConverter;
-							String bookmakerName = blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING);
-							if(!inputDataHelper.isBlockedBookmaker(bookmakerName)) {
-								if(STANLEYBET_BOOKMAKER_VALUE.equals(bookmakerName)  || 
-										SKYBET_BOOKMAKER_VALUE.equals(bookmakerName) ||
-										SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName)) {
-									bookmakerName = bookmakerName.substring(0, bookmakerName.length() - 3);
+							//(se la quota non è totale) oppure (se la quota è totale e il campo o3 corrisponde alla quota cercata)
+							if(quotaTotalUnderOver < 0 || oddsJSONObject.getDouble(O3_JSON_STRING) == quotaTotalUnderOver) {
+								
+								double quotaScommessa = oddsJSONObject.getDouble(campoQuotaScommessa);
+							
+								//mappo le informazioni rimanenti nel nuovo oggetto
+								TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
+								
+								TxOddsBluesheepJsonConverter blusheepJsonConv = (TxOddsBluesheepJsonConverter) jsonConverter;
+								String bookmakerName = blusheepJsonConv.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING);
+								if(!inputDataHelper.isBlockedBookmaker(bookmakerName)) {
+									if(STANLEYBET_BOOKMAKER_VALUE.equals(bookmakerName)  || 
+											SKYBET_BOOKMAKER_VALUE.equals(bookmakerName) ||
+											SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName)) {
+										bookmakerName = bookmakerName.substring(0, bookmakerName.length() - 3);
+									}
+									newRecord.setBookmakerName(bookmakerName);
+									newRecord.setTipoScommessa(scommessaTipo);
+									newRecord.setQuota(quotaScommessa);
+									
+									if("BetClic.it".equalsIgnoreCase(bookmakerName)) {
+										newRecord.setFiller(attributesOfferJSONObject.getString(BMOID_JSON_STRING));
+									}
+								
+									recordToBeReturned.add(newRecord);
 								}
-								newRecord.setBookmakerName(bookmakerName);
-								newRecord.setTipoScommessa(scommessaTipo);
-								newRecord.setQuota(quotaScommessa);
-							
-								recordToBeReturned.add(newRecord);
+								
 							}
 						}
 					}

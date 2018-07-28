@@ -56,7 +56,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	
 	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
-	private static final int maxThreadPoolSize = 30;
+	private static final int maxThreadPoolSize = 20;
 
 	// Map useful to get the info about the events at a second step
 	private EventoIdMap eventoIdMap;

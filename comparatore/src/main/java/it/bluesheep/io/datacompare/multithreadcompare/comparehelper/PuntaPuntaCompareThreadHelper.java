@@ -1,11 +1,13 @@
 package it.bluesheep.io.datacompare.multithreadcompare.comparehelper;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -16,6 +18,7 @@ import it.bluesheep.entities.util.TranslatorUtil;
 import it.bluesheep.entities.util.rating.impl.RatingCalculatorBookmakersOdds;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datacompare.util.BookmakerLinkGenerator;
 
 public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 
@@ -151,6 +154,12 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 		output.setScommessaBookmaker2(oppositeScommessaInputRecord.getTipoScommessa().getCode());
 		output.setSport(scommessaInputRecord.getSport().toString());
 		output = (RecordBookmakerVsBookmakerOdds)TranslatorUtil.translateFieldAboutCountry(output);
+		try {
+			output.setLinkBook1(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord));
+			output.setLinkBook2(BookmakerLinkGenerator.getBookmakerLinkEvent(oppositeScommessaInputRecord));
+		} catch (UnsupportedEncodingException e) {
+			logger.log(Level.SEVERE, e.getMessage(), e);
+		}
 		return output;
 	}
 	

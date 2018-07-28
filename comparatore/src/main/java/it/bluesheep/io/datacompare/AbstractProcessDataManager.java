@@ -11,7 +11,6 @@ import it.bluesheep.util.BlueSheepLogger;
 public abstract class AbstractProcessDataManager implements IProcessDataManager {
 
 	protected static Logger logger;
-	protected static final String OUTPUT_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
 	
 	protected AbstractProcessDataManager() {
 		logger = (new BlueSheepLogger(AbstractProcessDataManager.class)).getLogger();	

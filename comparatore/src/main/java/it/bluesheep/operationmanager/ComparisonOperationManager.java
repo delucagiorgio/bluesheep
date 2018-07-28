@@ -1,13 +1,16 @@
 package it.bluesheep.operationmanager;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +32,7 @@ import it.bluesheep.io.datainput.operationmanager.service.impl.InputDataManagerF
 import it.bluesheep.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.serviceapi.Service;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.DirectoryFileUtilManager;
 
 public class ComparisonOperationManager {
 	
@@ -198,8 +202,29 @@ public class ComparisonOperationManager {
 		}
 		
 		if(tabellaOutputList != null && !tabellaOutputList.isEmpty()) {
-			TelegramMessageManager tmm = new TelegramMessageManager(startTime);
-			tmm.sendMessageToTelegramGroupByBotAndStore(tabellaOutputList, alreadySentArbsOdds);
+			List<String> messageToBeSentKeysList = new ArrayList<String>();
+			int alreadySentCount = 0;
+			for(RecordOutput record : tabellaOutputList) {
+				String recordKey = ArbsUtil.getKeyArbsFromOutputRecord(record);
+				
+				//controllo che non l'abbia già mandata, se si non faccio nulla
+				if(!alreadySent(recordKey)) {
+					messageToBeSentKeysList.add(recordKey + ArbsConstants.KEY_SEPARATOR + record.getLinkBook1() + ArbsConstants.VALUE_SEPARATOR + record.getLinkBook2());
+				}else {
+					alreadySentCount++;
+				}
+			}
+			
+			logger.log(Level.INFO, "" + messageToBeSentKeysList.size() + " message(s) to be sent. Message(s) already sent " + alreadySentCount + "/" + tabellaOutputList.size() );
+
+			//Se ci sono aggiornamenti o nuovi arbitraggi, invia i risultati e li salva
+			if(!messageToBeSentKeysList.isEmpty()) {
+				
+				saveOutputOnFile(messageToBeSentKeysList);
+
+				TelegramMessageManager tmm = new TelegramMessageManager(startTime);
+				tmm.sendMessageToTelegramGroupByBotAndStore(messageToBeSentKeysList, alreadySentArbsOdds);
+			}
 		}
 		tabellaOutputList.clear();
 	}
@@ -323,8 +348,6 @@ public class ComparisonOperationManager {
 		}
 		
 		logger.config("Add to chiaveEventoScommessaMap TxOdds events finished");
-
-		
 	}
 
 	/**
@@ -344,6 +367,169 @@ public class ComparisonOperationManager {
 				serviceNameStatusMap.put(service, finished);
 			}
 		}
+	}
+	
+	private boolean alreadySent(String recordKey) {
+		boolean found = false;
+		boolean betterRatingFound = false;
+		String runIdFoundWithLowerRatings = null;
+		String tmpRating1 = null;
+		String tmpRating2 = null;
+		String tmpRating1Stored = null;
+		String tmpRating2Stored = null;
+		
+		if(alreadySentArbsOdds != null && !alreadySentArbsOdds.isEmpty()) {
+			String[] splittedRecord = recordKey.split(ArbsConstants.KEY_SEPARATOR);
+			String key = ArbsUtil.createArbsKeyFromRecordKey(splittedRecord[0]);
+
+			for(String runId : alreadySentArbsOdds.keySet()) {
+				String rating1 = null;
+				String rating2 = null;
+				String rating1Stored = null;
+				String rating2Stored = null;
+				tmpRating1 = null;
+				tmpRating2 = null;
+				tmpRating1Stored = null;
+				tmpRating2Stored = null;
+				betterRatingFound = false;
+				//Se non ho trovato una run con lo stesso record ma con rating inferiore o quella che ho trovato è precedente a runId
+				if(runIdFoundWithLowerRatings == null || runIdFoundWithLowerRatings.compareTo(runId) < 0) {
+					Map<String, Map<String, String>> arbsRunMap = alreadySentArbsOdds.get(runId);
+					for(String arbs : arbsRunMap.keySet()) {
+						if(key.equalsIgnoreCase(arbs)) {
+							found = true;
+							rating1Stored = arbsRunMap.get(arbs).get(ArbsConstants.RATING1);
+							rating2Stored = arbsRunMap.get(arbs).get(ArbsConstants.RATING2);
+							
+							String[] ratings = splittedRecord[1].split(ArbsConstants.VALUE_SEPARATOR);
+							rating1 = ratings[0];
+							rating2 = null;
+							if(ratings.length == 2) {
+								rating2 = ratings[1];
+							}
+							//Se il record è già stato inviato in precedenza ma con dei rating più bassi, lo reinvio
+							if(rating1Stored.compareTo(rating1) < 0 && ((rating2Stored == null && rating2 == null) ||
+									(rating2Stored != null && rating2 != null && rating2Stored.compareTo(rating2) < 0))) {
+								betterRatingFound = true;
+								tmpRating1 = rating1;
+								tmpRating1Stored = rating1Stored;
+								tmpRating2 = rating2;
+								tmpRating2Stored = rating2Stored;
+								runIdFoundWithLowerRatings = runId;
+							}else {
+								betterRatingFound = false;
+								break;
+							}
+						}
+					}
+				}
+			}
+			if(runIdFoundWithLowerRatings != null && betterRatingFound) {
+				logger.info("Key arbs " + key + " has been already sent, but with lower ratings. now_R1 = " +  tmpRating1 + "; stored_R1 = " + tmpRating1Stored + "; new_R2 = " + tmpRating2 + "; stored_R2 = " + tmpRating2Stored);
+				logger.info("Message is resent");
+			}
+		}
+		return found || betterRatingFound;
+	}
+	
+	/**
+	 * GD - 11/07/18
+	 * Salva le comparazioni di quote nei rispettivi file JSON, in base ai parametri passati
+	 * @param serviceName il servizio
+	 * @param processedRecord la lista di record
+	 */
+	private void saveOutputOnFile(List<String> processedRecord) {
+		
+		if(processedRecord != null && !processedRecord.isEmpty()) {
+			logger.info("Storing data for no repeated messages");
+	    	PrintWriter writer1 = null;
+	    	String filename = BlueSheepComparatoreMain.getProperties().getProperty(ArbsConstants.PREVIOUS_RUN_PATH) + ArbsConstants.FILENAME_PREVIOUS_RUNS;
+			DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty(ArbsConstants.PREVIOUS_RUN_PATH));
+
+			//Verifico che il file esista, dalla mappa dei record già processati popolata in fase di inizializzazione
+			if(alreadySentArbsOdds != null && alreadySentArbsOdds.keySet().size() > 0) {
+				long checkBoundTime = System.currentTimeMillis();
+				//TODO inserire una variabile di proprietà per questa costante
+				if(!(alreadySentArbsOdds.keySet().size() < ArbsConstants.STORED_RUNS_MAX)) {
+					List<String> runIdSet = new ArrayList<String>(alreadySentArbsOdds.keySet());
+					//Scarta le run non più nell'intervallo di tempo scelto
+					for(String runId : runIdSet) {
+						//Se la run è entro la mezz'ora, allora ok, altrimenti scartala a prescindere
+						//TODO inserire una variabile di proprietà per questa costante
+						if(checkBoundTime - new Long(runId) >= 60 * 60 * 1000L) {
+							alreadySentArbsOdds.remove(runId);
+						}
+					}
+					//Se dopo la rimozione delle run non più valide, sono ancora presenti più di un tot di run
+					if(!(alreadySentArbsOdds.keySet().size() < ArbsConstants.STORED_RUNS_MAX)) {
+						//set delle runId aggiornato, senza le run non valide
+						runIdSet = new ArrayList<String>(alreadySentArbsOdds.keySet());
+						//Cerco la run più vecchia, che sia per ordine oltre la k-esima esecuzione
+						String oldestRun = null;
+						for(String runId : runIdSet) {
+							if(oldestRun == null || runId.compareTo(oldestRun) < 0) {
+								oldestRun = runId;
+							}
+						}
+						//Rimuovo la più vecchia
+						if(oldestRun != null) {
+							alreadySentArbsOdds.remove(oldestRun);
+						}
+					}
+				}
+			}
+			
+			Map<String, Map<String, String>> arbsLastExecutionMap = new HashMap<String, Map<String, String>>();
+			if(alreadySentArbsOdds == null) {
+				alreadySentArbsOdds = new TreeMap<String, Map<String, Map<String, String>>>();
+			}
+			alreadySentArbsOdds.put("" + startTime, arbsLastExecutionMap);
+			//Inserisco i dati della nuova run
+			for(String record : processedRecord) {
+				String[] splittedRecord = record.split(ArbsConstants.KEY_SEPARATOR);
+				String key = ArbsUtil.createArbsKeyFromRecordKey(splittedRecord[0]);
+				Map<String, String> ratingMap = new HashMap<String, String>();
+				String[] ratings = splittedRecord[1].split(ArbsConstants.VALUE_SEPARATOR);
+				ratingMap.put(ArbsConstants.RATING1, ratings[0]);
+				if(ratings.length == 2 && !ratings[1].isEmpty()) {
+					ratingMap.put(ArbsConstants.RATING2, ratings[1]);
+				}
+				arbsLastExecutionMap.put(key,ratingMap);
+			}
+			
+	    	// Indico il path di destinazione dei miei dati
+	    	try {
+	    		String line = new String();
+	    		File outputFile = new File(filename);
+	    		if(outputFile.exists() && !outputFile.isDirectory()) {
+	    			outputFile.delete();
+	    		}
+	    		
+				writer1 = new PrintWriter(filename, "UTF-8");    	
+		    	// Scrivo
+		    	for(String runId : alreadySentArbsOdds.keySet()) {
+		    		Map<String, Map<String, String>> arbsRunMap = alreadySentArbsOdds.get(runId);
+		    		for(String arbsRecord : arbsRunMap.keySet()) {
+			    		line = runId + ArbsConstants.KEY_SEPARATOR;
+		    			line += arbsRecord + ArbsConstants.KEY_SEPARATOR;
+		    			Map<String, String> arbsRatingMap = arbsRunMap.get(arbsRecord);
+		    			line += arbsRatingMap.get(ArbsConstants.RATING1) ;
+		    			if(arbsRatingMap.get(ArbsConstants.RATING2) != null) {
+		    				line += ArbsConstants.VALUE_SEPARATOR + arbsRatingMap.get(ArbsConstants.RATING2);
+		    			}
+		    			line += System.lineSeparator();
+				    	writer1.write(line);
+		    		}
+		    	}
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);
+			}finally {
+				if(writer1 != null) {
+					writer1.close();
+				}
+			}
+		}
+		alreadySentArbsOdds.clear();
 	}
 	
 }

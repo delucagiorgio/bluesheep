@@ -48,10 +48,10 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		String bet = apiServiceInterface.identifyCorrectBetCode(scommessa, sport);
 		
 	    if (bet != null) {
+		    scommessaJsonListMap.put(bet + "_" + sport, result);
 			logger.info("Call API " + apiServiceInterface.getClass().getName() + " to retrieve data for service code bet = " + bet);
 	    	result.addAll(apiServiceInterface.getData(sport, scommessa));
 			logger.info("Data retrivied successfully");
-		    scommessaJsonListMap.put(bet + "_" + sport, result);
 	    }
 	    
 	    return result;
