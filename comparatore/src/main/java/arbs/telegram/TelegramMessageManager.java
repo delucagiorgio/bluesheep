@@ -40,22 +40,29 @@ public class TelegramMessageManager {
 		
 		List<String> chat_ids = new ArrayList<String>();
 		chat_ids.add(BlueSheepComparatoreMain.getProperties().getProperty("CHAT_ID"));
+		chat_ids.add("656422136");
 		
 		String pictureFormat = ".png";
 		
 		
 	    TelegramHandler telegramHandler = new TelegramHandler();
-	    String caption;
+	    String caption = null;
 	    for (String eventoIdLink : eventsIdLinkMap.keySet()) {
 	    	String idFile = eventoIdLink.split(ArbsConstants.IMAGE_ID)[1];
 	    	int i = Integer.parseInt(idFile);
 	    	
-	    	caption = createCaptionDescription(eventoIdLink.split(ArbsConstants.IMAGE_ID)[0], eventsIdLinkMap.get(eventoIdLink));  // Aggiungere la parte della didascalia coi link
-		    for (int j = 0; j < chat_ids.size(); j++) {
-				telegramHandler.sendPicture("../xhtml/" + i + pictureFormat, caption, chat_ids.get(j));
-		    }
+	    	caption = createCaptionDescription(eventoIdLink, eventsIdLinkMap.get(eventoIdLink));  // Aggiungere la parte della didascalia coi link
+	    	
+	    	for (int j = 0; j < chat_ids.size(); j++) {
+				
+	    		telegramHandler.sendPicture("../xhtml/" + i + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + i, chat_ids.get(j));
+				telegramHandler.sendMessage(caption, chat_ids.get(j));
+	    	}
+	    	
 		    imageGenerator.delete("../xhtml/" + i + pictureFormat);
+
 	    }
+	    
 	    if(eventsIdLinkMap.keySet().size() > 0 ) {
 		    logger.info("Photos sending completed");
 	    }else {
@@ -64,7 +71,8 @@ public class TelegramMessageManager {
 	}
 
 	private String createCaptionDescription(String eventoIdLink, List<String> linkBookmakerList) {
-		String[] eventoSplittedKey = eventoIdLink.split(ArbsConstants.VALUE_SEPARATOR);
+		String[] eventoIdLinkSplitted = eventoIdLink.split(ArbsConstants.IMAGE_ID);
+		String[] eventoSplittedKey = eventoIdLinkSplitted[0].split(ArbsConstants.VALUE_SEPARATOR);
 		
 		String linkBookmakers = "";
 		for(String bookmakerLink : linkBookmakerList) {
@@ -72,7 +80,8 @@ public class TelegramMessageManager {
 			linkBookmakers += ArbsUtil.getTelegramBoldString(splittedBookmakerLink[0] + ":") + " " + splittedBookmakerLink[1] + System.lineSeparator();
 		}
 		
-		return ArbsUtil.getTelegramBoldString("Evento:") + " " + eventoSplittedKey[0] + " vs " + eventoSplittedKey[1] + System.lineSeparator() + 
+		return ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + eventoIdLinkSplitted[1] + System.lineSeparator() + 
+				ArbsUtil.getTelegramBoldString("Evento:") + " " + eventoSplittedKey[0] + " vs " + eventoSplittedKey[1] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Data e ora:") + " " + eventoSplittedKey[2] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Links:") + System.lineSeparator() + 
 				linkBookmakers;

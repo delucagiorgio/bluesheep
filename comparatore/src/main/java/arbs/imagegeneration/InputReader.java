@@ -64,10 +64,10 @@ public class InputReader {
     			Event iterationEvent = events.get(j);
     			List<String> bookmakerLinkList = iterationEvent.getLinkBook();
     			if (iterationEvent.isSameEvent(tempEvent)) {
-    				if(!"null".equals(linkBook1) && !bookmakerLinkList.contains(linkBook1)) {
+    				if(!"null".equals(linkBook1) && !bookmakerLinkList.contains(bookmaker1 + ArbsConstants.KEY_SEPARATOR + linkBook1)) {
     					bookmakerLinkList.add(bookmaker1 + ArbsConstants.KEY_SEPARATOR + linkBook1);
     				}
-    				if(!"null".equals(linkBook2) && !bookmakerLinkList.contains(linkBook2)) {
+    				if(!"null".equals(linkBook2) && !bookmakerLinkList.contains(bookmaker2 + ArbsConstants.KEY_SEPARATOR + linkBook2)) {
     					bookmakerLinkList.add(bookmaker2 + ArbsConstants.KEY_SEPARATOR + linkBook2);
     				}
     				index = j;

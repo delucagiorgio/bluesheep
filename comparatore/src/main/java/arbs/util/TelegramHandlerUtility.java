@@ -8,11 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * This utility class provides an abstraction layer for sending multipart HTTP
@@ -23,7 +24,7 @@ import java.util.List;
 public class TelegramHandlerUtility {
 	private final String boundary;
 	private static final String LINE_FEED = "\r\n";
-	private HttpURLConnection httpConn;
+	private HttpsURLConnection httpConn;
 	private String charset;
 	private OutputStream outputStream;
 	private PrintWriter writer;
@@ -43,7 +44,7 @@ public class TelegramHandlerUtility {
 		boundary = "===" + System.currentTimeMillis() + "===";
 		
 		URL url = new URL(requestURL);
-		httpConn = (HttpURLConnection) url.openConnection();
+		httpConn = (HttpsURLConnection) url.openConnection();
 		httpConn.setUseCaches(false);
 		httpConn.setDoOutput(true);	// indicates POST method
 		httpConn.setDoInput(true);
@@ -130,20 +131,21 @@ public class TelegramHandlerUtility {
 		writer.append("--" + boundary + "--").append(LINE_FEED);
 		writer.close();
 
+		BufferedReader reader = null;
 		// checks server's status code first
-		int status = httpConn.getResponseCode();
-		if (status == HttpURLConnection.HTTP_OK) {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					httpConn.getInputStream()));
+		try {
+			reader = new BufferedReader(new InputStreamReader(
+				httpConn.getInputStream()));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				response.add(line);
 			}
 			reader.close();
-			httpConn.disconnect();
-		} else {
-			throw new IOException("Server returned non-OK status: " + status);
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
+
+		httpConn.disconnect();
 
 		return response;
 	}
