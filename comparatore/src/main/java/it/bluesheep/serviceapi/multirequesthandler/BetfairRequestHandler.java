@@ -43,11 +43,13 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 		
 		long startTime = System.currentTimeMillis();
 
+		sizeWait = sizeWait / 4;
+		
 		//Attende il tempo di timeout o la completa esecuzione corretta delle richieste
-		while(mapThreadResponse.keySet().size() != (cyclesQuery) && System.currentTimeMillis() - startTime < sizeWait * 2 * 1000L) {
+		while(mapThreadResponse.keySet().size() != (cyclesQuery) && System.currentTimeMillis() - startTime < sizeWait * 1000L) {
 			
-			logger.info("WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (cyclesQuery));
-			logger.info("Remains " + (sizeWait * 2 - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
+			logger.log(Level.INFO, "WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (cyclesQuery));
+			logger.log(Level.INFO, "Remains " + (sizeWait - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
 			
 			try {
 				Thread.sleep(1000);
