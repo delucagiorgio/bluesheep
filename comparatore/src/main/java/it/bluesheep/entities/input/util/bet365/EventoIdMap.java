@@ -1,8 +1,8 @@
 package it.bluesheep.entities.input.util.bet365;
 
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class EventoIdMap extends TreeMap<String, EventoBet365>{
+public class EventoIdMap extends ConcurrentHashMap<String, EventoBet365>{
 
 	private static final long serialVersionUID = 1L;
 

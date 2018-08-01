@@ -1,6 +1,6 @@
 package it.bluesheep.entities.input.util.betfair;
 
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Questa mappa è necessaria per mantenere il legame che c'è tra le informazioni di un EventoBetfair e 
@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * @author Giorgio De Luca
  *
  */
-public final class MercatoEventoBetfairMap extends TreeMap<String, EventoBetfair> {
+public final class MercatoEventoBetfairMap extends ConcurrentHashMap<String, EventoBetfair> {
 	
 	private static final long serialVersionUID = 1L;
 	

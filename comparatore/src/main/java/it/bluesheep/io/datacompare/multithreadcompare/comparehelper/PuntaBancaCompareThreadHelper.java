@@ -10,10 +10,12 @@ import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.output.subtype.RecordBookmakerVsExchangeOdds;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.TranslatorUtil;
 import it.bluesheep.entities.util.rating.impl.RatingCalculatorBookMakerExchangeOdds;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datacompare.util.BookmakerLinkGenerator;
 
 public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 
@@ -25,14 +27,13 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataMap,
 			Sport sport) {
 		super(oddsComparisonThreadMap, keyList, dataMap, sport);
-		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_MIN_THRESHOLD")).doubleValue();
-		this.maxThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_MAX_THRESHOLD")).doubleValue();
+		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.PB_MIN_THRESHOLD)).doubleValue();
+		this.maxThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.PB_MAX_THRESHOLD)).doubleValue();
 	}
 
 	@Override
 	public void run() {
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();
-		processedComparisonCounter = 0;
 		for(Date date : keyList) {
 			//per ogni evento in input
 			for(String evento : dateMap.get(date).keySet()) {
@@ -48,14 +49,8 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 						mappedOutputRecord.addAll(outputRecordsList);	
 					}
 				}
-				processedComparisonCounter++;
-				if(processedComparisonCounter % LOGGER_COMPARE_SIZE_PARTIAL_RESULT == 0) {
-					logger.info("Thread " + this.getId() + ": already compared events = " + processedComparisonCounter);
-				}
 			}
 		}
-
-		logger.info("Thread " + this.getId() + ": Comparison completed. Compared events = " + processedComparisonCounter);
 		oddsComparisonThreadMap.put("" + this.getId(), mappedOutputRecord);
 	}
 
@@ -77,6 +72,8 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 		BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord)scommessaInputRecord2;
 		recordOutput.setLiquidita(exchangeRecord.getLiquidita());
 		recordOutput = (RecordBookmakerVsExchangeOdds)TranslatorUtil.translateFieldAboutCountry(recordOutput);
+		recordOutput.setLinkBook1(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord1));
+		recordOutput.setLinkBook2(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord2));
 		return recordOutput;
 	}
 
@@ -121,7 +118,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 	private AbstractInputRecord findExchangeRecord(List<AbstractInputRecord> scommessaRecordList) {
 		AbstractInputRecord exchangeRecord = null;
 		for(AbstractInputRecord record : scommessaRecordList) {
-			if("Betfair Exchange".equals(record.getBookmakerName())) {
+			if(ComparatoreConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equals(record.getBookmakerName())) {
 				exchangeRecord = record;
 				break;
 			}

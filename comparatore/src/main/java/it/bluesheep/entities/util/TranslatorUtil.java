@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONArray;
@@ -23,20 +24,19 @@ public class TranslatorUtil {
 	
 	private static Map<String, String> codeTranslationMap;
 	private static Map<String, String> apiTranslationMap;
-	private static Logger logger;
+	private static Logger logger = (new BlueSheepLogger(TranslatorUtil.class)).getLogger();
 	private static final String ENGLISH = "en";
 	private static final String ITALIAN = "it";
 	
 	static {
 		InputStream csvFileStream = null;
 		try {
-			csvFileStream = new FileInputStream(BlueSheepComparatoreMain.getProperties().getProperty("PATH_NAZIONI_TRADUZIONE_CSV"));
+			csvFileStream = new FileInputStream(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.NATION_PATH_INPUTFILE));
 		} catch (FileNotFoundException e1) {
-			logger.severe("Error during initialization of codeTranslationMap : error is " + e1.getMessage());
+			logger.log(Level.SEVERE, "Error during initialization of codeTranslationMap : error is " + e1.getMessage(), e1);
 		}
         BufferedReader br = null;
         String line = "";
-        String cvsSplitBy = ";";
         codeTranslationMap = new HashMap<String, String>();
         apiTranslationMap = new HashMap<String, String>();
         
@@ -47,28 +47,26 @@ public class TranslatorUtil {
 	            while ((line = br.readLine()) != null) {
 
 	                // use comma as separator
-	                String[] countryDefinition = line.split(cvsSplitBy);
+	                String[] countryDefinition = line.split(ComparatoreConstants.REGEX_CSV);
 	                codeTranslationMap.put(countryDefinition[1], countryDefinition[0]);
 	            }
 
 	        } catch (Exception e) {
-	            logger.severe("Error during translation initialization map. Error is " + e.getMessage());
+	            logger.log(Level.SEVERE, "Error during translation initialization map. Error is " + e.getMessage(), e);
 	        } finally {
 	            if (br != null) {
 	                try {
 	                	csvFileStream.close();
 	                    br.close();
 	                } catch (IOException e) {
-	    	            logger.severe("Error during translation initialization map. Error is " + e.getMessage());
+	    	            logger.log(Level.SEVERE, "Error during translation initialization map. Error is " + e.getMessage(), e);
 	                }
 	            }
 	        }
         }
 	}
 	
-	private TranslatorUtil() {
-		logger = (new BlueSheepLogger(TranslatorUtil.class)).getLogger();
-	}
+	private TranslatorUtil() {}
 	
 	/**
 	 * GD - 30/04/2018
@@ -83,7 +81,7 @@ public class TranslatorUtil {
 					    "client=gtx&"+
 					    "sl=" + ENGLISH + 
 					    "&tl=" + ITALIAN + 
-					    "&dt=t&q=" + URLEncoder.encode(toBeTranslatedString, "UTF-8");    
+					    "&dt=t&q=" + URLEncoder.encode(toBeTranslatedString, ComparatoreConstants.ENCODING_UTF_8);    
 					  
 				URL obj = new URL(url);
 				HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
@@ -101,7 +99,7 @@ public class TranslatorUtil {
 				translatedString = parseResult(response.toString());
 				apiTranslationMap.put(toBeTranslatedString, translatedString);
 			}catch(Exception e) {
-	            logger.severe("Error during translation initialization map. No translation is applied. Error is " + e.getMessage());
+	            logger.log(Level.SEVERE, "Error during translation initialization map. No translation is applied. Error is " + e.getMessage(), e);
 	            translatedString = toBeTranslatedString;
 		}
 		 

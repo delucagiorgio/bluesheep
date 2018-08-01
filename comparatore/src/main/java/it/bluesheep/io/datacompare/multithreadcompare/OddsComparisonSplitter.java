@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -36,7 +37,7 @@ public class OddsComparisonSplitter {
 		Map<Date, Map<String, Map<Scommessa,List<AbstractInputRecord>>>> dataToBeSplitted = map.get(sport);
 		List<Date> keysList = new ArrayList<Date>(dataToBeSplitted.keySet());
 		
-		logger.info("Events to be compared are " + keysList.size());
+		logger.log(Level.CONFIG, "Events to be compared are " + keysList.size());
 		
 		int pageSize = keysList.size()/CONCURRENT_COMPARISON_THREAD;
 		executor = Executors.newFixedThreadPool(CONCURRENT_COMPARISON_THREAD);
@@ -47,16 +48,17 @@ public class OddsComparisonSplitter {
 			int endIndex = i == (CONCURRENT_COMPARISON_THREAD - 1) ? keysList.size() : startIndex + pageSize;
 			startNewComparisonThread(keysList.subList(startIndex, endIndex), dataToBeSplitted, threadComparisonResultMap, comparisonType, sport);
 		}
-		
+		int secondsToWait = 10;
+		long startTime = System.currentTimeMillis();
 		//Attende il tempo di timeout o la completa esecuzione corretta delle richieste
-		while(threadComparisonResultMap.keySet().size() != CONCURRENT_COMPARISON_THREAD) {
+		while(threadComparisonResultMap.keySet().size() != CONCURRENT_COMPARISON_THREAD && !(System.currentTimeMillis() - startTime > secondsToWait * 1000L)) {
 			
-			logger.info("WAITING FOR ODDS COMPARISONS COMPLETION: threads have already processed data are " + threadComparisonResultMap.keySet().size());
+			logger.log(Level.CONFIG, "WAITING FOR ODDS COMPARISONS COMPLETION: threads have already processed data are " + threadComparisonResultMap.keySet().size());
 			
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				logger.severe(e.getMessage());				
+				logger.log(Level.SEVERE, e.getMessage(), e);				
 			}
 		}
 		

@@ -2,6 +2,7 @@ package it.bluesheep.serviceapi.multirequesthandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import it.bluesheep.serviceapi.util.TxOddsRequestThreadHelper;
 
@@ -42,7 +43,7 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 
 				Thread.sleep(500);
 			} catch (InterruptedException e) {
-				logger.severe("Error during request number " + startDay + ". Error message : " + e.getMessage());
+				logger.log(Level.SEVERE, "Error during request number " + startDay + ". Error message : " + e.getMessage(), e);
 			}
 			
 			startDay++;
@@ -53,13 +54,13 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 		//Attende il tempo di timeout o la completa esecuzione corretta delle richieste
 		while(mapThreadResponse.keySet().size() != (endDay + 1) && System.currentTimeMillis() - startTime < sizeWait * 2 * 1000L) {
 			
-			logger.info("WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (endDay + 1));
-			logger.info("Remains " + (sizeWait * 2 - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
+			logger.log(Level.CONFIG, "WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (endDay + 1));
+			logger.log(Level.CONFIG, "Remains " + (sizeWait * 2 - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
 			
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				logger.severe(e.getMessage());				
+				logger.log(Level.SEVERE, e.getMessage(), e);				
 			}
 		}
 		

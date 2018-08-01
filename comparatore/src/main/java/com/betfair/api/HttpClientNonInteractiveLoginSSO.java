@@ -7,6 +7,7 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
@@ -29,6 +30,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.util.BlueSheepLogger;
  
  
@@ -48,7 +50,7 @@ public class HttpClientNonInteractiveLoginSSO {
         String jsonSessionToken = null;
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
-            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_CERTIFICATE_PATH"))), BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_PASSWORD"));
+            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_CERTIFICATE_PATH))), BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_PASSWORD));
             ctx.init(keyManagers, null, new SecureRandom());
             SSLSocketFactory factory = new SSLSocketFactory(ctx, new StrictHostnameVerifier());
  
@@ -57,12 +59,12 @@ public class HttpClientNonInteractiveLoginSSO {
             HttpPost httpPost = new HttpPost("https://identitysso.betfair.it/api/certlogin");
             
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-            nvps.add(new BasicNameValuePair("username", BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_USER")));
-            nvps.add(new BasicNameValuePair("password", BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_PASSWORD")));
+            nvps.add(new BasicNameValuePair("username", BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_USERNAME)));
+            nvps.add(new BasicNameValuePair("password", BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_PASSWORD)));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
  
-            httpPost.setHeader("X-Application", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"));
-            httpPost.setHeader("Accept","application/json");
+            httpPost.setHeader("X-Application", BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_APPKEY));
+            httpPost.setHeader("Accept", BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_APPLICATION_JSON));
             httpPost.setHeader("Connection", "keep-alive");
             
             HttpResponse response = httpClient.execute(httpPost);
@@ -72,9 +74,9 @@ public class HttpClientNonInteractiveLoginSSO {
                 responseString = EntityUtils.toString(entity);
             }
             
-            jsonSessionToken = (new JSONObject(responseString)).getString("sessionToken");
+            jsonSessionToken = (new JSONObject(responseString)).getString(ComparatoreConstants.BETFAIR_SESSION_TOKEN_STRING);
         }catch(Exception e) {
-        	logger.severe("Error occurred during login on Betfair.it non interactive login: error is " + e.getMessage());
+        	logger.log(Level.SEVERE, "Error occurred during login on Betfair.it non interactive login: error is " + e.getMessage(), e);
         }finally {
             httpClient.getConnectionManager().shutdown();
         }

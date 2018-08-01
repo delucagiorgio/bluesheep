@@ -3,6 +3,7 @@ package it.bluesheep.serviceapi.multirequesthandler;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.betfair.entities.MarketFilter;
 
@@ -45,8 +46,8 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 		//Attende il tempo di timeout o la completa esecuzione corretta delle richieste
 		while(mapThreadResponse.keySet().size() != (cyclesQuery) && System.currentTimeMillis() - startTime < sizeWait * 2 * 1000L) {
 			
-			logger.info("WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (cyclesQuery));
-			logger.info("Remains " + (sizeWait * 2 - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
+			logger.log(Level.CONFIG, "WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (cyclesQuery));
+			logger.log(Level.CONFIG, "Remains " + (sizeWait * 2 - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
 			
 			try {
 				Thread.sleep(1000);

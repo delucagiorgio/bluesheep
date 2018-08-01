@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.AbstractProcessDataManager;
@@ -20,6 +22,9 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds
 					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception{
+		logger.log(Level.INFO, "Starting matching info Betfair events with Tx-Odds & Bet365 events. Betfair events size = " + exchangeList.size());
+		
+		int i = 0;
 		for(AbstractInputRecord record : exchangeList) {
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
 			String key = splittedEventoKeyRecord[1];
@@ -29,7 +34,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 					for(String eventoTxOdds : dateMap.get(date).keySet()) {
 						String[] splittedEventoKey = eventoTxOdds.split("\\|");
 						String sport = splittedEventoKey[1];
-						String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
+						String[] partecipantiSplitted = splittedEventoKey[2].split(ComparatoreConstants.REGEX_VERSUS);
 						String partecipante1 = partecipantiSplitted[0];
 						String partecipante2 = partecipantiSplitted[1];
 						
@@ -45,12 +50,15 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 							exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
 							exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
 							exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
+							i++;
 							break;
 						}
 					}
 				}
 			}
 		}
+		logger.log(Level.INFO, "Matching info Betfair events with Tx-Odds & Bet365 events terminated. Matched events size = " + i + "/" + exchangeList.size());
+
 		return exchangeList;
 	}
 

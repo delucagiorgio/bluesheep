@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.entities.util.ComparatoreConstants;
 
 public class BlueSheepLogger {
 	
@@ -33,13 +34,13 @@ public class BlueSheepLogger {
 	 * @throws IOException
 	 */
 	private synchronized void setInitialConfig(String name) throws SecurityException, IOException {
-		String loggingMode = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_MODE");
+		String loggingMode = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.LOGGING_MODE_HANDLER);
         Handler handler = null;
         
         if(logger.getHandlers() == null || logger.getHandlers().length == 0) {
-	        if("CONSOLE".equalsIgnoreCase(loggingMode)) {
+	        if(ComparatoreConstants.LOG_CONSOLE.equalsIgnoreCase(loggingMode)) {
 	     		handler = new ConsoleHandler();
-	     	}else if("FILE_OUTPUT".equalsIgnoreCase(loggingMode)){
+	     	}else if(ComparatoreConstants.LOG_FILE_OUTPUT.equalsIgnoreCase(loggingMode)){
 	     		
 	     		SimpleDateFormat sdfFile = new SimpleDateFormat("yyyyMMdd_HH-mm-ss");
 	     		SimpleDateFormat sdfFileDir = new SimpleDateFormat("yyyyMMdd");
@@ -49,9 +50,9 @@ public class BlueSheepLogger {
 	     		String fileDirDateFormatString = sdfFileDir.format(DirectoryFileUtilManager.TODAY);
 	     		String weekFileDirDateFormatString = sdfWeekFileDir.format(DirectoryFileUtilManager.TODAY) + "_" + DirectoryFileUtilManager.WEEK_OF_MONTH;
 	     		
-	     		String logFileNamePrefix = BlueSheepComparatoreMain.getProperties().getProperty("LOG_PREFIX_FILENAME");
+	     		String logFileNamePrefix = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.LOG_PREFIX_FILENAME);
 	     		String logOutputFileName = logFileNamePrefix + fileDateFormatString + "_" + name + ".log";
-	     		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_PATH");
+	     		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.LOGGING_PATH);
 	     		
 	     		String weekLogOutputPath = logOutputPath + "/" + weekFileDirDateFormatString + "/";
 	     		String fileWeekLogOutputPath = weekLogOutputPath + "/" + fileDirDateFormatString + "/";
@@ -63,14 +64,13 @@ public class BlueSheepLogger {
 	        
 	     	handler.setFormatter(new SimpleFormatter() {
 	     		private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss.SSS");
-	     		private final String separatore = " - ";
 	     		
 	     		@Override
 	     	    public synchronized String format(LogRecord record) {
 	     			StringBuilder returnString = new StringBuilder();
-	     			returnString.append("[" + df.format(new Date(record.getMillis())) + "]").append(separatore);
-	     			returnString.append("[" + record.getLevel().getName() + "]").append(separatore);
-	     			returnString.append(record.getSourceClassName()).append(separatore).append(record.getSourceMethodName()).append(separatore);
+	     			returnString.append("[" + df.format(new Date(record.getMillis())) + "]").append(ComparatoreConstants.REGEX_MINUS);
+	     			returnString.append("[" + record.getLevel().getName() + "]").append(ComparatoreConstants.REGEX_MINUS);
+	     			returnString.append(record.getSourceClassName()).append(ComparatoreConstants.REGEX_MINUS).append(record.getSourceMethodName()).append(ComparatoreConstants.REGEX_MINUS);
 	     			returnString.append(record.getMessage());
 	     			
 	     			if(record.getThrown() != null) {
@@ -82,10 +82,10 @@ public class BlueSheepLogger {
 
 	     	});
 			
-	     	String loggerLevel = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_LEVEL");
+	     	String loggerLevel = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.LOGGING_LEVEL_OUTPUT);
 	    	
 			handler.setLevel(Level.parse(loggerLevel));
-	    	handler.setEncoding(BlueSheepComparatoreMain.getProperties().getProperty("ENCODING_UTF8"));
+	    	handler.setEncoding(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.ENCODING_UTF_8));
 	    	
 	    	logger.setLevel(Level.parse(loggerLevel));       	
 	    	logger.addHandler(handler); 

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.util.CosineSimilarityUtil;
@@ -33,7 +34,10 @@ public abstract class AbstractInputRecord {
 		this.partecipante2 = partecipante2;
 		this.sport = sport;
 		this.filler = filler;
-		this.keyEvento = "" + this.dataOraEvento + "|" + this.sport + "|" + this.partecipante1 + " vs " + this.partecipante2;
+		this.keyEvento = "" + this.dataOraEvento + 
+				ComparatoreConstants.REGEX_PIPE + this.sport + 
+				ComparatoreConstants.REGEX_PIPE + this.partecipante1 + 
+				ComparatoreConstants.REGEX_VERSUS + this.partecipante2;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {
@@ -186,16 +190,16 @@ public abstract class AbstractInputRecord {
 			String regex1 = null;
 			String regex2 = null;
 			
-			if (participant11.contains("&") && participant12.contains("&")) {
-				regex1 = "&";
-			}else if(participant11.contains("/") && participant12.contains("/")) {
-				regex1 = "/";
+			if (participant11.contains(ComparatoreConstants.REGEX_COMMERCIAL_E) && participant12.contains(ComparatoreConstants.REGEX_COMMERCIAL_E)) {
+				regex1 = ComparatoreConstants.REGEX_COMMERCIAL_E;
+			}else if(participant11.contains(ComparatoreConstants.REGEX_SLASH) && participant12.contains(ComparatoreConstants.REGEX_SLASH)) {
+				regex1 = ComparatoreConstants.REGEX_SLASH;
 			}
 			
-			if (participant21.contains("&") && participant22.contains("&")) {
-				regex2 = "&";
-			}else if(participant21.contains("/") && participant22.contains("/")) {
-				regex2 = "/";
+			if (participant21.contains(ComparatoreConstants.REGEX_COMMERCIAL_E) && participant22.contains(ComparatoreConstants.REGEX_COMMERCIAL_E)) {
+				regex2 = ComparatoreConstants.REGEX_COMMERCIAL_E;
+			}else if(participant21.contains(ComparatoreConstants.REGEX_SLASH) && participant22.contains(ComparatoreConstants.REGEX_SLASH)) {
+				regex2 = ComparatoreConstants.REGEX_SLASH;
 			}
 			
 			if(regex1 != null && regex2 != null) {

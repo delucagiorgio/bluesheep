@@ -3,9 +3,11 @@ package it.bluesheep.serviceapi.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
@@ -36,7 +38,7 @@ public class TxOddsApiImpl implements IApiInterface {
 	public TxOddsApiImpl() {
 		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();
 
-		daysInterval = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_DAYS");
+		daysInterval = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.TXODDS_DAYS_INTERVAL);
 	}
 	
 	public List<String> getData(Sport sport, Scommessa scommessa) {
@@ -44,15 +46,15 @@ public class TxOddsApiImpl implements IApiInterface {
 		String sportCode = identifyCorrectGameCode(sport);
 		String oddsType = identifyCorrectBetCode(scommessa, sport);
 		
-		logger.info("Setting parameters for TxOdds API request");
+		logger.log(Level.INFO, "Setting parameters for TxOdds API request");
 		
 		String[] dayIntervalSplitted = daysInterval.split(",");		
 		int endDay = Integer.parseInt(dayIntervalSplitted[1]);
 		
 		List<String> result = new ArrayList<String>();
 		
-		String u = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_USER");
-		String p = BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_PASSWORD");
+		String u = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.TXODDS_USER);
+		String p = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.TXODDS_PASSWORD);
 		txOddsRequestHandler = new TxOddsRequestHandler(endDay, u + ";" + p);
 		
 		result.addAll(txOddsRequestHandler.startMultithreadMarketRequests(

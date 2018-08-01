@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.bluesheep.entities.output.RecordOutput;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.io.datacompare.multithreadcompare.OddsComparisonSplitter;
@@ -27,7 +28,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();
 		OddsComparisonSplitter oddsComparisonSplitter = new OddsComparisonSplitter();
-		mappedOutputRecord = oddsComparisonSplitter.startComparisonOdds(sportMap, sport, "TX_ODDS");
+		mappedOutputRecord = oddsComparisonSplitter.startComparisonOdds(sportMap, sport, ComparatoreConstants.TX_ODDS_SERVICENAME);
 
 		return mappedOutputRecord;
 	}

@@ -37,6 +37,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String GROUP_JSON_STRING = "group";
 	private static final String ATEAM_JSON_STRING = "ateam";
 	private static final String NAME_JSON_STRING = "name";
+	private static final String BMOID_JSON_STRING = "bmoid";
 	
 	private static final String STANLEYBET_BOOKMAKER_VALUE = "StanleyBet.it";
 	private static final String SKYBET_BOOKMAKER_VALUE = "SkyBet.it";
@@ -154,6 +155,13 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 								newRecord.setBookmakerName(bookmakerName);
 								newRecord.setTipoScommessa(scommessaTipo);
 								newRecord.setQuota(quotaScommessa);
+								JSONObject attributesJSONObject = ((TxOddsBluesheepJsonConverter)jsonConverter).getAttributesNodeFromJSONObject(offerJSONObject);
+								if(attributesJSONObject != null) {
+									String bmoid = attributesJSONObject.getString(BMOID_JSON_STRING);
+									if(!"0".equalsIgnoreCase(bmoid)) {//diverso dal valore di default
+										newRecord.setFiller(bmoid);
+ 									}
+								}
 							
 								recordToBeReturned.add(newRecord);
 							}

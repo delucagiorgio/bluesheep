@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONArray;
@@ -26,6 +27,7 @@ import com.betfair.util.ISO8601DateTypeAdapter;
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.util.betfair.EventoBetfair;
 import it.bluesheep.entities.input.util.betfair.MercatoEventoBetfairMap;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
@@ -70,7 +72,6 @@ public class BetFairApiImpl implements IApiInterface {
 	private static final String ALTER_REGEX_NAME_EVENT = " - ";
 	private static final int QUERY_SIZE_EVENT = 200;
 	
-	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
 	
 	private String sessionToken;
@@ -84,7 +85,7 @@ public class BetFairApiImpl implements IApiInterface {
 
 	public BetFairApiImpl() {
 		logger = (new BlueSheepLogger(BetFairApiImpl.class)).getLogger();
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
+		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
 	@Override
@@ -98,13 +99,13 @@ public class BetFairApiImpl implements IApiInterface {
 		beom = BetfairExchangeOperationsManagerImpl.getInstance();
 		mercatoEventoBetfairMap = new MercatoEventoBetfairMap();
 
-		logger.info("Retrieving list events for sport " + sport + " and oddsType " + oddsType);
+		logger.log(Level.INFO, "Retrieving list events for sport " + sport + " and oddsType " + oddsType);
 		String resultEventsJSON = listEvents(sportCode, oddsType);
 		
 		//Mapping preliminare delle informazioni degli eventi		
 		List<EventoBetfair> eventoList = mapEventsIntoEventoBetfairClass(resultEventsJSON);
 		
-		logger.info("Available events for sport " + sport + " with oddsType " + oddsType + " are " + eventoList.size());
+		logger.log(Level.INFO, "Available events for sport " + sport + " with oddsType " + oddsType + " are " + eventoList.size());
 		
 		//Salvo gli id degli eventi per poter effettuare le chiamate sul marketCatalogue
 		Map<String, EventoBetfair> idEventoMap = new HashMap<String, EventoBetfair>();
@@ -112,10 +113,10 @@ public class BetFairApiImpl implements IApiInterface {
 			idEventoMap.put(evento.getId(), evento);
 		}
 
-		logger.info("Searching for markets on retrieved events");
+		logger.log(Level.INFO, "Searching for markets on retrieved events");
 		List<String> marketIdsList = getMarkets(idEventoMap);
 
-		logger.info("Searching for odds related to retrivied markets");
+		logger.log(Level.INFO, "Searching for odds related to retrivied markets");
 		List<String> returnJsonResponseList = getMarketsInfo(marketIdsList);
 		
 		return returnJsonResponseList;	
@@ -162,9 +163,9 @@ public class BetFairApiImpl implements IApiInterface {
 			
 			//chiamata sul marketCatalogue su un set di ids pari a querySize
 			try {
-				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
+				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_APPKEY), sessionToken);
 			} catch (BetFairAPIException e) {
-				logger.severe("Error retrieving data from listMarketCatalouge: the error is " + e.getMessage());
+				logger.log(Level.SEVERE, "Error retrieving data from listMarketCatalouge: the error is " + e.getMessage());
 			}
 			
 			//va a completare il mapping sugli oggetti EventoBetfair, 
@@ -270,7 +271,7 @@ public class BetFairApiImpl implements IApiInterface {
 				try {
 					dataOraEvento = (new ISO8601DateTypeAdapter()).getDateFromString(dataOraEventoString);
 				} catch (ParseException e) {
-					e.printStackTrace();
+					logger.log(Level.SEVERE, e.getMessage(), e);
 				}
 				
 				if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
@@ -311,24 +312,24 @@ public class BetFairApiImpl implements IApiInterface {
 		//Chiamata al servizio per ottenere tutti gli eventi relativi allo sport e alla scommessa in considerazione 
 		String resultEventsJSON = null;
 		try {
-			resultEventsJSON = beom.listEvents(filter, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
+			resultEventsJSON = beom.listEvents(filter, BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_APPKEY), sessionToken);
 		} catch (BetFairAPIException e) {
-			logger.severe("Error retrieving data from ListEvents: the error is " + e.getMessage());
+			logger.log(Level.SEVERE, "Error retrieving data from ListEvents: the error is " + e.getMessage());
 		}
 		
 		return resultEventsJSON;
 	}
 
 	private void login() {
-		if(BlueSheepComparatoreMain.getProperties().getProperty("APPKEY") == null || sessionToken == null) {
-			logger.info("Login with Betfair.it");
+		if(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BETFAIR_APPKEY) == null || sessionToken == null) {
+			logger.log(Level.CONFIG, "Login with Betfair.it");
 	        HttpClientNonInteractiveLoginSSO loginHttpHelper = new HttpClientNonInteractiveLoginSSO();
 	        try {
 	        	sessionToken = loginHttpHelper.login();
-	        	logger.info("Login successfully into Betfair.it");
-	        	logger.config("SessionToken = " + sessionToken);
+	        	logger.log(Level.CONFIG, "Login successfully into Betfair.it");
+	        	logger.log(Level.CONFIG, "SessionToken = " + sessionToken);
 			} catch (Exception e1) {
-				logger.severe("Login with Betfair.it exception: the error is " + e1.getMessage());
+				logger.log(Level.SEVERE, "Login with Betfair.it exception: the error is " + e1.getMessage());
 			}
 		}
 	}

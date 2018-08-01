@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.Bet365InputRecord;
 import it.bluesheep.entities.output.RecordOutput;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.AbstractProcessDataManager;
@@ -25,9 +27,8 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap sportMap) throws Exception {
-		logger.info("Start matching informartion for Bet365 on TxOdds events : "
-				+ "input size Bet365 events is " + bookmakerList.size() 
-				+ "; input size TxOdds events is " + sportMap.keySet().size());
+		logger.log(Level.INFO, "Start matching informartion for Bet365 on TxOdds events : "
+				+ "input size Bet365 events is " + bookmakerList.size());
 		int matchedCountEvents = 0;
 		for(AbstractInputRecord record : bookmakerList) {
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
@@ -38,7 +39,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 					for(String eventoTxOdds : dataMap.get(date).keySet()) {
 						String[] splittedEventoKey = eventoTxOdds.split("\\|");
 						String sport = splittedEventoKey[1];
-						String[] partecipantiSplitted = splittedEventoKey[2].split(" vs ");
+						String[] partecipantiSplitted = splittedEventoKey[2].split(ComparatoreConstants.REGEX_VERSUS);
 						String partecipante1 = partecipantiSplitted[0];
 						String partecipante2 = partecipantiSplitted[1];
 						
@@ -62,7 +63,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			}
 		}
 		
-		logger.info("Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
+		logger.log(Level.INFO, "Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
 		
 		return bookmakerList;
 	}

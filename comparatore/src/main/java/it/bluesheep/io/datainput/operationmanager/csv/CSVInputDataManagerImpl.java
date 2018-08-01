@@ -10,11 +10,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.record.CSVInputRecord;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.util.BlueSheepLogger;
@@ -28,9 +30,6 @@ import it.bluesheep.util.DirectoryFileUtilManager;
 public class CSVInputDataManagerImpl {
 
 	private static Logger logger;
-	private static final String SEPARATOR = ";";
-	private static final String PATH_INPUT_FILE = "PATH_INPUT_FILE";
-	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
 	
 	private static final Integer SPORT = 0;
@@ -49,8 +48,8 @@ public class CSVInputDataManagerImpl {
 	public CSVInputDataManagerImpl() {
 		logger = (new BlueSheepLogger(CSVInputDataManagerImpl.class)).getLogger();
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
-		csvFilenamePath = BlueSheepComparatoreMain.getProperties().getProperty(PATH_INPUT_FILE);
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
+		csvFilenamePath = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.CSV_ODDS_PATH_INPUT_FILE);
+		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
 	/**
@@ -60,7 +59,7 @@ public class CSVInputDataManagerImpl {
 	 */
 	public List<AbstractInputRecord> processManualOddsByCsv(){
 		
-		logger.info("Starting CSV input process");
+		logger.log(Level.INFO, "Starting CSV input process");
 		
 		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>();
 		
@@ -68,7 +67,7 @@ public class CSVInputDataManagerImpl {
 		try {
 			idLineMapKeyValues = getLines();
 		} catch (IOException e) {
-			logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
+			logger.log(Level.SEVERE, "Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage(), e);
 		}
 		
 		for(Integer idLine : idLineMapKeyValues.keySet()) {
@@ -96,7 +95,7 @@ public class CSVInputDataManagerImpl {
 		try {
 			dataOraEvento = sdf.parse(dataOraEventoString);
 		} catch (ParseException e) {
-			logger.warning("Line " + id + ": date cannot be parsed : error is " + e.getMessage());
+			logger.log(Level.WARNING, "Line " + id + ": date cannot be parsed : error is " + e.getMessage(), e);
 		}	
 		if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
 			Sport sport = getCorrectSport(map.get(SPORT), id);
@@ -173,7 +172,7 @@ public class CSVInputDataManagerImpl {
 		}else if (Sport.TENNIS.getCode().equalsIgnoreCase(string)) {
 			sport = Sport.TENNIS;
 		}else {
-			logger.warning("Attention: Line with ID = " + id + " has no valid SPORT value field. Value inserted is = " + string + "; values accepted are = " + Sport.values().toString());
+			logger.log(Level.WARNING, "Attention: Line with ID = " + id + " has no valid SPORT value field. Value inserted is = " + string + "; values accepted are = " + Sport.values().toString());
 		}
 		return sport;
 	}
@@ -188,19 +187,17 @@ public class CSVInputDataManagerImpl {
 		
 		Map<Integer, Map<Integer, String>> mapToBeReturned = new HashMap<Integer, Map<Integer, String>>();;
 		BufferedReader br = null;
-		
-
 		br = new BufferedReader(new FileReader(csvFilenamePath));
 		String line = br.readLine();
 		Integer i = new Integer(0);
 		while(line != null) {
 			try {
-				logger.info("Reading line : " + line);
+				logger.log(Level.CONFIG, "Reading line : " + line);
 				Map<Integer, String> keyValuesMap = getKeyValuesMapFromLine(line);
 				mapToBeReturned.put(i, keyValuesMap);
 				i = new Integer(i + 1);
 			}catch(Exception e) {
-				logger.severe("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage());
+				logger.log(Level.SEVERE, "Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage(), e);
 			}
 			line = br.readLine();
 		}
@@ -208,7 +205,7 @@ public class CSVInputDataManagerImpl {
 			br.close();
 		}
 		
-		logger.info("CSV parsing process completed");
+		logger.log(Level.INFO, "CSV parsing process completed");
 		
 		return mapToBeReturned;
 	}
@@ -224,7 +221,7 @@ public class CSVInputDataManagerImpl {
 		Map<Integer, String> keyValueMap = new HashMap<Integer, String>();
 		
 		if(line != null) {
-			String[] splittedLine = line.split(SEPARATOR);
+			String[] splittedLine = line.split(ComparatoreConstants.REGEX_CSV);
 			keyValueMap.put(BOOKMAKER, splittedLine[BOOKMAKER]);
 			keyValueMap.put(CAMPIONATO, splittedLine[CAMPIONATO]);
 			keyValueMap.put(DATA_ORA_EVENTO, splittedLine[DATA_ORA_EVENTO]);

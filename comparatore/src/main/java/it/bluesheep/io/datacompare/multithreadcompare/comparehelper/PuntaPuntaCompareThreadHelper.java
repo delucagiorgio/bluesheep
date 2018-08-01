@@ -11,11 +11,13 @@ import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.TranslatorUtil;
 import it.bluesheep.entities.util.rating.impl.RatingCalculatorBookmakersOdds;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
+import it.bluesheep.io.datacompare.util.BookmakerLinkGenerator;
 
 public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 
@@ -27,8 +29,8 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 			Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dataMap,
 			Sport sport) {
 		super(oddsComparisonThreadMap, keyList, dataMap, sport);
-		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MIN_THRESHOLD")).doubleValue();
-		this.maxThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty("TXODDS_MAX_THRESHOLD")).doubleValue();
+		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.PP_MIN_THRESHOLD)).doubleValue();
+		this.maxThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.PP_MAX_THRESHOLD)).doubleValue();
 	}
 
 	@Override
@@ -58,14 +60,8 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 						}
 					}
 				}
-				processedComparisonCounter++;
-				if(processedComparisonCounter % LOGGER_COMPARE_SIZE_PARTIAL_RESULT == 0) {
-					logger.info("Thread " + this.getId() + ": already compared events = " + processedComparisonCounter);
-				}
 			}
 		}
-
-		logger.info("Thread " + this.getId() + ": Comparison completed. Compared events = " + processedComparisonCounter);
 		oddsComparisonThreadMap.put("" + this.getId(), mappedOutputRecord);
 
 	}
@@ -149,6 +145,8 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 		output.setScommessaBookmaker2(oppositeScommessaInputRecord.getTipoScommessa().getCode());
 		output.setSport(scommessaInputRecord.getSport().toString());
 		output = (RecordBookmakerVsBookmakerOdds)TranslatorUtil.translateFieldAboutCountry(output);
+		output.setLinkBook1(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord));
+		output.setLinkBook2(BookmakerLinkGenerator.getBookmakerLinkEvent(oppositeScommessaInputRecord));
 		return output;
 	}
 	

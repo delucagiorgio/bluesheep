@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.input.util.bet365.EventoBet365;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.ScommessaUtilManager;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
@@ -33,9 +35,9 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 		if(jsonString != null && !jsonString.isEmpty()) {
 			returnItemsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
 	
-			logger.info("Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
+			logger.log(Level.CONFIG, "Mapping JSON completed : events mapped from input JSON are " + returnItemsList.size());
 	
-			logger.info("Merging events information with odds information");
+			logger.log(Level.CONFIG, "Merging events information with odds information");
 			String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
 			Map<String, EventoBet365> mercatoEventoBet365 = eventoIdEventoBet365Map.get(oddsType + "_" + sport);
 		    if(mercatoEventoBet365 == null) {
@@ -44,7 +46,7 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 		    }
 		    returnItemsList = mergeInfoEventoBet365WithInfoOdds(returnItemsList, mercatoEventoBet365);
 		    
-			logger.info("Merge events information with odds information completed successfully");
+			logger.log(Level.CONFIG, "Merge events information with odds information completed successfully");
 		}
 		return returnItemsList;
 	}
@@ -65,7 +67,10 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 				record.setDataOraEvento(evento.getDataOraEvento());
 				record.setPartecipante1(evento.getPartecipante1());
 				record.setPartecipante2(evento.getPartecipante2());
-				record.setKeyEvento("" + record.getDataOraEvento() + "|" + record.getSport() + "|" + record.getPartecipante1() + " vs " + record.getPartecipante2());
+				record.setKeyEvento("" + record.getDataOraEvento() + 
+						ComparatoreConstants.REGEX_PIPE + record.getSport() + 
+						ComparatoreConstants.REGEX_PIPE + record.getPartecipante1() + 
+						ComparatoreConstants.REGEX_VERSUS + record.getPartecipante2());
 			}
 		}
 		return returnItemsList;

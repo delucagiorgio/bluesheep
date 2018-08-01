@@ -14,13 +14,11 @@ import it.bluesheep.util.BlueSheepLogger;
 public abstract class CompareThreadHelper extends Thread {
 
 	protected static Logger logger;
-	protected static final int LOGGER_COMPARE_SIZE_PARTIAL_RESULT = 100;
 	
 	protected Map<String, List<RecordOutput>> oddsComparisonThreadMap;
 	protected List<Date> keyList;
 	protected Map<Date, Map<String, Map<Scommessa, List<AbstractInputRecord>>>> dateMap;
 	protected Sport sport;
-	protected int processedComparisonCounter;
 	
 	protected CompareThreadHelper(Map<String, List<RecordOutput>> oddsComparisonThreadMap, 
 			List<Date> keyList2, 

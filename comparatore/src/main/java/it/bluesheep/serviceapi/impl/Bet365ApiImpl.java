@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.util.bet365.EventoBet365;
 import it.bluesheep.entities.input.util.bet365.EventoIdMap;
+import it.bluesheep.entities.util.ComparatoreConstants;
 import it.bluesheep.entities.util.scommessa.Scommessa;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.serviceapi.IApiInterface;
@@ -42,7 +44,6 @@ public class Bet365ApiImpl implements IApiInterface {
 	private static final String PAGER = "pager";
 	private static final String PAGE = "page";
 	private static final String PAGESIZE = "per_page";
-	private static final String CHARSET = "utf-8";
 	
 	private static final String EVENTSNUMBER = "total";
 	private static final String RESULT_JSON_STRING = "results";
@@ -53,7 +54,6 @@ public class Bet365ApiImpl implements IApiInterface {
 	private static final String LEAGUE = "league";
 	private static final String OUREVENTID = "our_event_id";
 	
-	private static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	private static Long updateFrequencyDiff;
 	private static final int maxThreadPoolSize = 30;
 
@@ -66,8 +66,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	 */
 	public Bet365ApiImpl() {
 		logger = (new BlueSheepLogger(Bet365ApiImpl.class)).getLogger();
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(UPDATE_FREQUENCY)) * 1000L * 60L;
-
+		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
 	/**
@@ -80,12 +79,12 @@ public class Bet365ApiImpl implements IApiInterface {
 		String sportCode = identifyCorrectGameCode(sport);
 		// Obtaining the list of events for the chosen sport
 		
-		logger.info("Retrieving list events for sport " + sport);
+		logger.log(Level.CONFIG, "Retrieving list events for sport " + sport);
 		List<String> resultEventsJSON = listEvents(sportCode);
 		
 		//Mapping preliminare delle informazioni degli eventi		
 		List<EventoBet365> eventoList = mapEventsIntoEventoClass(resultEventsJSON);
-		logger.info("Available events for sport " + sport + " are " + eventoList.size());
+		logger.log(Level.INFO, "Available events for sport " + sport + " are " + eventoList.size());
 
 		// Salvo gli id degli eventi per poter effettuare le chiamate sui relativi mercati
 		// Mappo gli eventi a seconda del loro id
@@ -97,7 +96,7 @@ public class Bet365ApiImpl implements IApiInterface {
 		}
 		
 		// Ottengo le quote degli eventi trovati
-		logger.info("Searching for markets on retrieved events");
+		logger.log(Level.INFO, "Searching for markets on retrieved events");
 		List<String> oddsList = getMarkets(ids);
 				
 		// restituisco una list di json con le quote di quegli eventi
@@ -136,7 +135,7 @@ public class Bet365ApiImpl implements IApiInterface {
 		}
 		
 		// The application token
-		String token = BlueSheepComparatoreMain.getProperties().getProperty("BET365_TOKEN");
+		String token = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BET365_TOKEN);
 		
 		// The retrieved pages collection containing all the requested available events
 		List<String> result = new ArrayList<String>();
@@ -173,8 +172,8 @@ public class Bet365ApiImpl implements IApiInterface {
 	 * @return the list of answers by the system structured as json files
 	 */
 	private List<String> listEvents(String sport) {
-		String token = BlueSheepComparatoreMain.getProperties().getProperty("BET365_TOKEN");		
-		int numberOfDays = getNumberOfDays(BlueSheepComparatoreMain.getProperties().getProperty("BET365_DAYS"));
+		String token = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BET365_TOKEN);		
+		int numberOfDays = getNumberOfDays(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.BET365_DAYS_INTERVAL));
 		
 		// The retrieved pages collection
 		List<String> result = new ArrayList<String>();
@@ -190,8 +189,8 @@ public class Bet365ApiImpl implements IApiInterface {
 				do {
 					i++;
 					// URL composition
-					logger.info("Retrieving events list: page = " + i + "; querying on date = " + date);
-					String https_url = "https://api.betsapi.com/v1/bet365/upcoming?token="+token+"&sport_id="+sport+"&day="+date+"&page="+i+"&charset="+CHARSET;
+					logger.log(Level.CONFIG, "Retrieving events list: page = " + i + "; querying on date = " + date);
+					String https_url = "https://api.betsapi.com/v1/bet365/upcoming?token="+token+"&sport_id="+sport+"&day="+date+"&page="+i+"&charset="+ComparatoreConstants.ENCODING_UTF_8.toLowerCase();
 					
 					URL url;
 					HttpsURLConnection con;
@@ -203,7 +202,7 @@ public class Bet365ApiImpl implements IApiInterface {
 						result.add(partialResult);
 				} while((partialResult != null) && loopCheck(partialResult));			
 			} catch (Exception e) {
-			   logger.severe("Error during request data on Bet365. Error is " + e.getMessage());
+			   logger.log(Level.SEVERE, "Error during request data on Bet365. Error is " + e.getMessage());
 			}
 		}
 		
@@ -269,7 +268,7 @@ public class Bet365ApiImpl implements IApiInterface {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.severe("Error during request data on Bet365. Error is " + e.getMessage());
+				logger.log(Level.SEVERE, "Error during request data on Bet365. Error is " + e.getMessage());
 			}
 				
 		}

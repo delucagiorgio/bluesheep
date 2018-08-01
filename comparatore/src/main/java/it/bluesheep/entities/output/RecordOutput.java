@@ -16,6 +16,8 @@ public abstract class RecordOutput {
 	protected String scommessaBookmaker2;
 	protected double quotaScommessaBookmaker2;
 	protected String nazione;
+	protected String linkBook1;
+	protected String linkBook2;
 	
 	public Date getDataOraEvento() {
 		return dataOraEvento;
@@ -112,5 +114,20 @@ public abstract class RecordOutput {
 	public void setNazione(String nazione) {
 		this.nazione = nazione;
 	}
-	
+
+	public String getLinkBook1() {
+		return linkBook1;
+	}
+
+	public void setLinkBook1(String linkBook1) {
+		this.linkBook1 = linkBook1;
+	}
+
+	public String getLinkBook2() {
+		return linkBook2;
+	}
+
+	public void setLinkBook2(String linkBook2) {
+		this.linkBook2 = linkBook2;
+	}
 }

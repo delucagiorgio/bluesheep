@@ -15,7 +15,7 @@ import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.Bet365BluesheepJsonConverter;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
-public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
+public final class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 
 	private static final String RESULT_JSON_STRING = "results";
 	private static final String SUCCESS_JSON_STRING = "success";
@@ -95,34 +95,36 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	
 		if(correctCategory != null && correctSubCategory != null && (specificTypeOdds > -1 || underOverHandicap != null)) {		
 			JSONObject correctCategoryJSONObject = jsonConverter.getChildNodeByKey(resultJSONObject, correctCategory);
-			JSONObject spJSONObject = jsonConverter.getChildNodeByKey(correctCategoryJSONObject, SP_JSON_STRING);
-			JSONArray subCategoryJSONArray = jsonConverter.getChildNodeArrayByKey(spJSONObject, correctSubCategory);
-			
-			if(subCategoryJSONArray != null && subCategoryJSONArray.length() > 0) {
-				if(specificTypeOdds > -1) {
-					JSONObject oddsJSONObject = subCategoryJSONArray.getJSONObject(specificTypeOdds);
-					if(oddsJSONObject != null) {
-						double quota = oddsJSONObject.getDouble(ODDS_JSON_STRING);
-						recordToBeMapped = new Bet365InputRecord(tempRecord);
-						recordToBeMapped.setQuota(quota);
-						recordToBeMapped.setSport(sport);
-						recordToBeMapped.setTipoScommessa(scommessaTipo);
-					}
-				}else if(underOverHandicap != null) {
-					for(int i = 0; i < subCategoryJSONArray.length(); i++) {
-						JSONObject underOverJSONObject = subCategoryJSONArray.getJSONObject(i);
-						
-						String[] splittedHandicap = underOverHandicap.split("_");
-						
-						String headerString = underOverJSONObject.getString(HEADER_JSON_STRING).trim();
-						
-						if(splittedHandicap[1].equals(underOverJSONObject.getString(GOALS_CAT_JSON_STRING)) &&
-								splittedHandicap[0].equals(headerString)) {
-							double quota = underOverJSONObject.getDouble(ODDS_JSON_STRING);
+			if(correctCategoryJSONObject != null) {
+				JSONObject spJSONObject = jsonConverter.getChildNodeByKey(correctCategoryJSONObject, SP_JSON_STRING);
+				JSONArray subCategoryJSONArray = jsonConverter.getChildNodeArrayByKey(spJSONObject, correctSubCategory);
+				
+				if(subCategoryJSONArray != null && subCategoryJSONArray.length() > 0) {
+					if(specificTypeOdds > -1) {
+						JSONObject oddsJSONObject = subCategoryJSONArray.getJSONObject(specificTypeOdds);
+						if(oddsJSONObject != null) {
+							double quota = oddsJSONObject.getDouble(ODDS_JSON_STRING);
 							recordToBeMapped = new Bet365InputRecord(tempRecord);
 							recordToBeMapped.setQuota(quota);
 							recordToBeMapped.setSport(sport);
 							recordToBeMapped.setTipoScommessa(scommessaTipo);
+						}
+					}else if(underOverHandicap != null) {
+						for(int i = 0; i < subCategoryJSONArray.length(); i++) {
+							JSONObject underOverJSONObject = subCategoryJSONArray.getJSONObject(i);
+							
+							String[] splittedHandicap = underOverHandicap.split("_");
+							
+							String headerString = underOverJSONObject.getString(HEADER_JSON_STRING).trim();
+							
+							if(splittedHandicap[1].equals(underOverJSONObject.getString(GOALS_CAT_JSON_STRING)) &&
+									splittedHandicap[0].equals(headerString)) {
+								double quota = underOverJSONObject.getDouble(ODDS_JSON_STRING);
+								recordToBeMapped = new Bet365InputRecord(tempRecord);
+								recordToBeMapped.setQuota(quota);
+								recordToBeMapped.setSport(sport);
+								recordToBeMapped.setTipoScommessa(scommessaTipo);
+							}
 						}
 					}
 				}
