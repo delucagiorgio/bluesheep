@@ -32,6 +32,8 @@ public class ComparatoreConstants {
 	public static final String PP_MIN_THRESHOLD = "TXODDS_MIN_THRESHOLD";
 	public static final String PP_MAX_THRESHOLD = "TXODDS_MAX_THRESHOLD";
 	public static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
+	public static final String MINIMUM_ODD_VALUE = "MINIMUM_ODD_VALUE";
+
 	
 	//service names
 	public static final String TX_ODDS_SERVICENAME = "TX_ODDS";

@@ -21,6 +21,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 
 	private double minThreshold;
 	private double maxThreshold;
+	private double minimumOddValue;
 	
 	protected PuntaBancaCompareThreadHelper(Map<String, List<RecordOutput>> oddsComparisonThreadMap,
 			List<Date> keyList,
@@ -29,6 +30,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 		super(oddsComparisonThreadMap, keyList, dataMap, sport);
 		this.minThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.PB_MIN_THRESHOLD)).doubleValue();
 		this.maxThreshold = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.PB_MAX_THRESHOLD)).doubleValue();
+		this.minimumOddValue = new Double(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.MINIMUM_ODD_VALUE)).doubleValue();
 	}
 
 	@Override
@@ -96,7 +98,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 		
 		for(AbstractInputRecord record : eventoScommessaRecordList) {
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord) {
+			if(record != exchangeRecord && record.getQuota() >= minimumOddValue) {
 				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
 				//se il rating1 è sufficientemente alto
 				if(rating1 >= minThreshold && 
