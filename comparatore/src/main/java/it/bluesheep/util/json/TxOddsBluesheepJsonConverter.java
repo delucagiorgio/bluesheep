@@ -15,7 +15,7 @@ public class TxOddsBluesheepJsonConverter extends AbstractBluesheepJsonConverter
 	 * @param obj l'oggetto di cui si vogliono ottenere le informazioni "@attributes"
 	 * @return l'oggetto "@attributes" relativo all'oggetto JSON passato come parametro
 	 */
-	public JSONObject getAttributesNodeFromJSONObject(JSONObject obj) {
+	public static JSONObject getAttributesNodeFromJSONObject(JSONObject obj) {
 		return getChildNodeByKey(obj, "@attributes");
 	}
 	

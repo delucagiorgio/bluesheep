@@ -1,6 +1,7 @@
 package com.betfair.api;
 
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.HttpClient;
@@ -15,6 +16,7 @@ import com.betfair.util.RescriptResponseHandler;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.BlueSheepConstants;
 
 public class HttpUtil {
 
@@ -34,31 +36,32 @@ public class HttpUtil {
         HttpPost post = new HttpPost(URL);
         String resp = null;
         try {
-            post.setHeader(HTTP_HEADER_CONTENT_TYPE, BlueSheepComparatoreMain.getProperties().getProperty("APPLICATION_JSON"));
-            post.setHeader(HTTP_HEADER_ACCEPT, BlueSheepComparatoreMain.getProperties().getProperty("APPLICATION_JSON"));
-            post.setHeader(HTTP_HEADER_ACCEPT_CHARSET, BlueSheepComparatoreMain.getProperties().getProperty("ENCODING_UTF8"));
+            post.setHeader(HTTP_HEADER_CONTENT_TYPE, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPLICATION_JSON));
+            post.setHeader(HTTP_HEADER_ACCEPT, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPLICATION_JSON));
+            post.setHeader(HTTP_HEADER_ACCEPT_CHARSET, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8));
             post.setHeader(HTTP_HEADER_X_APPLICATION, appKey);
             post.setHeader(HTTP_HEADER_X_AUTHENTICATION, ssoToken);
 
-            post.setEntity(new StringEntity(param, BlueSheepComparatoreMain.getProperties().getProperty("ENCODING_UTF8")));
+            post.setEntity(new StringEntity(param, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8)));
 
             HttpClient httpClient = new DefaultHttpClient();
 
             HttpParams httpParams = httpClient.getParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, Integer.valueOf(BlueSheepComparatoreMain.getProperties().getProperty("TIMEOUT")));
-            HttpConnectionParams.setSoTimeout(httpParams, Integer.valueOf(BlueSheepComparatoreMain.getProperties().getProperty("TIMEOUT")));
+            HttpConnectionParams.setConnectionTimeout(httpParams, Integer.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_TIMEOUT)));
+            HttpConnectionParams.setSoTimeout(httpParams, Integer.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_TIMEOUT)));
 
             resp = httpClient.execute(post, reqHandler);
 
         } catch (Exception e) {
-            logger.severe("Error occurred during HTTP request execution: error is " + e.getMessage());
+            logger.log(Level.SEVERE, "Error occurred during HTTP request execution: error is " + e.getMessage());
         }
 
         return resp;
     }
 
     public String sendPostRequestRescript(String param, String operation, String appKey, String ssoToken) {
-        String apiNgURL = BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_URL") + BlueSheepComparatoreMain.getProperties().getProperty("RESCRIPT_SUFFIX") + operation;
+        String apiNgURL = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_BASE_URL) + 
+        		BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_RESCRIPT_SUFFIX) + operation;
         return sendPostRequest(param, appKey, ssoToken, apiNgURL, new RescriptResponseHandler());
     }
 }

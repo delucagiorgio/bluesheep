@@ -10,6 +10,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
 /**
@@ -38,12 +39,12 @@ public class ZipUtil {
  		String fileDirDateFormatString = sdfFileDir.format(DirectoryFileUtilManager.TODAY);
  		String weekFileDirDateFormatString = sdfWeekFileDir.format(DirectoryFileUtilManager.TODAY) + "_" + DirectoryFileUtilManager.WEEK_OF_MONTH;
  		
- 		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_PATH");
+ 		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_PATH);
  		
  		String weekLogOutputPath = logOutputPath + "/" + weekFileDirDateFormatString + "/";
  		String fileWeekLogOutputPath = weekLogOutputPath + "/" + fileDirDateFormatString + "/";
 		
- 		String fileLogPrefix = BlueSheepComparatoreMain.getProperties().getProperty("LOG_PREFIX_FILENAME");
+ 		String fileLogPrefix = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOG_PREFIX_FILENAME);
  		String filenameTodayDateString = fileLogPrefix + fileDirDateFormatString;
  		
  		File dirLogFiles = new File(fileWeekLogOutputPath);

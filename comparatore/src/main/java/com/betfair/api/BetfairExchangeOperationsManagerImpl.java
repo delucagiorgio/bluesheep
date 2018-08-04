@@ -17,6 +17,7 @@ import com.betfair.util.JsonConverter;
 import com.betfair.util.JsonrpcRequest;
 
 import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.util.BlueSheepConstants;
 
 
 public class BetfairExchangeOperationsManagerImpl extends BetfairExchangeOperationsManager{
@@ -91,7 +92,7 @@ public class BetfairExchangeOperationsManagerImpl extends BetfairExchangeOperati
         JsonrpcRequest request = new JsonrpcRequest();
         requestCount++;
         request.setId(""+requestCount);
-        request.setMethod(BlueSheepComparatoreMain.getProperties().getProperty("SPORTS_APING_V1_0") + operation);
+        request.setMethod(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_ENDPOINT) + operation);
         request.setParams(params);
 
         requestString =  JsonConverter.convertToJson(request);

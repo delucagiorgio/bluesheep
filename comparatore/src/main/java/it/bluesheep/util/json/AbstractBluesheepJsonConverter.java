@@ -13,7 +13,7 @@ public abstract class AbstractBluesheepJsonConverter {
 	 * @param childNodeKey il nome del nodo JSON richiesto come oggetto di ritorno
 	 * @return l'oggetto JSON con chiave pari a "childNode", null se non esiste o non è un JSONObject
 	 */
-	public JSONObject getChildNodeByKey(JSONObject obj, String childNodeKey) {
+	public static JSONObject getChildNodeByKey(JSONObject obj, String childNodeKey) {
 		
 		//costruisce l'oggetto JSON relativo al field passato come parametro (ChildNode)
 		JSONObject returnObj = obj.optJSONObject(childNodeKey);
@@ -29,7 +29,7 @@ public abstract class AbstractBluesheepJsonConverter {
 	 * @param childNodeKey la chiave di cui si vuole ottenere la collezione di dati
 	 * @return la collezione di dati avente chiave childNodeKey, null se il tipo restituito non è un ArrayJSON o se la chiave non esiste
 	 */
-	public JSONArray getChildNodeArrayByKey(JSONObject obj, String childNodeKey) {
+	public static JSONArray getChildNodeArrayByKey(JSONObject obj, String childNodeKey) {
 		
 		//costruisce un JSONArray relativo ad una collezione presente in un oggetto JSON
 		JSONArray arrayNodes = obj.optJSONArray(childNodeKey);

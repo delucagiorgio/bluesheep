@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.BlueSheepConstants;
  
  
 public class HttpClientNonInteractiveLoginSSO {
@@ -49,7 +50,7 @@ public class HttpClientNonInteractiveLoginSSO {
         String jsonSessionToken = null;
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
-            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_CERTIFICATE_PATH"))), BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_PASSWORD"));
+            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_CERTIFICATE_PATH))), BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD));
             ctx.init(keyManagers, null, new SecureRandom());
             SSLSocketFactory factory = new SSLSocketFactory(ctx, new StrictHostnameVerifier());
  
@@ -58,11 +59,11 @@ public class HttpClientNonInteractiveLoginSSO {
             HttpPost httpPost = new HttpPost("https://identitysso.betfair.it/api/certlogin");
             
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-            nvps.add(new BasicNameValuePair("username", BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_USER")));
-            nvps.add(new BasicNameValuePair("password", BlueSheepComparatoreMain.getProperties().getProperty("BETFAIR_PASSWORD")));
+            nvps.add(new BasicNameValuePair("username", BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_USERNAME)));
+            nvps.add(new BasicNameValuePair("password", BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD)));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
  
-            httpPost.setHeader("X-Application", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"));
+            httpPost.setHeader("X-Application", BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY));
             httpPost.setHeader("Accept","application/json");
             httpPost.setHeader("Connection", "keep-alive");
             
@@ -73,7 +74,7 @@ public class HttpClientNonInteractiveLoginSSO {
                 responseString = EntityUtils.toString(entity);
             }
             
-            jsonSessionToken = (new JSONObject(responseString)).getString("sessionToken");
+            jsonSessionToken = (new JSONObject(responseString)).getString(BlueSheepConstants.BETFAIR_SESSION_TOKEN_STRING);
         }catch(Exception e) {
         	logger.log(Level.SEVERE, e.getMessage(), e);
         }finally {

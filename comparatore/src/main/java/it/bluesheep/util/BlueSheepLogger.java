@@ -1,6 +1,8 @@
 package it.bluesheep.util;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,6 +22,7 @@ public class BlueSheepLogger {
 	
 	public BlueSheepLogger(Class<?> loggerClass) {
 		logger = Logger.getLogger(loggerClass.getSimpleName());
+		logger.setUseParentHandlers(false);
 		try {
 			setInitialConfig(loggerClass.getSimpleName());
 		}catch(Exception e) {
@@ -33,13 +36,13 @@ public class BlueSheepLogger {
 	 * @throws IOException
 	 */
 	private synchronized void setInitialConfig(String name) throws SecurityException, IOException {
-		String loggingMode = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_MODE");
+		String loggingMode = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_MODE_HANDLER);
         Handler handler = null;
         
         if(logger.getHandlers() == null || logger.getHandlers().length == 0) {
-	        if("CONSOLE".equalsIgnoreCase(loggingMode)) {
+	        if(BlueSheepConstants.LOG_CONSOLE.equalsIgnoreCase(loggingMode)) {
 	     		handler = new ConsoleHandler();
-	     	}else if("FILE_OUTPUT".equalsIgnoreCase(loggingMode)){
+	     	}else if(BlueSheepConstants.LOG_FILE_OUTPUT.equalsIgnoreCase(loggingMode)){
 	     		
 	     		SimpleDateFormat sdfFile = new SimpleDateFormat("yyyyMMdd_HH-mm-ss");
 	     		SimpleDateFormat sdfFileDir = new SimpleDateFormat("yyyyMMdd");
@@ -49,9 +52,9 @@ public class BlueSheepLogger {
 	     		String fileDirDateFormatString = sdfFileDir.format(DirectoryFileUtilManager.TODAY);
 	     		String weekFileDirDateFormatString = sdfWeekFileDir.format(DirectoryFileUtilManager.TODAY) + "_" + DirectoryFileUtilManager.WEEK_OF_MONTH;
 	     		
-	     		String logFileNamePrefix = BlueSheepComparatoreMain.getProperties().getProperty("LOG_PREFIX_FILENAME");
+	     		String logFileNamePrefix = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOG_PREFIX_FILENAME);
 	     		String logOutputFileName = logFileNamePrefix + fileDateFormatString + "_" + name + ".log";
-	     		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_PATH");
+	     		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_PATH);
 	     		
 	     		String weekLogOutputPath = logOutputPath + "/" + weekFileDirDateFormatString + "/";
 	     		String fileWeekLogOutputPath = weekLogOutputPath + "/" + fileDirDateFormatString + "/";
@@ -73,8 +76,13 @@ public class BlueSheepLogger {
 	     			returnString.append(record.getSourceClassName()).append(separatore).append(record.getSourceMethodName()).append(separatore);
 	     			returnString.append(record.getMessage());
 	     			
+	     			
 	     			if(record.getThrown() != null) {
-	     				returnString.append("Exception trown details : ").append(record.getThrown().getMessage());
+	     				returnString.append(" Exception trown details : ");
+	     				returnString.append("\n");
+	     				StringWriter sw = new StringWriter();
+	     				record.getThrown().printStackTrace(new PrintWriter(sw));
+	     				returnString.append(sw.toString());
 	     			}
 	     			returnString.append("\n");
 	     			return returnString.toString();
@@ -82,10 +90,10 @@ public class BlueSheepLogger {
 
 	     	});
 			
-	     	String loggerLevel = BlueSheepComparatoreMain.getProperties().getProperty("LOGGING_LEVEL");
+	     	String loggerLevel = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_LEVEL_OUTPUT);
 	    	
 			handler.setLevel(Level.parse(loggerLevel));
-	    	handler.setEncoding(BlueSheepComparatoreMain.getProperties().getProperty("ENCODING_UTF8"));
+	    	handler.setEncoding(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8));
 	    	
 	    	logger.setLevel(Level.parse(loggerLevel));       
 	    	logger.addHandler(handler); 
