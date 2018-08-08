@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.arbitraggi.imagegeneration.ImageGenerator;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
-import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
 public class TelegramMessageManager {
@@ -42,7 +42,7 @@ public class TelegramMessageManager {
 		// Fase di invio tramite telegram
 		
 		List<String> chat_ids = new ArrayList<String>();
-		chat_ids.add(BlueSheepComparatoreMain.getProperties().getProperty("CHAT_ID"));
+		chat_ids.add(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CHAT_ID));
 		
 		String pictureFormat = ".png";
 		

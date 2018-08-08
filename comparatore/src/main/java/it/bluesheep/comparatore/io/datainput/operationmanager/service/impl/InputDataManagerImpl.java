@@ -14,6 +14,7 @@ import it.bluesheep.comparatore.io.datainput.IInputDataManager;
 import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.BlueSheepSharedResources;
 
 /**
  * Classe di interfaccia tra il servizio e l'applicazione, mediante la quale si ottengono i dati richiesti
@@ -28,12 +29,10 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	protected static Logger logger;
 	protected Sport sport;
 	protected Service serviceName;
-	private Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
 	
-	protected InputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
+	protected InputDataManagerImpl(Sport sport) {
 		logger = (new BlueSheepLogger(InputDataManagerImpl.class)).getLogger();
 		this.sport = sport;
-		this.allServiceApiMapResult = allServiceApiMapResult;
 	}
 
 	/**
@@ -117,11 +116,11 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		try {
 			List<AbstractInputRecord> resultList = processAllData();
 			
-			Map<Sport, List<AbstractInputRecord>> sportByManagerName = allServiceApiMapResult.get(serviceName);
+			Map<Sport, List<AbstractInputRecord>> sportByManagerName = BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName);
 			
 			if(sportByManagerName == null) {
 				sportByManagerName = new HashMap<Sport, List<AbstractInputRecord>>();
-				allServiceApiMapResult.put(serviceName, sportByManagerName);
+				BlueSheepSharedResources.getAllServiceApiMapResult().put(serviceName, sportByManagerName);
 			}
 			
 			sportByManagerName.put(sport, resultList);

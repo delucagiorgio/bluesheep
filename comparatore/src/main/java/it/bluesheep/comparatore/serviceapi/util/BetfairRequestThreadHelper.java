@@ -15,7 +15,8 @@ import com.betfair.enums.types.MatchProjection;
 import com.betfair.enums.types.PriceData;
 import com.betfair.exceptions.BetFairAPIException;
 
-import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
+import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepLogger;
 
 public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
@@ -51,7 +52,7 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 			String responseJson = null;
 			//chiamata sul marketBook 
 			try {				
-				responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), token);
+				responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY), token);
 			} catch (BetFairAPIException e) {
 				logger.log(Level.SEVERE, e.getMessage(), e);
 			}

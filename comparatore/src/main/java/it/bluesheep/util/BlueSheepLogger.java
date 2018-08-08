@@ -14,7 +14,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 
 public class BlueSheepLogger {
 	
@@ -36,7 +36,7 @@ public class BlueSheepLogger {
 	 * @throws IOException
 	 */
 	private synchronized void setInitialConfig(String name) throws SecurityException, IOException {
-		String loggingMode = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_MODE_HANDLER);
+		String loggingMode = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LOGGING_MODE_HANDLER);
         Handler handler = null;
         
         if(logger.getHandlers() == null || logger.getHandlers().length == 0) {
@@ -52,9 +52,9 @@ public class BlueSheepLogger {
 	     		String fileDirDateFormatString = sdfFileDir.format(DirectoryFileUtilManager.TODAY);
 	     		String weekFileDirDateFormatString = sdfWeekFileDir.format(DirectoryFileUtilManager.TODAY) + "_" + DirectoryFileUtilManager.WEEK_OF_MONTH;
 	     		
-	     		String logFileNamePrefix = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOG_PREFIX_FILENAME);
-	     		String logOutputFileName = logFileNamePrefix + fileDateFormatString + "_" + name + ".log";
-	     		String logOutputPath = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_PATH);
+	     		String logFileNamePrefix = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LOG_PREFIX_FILENAME);
+	     		String logOutputFileName = logFileNamePrefix + fileDateFormatString + ".log";
+	     		String logOutputPath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LOGGING_PATH);
 	     		
 	     		String weekLogOutputPath = logOutputPath + "/" + weekFileDirDateFormatString + "/";
 	     		String fileWeekLogOutputPath = weekLogOutputPath + "/" + fileDirDateFormatString + "/";
@@ -90,10 +90,10 @@ public class BlueSheepLogger {
 
 	     	});
 			
-	     	String loggerLevel = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LOGGING_LEVEL_OUTPUT);
+	     	String loggerLevel = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LOGGING_LEVEL_OUTPUT);
 	    	
 			handler.setLevel(Level.parse(loggerLevel));
-	    	handler.setEncoding(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8));
+	    	handler.setEncoding(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8));
 	    	
 	    	logger.setLevel(Level.parse(loggerLevel));       
 	    	logger.addHandler(handler); 

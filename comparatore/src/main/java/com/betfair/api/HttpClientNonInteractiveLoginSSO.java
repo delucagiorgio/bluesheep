@@ -29,9 +29,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-import it.bluesheep.BlueSheepComparatoreMain;
-import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepLogger;
  
  
 public class HttpClientNonInteractiveLoginSSO {
@@ -50,7 +50,7 @@ public class HttpClientNonInteractiveLoginSSO {
         String jsonSessionToken = null;
         try {
             SSLContext ctx = SSLContext.getInstance("TLS");
-            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_CERTIFICATE_PATH))), BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD));
+            KeyManager[] keyManagers = getKeyManagers("pkcs12", new FileInputStream(new File(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_CERTIFICATE_PATH))), BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD));
             ctx.init(keyManagers, null, new SecureRandom());
             SSLSocketFactory factory = new SSLSocketFactory(ctx, new StrictHostnameVerifier());
  
@@ -59,11 +59,11 @@ public class HttpClientNonInteractiveLoginSSO {
             HttpPost httpPost = new HttpPost("https://identitysso.betfair.it/api/certlogin");
             
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-            nvps.add(new BasicNameValuePair("username", BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_USERNAME)));
-            nvps.add(new BasicNameValuePair("password", BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD)));
+            nvps.add(new BasicNameValuePair("username", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_USERNAME)));
+            nvps.add(new BasicNameValuePair("password", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD)));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
  
-            httpPost.setHeader("X-Application", BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY));
+            httpPost.setHeader("X-Application", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY));
             httpPost.setHeader("Accept","application/json");
             httpPost.setHeader("Connection", "keep-alive");
             

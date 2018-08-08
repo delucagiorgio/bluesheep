@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 
 public class InputDataHelper {
@@ -24,7 +24,7 @@ public class InputDataHelper {
 	 */
 	private List<String> getListBlockedBookmakers() {
 		List<String> blockedBookmakerList = new ArrayList<String>();
-		String propertyString = BlueSheepComparatoreMain.getProperties().getProperty("BLOCKED_BOOKMAKER");
+		String propertyString = BlueSheepServiceHandlerManager.getProperties().getProperty("BLOCKED_BOOKMAKER");
 		
 		if(propertyString != null && !propertyString.isEmpty()) {
 			String[] splittedInputList = propertyString.split(BlueSheepConstants.REGEX_CSV);

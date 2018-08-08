@@ -23,7 +23,6 @@ public class TxOddsInputRecord extends AbstractInputRecord{
 	public void setTimeOfInsertionInSystem(String stringFromJSON) {
 		try {
 			Date date = adapterDate.getDateFromString(stringFromJSON);
-			//Valorizza a falso il campo se la quota è vecchia almeno di 5 min
 			this.setTimeInsertionInSystem(date.getTime());
 		} catch (ParseException e) {
 			this.setTimeInsertionInSystem(System.currentTimeMillis());

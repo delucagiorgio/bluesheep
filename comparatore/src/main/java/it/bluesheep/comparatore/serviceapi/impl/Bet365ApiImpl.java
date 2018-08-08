@@ -17,13 +17,13 @@ import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.input.util.bet365.EventoBet365;
 import it.bluesheep.comparatore.entities.input.util.bet365.EventoIdMap;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.multirequesthandler.Bet365RequestHandler;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.json.Bet365BluesheepJsonConverter;
@@ -63,8 +63,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	 */
 	public Bet365ApiImpl() {
 		logger = (new BlueSheepLogger(Bet365ApiImpl.class)).getLogger();
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
-
+		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
 	/**
@@ -127,7 +126,7 @@ public class Bet365ApiImpl implements IApiInterface {
 		}
 
 		// The application token
-		String token = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BET365_TOKEN);
+		String token = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BET365_TOKEN);
 		
 		// The retrieved pages collection containing all the requested available events
 		List<String> result = new ArrayList<String>();
@@ -164,8 +163,8 @@ public class Bet365ApiImpl implements IApiInterface {
 	 * @return the list of answers by the system structured as json files
 	 */
 	private List<String> listEvents(String sport) {
-		String token = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BET365_TOKEN);		
-		int numberOfDays = getNumberOfDays(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BET365_DAYS_INTERVAL));
+		String token = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BET365_TOKEN);		
+		int numberOfDays = getNumberOfDays(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BET365_DAYS_INTERVAL));
 		
 		// The retrieved pages collection
 		List<String> result = new ArrayList<String>();

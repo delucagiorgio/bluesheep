@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
-import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepLogger;
 
 public class BookmakerLinkGenerator {
 
@@ -26,11 +26,6 @@ public class BookmakerLinkGenerator {
 	
 	private BookmakerLinkGenerator() {}
 	
-	static {
-		if(linkBookmakerSportMap == null) {
-			initializeMap();
-		}
-	}
 	
 	/**
 	 * GD - 30/07/18	
@@ -124,13 +119,13 @@ public class BookmakerLinkGenerator {
 	 * GD - 30/07/18
 	 * Inizializza la mappa con i valori in input da file di testo
 	 */
-	private synchronized static void initializeMap() {
+	public synchronized static void initializeMap() {
 		
 		logger.log(Level.INFO, "Starting initialization of URL map for bookmakers");
 		
 		InputStream csvFileStream = null;
 		try {
-			csvFileStream = new FileInputStream(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.LINK_BOOKMAKER_FILE_PATH));
+			csvFileStream = new FileInputStream(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LINK_BOOKMAKER_FILE_PATH));
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, e.getMessage(), e);
 		}

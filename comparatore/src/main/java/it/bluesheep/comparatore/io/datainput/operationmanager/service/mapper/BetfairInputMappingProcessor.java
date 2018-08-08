@@ -11,6 +11,7 @@ import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
+import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
 public final class BetfairInputMappingProcessor extends AbstractInputMappingProcessor{
@@ -105,6 +106,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 					recordToBeMapped.setSport(sport);
 					recordToBeMapped.setTipoScommessa(scommessaTipo);
 					recordToBeMapped.setTimeInsertionInSystem(System.currentTimeMillis());
+					recordToBeMapped.setSource(Service.CSV_SERVICENAME);
 				}
 			}
 		}

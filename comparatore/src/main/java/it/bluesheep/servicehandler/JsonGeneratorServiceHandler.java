@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
@@ -16,7 +15,14 @@ import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
+import it.bluesheep.util.zip.ZipUtil;
 
+/**
+ * 
+ * @author GD
+ * Classe del servizio di genereazione dei file per il bonus abusing di BlueSheep
+ *
+ */
 public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 
 	private static Logger logger;
@@ -50,6 +56,9 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 		}
 	}
 
+	/**
+	 * Avvia le comparazione delle quote e salva ne salva i risultati su file
+	 */
 	private void startComparisonForBonusAbusingAndExportOnFiles() {
 		
 		Map<Service, List<RecordOutput>> comparisonResultMap = CompareProcessFactory.startComparisonOdds(this);
@@ -60,24 +69,31 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 		}
 	}
 	
+	/**
+	 * GD - 05/08/18
+	 * Avvia la procedura di salvataggio delle comparazioni in base al tipo richiesto
+	 * @param serviceName il servizio di cui si vogliono salvare le quote
+	 * @param tabellaOutputList le comparazioni delle quote da salvare
+	 */
 	private void saveRecordsOnFile(Service serviceName, List<RecordOutput> tabellaOutputList) {
 		if(tabellaOutputList != null && !tabellaOutputList.isEmpty()) {
 			String pathOutputTable = "";
 			if(Service.BETFAIR_SERVICENAME.equals(serviceName)) {
-				pathOutputTable = BlueSheepConstants.JSON_PB_RESULT_PATH;
+				pathOutputTable = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.JSON_PB_RESULT_PATH);
 			}else if(Service.TXODDS_SERVICENAME.equals(serviceName)) {
-				pathOutputTable = BlueSheepConstants.JSON_PP_RESULT_PATH;
+				pathOutputTable = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.JSON_PP_RESULT_PATH);
+
 			}
 			logger.log(Level.INFO, "Exporting records in JSON for service " + serviceName);
 	
 	    	String jsonString = AbstractBluesheepJsonConverter.convertToJSON(tabellaOutputList);
-	    	String outputFilenameTabella = BlueSheepComparatoreMain.getProperties().getProperty(pathOutputTable) + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
+	    	String outputFilenameTabella = pathOutputTable + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
 	
 	    	// Indico il path di destinazione dei miei dati
 	    	PrintWriter writer = null;
 			try {
 				
-				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty(pathOutputTable));
+				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(pathOutputTable);
 				
 				writer = new PrintWriter(outputFilenameTabella, BlueSheepConstants.ENCODING_UTF_8);
 		    	// Scrivo
@@ -92,6 +108,18 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 			}
 	    	
 	    	logger.log(Level.INFO, "Export in JSON completed. File is " + outputFilenameTabella);
+	    	
+
+	    	try {
+	    		logger.log(Level.CONFIG, "Starting zipping old JSON file");
+	    		ZipUtil zipUtil = new ZipUtil();
+	    		zipUtil.zipOldJsonFiles(pathOutputTable);
+	    		logger.log(Level.CONFIG, "Zipping old JSON file completed");
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);
+			}
+	    	
+	    	
 		}
 	}
 

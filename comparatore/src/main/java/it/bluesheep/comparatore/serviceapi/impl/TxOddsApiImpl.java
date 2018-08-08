@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.multirequesthandler.TxOddsRequestHandler;
-import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * In questa classe si stabilisce la connessione con il servizio txodds e si ottiene il file json contenente le
@@ -37,7 +37,7 @@ public class TxOddsApiImpl implements IApiInterface {
 	
 	public TxOddsApiImpl() {
 		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();
-		daysInterval = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.TXODDS_DAYS_INTERVAL);
+		daysInterval = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TXODDS_DAYS_INTERVAL);
 	}
 	
 	public List<String> getData(Sport sport, Scommessa scommessa) {
@@ -52,8 +52,8 @@ public class TxOddsApiImpl implements IApiInterface {
 		
 		List<String> result = new ArrayList<String>();
 		
-		String u = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.TXODDS_USER);
-		String p = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.TXODDS_PASSWORD);
+		String u = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TXODDS_USER);
+		String p = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TXODDS_PASSWORD);
 		txOddsRequestHandler = new TxOddsRequestHandler(endDay, u + BlueSheepConstants.REGEX_CSV + p);
 		
 		result.addAll(txOddsRequestHandler.startMultithreadMarketRequests(

@@ -16,10 +16,10 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
-import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepLogger;
 
 public class TranslatorUtil {
 	
@@ -29,10 +29,10 @@ public class TranslatorUtil {
 	private static final String ENGLISH = "en";
 	private static final String ITALIAN = "it";
 	
-	static {
+	public static void initializeMapFromFile(){
 		InputStream csvFileStream = null;
 		try {
-			csvFileStream = new FileInputStream(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.NATION_PATH_INPUTFILE));
+			csvFileStream = new FileInputStream(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.NATION_PATH_INPUTFILE));
 		} catch (FileNotFoundException e1) {
 			logger.log(Level.SEVERE, "Error during initialization of codeTranslationMap : error is " + e1.getMessage());
 		}

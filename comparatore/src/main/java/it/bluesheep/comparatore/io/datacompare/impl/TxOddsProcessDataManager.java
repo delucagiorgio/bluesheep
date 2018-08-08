@@ -21,6 +21,7 @@ import it.bluesheep.comparatore.io.datacompare.util.ThresholdRatingFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
@@ -37,11 +38,13 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 	private double maxThreshold;
 	private boolean controlValidityOdds;
 	private long startComparisonTime;
+	private long minutesOfOddValidity;
 	
 	protected TxOddsProcessDataManager() {
 		super();
 		controlValidityOdds = false;
 		startComparisonTime = System.currentTimeMillis();
+		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
 	}
 	
 	@Override
@@ -140,8 +143,10 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 						   rating1 <= maxThreshold && 
 						   rating2 <= maxThreshold &&
 						   (!controlValidityOdds || 
-								   (startComparisonTime - scommessaInputRecord.getTimeInsertionInSystem() <= 10 * 60 * 1000L && 
-								   startComparisonTime - oppositeScommessaInputRecord.getTimeInsertionInSystem() <= 10 * 60 * 1000L)
+								   (!scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) && 
+										   !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) &&
+										   (hasBeenRecentlyUpdated(scommessaInputRecord) || hasBeenRecentlyUpdated(oppositeScommessaInputRecord))
+									)
 						   )) {
 							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
@@ -155,6 +160,10 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		return outputRecordList;
 	}
 	
+	private boolean hasBeenRecentlyUpdated(AbstractInputRecord scommessaInputRecord) {
+		return startComparisonTime - scommessaInputRecord.getTimeInsertionInSystem() <= minutesOfOddValidity;
+	}
+
 	/**
 	 * GD - 29/05/18
 	 * Ordina i record di input in base al valore di quota

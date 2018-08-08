@@ -9,6 +9,7 @@ import java.util.List;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.CosineSimilarityUtil;
+import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
 
 public abstract class AbstractInputRecord {
@@ -24,6 +25,7 @@ public abstract class AbstractInputRecord {
 	protected Scommessa tipoScommessa;
 	protected String filler;
 	protected long timeOfInsertionInSystem;
+	protected Service source;
 	
 	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {	
 		if(dataOraEvento != null) {
@@ -281,6 +283,14 @@ public abstract class AbstractInputRecord {
 		
 		}
 		return false;
+	}
+
+	public Service getSource() {
+		return source;
+	}
+
+	public void setSource(Service source) {
+		this.source = source;
 	}
 	
 }

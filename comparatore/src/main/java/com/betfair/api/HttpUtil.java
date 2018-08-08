@@ -14,9 +14,9 @@ import org.apache.http.params.HttpParams;
 
 import com.betfair.util.RescriptResponseHandler;
 
-import it.bluesheep.BlueSheepComparatoreMain;
-import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepLogger;
 
 public class HttpUtil {
 
@@ -36,19 +36,19 @@ public class HttpUtil {
         HttpPost post = new HttpPost(URL);
         String resp = null;
         try {
-            post.setHeader(HTTP_HEADER_CONTENT_TYPE, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPLICATION_JSON));
-            post.setHeader(HTTP_HEADER_ACCEPT, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPLICATION_JSON));
-            post.setHeader(HTTP_HEADER_ACCEPT_CHARSET, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8));
+            post.setHeader(HTTP_HEADER_CONTENT_TYPE, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPLICATION_JSON));
+            post.setHeader(HTTP_HEADER_ACCEPT, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPLICATION_JSON));
+            post.setHeader(HTTP_HEADER_ACCEPT_CHARSET, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8));
             post.setHeader(HTTP_HEADER_X_APPLICATION, appKey);
             post.setHeader(HTTP_HEADER_X_AUTHENTICATION, ssoToken);
 
-            post.setEntity(new StringEntity(param, BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8)));
+            post.setEntity(new StringEntity(param, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ENCODING_UTF_8)));
 
             HttpClient httpClient = new DefaultHttpClient();
 
             HttpParams httpParams = httpClient.getParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, Integer.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_TIMEOUT)));
-            HttpConnectionParams.setSoTimeout(httpParams, Integer.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_TIMEOUT)));
+            HttpConnectionParams.setConnectionTimeout(httpParams, Integer.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_TIMEOUT)));
+            HttpConnectionParams.setSoTimeout(httpParams, Integer.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_TIMEOUT)));
 
             resp = httpClient.execute(post, reqHandler);
 
@@ -60,8 +60,8 @@ public class HttpUtil {
     }
 
     public String sendPostRequestRescript(String param, String operation, String appKey, String ssoToken) {
-        String apiNgURL = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_BASE_URL) + 
-        		BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_RESCRIPT_SUFFIX) + operation;
+        String apiNgURL = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_BASE_URL) + 
+        		BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_RESCRIPT_SUFFIX) + operation;
         return sendPostRequest(param, appKey, ssoToken, apiNgURL, new RescriptResponseHandler());
     }
 }

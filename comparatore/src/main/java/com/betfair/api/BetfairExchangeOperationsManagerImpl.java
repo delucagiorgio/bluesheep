@@ -16,7 +16,7 @@ import com.betfair.exceptions.BetFairAPIException;
 import com.betfair.util.JsonConverter;
 import com.betfair.util.JsonrpcRequest;
 
-import it.bluesheep.BlueSheepComparatoreMain;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 
 
@@ -92,7 +92,7 @@ public class BetfairExchangeOperationsManagerImpl extends BetfairExchangeOperati
         JsonrpcRequest request = new JsonrpcRequest();
         requestCount++;
         request.setId(""+requestCount);
-        request.setMethod(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.BETFAIR_ENDPOINT) + operation);
+        request.setMethod(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_ENDPOINT) + operation);
         request.setParams(params);
 
         requestString =  JsonConverter.convertToJson(request);

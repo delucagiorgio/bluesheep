@@ -24,7 +24,6 @@ import com.betfair.enums.types.MarketSort;
 import com.betfair.exceptions.BetFairAPIException;
 import com.betfair.util.ISO8601DateTypeAdapter;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.input.util.betfair.EventoBetfair;
 import it.bluesheep.comparatore.entities.input.util.betfair.MercatoEventoBetfairMap;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
@@ -32,6 +31,7 @@ import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.multirequesthandler.BetfairRequestHandler;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
@@ -83,7 +83,7 @@ public class BetFairApiImpl implements IApiInterface {
 
 	public BetFairApiImpl() {
 		logger = (new BlueSheepLogger(BetFairApiImpl.class)).getLogger();
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
+		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
 	@Override
@@ -156,7 +156,7 @@ public class BetFairApiImpl implements IApiInterface {
 			
 			//chiamata sul marketCatalogue su un set di ids pari a querySize
 			try {
-				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
+				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY), sessionToken);
 			} catch (BetFairAPIException e) {
 				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
@@ -302,7 +302,7 @@ public class BetFairApiImpl implements IApiInterface {
 		//Chiamata al servizio per ottenere tutti gli eventi relativi allo sport e alla scommessa in considerazione 
 		String resultEventsJSON = null;
 		try {
-			resultEventsJSON = beom.listEvents(filter, BlueSheepComparatoreMain.getProperties().getProperty("APPKEY"), sessionToken);
+			resultEventsJSON = beom.listEvents(filter, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY), sessionToken);
 		} catch (BetFairAPIException e) {
 			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -311,7 +311,7 @@ public class BetFairApiImpl implements IApiInterface {
 	}
 
 	private void login() {
-		if(BlueSheepComparatoreMain.getProperties().getProperty("APPKEY") == null || sessionToken == null) {
+		if(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY) == null || sessionToken == null) {
 	        HttpClientNonInteractiveLoginSSO loginHttpHelper = new HttpClientNonInteractiveLoginSSO();
 	        try {
 	        	sessionToken = loginHttpHelper.login();

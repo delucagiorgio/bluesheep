@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.CSVInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
@@ -21,8 +20,10 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.IInputDataManager;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.impl.InputDataManagerImpl;
 import it.bluesheep.comparatore.serviceapi.Service;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepLogger;
+import it.bluesheep.util.BlueSheepSharedResources;
 
 /**
  * 
@@ -47,12 +48,12 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 	private String csvFilenamePath;
 	
 	
-	public CSVInputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
-		super(sport, allServiceApiMapResult);
+	public CSVInputDataManagerImpl(Sport sport) {
+		super(sport);
 		logger = (new BlueSheepLogger(CSVInputDataManagerImpl.class)).getLogger();
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
-		csvFilenamePath = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.CSV_ODDS_PATH_INPUT_FILE);
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
+		csvFilenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CSV_ODDS_PATH_INPUT_FILE);
+		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 		this.serviceName = Service.CSV_SERVICENAME;
 	}
 	
@@ -63,23 +64,31 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 	 */
 	@Override
 	public List<AbstractInputRecord> processAllData() {
-		
-		logger.log(Level.INFO, "Starting CSV input process");
-		
 		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>();
+
+		if(BlueSheepSharedResources.getCsvToBeProcessed()) {
 		
-		//ottengo tutte le linee del csv
-		try {
-			idLineMapKeyValues = getLines();
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
-		}
-		
-		for(Integer idLine : idLineMapKeyValues.keySet()) {
-			AbstractInputRecord record = mapSplittedInfoIntoAbstractInputRecord(idLineMapKeyValues.get(idLine), idLine);
-			if(record != null) {
-				returnList.add(record);
+			logger.log(Level.INFO, "Starting CSV input process");
+			
+			
+			//ottengo tutte le linee del csv
+			try {
+				idLineMapKeyValues = getLines();
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
+			
+			for(Integer idLine : idLineMapKeyValues.keySet()) {
+				AbstractInputRecord record = mapSplittedInfoIntoAbstractInputRecord(idLineMapKeyValues.get(idLine), idLine);
+				if(record != null) {
+					returnList.add(record);
+				}
+			}
+			
+			BlueSheepSharedResources.setCsvToBeProcessed(Boolean.FALSE);
+			
+		}else {
+			logger.log(Level.INFO, "CSV input data is suspended since data haven't changed from last run");
 		}
 		return returnList;
 	}
@@ -116,6 +125,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 				record.setBookmakerName(bookmaker);
 				record.setTipoScommessa(scommessa);
 				record.setQuota(quota);
+				record.setSource(serviceName);
 			}
 		}
 		return record;

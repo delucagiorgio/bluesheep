@@ -24,7 +24,6 @@ public class DirectoryFileUtilManager {
 	 * @param fileWeekLogOutputPath path da verificare e nel caso da creare
 	 */
 	public static void verifyDirectoryAndCreatePathIfNecessary(String fileWeekLogOutputPath) {
-		TODAY = new Date();
 		File directory = new File(fileWeekLogOutputPath);
 		if(!directory.exists()) {
 			directory.mkdirs();

@@ -2,7 +2,6 @@ package it.bluesheep.comparatore.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
@@ -18,8 +17,8 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 	
 	private AbstractInputMappingProcessor processor;
 	
-	protected TxOddsInputDataManagerImpl(Sport sport, Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult) {
-		super(sport, allServiceApiMapResult);
+	protected TxOddsInputDataManagerImpl(Sport sport) {
+		super(sport);
 		this.serviceName = Service.TXODDS_SERVICENAME;
 		processor = new TxOddsInputMappingProcessor();
 		apiServiceInterface = new TxOddsApiImpl();

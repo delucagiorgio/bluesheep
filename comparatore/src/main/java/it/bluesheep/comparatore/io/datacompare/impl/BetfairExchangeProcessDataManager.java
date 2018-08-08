@@ -21,6 +21,7 @@ import it.bluesheep.comparatore.io.datacompare.util.ThresholdRatingFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
@@ -30,11 +31,15 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	private double maxThreshold;
 	private boolean controlValidityOdds;
 	private long startComparisonTime;
+	private double minimumOddValue;
+	private long minutesOfOddValidity;
 	
 	protected BetfairExchangeProcessDataManager() {
 		super();
 		controlValidityOdds = false;
 		startComparisonTime = System.currentTimeMillis();
+		minimumOddValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINIMUM_ODD_VALUE));
+		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
 	}
 	
 	@Override
@@ -160,12 +165,14 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		for(String bookmaker : eventoScommessaRecordList.keySet()) {
 			AbstractInputRecord record = eventoScommessaRecordList.get(bookmaker);
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord) {
+			if(record != exchangeRecord && record.getQuota() >= minimumOddValue) {
 				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
 				//se il rating1 è sufficientemente alto
 				if(rating1 >= minThreshold && 
 				   rating1 <= maxThreshold && 
-				   (!controlValidityOdds || startComparisonTime - record.getTimeInsertionInSystem() <= 10 * 60 * 1000L)) {
+				   (!controlValidityOdds || 
+						   (record.getSource().equals(Service.CSV_SERVICENAME) &&
+						   startComparisonTime - record.getTimeInsertionInSystem() <= minutesOfOddValidity))) {
 					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating1);
 					outputRecordList.add(recordOutput);
 				}
@@ -174,7 +181,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		return outputRecordList;
 	}
 	
-	protected double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2){
+	private double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2){
 		return (new RatingCalculatorBookMakerExchangeOdds()).calculateRating(scommessaInputRecord1.getQuota(), scommessaInputRecord2.getQuota());
 	}
 

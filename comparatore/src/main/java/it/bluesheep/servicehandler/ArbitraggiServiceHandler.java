@@ -13,7 +13,6 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.arbitraggi.telegram.TelegramMessageManager;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
@@ -23,6 +22,10 @@ import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
+/** 
+ * @author GD
+ * Classe che fornisce il servizio di messaggistica degli arbitraggi.
+ */
 public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 
 	private static Logger logger;
@@ -58,6 +61,15 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		}
 	}
 
+	/**
+	 * GD - 05/08/18
+	 * Avvia il processo che calcola gli arbitraggi.
+	 * 1. comparazione delle quote
+	 * 2. creazione dei record univoci di arbitraggio
+	 * 3. filtraggio degli arbitraggi già inviati
+	 * 4. salvataggio degli arbitraggi da inviare su file
+	 * 5. invio tramite TelegramBot dei messaggi
+	 */
 	private void startArbitraggiProcess() {
 		try {
 			getAlreadySentArbsOdds(BlueSheepConstants.FILENAME_PREVIOUS_RUNS);
@@ -107,7 +119,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	 * @throws IOException nel caso succeda un problema con la lettura del file
 	 */
 	private void getAlreadySentArbsOdds(String filename) throws IOException{
-		String filenamePath = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
+		String filenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
 		BufferedReader br = new BufferedReader(new FileReader(filenamePath));
 		List<String> inputFileList = new ArrayList<String>();
 		try{
@@ -126,6 +138,14 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		}
 	}
 	
+	/**
+	 * GD - 05/08/18
+	 * Controlla che, dato un record univoco di arbitraggio, non sia già stato inviato nelle precedenti run del servizio,
+	 * al fine di evitare lo spam. La logica del metodo può restituire un valore FALSE se il record non è stato inviato o 
+	 * è stato inviato con una condizione di vantaggio minore, restituisce TRUE in tutti gli altri casi.
+	 * @param recordKey il record univoco da verificare
+	 * @return false se non inviato o inviato con rating minore, vero altrimenti
+	 */
 	private boolean alreadySent(String recordKey) {
 		boolean found = false;
 		boolean betterRatingFound = false;
@@ -148,7 +168,6 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 				tmpRating2 = null;
 				tmpRating1Stored = null;
 				tmpRating2Stored = null;
-				betterRatingFound = false;
 				//Se non ho trovato una run con lo stesso record ma con rating inferiore o quella che ho trovato è precedente a runId
 				if(runIdFoundWithLowerRatings == null || runIdFoundWithLowerRatings.compareTo(runId) < 0) {
 					Map<String, Map<String, String>> arbsRunMap = alreadySentArbsOdds.get(runId);
@@ -213,13 +232,12 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		if(processedRecord != null && !processedRecord.isEmpty()) {
 			logger.log(Level.INFO, "Storing data for no repeated messages");
 	    	PrintWriter writer1 = null;
-	    	String filename = BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
-			DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH));
+	    	String filename = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
+			DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH));
 
 			//Verifico che il file esista, dalla mappa dei record già processati popolata in fase di inizializzazione
 			if(alreadySentArbsOdds != null && alreadySentArbsOdds.keySet().size() > 0) {
 				long checkBoundTime = System.currentTimeMillis();
-				//TODO inserire una variabile di proprietà per questa costante
 				if(!(alreadySentArbsOdds.keySet().size() < BlueSheepConstants.STORED_RUNS_MAX)) {
 					List<String> runIdSet = new ArrayList<String>(alreadySentArbsOdds.keySet());
 					//Scarta le run non più nell'intervallo di tempo scelto

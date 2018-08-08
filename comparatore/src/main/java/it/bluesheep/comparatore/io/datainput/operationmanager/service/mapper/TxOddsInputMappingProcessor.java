@@ -11,12 +11,13 @@ import org.json.JSONObject;
 
 import com.betfair.util.ISO8601DateTypeAdapter;
 
-import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
+import it.bluesheep.comparatore.serviceapi.Service;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
 
@@ -50,7 +51,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	
 	public TxOddsInputMappingProcessor() {
 		super();
-		updateFrequencyDiff = Long.valueOf(BlueSheepComparatoreMain.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
+		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 		jsonConverter = new TxOddsBluesheepJsonConverter();
 	}
 	
@@ -157,6 +158,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 								String lastUpdatedString = attributesOfferJSONObject.getString(LAST_UPDATED_JSON_STRING);
 								
 								newRecord.setTimeOfInsertionInSystem(lastUpdatedString);
+								newRecord.setSource(Service.TXODDS_SERVICENAME);
 								
 								if("BetClic.it".equalsIgnoreCase(bookmakerName)) {
 									newRecord.setFiller(attributesOfferJSONObject.getString(BMOID_JSON_STRING));
