@@ -80,7 +80,11 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 			resultJSONList = scommessaJsonListMap.get(apiServiceInterface.identifyCorrectBetCode(scommessa, sport) + "_" + sport);
 			if (resultJSONList == null) {
 				//chiamo il servizio per ottenere i dati sullo sport e la relativa tipologia di scommessa
-				resultJSONList = getDataFromService(scommessa, sport);
+				try {
+					resultJSONList = getDataFromService(scommessa, sport);
+				}catch(Exception e) {
+					logger.log(Level.SEVERE, e.getMessage(), e);
+				}
 			}
 			
 			if (resultJSONList != null && !resultJSONList.isEmpty()) {
