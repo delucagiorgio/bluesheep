@@ -8,9 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,7 +32,6 @@ import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.multirequesthandler.BetfairRequestHandler;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.json.BetfairBluesheepJsonConverter;
 
 /**
@@ -82,7 +80,7 @@ public class BetFairApiImpl implements IApiInterface {
 	
 
 	public BetFairApiImpl() {
-		logger = (new BlueSheepLogger(BetFairApiImpl.class)).getLogger();
+		logger = Logger.getLogger(BetFairApiImpl.class);
 		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
@@ -158,7 +156,7 @@ public class BetFairApiImpl implements IApiInterface {
 			try {
 				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY), sessionToken);
 			} catch (BetFairAPIException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 			
 			//va a completare il mapping sugli oggetti EventoBetfair, 
@@ -261,7 +259,7 @@ public class BetFairApiImpl implements IApiInterface {
 				try {
 					dataOraEvento = (new ISO8601DateTypeAdapter()).getDateFromString(dataOraEventoString);
 				} catch (ParseException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage(), e);
 				}
 				
 				if(dataOraEvento != null && (dataOraEvento.getTime() - processingDate.getTime() > updateFrequencyDiff)) {
@@ -304,7 +302,7 @@ public class BetFairApiImpl implements IApiInterface {
 		try {
 			resultEventsJSON = beom.listEvents(filter, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY), sessionToken);
 		} catch (BetFairAPIException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		return resultEventsJSON;
@@ -315,9 +313,9 @@ public class BetFairApiImpl implements IApiInterface {
 	        HttpClientNonInteractiveLoginSSO loginHttpHelper = new HttpClientNonInteractiveLoginSSO();
 	        try {
 	        	sessionToken = loginHttpHelper.login();
-	        	logger.log(Level.CONFIG, "SessionToken = " + sessionToken);
+	        	logger.debug("SessionToken = " + sessionToken);
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}

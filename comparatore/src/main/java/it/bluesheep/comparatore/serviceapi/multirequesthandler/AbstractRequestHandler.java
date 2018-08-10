@@ -6,10 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import it.bluesheep.util.BlueSheepLogger;
+import org.apache.log4j.Logger;
 
 public abstract class AbstractRequestHandler {
 	
@@ -23,7 +21,6 @@ public abstract class AbstractRequestHandler {
 	protected AbstractRequestHandler(int maxThreadPoolSize, String token) {
 		this.maxThreadPoolSize = maxThreadPoolSize;
 		this.token = token;
-		this.logger = (new BlueSheepLogger(AbstractRequestHandler.class)).getLogger();
 	}
 	
 	public List<String> startMultithreadMarketRequests(List<String> ids){
@@ -36,7 +33,7 @@ public abstract class AbstractRequestHandler {
 		
 		resultList = runThreadRequests(requestIdsList);
 		
-		logger.log(Level.CONFIG, "Requests execution completed. Shutting down executor. Responses size = " + resultList.size());
+		logger.debug("Requests execution completed. Shutting down executor. Responses size = " + resultList.size());
 		
 		mapThreadResponse.clear();
 		

@@ -14,16 +14,11 @@ public class IOUtil {
      */ 
     private IOUtil() {} 
  
-    public static void close(Closeable stream) { 
+    public static void close(Closeable stream) throws IOException { 
         if (stream == null) { 
             return; 
         } 
-        try { 
-            stream.close(); 
-        } catch (IOException e) { 
-        	e.printStackTrace();
-        } 
- 
+        stream.close(); 
     } 
  
     public static String toString(InputStream in, String charset) throws IOException { 

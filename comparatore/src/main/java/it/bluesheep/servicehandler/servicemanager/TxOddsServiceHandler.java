@@ -2,17 +2,17 @@ package it.bluesheep.servicehandler.servicemanager;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.serviceapi.Service;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler {
-
 	
 	protected TxOddsServiceHandler() {
 		super();
-		logger = (new BlueSheepLogger(TxOddsServiceHandler.class)).getLogger();
+		logger = Logger.getLogger(TxOddsServiceHandler.class);
 		serviceName = Service.TXODDS_SERVICENAME;
 	}
 

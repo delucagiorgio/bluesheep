@@ -4,22 +4,22 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
+
+import org.apache.log4j.Logger;
 
 import com.betfair.entities.MarketFilter;
 
 import it.bluesheep.comparatore.serviceapi.util.BetfairRequestThreadHelper;
 
 public class BetfairRequestHandler extends AbstractRequestHandler {
-
+	
 	private static final int QUERY_SIZE_MARKET = 40;
-	
 	private MarketFilter filter;
-	
 	
 	public BetfairRequestHandler(int maxThreadPoolSize, MarketFilter filter, String sessionToken) {
 		super(maxThreadPoolSize / QUERY_SIZE_MARKET  + 1, sessionToken);
 		this.filter = filter;
+		this.logger = Logger.getLogger(BetfairRequestHandler.class);
 	}
 
 	@Override
@@ -48,11 +48,11 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 			
 			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
-			logger.log(Level.WARNING, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		if(timeoutReached) {
-			logger.log(Level.WARNING, "" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
+			logger.warn("" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
 		}
 		
 		for(String idJSON : mapThreadResponse.keySet()) {

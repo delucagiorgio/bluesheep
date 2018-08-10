@@ -16,15 +16,14 @@ import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 /**
@@ -49,8 +48,8 @@ public final class BlueSheepServiceHandlerManager {
 		updateInformationFromProperties();	
 		TranslatorUtil.initializeMapFromFile();
 		BookmakerLinkGenerator.initializeMap();
-		logger = (new BlueSheepLogger(BlueSheepServiceHandlerManager.class)).getLogger();
-		logger.log(Level.INFO, properties.toString());
+		logger = Logger.getLogger(BlueSheepServiceHandlerManager.class);
+		logger.info(properties.toString());
 	}
 	
 	public static synchronized BlueSheepServiceHandlerManager getBlueSheepServiceHandlerInstance() {
@@ -69,7 +68,7 @@ public final class BlueSheepServiceHandlerManager {
 	public void start() {
 		
 		//1. avvio tutti i servizi come thread indipendenti e lascio la gestione all'executor
-		logger.log(Level.INFO, "Starting all active services");
+		logger.info("Starting all active services");
 		boolean stopApplication = false;
 		boolean propertiesConfigurationChanged = false;
 		
@@ -107,33 +106,33 @@ public final class BlueSheepServiceHandlerManager {
 				while(!stopApplication && !propertiesConfigurationChanged && (key = ws.take()) != null) {
 					for (WatchEvent<?> event : key.pollEvents()) {
 						WatchEvent.Kind<?> kind = event.kind();
-		                logger.log(Level.INFO, "Event kind:" + kind + ". File affected: " + event.context() + ".");
+		                logger.info("Event kind:" + kind + ". File affected: " + event.context() + ".");
 		                
 		                if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 			                switch(event.context().toString()) {
 			                	case BlueSheepConstants.TRADUZIONI_NAZIONI_FILENAME:
-			                		logger.log(Level.INFO, "File " + BlueSheepConstants.TRADUZIONI_NAZIONI_FILENAME + " has changed. Map of data is going to be updated.");
+			                		logger.info("File " + BlueSheepConstants.TRADUZIONI_NAZIONI_FILENAME + " has changed. Map of data is going to be updated.");
 			                		TranslatorUtil.initializeMapFromFile();
 			                		break;
 			                	case BlueSheepConstants.CSV_FILENAME:
-			                		logger.log(Level.INFO, "File " + BlueSheepConstants.CSV_FILENAME + " has changed. CSV is going to be recalculated");
+			                		logger.info("File " + BlueSheepConstants.CSV_FILENAME + " has changed. CSV is going to be recalculated");
 			                		BlueSheepSharedResources.setCsvToBeProcessed(Boolean.TRUE);
 			                		break;
 			                	case BlueSheepConstants.BOOKMAKER_LINK_FILENAME:
-			                		logger.log(Level.INFO, "File " + BlueSheepConstants.BOOKMAKER_LINK_FILENAME + " has changed. BookmakerLinkMap is going to be updated");
+			                		logger.info("File " + BlueSheepConstants.BOOKMAKER_LINK_FILENAME + " has changed. BookmakerLinkMap is going to be updated");
 			                		BookmakerLinkGenerator.initializeMap();
 			                		break;
 			                	case BlueSheepConstants.PROPERTIES_FILENAME:
-			                		logger.log(Level.INFO, "File " + BlueSheepConstants.PROPERTIES_FILENAME + " has changed. Properties are going to be updated");
+			                		logger.info("File " + BlueSheepConstants.PROPERTIES_FILENAME + " has changed. Properties are going to be updated");
 			                		updateInformationFromProperties();
 			                		propertiesConfigurationChanged = true;
 			                		break;
 			                	case BlueSheepConstants.BLUESHEEP_APP_STATUS:
-			                		logger.log(Level.INFO, "File " + BlueSheepConstants.BLUESHEEP_APP_STATUS + " has changed");
+			                		logger.info("File " + BlueSheepConstants.BLUESHEEP_APP_STATUS + " has changed");
 			                		stopApplication = isApplicationDown();
 			                		break;
 			                	default:
-			                		logger.log(Level.INFO, "No particular actions are required for the changed file");
+			                		logger.info("No particular actions are required for the changed file");
 			                }
 			            }
 					}
@@ -153,16 +152,16 @@ public final class BlueSheepServiceHandlerManager {
 						message = "Restarting " + message;
 					}
 					
-					logger.log(Level.INFO, message + ". Timeout to force shutdown is " + timeout + " " + timeUnitTimeout);
+					logger.info(message + ". Timeout to force shutdown is " + timeout + " " + timeUnitTimeout);
 					
 					executor.shutdown();
 					terminatedCorrectly = executor.awaitTermination(timeout, timeUnitTimeout);
 				}
 				
-				logger.log(Level.INFO, "Application completes the executions correctly = " + terminatedCorrectly);
+				logger.info("Application completes the executions correctly = " + terminatedCorrectly);
 				
 			} catch (IOException | InterruptedException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 				System.exit(-1);
 			}
 		}while(!stopApplication || propertiesConfigurationChanged);
@@ -183,7 +182,7 @@ public final class BlueSheepServiceHandlerManager {
 			String line;
 			while((line = br.readLine()) != null) {
 				if(line.trim().equals("0")) {
-					logger.log(Level.INFO, "Application is going to be stopped. Starting procedure for services termination");
+					logger.info("Application is going to be stopped. Starting procedure for services termination");
 					isOff = true;
 					break;
 				}
@@ -191,11 +190,11 @@ public final class BlueSheepServiceHandlerManager {
 			in.close();
 			br.close();
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		if(!isOff) {
-			logger.log(Level.WARNING, "Code to stop the application is incorrect : please, write \"0\" in the file " + 
+			logger.warn("Code to stop the application is incorrect : please, write \"0\" in the file " + 
 					BlueSheepConstants.BLUESHEEP_APP_STATUS +" if you want to stop the application ");
 		}
 		
@@ -224,7 +223,7 @@ public final class BlueSheepServiceHandlerManager {
 			in.close();
 		} catch (IOException e) {
 			if(logger != null) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}else {
 				System.out.println("Error retrieving properties\n" + e.getMessage());
 			}

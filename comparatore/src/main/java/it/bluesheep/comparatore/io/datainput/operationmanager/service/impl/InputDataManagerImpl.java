@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
@@ -13,7 +13,6 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.IInputDataManager;
 import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.Service;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 /**
@@ -26,12 +25,11 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	
 	protected IApiInterface apiServiceInterface;
 	protected Map<String, List<String>> scommessaJsonListMap;
-	protected static Logger logger;
+	protected Logger logger;
 	protected Sport sport;
 	protected Service serviceName;
 	
 	protected InputDataManagerImpl(Sport sport) {
-		logger = (new BlueSheepLogger(InputDataManagerImpl.class)).getLogger();
 		this.sport = sport;
 	}
 
@@ -49,9 +47,9 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		
 	    if (bet != null) {
 		    scommessaJsonListMap.put(bet + "_" + sport, result);
-			logger.log(Level.CONFIG, "Call API " + apiServiceInterface.getClass().getName() + " to retrieve data for service code bet = " + bet);
+			logger.debug("Call API " + apiServiceInterface.getClass().getName() + " to retrieve data for service code bet = " + bet);
 	    	result.addAll(apiServiceInterface.getData(sport, scommessa));
-			logger.log(Level.CONFIG, "Data retrivied successfully");
+			logger.debug("Data retrivied successfully");
 	    }
 	    
 	    return result;
@@ -69,7 +67,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 	 */
 	public List<AbstractInputRecord> processAllData(){
 				
-		logger.log(Level.CONFIG, "Starting processing data for sport " + sport);
+		logger.debug("Starting processing data for sport " + sport);
 		
 		//la lista di scommesse filtrata per possibili combinazioni sul determinato sport
 		List<Scommessa> sportScommessaList = getCombinazioniSportScommessa(sport);
@@ -80,7 +78,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		scommessaJsonListMap = new HashMap<String,List<String>>();
 		//per ogni tipologia di scommessa
 		for(Scommessa scommessa : sportScommessaList) {
-			logger.log(Level.CONFIG, "Query on data for scommessa " + scommessa);
+			logger.debug("Query on data for scommessa " + scommessa);
 
 			resultJSONList = scommessaJsonListMap.get(apiServiceInterface.identifyCorrectBetCode(scommessa, sport) + "_" + sport);
 			if (resultJSONList == null) {
@@ -124,9 +122,9 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 			}
 			
 			sportByManagerName.put(sport, resultList);
-			logger.log(Level.INFO, "Data retrieval from class " + this.getClass().getSimpleName() + " for sport " + sport + " completed. Mapped records are " + resultList.size());
+			logger.info("Data retrieval from class " + this.getClass().getSimpleName() + " for sport " + sport + " completed. Mapped records are " + resultList.size());
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
+			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
 	}
 	

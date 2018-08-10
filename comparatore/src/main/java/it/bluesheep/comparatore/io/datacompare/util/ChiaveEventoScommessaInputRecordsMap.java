@@ -3,14 +3,13 @@ package it.bluesheep.comparatore.io.datacompare.util;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * Classe utile a collezionare i dati secondo il criterio:
@@ -33,7 +32,7 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 	
 	public ChiaveEventoScommessaInputRecordsMap() {
 		super();
-		logger = (new BlueSheepLogger(ChiaveEventoScommessaInputRecordsMap.class)).getLogger();
+		logger = Logger.getLogger(ChiaveEventoScommessaInputRecordsMap.class);
 	}
 
 	public void addToMapEventoScommessaRecord(AbstractInputRecord record) {
@@ -82,7 +81,7 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 		
 		//se esiste il record, notifico la sovrascrittura con il nuovo aggiornamento
 		if(recordOfBookmaker != null) {
-			logger.log(Level.CONFIG, "Record with key Evento " + 
+			logger.debug("Record with key Evento " + 
 					record.getKeyEvento() + " has been updated: " + 
 					sport + ("" + BlueSheepConstants.REGEX_SLASH) +
 					record.getDataOraEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +

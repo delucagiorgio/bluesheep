@@ -8,14 +8,11 @@ import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
-import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
+import org.apache.log4j.Logger;
+
 import it.bluesheep.util.DirectoryFileUtilManager;
 
 /**
@@ -30,66 +27,13 @@ import it.bluesheep.util.DirectoryFileUtilManager;
  */
 public class ZipUtil {
 	
-	private static final String EXTENSION_FILE_LOG = ".log";
 	private static final String EXTENSION_FILE_ZIP = ".zip";
-	private static final String ZIPPED_FILE_PREFIX = "ZIPPED_LOG_";
+	private static final String ZIPPED_FILE_PREFIX = "ZIPPED_JSON_";
 	private static final String EXTENSION_FILE_JSON = ".json";
 	private Logger logger;
 	
 	public ZipUtil() {
-		logger = (new BlueSheepLogger(ZipUtil.class)).getLogger();
-	}
-	
-	public void zipLastRunLogFiles() throws IOException {
-		Date now = new Date();
-		//Formato della directory dei giorni
- 		SimpleDateFormat sdfFileDir = new SimpleDateFormat("yyyyMMdd");
- 		//Formato della directory delle settimane relative al mese
- 		SimpleDateFormat sdfWeekFileDir = new SimpleDateFormat("yyyyMM");
- 		
- 		String fileDirDateFormatString = sdfFileDir.format(now);
- 		String weekFileDirDateFormatString = sdfWeekFileDir.format(now) + "_" + DirectoryFileUtilManager.WEEK_OF_MONTH;
- 		
- 		String logOutputPath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LOGGING_PATH);
- 		
- 		String weekLogOutputPath = logOutputPath + "/" + weekFileDirDateFormatString + "/";
- 		String fileWeekLogOutputPath = weekLogOutputPath + "/" + fileDirDateFormatString + "/";
-		
- 		String fileLogPrefix = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LOG_PREFIX_FILENAME);
- 		String filenameTodayDateString = fileLogPrefix + fileDirDateFormatString;
- 		
- 		File dirLogFiles = new File(fileWeekLogOutputPath);
- 		File [] logFiles = dirLogFiles.listFiles(new FilenameFilter() {
- 		    @Override
- 		    public boolean accept(File dir, String name) {
- 		        return name.startsWith(filenameTodayDateString) && 
- 		        		name.endsWith(EXTENSION_FILE_LOG);
- 		    }
- 		});
- 		
- 		if(logFiles != null && logFiles.length != 0) {
-	 		SimpleDateFormat sdfLog = new SimpleDateFormat("yyyyMMdd_HHmm");
-	 		String outputFileName = fileWeekLogOutputPath + ZIPPED_FILE_PREFIX + fileLogPrefix + sdfLog.format(now) + EXTENSION_FILE_ZIP;
-	 		File zipLog = new File(outputFileName);
-	 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipLog));
-	 		
-	 		for(File logFile : logFiles) {
-		 		ZipEntry entryZip = new ZipEntry(logFile.getName());
-		 		out.putNextEntry(entryZip);
-		
-		 		byte[] data = Files.readAllBytes(logFile.toPath());
-		 		
-		 		out.write(data, 0, data.length);
-		 		out.closeEntry();
-	 		}
-	 		out.close();
-	 		
-	 		//rimuovo i file "*.log" presenti nella directory
-	 		int sizeFileList = logFiles.length;
-	 		for(int i = 0; i < sizeFileList; i++) {
-	 			logFiles[i].delete();
-	 		}
- 		}
+		logger = Logger.getLogger(ZipUtil.class);
 	}
 	
 	public void zipOldJsonFiles(String pathOutfileFile) {
@@ -140,7 +84,7 @@ public class ZipUtil {
 					dateOfLatestFile = dateOfFile;
 				}
 			} catch (ParseException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);			
+				logger.error(e.getMessage(), e);			
 			}
  		}
 		return latestFile;
@@ -175,7 +119,7 @@ public class ZipUtil {
 	 			out.close();
 	 		}
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);			
+			logger.error(e.getMessage(), e);			
 		}
 	}
 }

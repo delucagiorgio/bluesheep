@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.util.betfair.EventoBetfair;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
@@ -28,6 +30,7 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 		apiServiceInterface = new BetFairApiImpl();
 		scommessaMapMarketIdEventoMap = new HashMap<String, Map<String,EventoBetfair>>();
 		this.serviceName = Service.BETFAIR_SERVICENAME;
+		this.logger = Logger.getLogger(BetfairExchangeInputDataManagerImpl.class);
 	}
 
 

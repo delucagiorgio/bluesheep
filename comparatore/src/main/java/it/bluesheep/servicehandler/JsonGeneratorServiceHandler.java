@@ -5,14 +5,13 @@ import java.io.PrintWriter;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.zip.ZipUtil;
@@ -31,7 +30,7 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 	
 	private JsonGeneratorServiceHandler() {
 		super();
-		logger = (new BlueSheepLogger(JsonGeneratorServiceHandler.class)).getLogger();
+		logger = Logger.getLogger(JsonGeneratorServiceHandler.class);
 	}
 	
 	public static synchronized JsonGeneratorServiceHandler getJsonGeneratorServiceHandlerInstance() {
@@ -50,9 +49,9 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 			
 			long endTime = System.currentTimeMillis();
 			
-			logger.log(Level.INFO, "Export data completed in " + (endTime - startTime) / 1000 + " seconds");
+			logger.info("Export data completed in " + (endTime - startTime) / 1000 + " seconds");
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
+			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
 	}
 
@@ -84,7 +83,7 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 				pathOutputTable = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.JSON_PP_RESULT_PATH);
 
 			}
-			logger.log(Level.INFO, "Exporting records in JSON for service " + serviceName);
+			logger.info("Exporting records in JSON for service " + serviceName);
 	
 	    	String jsonString = AbstractBluesheepJsonConverter.convertToJSON(tabellaOutputList);
 	    	String outputFilenameTabella = pathOutputTable + new Timestamp(startTime).toString().replaceAll(" ", "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
@@ -99,7 +98,7 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 		    	// Scrivo
 		    	writer.println(jsonString);
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Error with file during saving : error is " + e.getMessage(), e);
+				logger.error("Error with file during saving : error is " + e.getMessage(), e);
 			}finally {
 				if(writer != null) {
 					writer.close();
@@ -107,19 +106,17 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 				jsonString = null;
 			}
 	    	
-	    	logger.log(Level.INFO, "Export in JSON completed. File is " + outputFilenameTabella);
+	    	logger.info("Export in JSON completed. File is " + outputFilenameTabella);
 	    	
 
 	    	try {
-	    		logger.log(Level.CONFIG, "Starting zipping old JSON file");
+	    		logger.debug("Starting zipping old JSON file");
 	    		ZipUtil zipUtil = new ZipUtil();
 	    		zipUtil.zipOldJsonFiles(pathOutputTable);
-	    		logger.log(Level.CONFIG, "Zipping old JSON file completed");
+	    		logger.debug("Zipping old JSON file completed");
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
-	    	
-	    	
 		}
 	}
 

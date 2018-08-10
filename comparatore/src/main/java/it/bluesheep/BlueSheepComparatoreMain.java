@@ -7,8 +7,6 @@ public class BlueSheepComparatoreMain {
 	public static void main(String[] args) throws Exception{
 		
 		initializeServiceHandler();
-		
-		System.out.println("Exiting...");
 	}
 	
 	private static void initializeServiceHandler(){

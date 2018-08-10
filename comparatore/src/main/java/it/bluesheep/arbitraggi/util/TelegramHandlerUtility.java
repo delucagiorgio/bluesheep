@@ -133,17 +133,13 @@ public class TelegramHandlerUtility {
 
 		BufferedReader reader = null;
 		// checks server's status code first
-		try {
-			reader = new BufferedReader(new InputStreamReader(
-				httpConn.getInputStream()));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				response.add(line);
-			}
-			reader.close();
-		}catch(Exception e) {
-			e.printStackTrace();
+		reader = new BufferedReader(new InputStreamReader(
+			httpConn.getInputStream()));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			response.add(line);
 		}
+		reader.close();
 
 		httpConn.disconnect();
 

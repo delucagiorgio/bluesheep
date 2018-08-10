@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -25,7 +26,6 @@ import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.multirequesthandler.Bet365RequestHandler;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.json.Bet365BluesheepJsonConverter;
 
 public class Bet365ApiImpl implements IApiInterface {
@@ -62,7 +62,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	 * Logger initialization
 	 */
 	public Bet365ApiImpl() {
-		logger = (new BlueSheepLogger(Bet365ApiImpl.class)).getLogger();
+		logger = Logger.getLogger(Bet365ApiImpl.class);
 		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 	}
 	
@@ -76,12 +76,12 @@ public class Bet365ApiImpl implements IApiInterface {
 		String sportCode = identifyCorrectGameCode(sport);
 		// Obtaining the list of events for the chosen sport
 		
-		logger.log(Level.CONFIG, "Retrieving list events for sport " + sport);
+		logger.debug("Retrieving list events for sport " + sport);
 		List<String> resultEventsJSON = listEvents(sportCode);
 		
 		//Mapping preliminare delle informazioni degli eventi		
 		List<EventoBet365> eventoList = mapEventsIntoEventoClass(resultEventsJSON);
-		logger.log(Level.CONFIG, "Available events for sport " + sport + " are " + eventoList.size());
+		logger.debug("Available events for sport " + sport + " are " + eventoList.size());
 
 		// Salvo gli id degli eventi per poter effettuare le chiamate sui relativi mercati
 		// Mappo gli eventi a seconda del loro id
@@ -93,10 +93,10 @@ public class Bet365ApiImpl implements IApiInterface {
 		}
 		
 		// Ottengo le quote degli eventi trovati
-		logger.log(Level.CONFIG, "Searching for markets on retrieved events for sport " + sport);
+		logger.debug("Searching for markets on retrieved events for sport " + sport);
 		List<String> oddsList = getMarkets(ids);
 		
-		logger.log(Level.CONFIG, "Retrieved odds size for sport " + sport + " is " + oddsList.size());
+		logger.debug("Retrieved odds size for sport " + sport + " is " + oddsList.size());
 		
 		// restituisco una list di json con le quote di quegli eventi
 		return oddsList;
@@ -191,7 +191,7 @@ public class Bet365ApiImpl implements IApiInterface {
 						result.add(partialResult);
 				} while((partialResult != null) && loopCheck(partialResult));			
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 		
@@ -256,7 +256,7 @@ public class Bet365ApiImpl implements IApiInterface {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 				
 		}

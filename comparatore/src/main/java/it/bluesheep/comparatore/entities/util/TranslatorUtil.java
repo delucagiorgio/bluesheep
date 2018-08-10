@@ -11,15 +11,13 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 
 public class TranslatorUtil {
 	
@@ -34,7 +32,7 @@ public class TranslatorUtil {
 		try {
 			csvFileStream = new FileInputStream(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.NATION_PATH_INPUTFILE));
 		} catch (FileNotFoundException e1) {
-			logger.log(Level.SEVERE, "Error during initialization of codeTranslationMap : error is " + e1.getMessage());
+			logger.error("Error during initialization of codeTranslationMap : error is " + e1.getMessage());
 		}
         BufferedReader br = null;
         String line = "";
@@ -53,14 +51,14 @@ public class TranslatorUtil {
 	            }
 
 	        } catch (Exception e) {
-	        	logger.log(Level.SEVERE, "Error during translation initialization map. Error is " + e.getMessage());
+	        	logger.error("Error during translation initialization map. Error is " + e.getMessage());
 	        } finally {
 	            if (br != null) {
 	                try {
 	                	csvFileStream.close();
 	                    br.close();
 	                } catch (IOException e) {
-	                	logger.log(Level.SEVERE, "Error during translation initialization map. Error is " + e.getMessage());
+	                	logger.error("Error during translation initialization map. Error is " + e.getMessage());
 	                }
 	            }
 	        }
@@ -68,7 +66,7 @@ public class TranslatorUtil {
 	}
 	
 	private TranslatorUtil() {
-		logger = (new BlueSheepLogger(TranslatorUtil.class)).getLogger();
+		logger = Logger.getLogger(TranslatorUtil.class);
 	}
 	
 	/**
@@ -102,7 +100,7 @@ public class TranslatorUtil {
 				translatedString = parseResult(response.toString());
 				apiTranslationMap.put(toBeTranslatedString, translatedString);
 			}catch(Exception e) {
-				logger.log(Level.SEVERE, "Error during translation initialization map. No translation is applied. Error is " + e.getMessage());
+				logger.error("Error during translation initialization map. No translation is applied. Error is " + e.getMessage());
 	            translatedString = toBeTranslatedString;
 		}
 		 

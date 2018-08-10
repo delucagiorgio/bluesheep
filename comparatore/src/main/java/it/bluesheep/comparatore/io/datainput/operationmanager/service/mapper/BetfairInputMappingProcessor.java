@@ -2,8 +2,8 @@ package it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -27,6 +27,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	public BetfairInputMappingProcessor() {
 		super();
 		jsonConverter = new BetfairBluesheepJsonConverter();
+		this.logger = Logger.getLogger(BetfairInputMappingProcessor.class);
 	}
 	
 	@Override
@@ -57,7 +58,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 					recordsToBeReturned.add(recordToBeMapped);
 				}
 			}catch(Exception e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 		

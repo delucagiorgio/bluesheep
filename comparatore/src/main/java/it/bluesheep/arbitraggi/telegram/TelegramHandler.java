@@ -8,13 +8,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.log4j.Logger;
+
 import it.bluesheep.arbitraggi.util.TelegramHandlerUtility;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.BlueSheepConstants;
 
 public class TelegramHandler {
@@ -29,7 +28,7 @@ public class TelegramHandler {
 	private static Logger logger;
 	
 	public TelegramHandler() {
-		logger = (new BlueSheepLogger(TelegramHandler.class)).getLogger();
+		logger = Logger.getLogger(TelegramHandler.class);
 	}
 	
 
@@ -51,11 +50,11 @@ public class TelegramHandler {
 			List<String> response = multipart.finish();
 			
 			for (String line : response) {
-				logger.log(Level.CONFIG, line);
+				logger.debug(line);
 			}
 			
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -64,7 +63,7 @@ public class TelegramHandler {
 		try {
 			caption = URLEncoder.encode(caption, BlueSheepConstants.ENCODING_UTF_8);
 		} catch (UnsupportedEncodingException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		if(caption != null) {
@@ -82,11 +81,11 @@ public class TelegramHandler {
 	            
 	            String inputLine;
 	            while ((inputLine = in.readLine()) != null) {
-	                logger.log(Level.CONFIG, inputLine);
+	                logger.debug(inputLine);
 	            }
 	            in.close();
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
     }

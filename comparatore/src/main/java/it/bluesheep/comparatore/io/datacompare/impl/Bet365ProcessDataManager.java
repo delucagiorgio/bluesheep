@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.Bet365InputRecord;
@@ -21,6 +22,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	
 	protected Bet365ProcessDataManager() {
 		super();
+		this.logger = Logger.getLogger(Bet365ProcessDataManager.class);
 	}
 	
 	@Override
@@ -31,7 +33,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap sportMap) throws Exception {
-		logger.log(Level.INFO, "Start matching informartion for Bet365 on TxOdds events : "
+		logger.info("Start matching informartion for Bet365 on TxOdds events : "
 				+ "input size Bet365 events is " + bookmakerList.size() 
 				+ "; input size TxOdds events is " + sportMap.keySet().size());
 		int matchedCountEvents = 0;
@@ -71,7 +73,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			}
 		}
 		
-		logger.log(Level.INFO, "Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
+		logger.info("Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
 		
 		return bookmakerList;
 	}

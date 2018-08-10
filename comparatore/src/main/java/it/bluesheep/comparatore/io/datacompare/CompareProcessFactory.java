@@ -5,20 +5,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.impl.ProcessDataManagerFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 public class CompareProcessFactory {
 	
-	private static Logger logger = (new BlueSheepLogger(CompareProcessFactory.class)).getLogger();
+	private static Logger logger = Logger.getLogger(CompareProcessFactory.class);
 	
 	private CompareProcessFactory() {}
 	
@@ -43,10 +42,10 @@ public class CompareProcessFactory {
 			for(Sport sport : Sport.values()) {
 				try {
 					outputRecord = processDataManager.compareOdds(BlueSheepSharedResources.getEventoScommessaRecordMap(), sport, bluesheepService);
-					logger.log(Level.INFO, "" + service.getCode() + " :: Odds comparison result size for sport " + sport + " is " + outputRecord.size());
+					logger.info("" + service.getCode() + " :: Odds comparison result size for sport " + sport + " is " + outputRecord.size());
 					tabellaOutputList.addAll(outputRecord);
 				} catch (Exception e) {
-					logger.log(Level.SEVERE, e.getMessage(), e);
+					logger.error(e.getMessage(), e);
 				}
 			}
 			returnMap.put(service, tabellaOutputList);

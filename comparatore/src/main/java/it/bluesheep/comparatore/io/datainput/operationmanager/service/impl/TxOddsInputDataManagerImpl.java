@@ -2,7 +2,8 @@ package it.bluesheep.comparatore.io.datainput.operationmanager.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
@@ -22,6 +23,7 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 		this.serviceName = Service.TXODDS_SERVICENAME;
 		processor = new TxOddsInputMappingProcessor();
 		apiServiceInterface = new TxOddsApiImpl();
+		this.logger = Logger.getLogger(TxOddsInputDataManagerImpl.class);
 	}
 
 	/**
@@ -42,7 +44,7 @@ public final class TxOddsInputDataManagerImpl extends InputDataManagerImpl {
 				abstractInputRecordsList = processor.mapInputRecordIntoAbstractInputRecord(jsonString, tipoScommessa, sport);
 			}
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		return abstractInputRecordsList;

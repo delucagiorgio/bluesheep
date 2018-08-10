@@ -10,18 +10,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 
 public class BookmakerLinkGenerator {
 
-	private static Logger logger = (new BlueSheepLogger(BookmakerLinkGenerator.class)).getLogger();
+	private static Logger logger = Logger.getLogger(BookmakerLinkGenerator.class);
 	private static Map<String, Map<Sport, Map<String, String>>> linkBookmakerSportMap;
 	
 	private BookmakerLinkGenerator() {}
@@ -75,7 +75,7 @@ public class BookmakerLinkGenerator {
 							returnString += specificField;
 						}
 					}else {
-						logger.log(Level.WARNING, record.getBookmakerName() + " is not present in linkBookmakerSportMap. Values available are " + linkBookmakerSportMap.toString());
+						logger.warn(record.getBookmakerName() + " is not present in linkBookmakerSportMap. Values available are " + linkBookmakerSportMap.toString());
 					}
 				}
 			}
@@ -127,7 +127,7 @@ public class BookmakerLinkGenerator {
 		try {
 			csvFileStream = new FileInputStream(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.LINK_BOOKMAKER_FILE_PATH));
 		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 
         BufferedReader br = null;
@@ -178,14 +178,14 @@ public class BookmakerLinkGenerator {
 	                }
 	            }
 	        } catch (Exception e) {
-	            logger.log(Level.SEVERE, "Error during initialization map. Error is in line : " + line, e);
+	            logger.error("Error during initialization map. Error is in line : " + line, e);
 	        } finally {
 	            if (br != null) {
 	                try {
 	                	csvFileStream.close();
 	                    br.close();
 	                } catch (IOException e) {
-	    	            logger.log(Level.SEVERE, "Error during initialization map. Error is " + e.getMessage(), e);
+	    	            logger.error("Error during initialization map. Error is " + e.getMessage(), e);
 	                }
 	            }
 	        }

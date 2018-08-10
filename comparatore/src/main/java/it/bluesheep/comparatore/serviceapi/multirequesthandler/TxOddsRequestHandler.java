@@ -3,7 +3,8 @@ package it.bluesheep.comparatore.serviceapi.multirequesthandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.serviceapi.util.TxOddsRequestThreadHelper;
 import it.bluesheep.util.BlueSheepConstants;
@@ -16,6 +17,7 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 	public TxOddsRequestHandler(int maxThreadPoolSize, String token) {
 		super(maxThreadPoolSize, token);
 		this.lastTimestampUpdate = BlueSheepSharedResources.getTxOddsUpdateTimestamp();
+		this.logger = Logger.getLogger(TxOddsRequestHandler.class);
 	}
 	
 
@@ -65,10 +67,10 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 			
 			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
-			logger.log(Level.WARNING, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		if(timeoutReached) {
-			logger.log(Level.WARNING, "" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
+			logger.warn("" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
 		}
 		
 		long tempUpdateTimestamp = -1;

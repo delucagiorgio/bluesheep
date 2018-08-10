@@ -17,7 +17,7 @@ public class TinyUrlShortener {
 	
 	private TinyUrlShortener() {}
 	
-	public static String getShortenedURLFromLongURL(String longUrl) {
+	public static String getShortenedURLFromLongURL(String longUrl) throws IOException {
         String returnUrl = longUrl;
 
 		if(longUrl != null && !"null".equalsIgnoreCase(longUrl)) {
@@ -26,11 +26,7 @@ public class TinyUrlShortener {
 			if(shortedURL == null) {
 				Map<String, String> params = new HashMap<String, String>(); 
 		        params.put("url", longUrl); 
-		        try {
-		        	returnUrl = NetUtil.doPost("http://tinyurl.com/api-create.php", params);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+	        	returnUrl = NetUtil.doPost("http://tinyurl.com/api-create.php", params);
 		        
 		        if(returnUrl != null) {
 		        	urlShortenerMap.put(longUrl, returnUrl);

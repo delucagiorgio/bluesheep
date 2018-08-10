@@ -5,15 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
 
@@ -25,8 +23,7 @@ public class TxOddsRequestThreadHelper extends AbstractRequestThreadHelper {
 	public TxOddsRequestThreadHelper(String urlRequest, Map<String, String> mapThreadResponse) {
 		super();
 		this.urlRequest = urlRequest;
-		
-		logger = (new BlueSheepLogger(Bet365RequestThreadHelper.class)).getLogger();
+		logger = Logger.getLogger(TxOddsRequestThreadHelper.class);
 		this.urlRequest = urlRequest;
 		this.resultThreadRequest = mapThreadResponse;
 	}
@@ -44,7 +41,7 @@ public class TxOddsRequestThreadHelper extends AbstractRequestThreadHelper {
 			JSONObject attributesNode = TxOddsBluesheepJsonConverter.getAttributesNodeFromJSONObject(jsonObjectResult);
 			resultThreadRequest.put("" + this.getId() + BlueSheepConstants.REGEX_CSV + attributesNode.getLong("timestamp"), jsonResult);
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
+			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
 		
 	}
@@ -64,7 +61,7 @@ public class TxOddsRequestThreadHelper extends AbstractRequestThreadHelper {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 		return result;

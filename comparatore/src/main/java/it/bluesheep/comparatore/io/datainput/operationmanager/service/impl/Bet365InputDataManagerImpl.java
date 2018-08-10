@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.util.bet365.EventoBet365;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
@@ -27,6 +29,7 @@ public final class Bet365InputDataManagerImpl extends InputDataManagerImpl {
 		apiServiceInterface = new Bet365ApiImpl();
 		eventoIdEventoBet365Map = new HashMap<String, Map<String, EventoBet365>>();
 		this.serviceName = Service.BET365_SERVICENAME;
+		this.logger = Logger.getLogger(Bet365InputDataManagerImpl.class);
 	}
 	
 	@Override

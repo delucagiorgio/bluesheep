@@ -3,13 +3,10 @@ package it.bluesheep.arbitraggi.imagegeneration;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.xhtmlrenderer.swing.Java2DRenderer;
 import org.xhtmlrenderer.util.FSImageWriter;
-
-import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * Converte Xhtml in png, ma in maniera pessima. Da trovare altra soluzione
@@ -22,7 +19,7 @@ public class XHTML2PngConverter {
 	private static Logger logger;
 	
 	public XHTML2PngConverter() {
-		logger = (new BlueSheepLogger(XHTML2PngConverter.class)).getLogger();
+		logger = Logger.getLogger(XHTML2PngConverter.class);
 	}
 	
 	public void convert (String inputFile, String outputFileName) {
@@ -35,7 +32,7 @@ public class XHTML2PngConverter {
 		try {
 			renderer = new Java2DRenderer(f, IMAGE_WIDTH);
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		// this renders and returns the image, which is stored in the J2R; will not
@@ -50,7 +47,7 @@ public class XHTML2PngConverter {
 		try {
 			imageWriter.write(img, outputFileName);
 		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 }

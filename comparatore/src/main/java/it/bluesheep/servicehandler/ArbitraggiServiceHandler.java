@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.telegram.TelegramMessageManager;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
@@ -19,7 +19,6 @@ import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
 /** 
@@ -36,7 +35,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	
 	private ArbitraggiServiceHandler() {
 		super();
-		logger = (new BlueSheepLogger(ArbitraggiServiceHandler.class)).getLogger();
+		logger = Logger.getLogger(ArbitraggiServiceHandler.class);
 	}
 	
 	public static synchronized ArbitraggiServiceHandler getArbitraggiServiceHandlerInstance() {
@@ -55,9 +54,9 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			
 			long endTime = System.currentTimeMillis();
 			
-			logger.log(Level.INFO, "Arbitraggi execution terminated in " + (endTime - startTime)/1000 + " seconds.");
+			logger.info("Arbitraggi execution terminated in " + (endTime - startTime)/1000 + " seconds.");
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
+			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
 	}
 
@@ -74,7 +73,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		try {
 			getAlreadySentArbsOdds(BlueSheepConstants.FILENAME_PREVIOUS_RUNS);
 		}catch(IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 		
 		Map<Service, List<RecordOutput>> outputRecordMap = CompareProcessFactory.startComparisonOdds(this);
@@ -94,7 +93,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 					}
 				}
 				
-				logger.log(Level.INFO, "" + messageToBeSentKeysList.size() + " message(s) to be sent. Message(s) already sent " + alreadySentCount + "/" + tabellaOutputList.size() );
+				logger.info("" + messageToBeSentKeysList.size() + " message(s) to be sent. Message(s) already sent " + alreadySentCount + "/" + tabellaOutputList.size() );
 		
 				//Se ci sono aggiornamenti o nuovi arbitraggi, invia i risultati e li salva
 				if(!messageToBeSentKeysList.isEmpty()) {
@@ -134,7 +133,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		
 		if(!inputFileList.isEmpty()) {
 			alreadySentArbsOdds = ArbsUtil.initializePreviousRunRecordsMap(inputFileList);
-			logger.log(Level.INFO, "There are already " + alreadySentArbsOdds.size() + " run collection of message sent.");
+			logger.info("There are already " + alreadySentArbsOdds.size() + " run collection of message sent.");
 		}
 	}
 	
@@ -192,14 +191,14 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 								tmpRating2 = rating2;
 								tmpRating2Stored = rating2Stored;
 								runIdFoundWithLowerRatings = runId;
-								logger.log(Level.INFO, "Key arbitraggio " + key + 
+								logger.info("Key arbitraggio " + key + 
 										" has been already sent, but with lower ratings. now_R1 = " +  rating1 + 
 										"; stored_R1 = " + rating1Stored + 
 										"; new_R2 = " + rating2 + 
 										"; stored_R2 = " + rating2Stored + 
 										"; RunID = " + runId);
 							}else {
-								logger.log(Level.INFO, "Key arbitraggio " + key + 
+								logger.info("Key arbitraggio " + key + 
 										" has been already sent, but with higher or equal on the ratings. now_R1 = " +  rating1 + 
 										"; stored_R1 = " + rating1Stored + 
 										"; new_R2 = " + rating2 + 
@@ -213,8 +212,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 				}
 			}
 			if(runIdFoundWithLowerRatings != null && betterRatingFound) {
-				logger.log(Level.INFO, "Key arbitraggio " + key + " has been already sent, but with lower ratings. now_R1 = " +  tmpRating1 + "; stored_R1 = " + tmpRating1Stored + "; new_R2 = " + tmpRating2 + "; stored_R2 = " + tmpRating2Stored);
-				logger.log(Level.INFO, "Message is resent");
+				logger.info("Key arbitraggio " + key + " has been already sent, but with lower ratings. now_R1 = " +  tmpRating1 + "; stored_R1 = " + tmpRating1Stored + "; new_R2 = " + tmpRating2 + "; stored_R2 = " + tmpRating2Stored);
+				logger.info("Message is resent");
 				found = false;
 			}
 		}
@@ -230,7 +229,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	private void saveOutputOnFile(List<String> processedRecord) {
 		
 		if(processedRecord != null && !processedRecord.isEmpty()) {
-			logger.log(Level.INFO, "Storing data for no repeated messages");
+			logger.info("Storing data for no repeated messages");
 	    	PrintWriter writer1 = null;
 	    	String filename = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
 			DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH));
@@ -310,7 +309,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		    		}
 		    	}
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}finally {
 				if(writer1 != null) {
 					writer1.close();

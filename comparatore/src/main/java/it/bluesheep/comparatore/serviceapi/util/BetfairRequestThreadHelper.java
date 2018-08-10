@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import com.betfair.api.BetfairExchangeOperationsManagerImpl;
 import com.betfair.api.IBetfairExchangeOperationsManager;
@@ -17,7 +17,6 @@ import com.betfair.exceptions.BetFairAPIException;
 
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 
 public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 
@@ -34,7 +33,7 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 		this.filter.setEventIds(eventsIds);	
 		this.token = sessionToken;
 		this.idsSublist = idsSublist;
-		logger = (new BlueSheepLogger(BetfairRequestThreadHelper.class)).getLogger();
+		logger = Logger.getLogger(BetfairRequestThreadHelper.class);
 	}
 	
 	@Override
@@ -54,13 +53,13 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 			try {				
 				responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY), token);
 			} catch (BetFairAPIException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 			
 			//colleziono JSON da ritornare
 			resultThreadRequest.put("" + this.getId(), responseJson);
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
+			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 
 		}
 	}

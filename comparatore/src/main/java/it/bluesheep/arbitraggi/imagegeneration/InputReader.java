@@ -1,8 +1,11 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.util.urlshortener.TinyUrlShortener;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
@@ -15,6 +18,13 @@ import it.bluesheep.util.BlueSheepConstants;
  *
  */
 public class InputReader {
+	
+	private Logger logger;
+	
+	public InputReader() {
+		logger = Logger.getLogger(InputReader.class);
+	}
+	
 	public List<Event> convert(List<String> inputRecords) {
 	    List<Event> events = new ArrayList<Event>();
 	    String extractionTime = null;
@@ -50,12 +60,17 @@ public class InputReader {
     		String linkBook1 = "";
     		String linkBook2 = "";
     		String[] linksSplitted = splittedKeyPart[splittedKeyPart.length - 1].split(BlueSheepConstants.REGEX_CSV);
-			if(!"null".equals(linksSplitted[0])) {
-				linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linksSplitted[0]);
+			try {
+				if(!"null".equals(linksSplitted[0])) {
+					linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linksSplitted[0]);
+				}
+				if(!"null".equals(linksSplitted[1])) {
+					linkBook2 = TinyUrlShortener.getShortenedURLFromLongURL(linksSplitted[1]);
+				}
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
 			}
-			if(!"null".equals(linksSplitted[1])) {
-				linkBook2 = TinyUrlShortener.getShortenedURLFromLongURL(linksSplitted[1]);
-			}
+
     		
     		Event tempEvent = new Event(participant1, participant2, date, sport, country, championship, extractionTime);
     		

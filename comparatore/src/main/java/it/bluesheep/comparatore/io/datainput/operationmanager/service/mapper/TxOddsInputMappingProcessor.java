@@ -4,8 +4,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -53,6 +53,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 		super();
 		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 		jsonConverter = new TxOddsBluesheepJsonConverter();
+		this.logger = Logger.getLogger(TxOddsInputMappingProcessor.class);
 	}
 	
 	@Override
@@ -90,7 +91,7 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 					recordsToBeReturned.addAll(mappedRecordsWithOdds);
 				}
 			}catch(Exception e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 		return recordsToBeReturned;

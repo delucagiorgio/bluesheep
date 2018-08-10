@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.CSVInputRecord;
@@ -22,7 +22,6 @@ import it.bluesheep.comparatore.io.datainput.operationmanager.service.impl.Input
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 /**
@@ -32,7 +31,6 @@ import it.bluesheep.util.BlueSheepSharedResources;
  */
 public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IInputDataManager{
 
-	private static Logger logger;
 	private static Long updateFrequencyDiff;
 	
 	private static final Integer SPORT = 0;
@@ -50,7 +48,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 	
 	public CSVInputDataManagerImpl(Sport sport) {
 		super(sport);
-		logger = (new BlueSheepLogger(CSVInputDataManagerImpl.class)).getLogger();
+		this.logger = Logger.getLogger(CSVInputDataManagerImpl.class);
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
 		csvFilenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CSV_ODDS_PATH_INPUT_FILE);
 		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
@@ -68,14 +66,14 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 
 		if(BlueSheepSharedResources.getCsvToBeProcessed()) {
 		
-			logger.log(Level.INFO, "Starting CSV input process");
+			logger.info("Starting CSV input process");
 			
 			
 			//ottengo tutte le linee del csv
 			try {
 				idLineMapKeyValues = getLines();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 			
 			for(Integer idLine : idLineMapKeyValues.keySet()) {
@@ -88,7 +86,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 			BlueSheepSharedResources.setCsvToBeProcessed(Boolean.FALSE);
 			
 		}else {
-			logger.log(Level.INFO, "CSV input data is suspended since data haven't changed from last run");
+			logger.warn("CSV input data is suspended since data haven't changed from last run");
 		}
 		return returnList;
 	}
@@ -110,7 +108,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		try {
 			dataOraEvento = sdf.parse(dataOraEventoString);
 		} catch (ParseException e) {
-			logger.log(Level.SEVERE, "Line " + id + ": date cannot be parsed : error is " + e.getMessage(), e);
+			logger.error("Line " + id + ": date cannot be parsed : error is " + e.getMessage(), e);
 		}	
 		if(dataOraEvento != null && (dataOraEvento.getTime() - processingDate.getTime() > updateFrequencyDiff)) {
 			Sport sport = getCorrectSport(map.get(SPORT), id);
@@ -171,7 +169,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		}else if(Scommessa.PAREGGIO_X.getCode().equalsIgnoreCase(string)) {
 			scommessa = Scommessa.PAREGGIO_X;
 		}else {
-			logger.log(Level.WARNING, "Attention: Line with ID = " + id + " has no valid SCOMMESSA value field. Value inserted is = " + string + "; values accepted are = " + Scommessa.values().toString());
+			logger.warn("Attention: Line with ID = " + id + " has no valid SCOMMESSA value field. Value inserted is = " + string + "; values accepted are = " + Scommessa.values().toString());
 		}
 		return scommessa;
 	}
@@ -190,7 +188,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		}else if (Sport.TENNIS.getCode().equalsIgnoreCase(string)) {
 			sport = Sport.TENNIS;
 		}else {
-			logger.log(Level.WARNING, "Attention: Line with ID = " + id + " has no valid SPORT value field. Value inserted is = " + string + "; values accepted are = " + Sport.values().toString());
+			logger.warn("Attention: Line with ID = " + id + " has no valid SPORT value field. Value inserted is = " + string + "; values accepted are = " + Sport.values().toString());
 		}
 		return sport;
 	}
@@ -212,12 +210,12 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		Integer i = new Integer(0);
 		while(line != null) {
 			try {
-				logger.log(Level.CONFIG, "Reading line : " + line);
+				logger.debug("Reading line : " + line);
 				Map<Integer, String> keyValuesMap = getKeyValuesMapFromLine(line);
 				mapToBeReturned.put(i, keyValuesMap);
 				i = new Integer(i + 1);
 			}catch(Exception e) {
-				logger.log(Level.SEVERE, "Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage(), e);
+				logger.error("Exception occurred during getLines in CSVInputDataManagerImpl : exception is :" + e.getMessage(), e);
 			}
 			line = br.readLine();
 		}
@@ -225,7 +223,7 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 			br.close();
 		}
 		
-		logger.log(Level.INFO, "CSV parsing process completed");
+		logger.info("CSV parsing process completed");
 		
 		return mapToBeReturned;
 	}

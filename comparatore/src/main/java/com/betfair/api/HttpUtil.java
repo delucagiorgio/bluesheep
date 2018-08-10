@@ -1,9 +1,5 @@
 package com.betfair.api;
 
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
@@ -11,12 +7,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.log4j.Logger;
 
 import com.betfair.util.RescriptResponseHandler;
 
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 
 public class HttpUtil {
 
@@ -29,7 +25,7 @@ public class HttpUtil {
 
     public HttpUtil() {
         super();
-        logger = (new BlueSheepLogger(HttpUtil.class)).getLogger();
+        logger = Logger.getLogger(HttpUtil.class);
     }
 
     private String sendPostRequest(String param, String appKey, String ssoToken, String URL, ResponseHandler<String> reqHandler) {
@@ -53,7 +49,7 @@ public class HttpUtil {
             resp = httpClient.execute(post, reqHandler);
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error occurred during HTTP request execution: error is " + e.getMessage());
+            logger.error("Error occurred during HTTP request execution: error is " + e.getMessage(), e);
         }
 
         return resp;

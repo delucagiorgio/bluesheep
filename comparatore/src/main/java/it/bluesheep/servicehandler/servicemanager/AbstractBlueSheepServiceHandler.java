@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
@@ -66,13 +66,13 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 			List<AbstractInputRecord> transformedRecords;
 			for(Sport sport : serviceNameInputData.keySet()) {
 				try {
-					logger.log(Level.INFO, "Starting data transformation for " + serviceName + " on sport " + sport);
+					logger.info("Starting data transformation for " + serviceName + " on sport " + sport);
 					transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(serviceNameInputData.get(sport), BlueSheepSharedResources.getEventoScommessaRecordMap());
-					logger.log(Level.INFO, "Data transformation for " + serviceName + " on sport " + sport + " completed");
+					logger.info("Data transformation for " + serviceName + " on sport " + sport + " completed");
 
 					addToChiaveEventoScommessaMap(transformedRecords);
 				} catch (Exception e) {
-					logger.log(Level.SEVERE, e.getMessage(), e);
+					logger.error(e.getMessage(), e);
 				}
 			}
 		}
@@ -101,7 +101,7 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 		executor = Executors.newFixedThreadPool(sportToBeRetrieved.size());
 
 		for(Sport sport : sportToBeRetrieved) {
-			logger.log(Level.INFO, "Starting data retrivial for " + serviceName + " on sport " + sport);
+			logger.info("Starting data retrivial for " + serviceName + " on sport " + sport);
 			executor.submit(InputDataManagerFactory.getInputDataManagerByString(sport, serviceName));
 		}
 		boolean timeoutReached = true;
@@ -110,10 +110,10 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 			executor.shutdown();
 			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
-			logger.log(Level.WARNING, e.getMessage(), e);
+			logger.warn(e.getMessage(), e);
 		}
 		
-		logger.log(Level.INFO, "" + serviceName + " service handler for data retrieval completed for all sports. Timeout reached = " + timeoutReached);
+		logger.info("" + serviceName + " service handler for data retrieval completed for all sports. Timeout reached = " + timeoutReached);
 		
 		Map<Sport, List<AbstractInputRecord>> sportInputRecordListMap = BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName);
 		
@@ -136,9 +136,9 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 			//Svuota la mappa dei risultati
 			BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName).clear();
 			
-			logger.log(Level.INFO, "Data retrivial  for service " + serviceName + " completed in " + (endTime - startTime)/1000 + " seconds");
+			logger.info("Data retrivial  for service " + serviceName + " completed in " + (endTime - startTime)/1000 + " seconds");
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
+			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
 	}
 	

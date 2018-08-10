@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import it.bluesheep.util.BlueSheepLogger;
+import org.apache.log4j.Logger;
 
 public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 	
@@ -19,7 +17,7 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 	
 	public Bet365RequestThreadHelper(String urlRequest, String token, Map<String, String> mapThreadResponse) {
 		super();
-		logger = (new BlueSheepLogger(Bet365RequestThreadHelper.class)).getLogger();
+		logger = Logger.getLogger(Bet365RequestThreadHelper.class);
 		this.urlRequest = urlRequest;
 		this.token = token;
 		this.resultThreadRequest = mapThreadResponse;
@@ -35,13 +33,12 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 				url = new URL(urlRequest);
 				con = (HttpsURLConnection)url.openConnection();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 			partialResult = get_result(con); 		
 			addResultToApiCollection(partialResult);
 		}catch(Exception e) {
-			logger.log(Level.SEVERE, "ERRORE THREAD :: " + e.getMessage(), e);
-
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -64,7 +61,7 @@ public class Bet365RequestThreadHelper extends AbstractRequestThreadHelper {
 			   }
 			   br.close();
 			} catch (IOException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 		return result;

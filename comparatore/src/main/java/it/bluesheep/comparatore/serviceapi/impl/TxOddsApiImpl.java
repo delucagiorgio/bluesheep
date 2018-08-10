@@ -3,8 +3,8 @@ package it.bluesheep.comparatore.serviceapi.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
@@ -13,7 +13,6 @@ import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.multirequesthandler.TxOddsRequestHandler;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 
 /**
  * In questa classe si stabilisce la connessione con il servizio txodds e si ottiene il file json contenente le
@@ -36,7 +35,7 @@ public class TxOddsApiImpl implements IApiInterface {
 	private String daysInterval;
 	
 	public TxOddsApiImpl() {
-		logger = (new BlueSheepLogger(TxOddsApiImpl.class)).getLogger();
+		logger = Logger.getLogger(TxOddsApiImpl.class);
 		daysInterval = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TXODDS_DAYS_INTERVAL);
 	}
 	
@@ -45,7 +44,7 @@ public class TxOddsApiImpl implements IApiInterface {
 		String sportCode = identifyCorrectGameCode(sport);
 		String oddsType = identifyCorrectBetCode(scommessa, sport);
 		
-		logger.log(Level.CONFIG, "Setting parameters for TxOdds API request");
+		logger.debug("Setting parameters for TxOdds API request");
 		
 		String[] dayIntervalSplitted = daysInterval.split(",");		
 		int endDay = Integer.parseInt(dayIntervalSplitted[1]);

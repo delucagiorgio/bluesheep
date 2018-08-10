@@ -7,14 +7,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.imagegeneration.ImageGenerator;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
 public class TelegramMessageManager {
@@ -24,7 +23,7 @@ public class TelegramMessageManager {
 	private long startTimeExecution;
 	
 	public TelegramMessageManager(long startTime) {
-		logger = (new BlueSheepLogger(TelegramMessageManager.class)).getLogger();
+		logger = Logger.getLogger(TelegramMessageManager.class);
 		startTimeExecution = startTime;
 	}
 
@@ -57,7 +56,7 @@ public class TelegramMessageManager {
 	    	try {
 				caption = createCaptionDescription(eventoIdLink, eventsIdLinkMap.get(eventoIdLink));
 			} catch (ParseException e) {
-				logger.log(Level.SEVERE, e.getMessage(), e);			
+				logger.error(e.getMessage(), e);			
 			}
 	    	
 	    	for (int j = 0; j < chat_ids.size(); j++) {
@@ -71,9 +70,9 @@ public class TelegramMessageManager {
 	    }
 	    
 	    if(eventsIdLinkMap.keySet().size() > 0 ) {
-		    logger.log(Level.INFO, "Photos sending completed");
+		    logger.info("Photos sending completed");
 	    }else {
-	    	logger.log(Level.INFO, "No photo to be sent");
+	    	logger.info("No photo to be sent");
 	    }
 	}
 

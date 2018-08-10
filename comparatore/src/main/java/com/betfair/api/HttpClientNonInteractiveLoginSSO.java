@@ -7,8 +7,6 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -27,11 +25,11 @@ import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepLogger;
  
  
 public class HttpClientNonInteractiveLoginSSO {
@@ -40,7 +38,7 @@ public class HttpClientNonInteractiveLoginSSO {
     private static Logger logger;
     
     public HttpClientNonInteractiveLoginSSO() {
-    	logger = (new BlueSheepLogger(HttpClientNonInteractiveLoginSSO.class)).getLogger();
+    	logger = Logger.getLogger(HttpClientNonInteractiveLoginSSO.class);
     }
     
     public String login() throws Exception {
@@ -76,7 +74,7 @@ public class HttpClientNonInteractiveLoginSSO {
             
             jsonSessionToken = (new JSONObject(responseString)).getString(BlueSheepConstants.BETFAIR_SESSION_TOKEN_STRING);
         }catch(Exception e) {
-        	logger.log(Level.SEVERE, e.getMessage(), e);
+        	logger.error(e.getMessage(), e);
         }finally {
             httpClient.getConnectionManager().shutdown();
         }

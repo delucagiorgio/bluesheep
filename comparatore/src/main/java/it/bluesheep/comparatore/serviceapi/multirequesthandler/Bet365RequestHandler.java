@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
+
+import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.serviceapi.util.Bet365RequestThreadHelper;
 import it.bluesheep.util.BlueSheepConstants;
@@ -13,6 +14,7 @@ public class Bet365RequestHandler extends AbstractRequestHandler {
 	
 	public Bet365RequestHandler(int maxThreadPoolSize, String token) {
 		super(maxThreadPoolSize, token);
+		this.logger = Logger.getLogger(Bet365RequestHandler.class);
 	}
 	
 	@Override
@@ -33,19 +35,20 @@ public class Bet365RequestHandler extends AbstractRequestHandler {
 
 					timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
 				} catch (InterruptedException e) {
-					logger.log(Level.WARNING, e.getMessage(), e);
+					logger.error(e.getMessage(), e);
 				}
 				if(!isLastQueueRequest) {
 					executor = Executors.newFixedThreadPool(maxThreadPoolSize);
 				}
 				
 				if(timeoutReached) {
-					logger.log(Level.WARNING, "" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
+					logger.warn("" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
 				}				
-				for(String idJSON : mapThreadResponse.keySet()) {
-					resultList.add(mapThreadResponse.get(idJSON));
-				}
 			}
+		}
+		
+		for(String idJSON : mapThreadResponse.keySet()) {
+			resultList.add(mapThreadResponse.get(idJSON));
 		}
 
 		return resultList;

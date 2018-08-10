@@ -1,13 +1,14 @@
 package it.bluesheep.servicehandler.servicemanager;
 
+import org.apache.log4j.Logger;
+
 import it.bluesheep.comparatore.serviceapi.Service;
-import it.bluesheep.util.BlueSheepLogger;
 
 public class CSVServiceHandler extends AbstractBlueSheepServiceHandler{
 
 	protected CSVServiceHandler() {
 		super();
-		logger = (new BlueSheepLogger(CSVServiceHandler.class)).getLogger();
+		logger = Logger.getLogger(CSVServiceHandler.class);
 		serviceName = Service.CSV_SERVICENAME;
 	}
 }

@@ -2,8 +2,8 @@ package it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -35,6 +35,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	
 	public Bet365InputMappingProcessor() {
 		super();
+		this.logger = Logger.getLogger(Bet365InputMappingProcessor.class);
 	}
 	
 	
@@ -66,7 +67,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 					}
 					
 				}catch(Exception e) {
-					logger.log(Level.SEVERE, e.getMessage() + "\nJSON is " + resultJSONObject, e);
+					logger.error(e.getMessage() + "\nJSON is " + resultJSONObject, e);
 				}
 			}
 		}

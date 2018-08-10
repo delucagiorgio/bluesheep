@@ -21,14 +21,6 @@ public class BlueSheepConstants {
 	public static final String PATH_TO_RESOURCES = "../RISORSE_BLUESHEEP/";
 	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatus.txt";
 	
-	//log
-	public static final String LOGGING_PATH = "LOGGING_PATH";
-	public static final String LOG_PREFIX_FILENAME = "LOG_PREFIX_FILENAME";
-	public static final String LOGGING_MODE_HANDLER = "LOGGING_MODE";
-	public static final String LOG_CONSOLE = "CONSOLE";
-	public static final String LOG_FILE_OUTPUT = "FILE_OUTPUT";
-	public static final String LOGGING_LEVEL_OUTPUT = "LOGGING_LEVEL";
-	
 	//json
 	public static final String JSON_PP_RESULT_PATH = "PATH_OUTPUT_TABLE2";
 	public static final String JSON_PB_RESULT_PATH = "PATH_OUTPUT_TABLE1";
