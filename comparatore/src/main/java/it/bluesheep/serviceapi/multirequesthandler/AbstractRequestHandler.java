@@ -36,17 +36,15 @@ public abstract class AbstractRequestHandler {
 		
 		logger.log(Level.INFO, "Size requests to handle: " + ids.size());
 		
-		int sizeWait = ids.size() * 2;
-		resultList = runThreadRequests(requestIdsList, sizeWait);
+		resultList = runThreadRequests(requestIdsList);
 		
 		logger.log(Level.INFO, "Requests execution completed. Shutting down executor. Responses size = " + resultList.size());
 		
-		executor.shutdown();
 		mapThreadResponse.clear();
 		
 		return resultList;
 	}
 
-	protected abstract List<String> runThreadRequests(List<String> requestIdsList, int sizeWait);
+	protected abstract List<String> runThreadRequests(List<String> requestIdsList);
 	
 }

@@ -3,6 +3,7 @@ package it.bluesheep.serviceapi.multirequesthandler;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import com.betfair.entities.MarketFilter;
@@ -22,8 +23,8 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 	}
 
 	@Override
-	protected List<String> runThreadRequests(List<String> marketIdsList, int sizeWait) {
-				
+	protected List<String> runThreadRequests(List<String> marketIdsList) {
+		
 		List<String> returnJsonResponseList = new ArrayList<String>();
 
 		//inizializzazione variabili query paginata
@@ -41,19 +42,17 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 			cyclesQuery++;
 		} while(cyclesQuery * QUERY_SIZE_MARKET < marketIdsList.size());
 		
-		long startTime = System.currentTimeMillis();
-
-		//Attende il tempo di timeout o la completa esecuzione corretta delle richieste
-		while(mapThreadResponse.keySet().size() != (cyclesQuery) && System.currentTimeMillis() - startTime < sizeWait * 2 * 1000L) {
+		boolean timeoutReached = true;
+		try {
+			executor.shutdown();
 			
-			logger.log(Level.CONFIG, "WAITING FOR REQUESTS COMPLETION: Actual size of completed request list is " + mapThreadResponse.keySet().size() + "/" + (cyclesQuery));
-			logger.log(Level.CONFIG, "Remains " + (sizeWait * 2 - (System.currentTimeMillis() - startTime ) / 1000) + " seconds to close request pool"); 
-			
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				logger.severe(e.getMessage());				
-			}
+			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			logger.log(Level.WARNING, e.getMessage(), e);
+		}
+		
+		if(timeoutReached) {
+			logger.log(Level.WARNING, "" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
 		}
 		
 		for(String idJSON : mapThreadResponse.keySet()) {
@@ -63,7 +62,7 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 		mapThreadResponse.clear();
 		
 		return returnJsonResponseList;
-	}
+}
 	
 	/**
 	 * GD - 25/04/2018

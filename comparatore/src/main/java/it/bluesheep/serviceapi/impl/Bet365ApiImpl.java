@@ -108,30 +108,22 @@ public class Bet365ApiImpl implements IApiInterface {
 	 * @param idEventoMap mappa relativa agli eventi di cui si vogliono ottenere determinati mercati
 	 * @return gli ids dei mercati relativi agli eventi passati come parametro
 	 */
-	private List<String> getMarkets(List<String> idEventoMap) {
+	private List<String> getMarkets(List<String> idEventoList) {
 		
 		// Ottengo le stringhe composte da (max) 10 id relativi agli eventi separati da virgole
 		final int BET365APILIMIT = 10;
 		List<String> ids = new ArrayList<String>();
 		String temp = "";
-		int j = 1;
-		for (int i = 0; i < idEventoMap.size(); i++) {
-			if (j < BET365APILIMIT) {
-				temp += idEventoMap.get(i) + ",";
-				j++;
-			} else if (j == BET365APILIMIT) {
-				temp += idEventoMap.get(i);
-				j++;
-			} else {
-				j = 1;
+		int idsListSize = idEventoList.size();
+		
+		for (int i = 0; i < idsListSize; i++) {
+			temp = temp + idEventoList.get(i);
+			if((i + 1) % BET365APILIMIT != 0 && (i + 1) < idsListSize) {
+				temp = temp + ",";
+			}else {
 				ids.add(temp);
-				temp = idEventoMap.get(i);
-				j++;
+				temp = "";
 			}
-		}
-		//to cancel to "," in case of non-multiple of 10 list size
-		if(idEventoMap.size() % BET365APILIMIT != 0) {
-			ids.add(temp.substring(0, temp.length() - 2));
 		}
 		
 		// The application token
