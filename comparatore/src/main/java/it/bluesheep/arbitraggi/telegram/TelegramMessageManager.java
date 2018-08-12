@@ -88,6 +88,7 @@ public class TelegramMessageManager {
 			linkBookmakers += ArbsUtil.getTelegramBoldString(splittedBookmakerLink[0] + ":") + " " + splittedBookmakerLink[1] + System.lineSeparator();
 		}
 		
+		
 		return ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + eventoIdLinkSplitted[1] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Evento:") + " " + eventoSplittedKey[0] + BlueSheepConstants.REGEX_VERSUS + eventoSplittedKey[1] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Data e ora:") + " " + sdfOutput.format(sdfInput.parse(eventoSplittedKey[2])) + System.lineSeparator() + 

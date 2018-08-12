@@ -6,7 +6,7 @@
 		class="org.apache.log4j.ConsoleAppender">
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern"
-			value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-5p]| %m%n" />
+			value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" />
 		</layout>
 	</appender>
 
@@ -27,13 +27,13 @@
        <param name="file" value="../LOG/BluesheepApplication.log" />
        <param name="DatePattern" value="'.'yyyy-MM-dd-HH" />
        <layout class="org.apache.log4j.PatternLayout">
-          <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-5p]| %m%n"/>          
+          <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n"/>          
        </layout>
     </appender>
 
 	<root>
 		<level value="INFO" />
-<!-- 		<appender-ref ref="console"/> -->
-		<appender-ref ref="file"/>
+		<appender-ref ref="console"/>
+<!-- 		<appender-ref ref="file"/> -->
 	</root>
 </log4j:configuration>

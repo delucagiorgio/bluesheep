@@ -145,7 +145,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 						   (!controlValidityOdds || 
 								   (!scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) && 
 										   !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) &&
-										   (hasBeenRecentlyUpdated(scommessaInputRecord) || hasBeenRecentlyUpdated(oppositeScommessaInputRecord))
+										   hasBeenRecentlyUpdated(scommessaInputRecord) && 
+										   hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
 									)
 						   )) {
 							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);

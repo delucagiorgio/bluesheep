@@ -87,10 +87,14 @@ public final class BlueSheepServiceHandlerManager {
 			}
 			
 			long arbsFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_ARBS_SEC));
-			executor.scheduleWithFixedDelay(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance(), 30, arbsFrequencySeconds, TimeUnit.SECONDS);
+			if(arbsFrequencySeconds > 0) {
+				executor.scheduleWithFixedDelay(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance(), 30, arbsFrequencySeconds, TimeUnit.SECONDS);
+			}
 			
 			long jsonFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_JSON_SEC));
-			executor.scheduleAtFixedRate(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance(), 10, jsonFrequencySeconds, TimeUnit.SECONDS);
+			if(jsonFrequencySeconds > 0) {
+				executor.scheduleAtFixedRate(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance(), 10, jsonFrequencySeconds, TimeUnit.SECONDS);
+			}
 			
 			WatchService ws = null;
 			
@@ -99,14 +103,14 @@ public final class BlueSheepServiceHandlerManager {
 				
 				Path pathToResources = Paths.get(BlueSheepConstants.PATH_TO_RESOURCES);
 				
-				pathToResources.register(ws, StandardWatchEventKinds.ENTRY_MODIFY);
+				pathToResources.register(ws, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_CREATE);
 				WatchKey key;
 				stopApplication = false;
 				propertiesConfigurationChanged = false;
 				while(!stopApplication && !propertiesConfigurationChanged && (key = ws.take()) != null) {
 					for (WatchEvent<?> event : key.pollEvents()) {
 						WatchEvent.Kind<?> kind = event.kind();
-		                logger.info("Event kind:" + kind + ". File affected: " + event.context() + ".");
+		                logger.info("Event kind:" + kind + " - File affected: " + event.context());
 		                
 		                if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 			                switch(event.context().toString()) {
@@ -127,16 +131,17 @@ public final class BlueSheepServiceHandlerManager {
 			                		updateInformationFromProperties();
 			                		propertiesConfigurationChanged = true;
 			                		break;
-			                	case BlueSheepConstants.BLUESHEEP_APP_STATUS:
-			                		logger.info("File " + BlueSheepConstants.BLUESHEEP_APP_STATUS + " has changed");
-			                		stopApplication = isApplicationDown();
-			                		break;
 			                	default:
 			                		logger.info("No particular actions are required for the changed file");
 			                }
+			            }else {
+			            	if(BlueSheepConstants.BLUESHEEP_APP_STATUS.equalsIgnoreCase(event.context().toString())) {
+			            		logger.info("File " + BlueSheepConstants.BLUESHEEP_APP_STATUS + " has changed");
+			            		stopApplication = isApplicationDown();
+			            	}
 			            }
+		                key.reset();
 					}
-		            key.reset();
 				}
 				ws.close();
 				

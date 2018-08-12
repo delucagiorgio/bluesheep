@@ -79,14 +79,15 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 			String[] splittedThreadIdTimestamp = idJSON.split(BlueSheepConstants.REGEX_CSV);
 			if(splittedThreadIdTimestamp.length == 2){
 				Long timestampFromJSON = new Long(splittedThreadIdTimestamp[1]);
+				logger.debug("Timestamp: " + timestampFromJSON);
 				if(tempUpdateTimestamp < 0 || timestampFromJSON.longValue() < tempUpdateTimestamp) {
 					tempUpdateTimestamp = timestampFromJSON.longValue();
+					logger.debug("Minimum timestamp found: " + timestampFromJSON);
 					BlueSheepSharedResources.setTxOddsNowMinimumUpdateTimestamp(timestampFromJSON);
 				}
 			}
 			result.add(mapThreadResponse.get(idJSON));
 		}
-		
 		
 		mapThreadResponse.clear();
 		

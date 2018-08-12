@@ -170,9 +170,14 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 				//se il rating1 è sufficientemente alto
 				if(rating1 >= minThreshold && 
 				   rating1 <= maxThreshold && 
-				   (!controlValidityOdds || 
-						   (record.getSource().equals(Service.CSV_SERVICENAME) &&
-						   startComparisonTime - record.getTimeInsertionInSystem() <= minutesOfOddValidity))) {
+					   (!controlValidityOdds || 
+							   (
+									   !record.getSource().equals(Service.CSV_SERVICENAME) &&
+									   hasBeenRecentlyUpdated(record) && 
+									   hasBeenRecentlyUpdated(exchangeRecord)
+							   )
+						)
+					) {
 					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating1);
 					outputRecordList.add(recordOutput);
 				}
@@ -183,6 +188,10 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	
 	private double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2){
 		return (new RatingCalculatorBookMakerExchangeOdds()).calculateRating(scommessaInputRecord1.getQuota(), scommessaInputRecord2.getQuota());
+	}
+	
+	private boolean hasBeenRecentlyUpdated(AbstractInputRecord scommessaInputRecord) {
+		return startComparisonTime - scommessaInputRecord.getTimeInsertionInSystem() <= minutesOfOddValidity;
 	}
 
 }

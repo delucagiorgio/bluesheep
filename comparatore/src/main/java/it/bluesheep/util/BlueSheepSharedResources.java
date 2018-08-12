@@ -35,6 +35,7 @@ public class BlueSheepSharedResources {
 	private static Map<Service, Long> activeServices;
 	private static Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
 	private static Map<Service, List<Sport>> serviceSportMap;
+	private static int updateCallCount = 0;
 	
 	private BlueSheepSharedResources() {}
 
@@ -68,10 +69,6 @@ public class BlueSheepSharedResources {
 
 	public static long getUpdateFrequencyDiff() {
 		return updateFrequencyDiff;
-	}
-
-	public static void setUpdateFrequencyDiff(long updateFrequencyDiff) {
-		BlueSheepSharedResources.updateFrequencyDiff = updateFrequencyDiff;
 	}
 	
 	/**
@@ -177,6 +174,14 @@ public class BlueSheepSharedResources {
 
 	public static Map<Service, Map<Sport, List<AbstractInputRecord>>> getAllServiceApiMapResult() {
 		return allServiceApiMapResult;
+	}
+
+	public static int getUpdateCallCount() {
+		return updateCallCount;
+	}
+
+	public static void setUpdateCallCount(int updateCallCount) {
+		BlueSheepSharedResources.updateCallCount = updateCallCount;
 	}
 
 }
