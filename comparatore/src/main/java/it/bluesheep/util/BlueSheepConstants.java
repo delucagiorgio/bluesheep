@@ -19,7 +19,7 @@ public class BlueSheepConstants {
 	public static final String BOOKMAKER_LINK_FILENAME = "LinkBookmaker.csv";
 	public static final String SERVICE_NAME_LIST = "ACTIVE_SERVICE_NAME";
 	public static final String PATH_TO_RESOURCES = "../RISORSE_BLUESHEEP/";
-	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatus.txt";
+	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatusOn.txt";
 	
 	//json
 	public static final String JSON_PP_RESULT_PATH = "PATH_OUTPUT_TABLE2";
@@ -75,7 +75,8 @@ public class BlueSheepConstants {
 	//arbitraggi
 	public static final String RATING1 = "R1";
 	public static final String RATING2 = "R2";
-	public static final String FILENAME_PREVIOUS_RUNS = "previousRunFile.txt";
+	public static final String FILENAME_PREVIOUS_RUNS_PP = "previousRunFilePP.txt";
+	public static final String FILENAME_PREVIOUS_RUNS_PB = "previousRunFilePB.txt";
 	public static final String PREVIOUS_RUN_PATH = "PREVIOUS_RUN_PATH";
 	public static final String CHAT_ID = "CHAT_ID";
 	public static final int STORED_RUNS_MAX = 40;

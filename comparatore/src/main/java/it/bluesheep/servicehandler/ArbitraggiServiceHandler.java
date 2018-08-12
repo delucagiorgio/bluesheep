@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 
 	private static Logger logger;
 	private static ArbitraggiServiceHandler instance;
-	private static Map<String, Map<String, Map<String, String>>> alreadySentArbsOdds;
+	private static Map<String, Map<String, Map<String, Map<String, String>>>> alreadySentArbsOdds;
 	private static long startTime;
 
 	
@@ -70,11 +71,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	 * 5. invio tramite TelegramBot dei messaggi
 	 */
 	private void startArbitraggiProcess() {
-		try {
-			getAlreadySentArbsOdds(BlueSheepConstants.FILENAME_PREVIOUS_RUNS);
-		}catch(IOException e) {
-			logger.error(e.getMessage(), e);
-		}
+		
+		getAlreadySentArbsOdds();
 		
 		Map<Service, List<RecordOutput>> outputRecordMap = CompareProcessFactory.startComparisonOdds(this);
 		
@@ -98,7 +96,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 				//Se ci sono aggiornamenti o nuovi arbitraggi, invia i risultati e li salva
 				if(!messageToBeSentKeysList.isEmpty()) {
 					
-					saveOutputOnFile(messageToBeSentKeysList);
+					saveOutputOnFile(messageToBeSentKeysList, tabellaType);
 		
 					TelegramMessageManager tmm = new TelegramMessageManager(startTime);
 					tmm.sendMessageToTelegramGroupByBotAndStore(messageToBeSentKeysList, alreadySentArbsOdds);
@@ -117,24 +115,34 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	 * @param filename il nome del file da cui leggere
 	 * @throws IOException nel caso succeda un problema con la lettura del file
 	 */
-	private void getAlreadySentArbsOdds(String filename) throws IOException{
-		String filenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
-		BufferedReader br = new BufferedReader(new FileReader(filenamePath));
-		List<String> inputFileList = new ArrayList<String>();
-		try{
-			String line = br.readLine();
-			while (line != null) {
-				inputFileList.add(line);
-				line = br.readLine();
+	private void getAlreadySentArbsOdds(){
+		if(alreadySentArbsOdds == null) {
+			alreadySentArbsOdds = new TreeMap<String, Map<String, Map<String, Map<String, String>>>>();
+		}
+		List<String> serviceFilenameList = Arrays.asList(BlueSheepConstants.FILENAME_PREVIOUS_RUNS_PB, BlueSheepConstants.FILENAME_PREVIOUS_RUNS_PP);
+		for(String filenameService : serviceFilenameList) {
+			String filenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + filenameService;
+			List<String> inputFileList = new ArrayList<String>();
+			try{	
+				BufferedReader br = new BufferedReader(new FileReader(filenamePath));
+
+				String line = br.readLine();
+				while (line != null) {
+					inputFileList.add(line);
+					line = br.readLine();
+				}
+				br.close();
+			}catch(IOException e) {
+				logger.error(e.getMessage(), e);
 			}
-		}finally{
-			br.close();
+			if(!inputFileList.isEmpty()) {
+				Map<String, Map<String, Map<String, String>>> mappedRecordsMap = ArbsUtil.initializePreviousRunRecordsMap(inputFileList);
+				alreadySentArbsOdds.put(filenameService, mappedRecordsMap);
+				logger.info("There are already " + alreadySentArbsOdds.size() + " run collection of message sent.");
+			}
 		}
 		
-		if(!inputFileList.isEmpty()) {
-			alreadySentArbsOdds = ArbsUtil.initializePreviousRunRecordsMap(inputFileList);
-			logger.info("There are already " + alreadySentArbsOdds.size() + " run collection of message sent.");
-		}
+
 	}
 	
 	/**
@@ -157,55 +165,58 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		if(alreadySentArbsOdds != null && !alreadySentArbsOdds.isEmpty()) {
 			String[] splittedRecord = recordKey.split(BlueSheepConstants.KEY_SEPARATOR);
 			String key = ArbsUtil.createArbsKeyFromRecordKey(splittedRecord[0]);
-
-			for(String runId : alreadySentArbsOdds.keySet()) {
-				String rating1 = null;
-				String rating2 = null;
-				String rating1Stored = null;
-				String rating2Stored = null;
-				tmpRating1 = null;
-				tmpRating2 = null;
-				tmpRating1Stored = null;
-				tmpRating2Stored = null;
-				//Se non ho trovato una run con lo stesso record ma con rating inferiore o quella che ho trovato è precedente a runId
-				if(runIdFoundWithLowerRatings == null || runIdFoundWithLowerRatings.compareTo(runId) < 0) {
-					Map<String, Map<String, String>> arbsRunMap = alreadySentArbsOdds.get(runId);
-					for(String arbs : arbsRunMap.keySet()) {
-						if(key.equalsIgnoreCase(arbs)) {
-							found = true;
-							rating1Stored = arbsRunMap.get(arbs).get(BlueSheepConstants.RATING1);
-							rating2Stored = arbsRunMap.get(arbs).get(BlueSheepConstants.RATING2);
-							
-							String[] ratings = splittedRecord[1].split(BlueSheepConstants.REGEX_CSV);
-							rating1 = ratings[0];
-							rating2 = null;
-							if(ratings.length == 2) {
-								rating2 = ratings[1];
-							}
-							//Se il record è già stato inviato in precedenza ma con dei rating più bassi, lo reinvio
-							if(rating1Stored.compareTo(rating1) < 0 && ((rating2Stored == null && rating2 == null) ||
-									(rating2Stored != null && rating2 != null && rating2Stored.compareTo(rating2) < 0))) {
-								betterRatingFound = true;
-								tmpRating1 = rating1;
-								tmpRating1Stored = rating1Stored;
-								tmpRating2 = rating2;
-								tmpRating2Stored = rating2Stored;
-								runIdFoundWithLowerRatings = runId;
-								logger.info("Key arbitraggio " + key + 
-										" has been already sent, but with lower ratings. now_R1 = " +  rating1 + 
-										"; stored_R1 = " + rating1Stored + 
-										"; new_R2 = " + rating2 + 
-										"; stored_R2 = " + rating2Stored + 
-										"; RunID = " + runId);
-							}else {
-								logger.info("Key arbitraggio " + key + 
-										" has been already sent, but with higher or equal on the ratings. now_R1 = " +  rating1 + 
-										"; stored_R1 = " + rating1Stored + 
-										"; new_R2 = " + rating2 + 
-										"; stored_R2 = " + rating2Stored + 
-										"; RunID = " + runId);
-								betterRatingFound = false;
-								break;
+			
+			for(String filePath : alreadySentArbsOdds.keySet()) {
+				Map<String,Map<String,Map<String,String>>> filePathMap = alreadySentArbsOdds.get(filePath);
+				for(String runId : filePathMap.keySet()) {
+					String rating1 = null;
+					String rating2 = null;
+					String rating1Stored = null;
+					String rating2Stored = null;
+					tmpRating1 = null;
+					tmpRating2 = null;
+					tmpRating1Stored = null;
+					tmpRating2Stored = null;
+					//Se non ho trovato una run con lo stesso record ma con rating inferiore o quella che ho trovato è precedente a runId
+					if(runIdFoundWithLowerRatings == null || runIdFoundWithLowerRatings.compareTo(runId) < 0) {
+						Map<String, Map<String, String>> arbsRunMap = filePathMap.get(runId);
+						for(String arbs : arbsRunMap.keySet()) {
+							if(key.equalsIgnoreCase(arbs)) {
+								found = true;
+								rating1Stored = arbsRunMap.get(arbs).get(BlueSheepConstants.RATING1);
+								rating2Stored = arbsRunMap.get(arbs).get(BlueSheepConstants.RATING2);
+								
+								String[] ratings = splittedRecord[1].split(BlueSheepConstants.REGEX_CSV);
+								rating1 = ratings[0];
+								rating2 = null;
+								if(ratings.length == 2) {
+									rating2 = ratings[1];
+								}
+								//Se il record è già stato inviato in precedenza ma con dei rating più bassi, lo reinvio
+								if(rating1Stored.compareTo(rating1) < 0 && ((rating2Stored == null && rating2 == null) ||
+										(rating2Stored != null && rating2 != null && rating2Stored.compareTo(rating2) < 0))) {
+									betterRatingFound = true;
+									tmpRating1 = rating1;
+									tmpRating1Stored = rating1Stored;
+									tmpRating2 = rating2;
+									tmpRating2Stored = rating2Stored;
+									runIdFoundWithLowerRatings = runId;
+									logger.info("Key arbitraggio " + key + 
+											" has been already sent, but with lower ratings. now_R1 = " +  rating1 + 
+											"; stored_R1 = " + rating1Stored + 
+											"; new_R2 = " + rating2 + 
+											"; stored_R2 = " + rating2Stored + 
+											"; RunID = " + runId);
+								}else {
+									logger.info("Key arbitraggio " + key + 
+											" has been already sent, but with higher or equal on the ratings. now_R1 = " +  rating1 + 
+											"; stored_R1 = " + rating1Stored + 
+											"; new_R2 = " + rating2 + 
+											"; stored_R2 = " + rating2Stored + 
+											"; RunID = " + runId);
+									betterRatingFound = false;
+									break;
+								}
 							}
 						}
 					}
@@ -225,32 +236,38 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	 * Salva le comparazioni di quote nei rispettivi file JSON, in base ai parametri passati
 	 * @param serviceName il servizio
 	 * @param processedRecord la lista di record
+	 * @param tabellaType 
 	 */
-	private void saveOutputOnFile(List<String> processedRecord) {
+	private void saveOutputOnFile(List<String> processedRecord, Service tabellaType) {
 		
 		if(processedRecord != null && !processedRecord.isEmpty()) {
 			logger.info("Storing data for no repeated messages");
 	    	PrintWriter writer1 = null;
-	    	String filename = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS;
+	    	String filenameTable = null;
+	    	if(Service.BETFAIR_SERVICENAME.equals(tabellaType)) {
+	    		filenameTable = BlueSheepConstants.FILENAME_PREVIOUS_RUNS_PB;
+	    	}else if(Service.TXODDS_SERVICENAME.equals(tabellaType)) {
+	    		filenameTable = BlueSheepConstants.FILENAME_PREVIOUS_RUNS_PP;
+	    	}
+	    	String filename = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + filenameTable;
 			DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH));
-
 			//Verifico che il file esista, dalla mappa dei record già processati popolata in fase di inizializzazione
 			if(alreadySentArbsOdds != null && alreadySentArbsOdds.keySet().size() > 0) {
+				Map<String, Map<String, Map<String, String>>> tabellaTypeMap = alreadySentArbsOdds.get(filenameTable);
 				long checkBoundTime = System.currentTimeMillis();
-				if(!(alreadySentArbsOdds.keySet().size() < BlueSheepConstants.STORED_RUNS_MAX)) {
-					List<String> runIdSet = new ArrayList<String>(alreadySentArbsOdds.keySet());
+				if(tabellaTypeMap != null && !tabellaTypeMap.isEmpty() && !(tabellaTypeMap.keySet().size() < BlueSheepConstants.STORED_RUNS_MAX)) {
+					List<String> runIdSet = new ArrayList<String>(tabellaTypeMap.keySet());
 					//Scarta le run non più nell'intervallo di tempo scelto
 					for(String runId : runIdSet) {
 						//Se la run è entro la mezz'ora, allora ok, altrimenti scartala a prescindere
-						//TODO inserire una variabile di proprietà per questa costante
 						if(checkBoundTime - new Long(runId) >= 60 * 60 * 1000L) {
-							alreadySentArbsOdds.remove(runId);
+							tabellaTypeMap.remove(runId);
 						}
 					}
 					//Se dopo la rimozione delle run non più valide, sono ancora presenti più di un tot di run
-					if(!(alreadySentArbsOdds.keySet().size() < BlueSheepConstants.STORED_RUNS_MAX)) {
+					if(!(tabellaTypeMap.keySet().size() < BlueSheepConstants.STORED_RUNS_MAX)) {
 						//set delle runId aggiornato, senza le run non valide
-						runIdSet = new ArrayList<String>(alreadySentArbsOdds.keySet());
+						runIdSet = new ArrayList<String>(tabellaTypeMap.keySet());
 						//Cerco la run più vecchia, che sia per ordine oltre la k-esima esecuzione
 						String oldestRun = null;
 						for(String runId : runIdSet) {
@@ -260,7 +277,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 						}
 						//Rimuovo la più vecchia
 						if(oldestRun != null) {
-							alreadySentArbsOdds.remove(oldestRun);
+							tabellaTypeMap.remove(oldestRun);
 						}
 					}
 				}
@@ -268,9 +285,14 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			
 			Map<String, Map<String, String>> arbsLastExecutionMap = new HashMap<String, Map<String, String>>();
 			if(alreadySentArbsOdds == null) {
-				alreadySentArbsOdds = new TreeMap<String, Map<String, Map<String, String>>>();
+				alreadySentArbsOdds = new TreeMap<String, Map<String, Map<String, Map<String, String>>>>();
 			}
-			alreadySentArbsOdds.put("" + startTime, arbsLastExecutionMap);
+			Map<String, Map<String, Map<String, String>>> tabellaTypeAlreadySentMap = alreadySentArbsOdds.get(filenameTable);
+			if(tabellaTypeAlreadySentMap == null) {
+				tabellaTypeAlreadySentMap = new TreeMap<String, Map<String, Map<String, String>>>();
+				alreadySentArbsOdds.put(filenameTable, tabellaTypeAlreadySentMap);
+			}
+			tabellaTypeAlreadySentMap.put("" + startTime, arbsLastExecutionMap);
 			//Inserisco i dati della nuova run
 			for(String record : processedRecord) {
 				String[] splittedRecord = record.split(BlueSheepConstants.KEY_SEPARATOR);
@@ -294,8 +316,9 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	    		
 				writer1 = new PrintWriter(filename, BlueSheepConstants.ENCODING_UTF_8);    	
 		    	// Scrivo
-		    	for(String runId : alreadySentArbsOdds.keySet()) {
-		    		Map<String, Map<String, String>> arbsRunMap = alreadySentArbsOdds.get(runId);
+				
+		    	for(String runId : tabellaTypeAlreadySentMap.keySet()) {
+		    		Map<String, Map<String, String>> arbsRunMap = tabellaTypeAlreadySentMap.get(runId);
 		    		for(String arbsRecord : arbsRunMap.keySet()) {
 			    		line = runId + BlueSheepConstants.KEY_SEPARATOR;
 		    			line += arbsRecord + BlueSheepConstants.KEY_SEPARATOR;
@@ -315,7 +338,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 					writer1.close();
 				}
 			}
+			tabellaTypeAlreadySentMap.clear();
 		}
-		alreadySentArbsOdds.clear();
+
 	}
 }

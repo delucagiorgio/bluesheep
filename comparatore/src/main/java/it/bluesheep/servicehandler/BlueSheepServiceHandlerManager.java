@@ -1,10 +1,8 @@
 package it.bluesheep.servicehandler;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -103,9 +101,8 @@ public final class BlueSheepServiceHandlerManager {
 				
 				Path pathToResources = Paths.get(BlueSheepConstants.PATH_TO_RESOURCES);
 				
-				pathToResources.register(ws, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_CREATE);
+				pathToResources.register(ws, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 				WatchKey key;
-				stopApplication = false;
 				propertiesConfigurationChanged = false;
 				while(!stopApplication && !propertiesConfigurationChanged && (key = ws.take()) != null) {
 					for (WatchEvent<?> event : key.pollEvents()) {
@@ -134,10 +131,10 @@ public final class BlueSheepServiceHandlerManager {
 			                	default:
 			                		logger.info("No particular actions are required for the changed file");
 			                }
-			            }else {
+			            }else if(StandardWatchEventKinds.ENTRY_DELETE == kind){
 			            	if(BlueSheepConstants.BLUESHEEP_APP_STATUS.equalsIgnoreCase(event.context().toString())) {
-			            		logger.info("File " + BlueSheepConstants.BLUESHEEP_APP_STATUS + " has changed");
-			            		stopApplication = isApplicationDown();
+			            		logger.info("File " + BlueSheepConstants.BLUESHEEP_APP_STATUS + " has been deleted: application is going to be stopped");
+			            		stopApplication = true;
 			            	}
 			            }
 		                key.reset();
@@ -170,40 +167,6 @@ public final class BlueSheepServiceHandlerManager {
 				System.exit(-1);
 			}
 		}while(!stopApplication || propertiesConfigurationChanged);
-	}
-	
-	/**
-	 * GD - 05/08/18
-	 * Verifica che l'applicazione debba essere spenta nel momento in cui viene modificato il file "bluesheepStatus.txt"
-	 * @return true, se il file contiene 0, false altrimenti
-	 */
-	private boolean isApplicationDown() {
-		boolean isOff = false;
-		InputStream in = null;
-		BufferedReader br = null;
-		try {
-			in = new FileInputStream(BlueSheepConstants.PATH_TO_RESOURCES + BlueSheepConstants.BLUESHEEP_APP_STATUS);
-			br = new BufferedReader(new InputStreamReader(in));
-			String line;
-			while((line = br.readLine()) != null) {
-				if(line.trim().equals("0")) {
-					logger.info("Application is going to be stopped. Starting procedure for services termination");
-					isOff = true;
-					break;
-				}
-			}
-			in.close();
-			br.close();
-		}catch(Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-		
-		if(!isOff) {
-			logger.warn("Code to stop the application is incorrect : please, write \"0\" in the file " + 
-					BlueSheepConstants.BLUESHEEP_APP_STATUS +" if you want to stop the application ");
-		}
-		
-		return isOff;
 	}
 
 	public static Properties getProperties() {
