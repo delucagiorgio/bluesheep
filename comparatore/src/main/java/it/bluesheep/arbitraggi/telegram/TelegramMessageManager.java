@@ -27,7 +27,7 @@ public class TelegramMessageManager {
 		startTimeExecution = startTime;
 	}
 
-	public void sendMessageToTelegramGroupByBotAndStore(List<String> outputRecordKeys, Map<String, Map<String, Map<String, Map<String, String>>>> alreadySentArbsOdds) {
+	public void sendMessageToTelegramGroupByBotAndStore(List<String> outputRecordKeys) {
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		

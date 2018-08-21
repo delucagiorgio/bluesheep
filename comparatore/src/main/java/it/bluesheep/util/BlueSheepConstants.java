@@ -75,8 +75,7 @@ public class BlueSheepConstants {
 	//arbitraggi
 	public static final String RATING1 = "R1";
 	public static final String RATING2 = "R2";
-	public static final String FILENAME_PREVIOUS_RUNS_PP = "previousRunFilePP.txt";
-	public static final String FILENAME_PREVIOUS_RUNS_PB = "previousRunFilePB.txt";
+	public static final String FILENAME_PREVIOUS_RUNS = "previousRunFile.txt";
 	public static final String PREVIOUS_RUN_PATH = "PREVIOUS_RUN_PATH";
 	public static final String CHAT_ID = "CHAT_ID";
 	public static final int STORED_RUNS_MAX = 40;
