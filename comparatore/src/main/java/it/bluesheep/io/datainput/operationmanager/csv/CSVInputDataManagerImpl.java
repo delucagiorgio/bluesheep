@@ -3,7 +3,6 @@ package it.bluesheep.io.datainput.operationmanager.csv;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -87,29 +86,29 @@ public class CSVInputDataManagerImpl {
 	 * @return il record generico pronto per essere processato dall'applicazione, null se qualcosa va storto
 	 */
 	private AbstractInputRecord mapSplittedInfoIntoAbstractInputRecord(Map<Integer, String> map, Integer id) {
-		String dataOraEventoString = map.get(DATA_ORA_EVENTO);
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
 		AbstractInputRecord record = null;
-		
-		Date dataOraEvento = null;
 		try {
-			dataOraEvento = sdf.parse(dataOraEventoString);
-		} catch (ParseException e) {
-			logger.log(Level.WARNING, "Line " + id + ": date cannot be parsed : error is " + e.getMessage(), e);
+			String dataOraEventoString = map.get(DATA_ORA_EVENTO);
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+			
+			Date dataOraEvento = null;
+				dataOraEvento = sdf.parse(dataOraEventoString);
+			if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
+				Sport sport = getCorrectSport(map.get(SPORT), id);
+				Scommessa scommessa = getCorrectScommessa(map.get(SCOMMESSA), id);
+				String campionato = map.get(CAMPIONATO);
+				String bookmaker = map.get(BOOKMAKER);
+				String partecipante1 = map.get(PARTECIPANTE1);
+				String partecipante2 = map.get(PARTECIPANTE2);
+				double quota = new Double(map.get(QUOTA));
+				record = new CSVInputRecord(dataOraEvento, sport, campionato, partecipante1, partecipante2, id.toString());
+				record.setBookmakerName(bookmaker);
+				record.setTipoScommessa(scommessa);
+				record.setQuota(quota);
+			}
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Line " + id + ": " + e.getMessage(), e);
 		}	
-		if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
-			Sport sport = getCorrectSport(map.get(SPORT), id);
-			Scommessa scommessa = getCorrectScommessa(map.get(SCOMMESSA), id);
-			String campionato = map.get(CAMPIONATO);
-			String bookmaker = map.get(BOOKMAKER);
-			String partecipante1 = map.get(PARTECIPANTE1);
-			String partecipante2 = map.get(PARTECIPANTE2);
-			double quota = new Double(map.get(QUOTA));
-			record = new CSVInputRecord(dataOraEvento, sport, campionato, partecipante1, partecipante2, id.toString());
-			record.setBookmakerName(bookmaker);
-			record.setTipoScommessa(scommessa);
-			record.setQuota(quota);
-		}
 		return record;
 	}
 
