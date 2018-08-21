@@ -103,29 +103,29 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
 		AbstractInputRecord record = null;
 		Date processingDate = new Date();
-		
-		Date dataOraEvento = null;
 		try {
-			dataOraEvento = sdf.parse(dataOraEventoString);
-		} catch (ParseException e) {
-			logger.error("Line " + id + ": date cannot be parsed : error is " + e.getMessage(), e);
-		}	
-		if(dataOraEvento != null && (dataOraEvento.getTime() - processingDate.getTime() > updateFrequencyDiff)) {
-			Sport sport = getCorrectSport(map.get(SPORT), id);
-			if(sport.equals(this.sport)) {
-				Scommessa scommessa = getCorrectScommessa(map.get(SCOMMESSA), id);
-				String campionato = map.get(CAMPIONATO);
-				String bookmaker = map.get(BOOKMAKER);
-				String partecipante1 = map.get(PARTECIPANTE1);
-				String partecipante2 = map.get(PARTECIPANTE2);
-				double quota = new Double(map.get(QUOTA));
-				record = new CSVInputRecord(dataOraEvento, sport, campionato, partecipante1, partecipante2, id.toString());
-				record.setBookmakerName(bookmaker);
-				record.setTipoScommessa(scommessa);
-				record.setQuota(quota);
-				record.setSource(serviceName);
+			Date dataOraEvento = sdf.parse(dataOraEventoString);
+	
+			if(dataOraEvento != null && (dataOraEvento.getTime() - processingDate.getTime() > updateFrequencyDiff)) {
+				Sport sport = getCorrectSport(map.get(SPORT), id);
+				if(sport.equals(this.sport)) {
+					Scommessa scommessa = getCorrectScommessa(map.get(SCOMMESSA), id);
+					String campionato = map.get(CAMPIONATO);
+					String bookmaker = map.get(BOOKMAKER);
+					String partecipante1 = map.get(PARTECIPANTE1);
+					String partecipante2 = map.get(PARTECIPANTE2);
+					double quota = new Double(map.get(QUOTA));
+					record = new CSVInputRecord(dataOraEvento, sport, campionato, partecipante1, partecipante2, id.toString());
+					record.setBookmakerName(bookmaker);
+					record.setTipoScommessa(scommessa);
+					record.setQuota(quota);
+					record.setSource(serviceName);
+				}
 			}
-		}
+		} catch (ParseException e) {
+			logger.error("Line " + id + ": " + e.getMessage(), e);
+		}	
+		
 		return record;
 	}
 
