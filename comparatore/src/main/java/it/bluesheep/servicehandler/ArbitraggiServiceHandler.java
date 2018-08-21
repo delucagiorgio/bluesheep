@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import it.bluesheep.arbitraggi.telegram.TelegramMessageManager;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
+import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
@@ -86,11 +87,16 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			int alreadySentCount = 0;
 			for(RecordOutput record : tabellaOutputList) {
 				String recordKey = ArbsUtil.getKeyArbsFromOutputRecord(record);
-				//controllo che non l'abbia già mandata, se si non faccio nulla
-				if(!alreadySent(recordKey)) {
-					messageToBeSentKeysList.add(recordKey + BlueSheepConstants.KEY_SEPARATOR + record.getLinkBook1() + BlueSheepConstants.REGEX_CSV + record.getLinkBook2());
+				boolean isValidExchangeRecord = record instanceof RecordBookmakerVsExchangeOdds && ((RecordBookmakerVsExchangeOdds)record).getLiquidita() >= 50D;
+				if((!(record instanceof RecordBookmakerVsExchangeOdds) || isValidExchangeRecord)) {
+					//controllo che non l'abbia già mandata, se si non faccio nulla
+					if(!alreadySent(recordKey)) {
+						messageToBeSentKeysList.add(recordKey + BlueSheepConstants.KEY_SEPARATOR + record.getLinkBook1() + BlueSheepConstants.REGEX_CSV + record.getLinkBook2());
+					}else {
+						alreadySentCount++;
+					}
 				}else {
-					alreadySentCount++;
+					logger.info("Insufficient size (liquidità) by requirements : " + 50D);
 				}
 			}
 			
