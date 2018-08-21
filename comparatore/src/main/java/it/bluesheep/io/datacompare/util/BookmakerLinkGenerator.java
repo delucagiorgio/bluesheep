@@ -75,14 +75,18 @@ public class BookmakerLinkGenerator {
 				Map<String, String> bookmakerURLMap = sportBookmakerMap.get(record.getSport());
 				if(bookmakerURLMap != null) {
 					String specificOrGeneralURL = bookmakerURLMap.get(record.getBookmakerName());
-					String[] splittedSpecificOrGeneralURL = specificOrGeneralURL.split("BSKEY");
-					returnString = splittedSpecificOrGeneralURL[1];
-					if("si".equalsIgnoreCase(splittedSpecificOrGeneralURL[0])) {
-						String specificField = record.getFiller();
-						if(!sourceOfURL.equals("BetfairAPI")) {
-							specificField = getPartecipanteStringForSearch(record);
-						}	
-						returnString += specificField;
+					if(specificOrGeneralURL != null) {
+						String[] splittedSpecificOrGeneralURL = specificOrGeneralURL.split("BSKEY");
+						returnString = splittedSpecificOrGeneralURL[1];
+						if("si".equalsIgnoreCase(splittedSpecificOrGeneralURL[0])) {
+							String specificField = record.getFiller();
+							if(!sourceOfURL.equals("BetfairAPI")) {
+								specificField = getPartecipanteStringForSearch(record);
+							}	
+							returnString += specificField;
+						}
+					}else {
+						logger.log(Level.WARNING, "Bookmaker " + record.getBookmakerName() + " is not present in linkMap");
 					}
 				}
 			}
