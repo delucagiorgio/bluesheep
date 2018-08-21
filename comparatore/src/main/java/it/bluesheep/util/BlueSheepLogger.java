@@ -87,6 +87,8 @@ public class BlueSheepLogger {
 			handler.setLevel(Level.parse(loggerLevel));
 	    	handler.setEncoding(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.ENCODING_UTF_8));
 	    	
+	    	Logger.getGlobal().setLevel(Level.CONFIG);
+	    	
 	    	logger.setLevel(Level.parse(loggerLevel));       	
 	    	logger.addHandler(handler); 
         }

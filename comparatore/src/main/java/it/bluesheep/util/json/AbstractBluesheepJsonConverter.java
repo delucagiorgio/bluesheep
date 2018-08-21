@@ -4,9 +4,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONWriter;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 public abstract class AbstractBluesheepJsonConverter {
 	
 	protected static AbstractBluesheepJsonConverter instance;
+	private static boolean FORMAT_OUTPUT;
 		
 	/**
 	 * GD - 17/04/18 
@@ -65,7 +71,14 @@ public abstract class AbstractBluesheepJsonConverter {
 	 * @return la stringa JSON relativa all'oggetto passato come parametro
 	 */
 	public static String convertToJSON(Object obj) {
-		return JSONWriter.valueToString(obj);
+		if(!FORMAT_OUTPUT) {
+			return JSONWriter.valueToString(obj);
+		}else {
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			JsonParser jp = new JsonParser();
+			JsonElement je = jp.parse(JSONWriter.valueToString(obj));
+			return gson.toJson(je);
+		}
 	}
 	
 	/**
@@ -75,6 +88,10 @@ public abstract class AbstractBluesheepJsonConverter {
 	 * @return la collezione di partite relativa all'oggetto JSON passato come parametro
 	 */
 	public abstract JSONArray getAllMatchesFromJSONObjectRoot(JSONObject obj);
+
+	public static void setFormatOutput(boolean formatOutput) {
+		FORMAT_OUTPUT = formatOutput;
+	}
 
 	
 }
