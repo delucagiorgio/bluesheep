@@ -5,7 +5,6 @@ import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 public class BlueSheepComparatoreMain {
 	
 	public static void main(String[] args) throws Exception{
-		
 		initializeServiceHandler();
 	}
 	

@@ -3,6 +3,8 @@ package it.bluesheep.arbitraggi.telegram;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -12,7 +14,6 @@ import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.imagegeneration.ImageGenerator;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
-import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
@@ -36,34 +37,50 @@ public class TelegramMessageManager {
 		DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary("../xhtml/");
 		
 		ImageGenerator imageGenerator = new ImageGenerator();
-		Map<String, List<String>> eventsIdLinkMap = imageGenerator.generate(outputRecordKeys);
 		
+		Map<String, Map<String, List<String>>> eventsIdLinkMap = imageGenerator.generate(outputRecordKeys);
+			
 		// Fase di invio tramite telegram
-		
-		List<String> chat_ids = new ArrayList<String>();
-		chat_ids.add(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CHAT_ID));
-		
+	    TelegramHandler telegramHandler = new TelegramHandler();
+		List<String> chat_ids = telegramHandler.getTelegramUsersIds();	
 		String pictureFormat = ".png";
 		
 		
-	    TelegramHandler telegramHandler = new TelegramHandler();
 	    String caption = null;
-	    for (String eventoIdLink : eventsIdLinkMap.keySet()) {
-	    	String idFile = eventoIdLink.split(BlueSheepConstants.IMAGE_ID)[1];
+	    List<String> idFileOrderedList = new ArrayList<String>(eventsIdLinkMap.keySet());
+	    
+	    Collections.sort(idFileOrderedList, new Comparator<String>() {
+	        public int compare(String o1, String o2) {
+	            Integer i1 = Integer.parseInt(o1);
+	            Integer i2 = Integer.parseInt(o2);
+	            return (i1 < i2 ? -1 : (i1 == i2 ? 0 : 1));
+	        }
+	    });
+	    
+	    boolean firstFile = true;
+	    
+	    for (String idFile : idFileOrderedList) {
+	    	Map<String, List<String>> recordKeyLinksMap = eventsIdLinkMap.get(idFile);
 	    	int i = Integer.parseInt(idFile);
+	    	
+	    	if(firstFile) {
+	    		String text = "🐑🐑🐑 " + ArbsUtil.getTelegramBoldString("LE SHEEPPATE") + " 🐑🐑🐑";
+	    		telegramHandler.sendMessage(text, chat_ids);
+	    		firstFile = false;
+	    	}
+	    	
+	    	//Dovrebbe essere sempre unico
+	    	String recordKey = new ArrayList<String>(recordKeyLinksMap.keySet()).get(0);
 	    	
 	    	// Aggiungere la parte della didascalia coi link
 	    	try {
-				caption = createCaptionDescription(eventoIdLink, eventsIdLinkMap.get(eventoIdLink));
+				caption = createCaptionDescription(recordKey, recordKeyLinksMap.get(recordKey));
 			} catch (ParseException e) {
 				logger.error(e.getMessage(), e);			
 			}
-	    	
-	    	for (int j = 0; j < chat_ids.size(); j++) {
-				
-	    		telegramHandler.sendPicture("../xhtml/" + (i - 1) + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + i, chat_ids.get(j));
-				telegramHandler.sendMessage(caption, chat_ids.get(j));
-	    	}
+	    					
+	    	telegramHandler.sendPicture("../xhtml/" + (i - 1) + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + i, chat_ids);
+			telegramHandler.sendMessage(caption, chat_ids);
 	    	
 		    imageGenerator.delete("../xhtml/" + (i - 1) + pictureFormat);
 

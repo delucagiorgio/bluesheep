@@ -88,5 +88,15 @@ public class BlueSheepConstants {
 	public static final String FREQ_ARBS_SEC = "FREQ_ARBS_SEC";
 	public static final String XHTML_PATH = "XHTML_PATH";
 		
+	
+	// SOGLIA OLTRE LA QUALE SI MOSTRANO I MISSILI NELLA NOTIFICA TELEGRAM
+	public static final String MISSILE_TRASHOLD = "MISSILE_TRASHOLD";
+
+	// TELEGRAM BOT KEY
+	public static final String TELEGRAMBOTKEY = "TELEGRAMBOTKEY";
+	
+	// TELEGRAM TERMINAL USERS IDS FILE
+	public static final String TERMINALUSERSFILE = "TERMINALUSERSFILE";
+	
 	private BlueSheepConstants() {}
 }

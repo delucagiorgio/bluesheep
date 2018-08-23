@@ -10,39 +10,46 @@ import it.bluesheep.util.BlueSheepConstants;
 
 /**
  * ImageGenerator gestisce la creazione dell'immagine da inviare a partire dalla lista di stringhe. 
- * Utilizzare il suo metodo generate in maniera trasparente :)
+ * Utilizzare il suo metodo generate in maniera trasparente
  * @author Fabio
  *
  */
 public class ImageGenerator {
 
-	private final static String PICTURE_FORMAT = ".png";
+	private final static String pictureFormat = ".png";
 	
 	public void delete(String filename) {
 		File file = new File(filename);
-		file.delete();
+		file.delete();        
+        return;
 	}
 
-	public Map<String, List<String>> generate(List<String> inputRecords) {
+	public Map<String, Map<String, List<String>>> generate(List<String> inputRecords) {
 
-		Map<String, List<String>> eventXHTMLStringMap = new HashMap<String, List<String>>();
+		Map<String, Map<String, List<String>>> eventXHTMLStringMap = new HashMap<String, Map<String, List<String>>>();
 		
 		// Converte le stringhe in oggetti rappresentanti gli eventi
 		InputReader inputReader = new InputReader();
 	    List<Event> events = inputReader.convert(inputRecords);
-	
+	    
 	    // Genero l'xhtml relativo ad ogni evento 
-	    EventToXHTML eventToXhtml = new EventToXHTML();
+	    for (int i = 0; i < events.size(); i++) {
+	    	Map<String, List<String>> recordKeyLinksMap = new HashMap<String, List<String>>(); 
+	    	recordKeyLinksMap.put(events.get(i).getUnifiedKeyAndLinks() + BlueSheepConstants.IMAGE_ID + (i + 1), events.get(i).getLinkBook());
+    		eventXHTMLStringMap.put("" + (i + 1), recordKeyLinksMap);
+	    }
+	    
+	    
+	    // Genero l'xhtml relativo ad ogni evento 
 		List<String> xhtmlEvents = new ArrayList<String>();
 	    for (int i = 0; i < events.size(); i++) {
-    		xhtmlEvents.add(eventToXhtml.convert(events.get(i), i + 1, events.size()));
-    		eventXHTMLStringMap.put(events.get(i).getUnifiedKeyAndLinks() + BlueSheepConstants.IMAGE_ID + (i + 1), events.get(i).getLinkBook());
+    		xhtmlEvents.add(events.get(i).toHtml(i + 1, events.size()));
 	    }
 	    
 	    // Converto l'xhtml in immagine .png
-	    XHTMLFileHandler xhtmlFileHandler = new XHTMLFileHandler();
-		XHTML2PngConverter converter = new XHTML2PngConverter();
-		String xhtmlFileName = "../xhtml/xhtml.xhtml";
+	    HtmlFileHandler xhtmlFileHandler = new HtmlFileHandler();
+		Html2PngConverter converter = new Html2PngConverter();
+		String xhtmlFileName = "../xhtml/html.html";
 		String xhtmlSourceCode;
 	    for (int i = 0; i < xhtmlEvents.size(); i++) {
 			
@@ -50,15 +57,15 @@ public class ImageGenerator {
 	    	
 			// Create a temp file
 			xhtmlFileHandler.generateFile(xhtmlFileName, xhtmlSourceCode);
-				
+					
 			// Converting the xhtml file to png
 			//converter.convert(xhtmlFileName, pictureFileName);
-			converter.convert(xhtmlFileName, "../xhtml/" + i + PICTURE_FORMAT);		
+			converter.convert(xhtmlFileName, "../xhtml/" + i + pictureFormat);		
 			
 			// Deleting the temp file
 			xhtmlFileHandler.delete(xhtmlFileName);
 	    }
-
+		
 		return eventXHTMLStringMap;
 	}
 }

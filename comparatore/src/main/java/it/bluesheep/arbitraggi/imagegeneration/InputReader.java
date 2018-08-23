@@ -2,28 +2,25 @@ package it.bluesheep.arbitraggi.imagegeneration;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.util.urlshortener.TinyUrlShortener;
-import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.util.BlueSheepConstants;
 
 /**
- * Input reader, come suggerisce lo stesso nome, è in grado di leggere l'ingresso, sottoforma di lista di stringhe, e di restituire una lista di oggetti
- * Event più facilmente trattabili durante il resto dell'elaborazione. 
+ * Input reader, come suggerisce lo stesso nome, � in grado di leggere l'ingresso, sottoforma di lista di stringhe, e di 
+ * restituire una lista di oggetti Event pi� facilmente trattabili durante il resto dell'elaborazione. 
  * @author Fabio
  *
  */
 public class InputReader {
 	
-	private Logger logger;
-	
-	public InputReader() {
-		logger = Logger.getLogger(InputReader.class);
-	}
+	private final static String SOCCER = "CALCIO";
+	private final static String TENNIS = "TENNIS";	
+	private final static String separator1 = "\\|";
+	private static Logger logger = Logger.getLogger(InputReader.class);
 	
 	public List<Event> convert(List<String> inputRecords) {
 	    List<Event> events = new ArrayList<Event>();
@@ -34,10 +31,8 @@ public class InputReader {
 	    }
 	    
 		for (int i = 1; i < inputRecords.size(); i++) {
-    		String separator1 = "\\|";
-    		
-    		String[] splittedKeyPart = inputRecords.get(i).split(BlueSheepConstants.KEY_SEPARATOR);
-    		
+
+			String[] splittedKeyPart = inputRecords.get(i).split(BlueSheepConstants.KEY_SEPARATOR);
     		String[] parts = splittedKeyPart[0].replaceAll("&", "and").split(BlueSheepConstants.REGEX_CSV);
     		String match = parts[0];    		
     		String[] matchparts = match.split(separator1);
@@ -71,8 +66,12 @@ public class InputReader {
 				logger.error(e.getMessage(), e);
 			}
 
-    		
-    		Event tempEvent = new Event(participant1, participant2, date, sport, country, championship, extractionTime);
+			Event tempEvent = null;
+			if (sport.equals(SOCCER)) {
+	    		tempEvent = new SoccerEvent(participant1, participant2, date, sport, country, championship, extractionTime);
+			} else if (sport.equals(TENNIS)) {
+	    		tempEvent = new TennisEvent(participant1, participant2, date, sport, country, championship, extractionTime);    			
+			}
     		
     		int index = -1;
     		for (int j = 0; j < events.size(); j++) {
@@ -100,42 +99,10 @@ public class InputReader {
     			index = events.size() - 1;
     		}
 
-    		if (oddsType1.equals("U_2.5") || oddsType1.equals("O_2.5")) {
-    			events.get(index).getBet_UO25().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if (oddsType1.equals("U_0.5") || oddsType1.equals("O_0.5")) {
-    			events.get(index).getBet_UO05().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if (oddsType1.equals("U_1.5") || oddsType1.equals("O_1.5")) {
-    			events.get(index).getBet_UO15().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if (oddsType1.equals("U_3.5") || oddsType1.equals("O_3.5")) {
-    			events.get(index).getBet_UO35().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		}else if (oddsType1.equals("U_4.5") || oddsType1.equals("O_4.5")) {
-    			events.get(index).getBet_UO45().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		}else if (oddsType1.equals("U_5.5") || oddsType1.equals("O_5.5")) {
-    			events.get(index).getBet_UO55().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if (oddsType1.equals("U_6.5") || oddsType1.equals("O_6.5")) {
-    			events.get(index).getBet_UO65().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if ((oddsType1.equals("1") || oddsType1.equals("2")) && !sport.equals(Sport.CALCIO.toString())) {
-    			events.get(index).getBet_12().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if ((oddsType1.equals("1") || oddsType2.equals("2") || oddsType2.equals("X")) && sport.equals(Sport.CALCIO.toString())) {
-    			events.get(index).getBet_1X2().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		} else if (oddsType1.equals("GOAL") || oddsType1.equals("NOGOAL")) {
-        		events.get(index).getBet_GGNG().add(new Bet(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2));
-    		}	    	
+    		events.get(index).addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);
 		}
 		
-		for (int i = 0; i < events.size(); i++) {
-			Collections.sort(events.get(i).getBet_12(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_1X2(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO65(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO55(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO45(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO35(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO25(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO15(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_UO05(), Collections.reverseOrder());
-			Collections.sort(events.get(i).getBet_GGNG(), Collections.reverseOrder());
-		}
-
 		return events;
+
 	}
 }
