@@ -17,6 +17,7 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
+import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.comparatore.io.datacompare.util.ThresholdRatingFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
@@ -32,7 +33,7 @@ import it.bluesheep.util.BlueSheepSharedResources;
  * @author Giorgio De Luca
  *
  */
-public class TxOddsProcessDataManager extends AbstractProcessDataManager {
+public class TxOddsProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents{
 	
 	private double minThreshold;
 	private double maxThreshold;
@@ -203,6 +204,18 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager {
 		output = (RecordBookmakerVsBookmakerOdds)TranslatorUtil.translateFieldAboutCountry(output);
 		output.setLinkBook1(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord));
 		output.setLinkBook2(BookmakerLinkGenerator.getBookmakerLinkEvent(oppositeScommessaInputRecord));
+		
 		return output;
+	}
+
+	@Override
+	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception {
+		for(AbstractInputRecord txOddsRecord : bookmakerList) {
+			AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord);
+			if(exchangeRecord != null) {
+				txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
+			}
+		}
+		return null;
 	}
 }

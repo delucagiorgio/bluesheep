@@ -15,6 +15,7 @@ import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRe
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepSharedResources;
 
 public class CSVProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
 	
@@ -33,7 +34,7 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 			String key = splittedEventoKeyRecord[1];
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dataMap = eventiTxOddsMap.get(Sport.valueOf(key));
 			for(Date date : dataMap.keySet()) {
-				if((Sport.TENNIS.equals(record.getSport()) && record.compareDate(date, record.getDataOraEvento())) || 
+				if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
 						(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
 					for(String eventoTxOdds : dataMap.get(date).keySet()) { 
 						String[] splittedEventoKey = eventoTxOdds.split("\\|");
@@ -43,6 +44,7 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 						String partecipante2 = partecipantiSplitted[1];
 						
 						CSVInputRecord csvRecord = (CSVInputRecord) record;
+						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record);
 						
 						if(csvRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2)) {
 							Map<Scommessa, Map<String, AbstractInputRecord>> mapScommessaRecord = dataMap.get(date).get(eventoTxOdds);
@@ -52,7 +54,11 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 							AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerList.get(0)); 
 							AbstractInputRecord csvRecordCopy = new CSVInputRecord(csvRecord); 
 							csvRecordCopy.setCampionato(bookmakerRecord.getCampionato());
-							csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+							if(exchangeRecord != null) {
+								csvRecordCopy.setDataOraEvento(exchangeRecord.getDataOraEvento());
+							}else {
+								csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+							}
 							csvRecordCopy.setKeyEvento(bookmakerRecord.getKeyEvento());
 							csvRecordCopy.setPartecipante1(bookmakerRecord.getPartecipante1());
 							csvRecordCopy.setPartecipante2(bookmakerRecord.getPartecipante2());

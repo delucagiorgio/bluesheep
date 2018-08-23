@@ -57,17 +57,12 @@ public class TelegramMessageManager {
 	        }
 	    });
 	    
-	    boolean firstFile = true;
+		String text = "🐑🐑🐑 " + ArbsUtil.getTelegramBoldString("LE SHEEPPATE") + " 🐑🐑🐑";
+		telegramHandler.sendMessage(text, chat_ids);
 	    
 	    for (String idFile : idFileOrderedList) {
 	    	Map<String, List<String>> recordKeyLinksMap = eventsIdLinkMap.get(idFile);
 	    	int i = Integer.parseInt(idFile);
-	    	
-	    	if(firstFile) {
-	    		String text = "🐑🐑🐑 " + ArbsUtil.getTelegramBoldString("LE SHEEPPATE") + " 🐑🐑🐑";
-	    		telegramHandler.sendMessage(text, chat_ids);
-	    		firstFile = false;
-	    	}
 	    	
 	    	//Dovrebbe essere sempre unico
 	    	String recordKey = new ArrayList<String>(recordKeyLinksMap.keySet()).get(0);

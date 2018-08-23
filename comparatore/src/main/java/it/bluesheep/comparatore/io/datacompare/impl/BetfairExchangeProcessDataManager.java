@@ -49,31 +49,33 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
 			String key = splittedEventoKeyRecord[1];
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dateMap = eventiTxOddsMap.get(Sport.valueOf(key));
-			for(Date date : dateMap.keySet()) {
-				if((Sport.TENNIS.equals(record.getSport()) && record.compareDate(date, record.getDataOraEvento())) || 
-						(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
-					for(String eventoTxOdds : dateMap.get(date).keySet()) {
-						String[] splittedEventoKey = eventoTxOdds.split("\\|");
-						String sport = splittedEventoKey[1];
-						String[] partecipantiSplitted = splittedEventoKey[2].split(BlueSheepConstants.REGEX_VERSUS);
-						String partecipante1 = partecipantiSplitted[0];
-						String partecipante2 = partecipantiSplitted[1];
-						
-						BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) record;
-						
-						if(exchangeRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) || 
-													exchangeRecord.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
-							Map<Scommessa, Map<String, AbstractInputRecord>> mapScommessaRecord = dateMap.get(date).get(eventoTxOdds);
-							List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
-							Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
-							List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
-							AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
-							exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
-							exchangeRecord.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-							exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
-							exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
-							exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
-							break;
+			if(dateMap != null) {
+				for(Date date : dateMap.keySet()) {
+					if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
+							(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
+						for(String eventoTxOdds : dateMap.get(date).keySet()) {
+							String[] splittedEventoKey = eventoTxOdds.split("\\|");
+							String sport = splittedEventoKey[1];
+							String[] partecipantiSplitted = splittedEventoKey[2].split(BlueSheepConstants.REGEX_VERSUS);
+							String partecipante1 = partecipantiSplitted[0];
+							String partecipante2 = partecipantiSplitted[1];
+							
+							BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) record;
+							
+							if(exchangeRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) || 
+														exchangeRecord.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
+								Map<Scommessa, Map<String, AbstractInputRecord>> mapScommessaRecord = dateMap.get(date).get(eventoTxOdds);
+								List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
+								Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
+								List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
+								AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
+								exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
+								exchangeRecord.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+	//							exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
+								exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
+								exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
+								break;
+							}
 						}
 					}
 				}

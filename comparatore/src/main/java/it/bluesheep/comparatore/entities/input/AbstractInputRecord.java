@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
@@ -61,6 +62,7 @@ public abstract class AbstractInputRecord {
 
 	public void setDataOraEvento(Date dataOraEvento) {
 		this.dataOraEvento = dataOraEvento;
+		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_VERSUS + this.partecipante2;
 	}
 
 	public Sport getSport() {
@@ -149,7 +151,7 @@ public abstract class AbstractInputRecord {
 	 * @param tipoScommessa2 seconda scommessa
 	 * @return true, se le scommessa sono uguali, false altrimenti
 	 */
-	protected boolean isSameScommessa(Scommessa tipoScommessa1, Scommessa tipoScommessa2) {
+	protected static boolean isSameScommessa(Scommessa tipoScommessa1, Scommessa tipoScommessa2) {
 		return tipoScommessa1.getCode().equals(tipoScommessa2.getCode());
 	}
 
@@ -159,7 +161,7 @@ public abstract class AbstractInputRecord {
 	 * @param sport2 secondo sport
 	 * @return true, se gli sport sono gli stessi, false altrimenti
 	 */
-	protected boolean compareSport(Sport sport1, Sport sport2) {
+	public static boolean compareSport(Sport sport1, Sport sport2) {
 		return sport1.getCode() == sport2.getCode();
 	}
 
@@ -169,9 +171,9 @@ public abstract class AbstractInputRecord {
 	 * @param dataOraEvento2 seconda data
 	 * @return true, se le date sono identiche (con un errore di accettazione tra le due di UN'ORA), false altrimenti
 	 */
-	public boolean compareDate(Date dataOraEvento1, Date dataOraEvento2) {
-		return ((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() < 1800000))
-				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() < 1800000));
+	public static boolean compareDate(Date dataOraEvento1, Date dataOraEvento2) {
+		return ((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() < 3600000))
+				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() < 3600000));
 	}
 
 	/**
@@ -182,9 +184,20 @@ public abstract class AbstractInputRecord {
 	 * @param bmPartecipante2 partecipante2 del record di Bookmaker
 	 * @return
 	 */
-	protected boolean compareParticipants(String exPartecipante1, String exPartecipante2, String bmPartecipante1, String bmPartecipante2) {
+	public static boolean compareParticipants(String exPartecipante1, String exPartecipante2, String bmPartecipante1, String bmPartecipante2) {
 		
 		if(exPartecipante1 == null || exPartecipante2 == null || bmPartecipante1 == null || bmPartecipante2 == null) {
+			return false;
+		}
+		
+		Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
+		boolean allTest = patterMinorCategory.matcher(exPartecipante1).find() && patterMinorCategory.matcher(exPartecipante2).find() && 
+				patterMinorCategory.matcher(bmPartecipante1).find() && patterMinorCategory.matcher(bmPartecipante2).find();
+		boolean noTest = !(patterMinorCategory.matcher(exPartecipante1).find() || patterMinorCategory.matcher(exPartecipante2).find() || 
+				patterMinorCategory.matcher(bmPartecipante1).find() || patterMinorCategory.matcher(bmPartecipante2).find());
+		boolean noOneOrAllMinorCategory = allTest && noTest;
+		
+		if(noOneOrAllMinorCategory) {
 			return false;
 		}
 		
@@ -251,7 +264,7 @@ public abstract class AbstractInputRecord {
 		}
 	}
 	
-	private boolean equalLists(List<String> one, List<String> two){     
+	private static boolean equalLists(List<String> one, List<String> two){     
 	    if (one == null && two == null){
 	        return true;
 	    }

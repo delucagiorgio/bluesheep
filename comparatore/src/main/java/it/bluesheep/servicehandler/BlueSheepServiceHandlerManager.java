@@ -74,24 +74,25 @@ public final class BlueSheepServiceHandlerManager {
 			BlueSheepSharedResources.initializeDataStructures();
 			
 			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 2);
-	
+			long initialDelay = 120;
+
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
-				long initialDelay = 0;
-				if(!Service.TXODDS_SERVICENAME.equals(activeService)) {
-					initialDelay = 60;
+				if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
+					initialDelay = 0;
 				}
 				
 				executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
+				initialDelay = 120;
 			}
 			
 			long arbsFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_ARBS_SEC));
 			if(arbsFrequencySeconds > 0) {
-				executor.scheduleWithFixedDelay(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance(), 30, arbsFrequencySeconds, TimeUnit.SECONDS);
+				executor.scheduleWithFixedDelay(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance(), initialDelay, arbsFrequencySeconds, TimeUnit.SECONDS);
 			}
 			
 			long jsonFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_JSON_SEC));
 			if(jsonFrequencySeconds > 0) {
-				executor.scheduleAtFixedRate(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance(), 10, jsonFrequencySeconds, TimeUnit.SECONDS);
+				executor.scheduleAtFixedRate(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance(), initialDelay, jsonFrequencySeconds, TimeUnit.SECONDS);
 			}
 			
 			WatchService ws = null;

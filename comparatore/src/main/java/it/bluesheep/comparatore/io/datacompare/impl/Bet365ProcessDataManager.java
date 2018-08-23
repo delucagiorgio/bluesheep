@@ -17,6 +17,7 @@ import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRe
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepSharedResources;
 
 public class Bet365ProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
 	
@@ -42,7 +43,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			String key = splittedEventoKeyRecord[1];
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dataMap = sportMap.get(Sport.valueOf(key));
 			for(Date date : dataMap.keySet()) {
-				if((Sport.TENNIS.equals(record.getSport()) && record.compareDate(date, record.getDataOraEvento())) || 
+				if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
 						(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
 					for(String eventoTxOdds : dataMap.get(date).keySet()) {
 						String[] splittedEventoKey = eventoTxOdds.split("\\|");
@@ -52,6 +53,8 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 						String partecipante2 = partecipantiSplitted[1];
 						
 						Bet365InputRecord bet365Record = (Bet365InputRecord) record;
+						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record);
+
 						
 						if(bet365Record.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) ||
 								bet365Record.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
@@ -61,7 +64,12 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 							List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
 							AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
 							bet365Record.setCampionato(bookmakerRecord.getCampionato());
-							bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+							if(exchangeRecord != null) {
+								bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
+							}else {
+								bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+
+							}
 							bet365Record.setKeyEvento(bookmakerRecord.getKeyEvento());
 							bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
 							bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());

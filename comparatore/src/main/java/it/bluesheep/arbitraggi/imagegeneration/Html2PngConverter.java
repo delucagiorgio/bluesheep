@@ -27,16 +27,19 @@ public class Html2PngConverter {
 	private final static String LOGGING_FILE_FAKE = "../xhtml/logs.txt";
 
 
-	public Html2PngConverter() {
-		System.setProperty("webdriver.gecko.driver", "/Users/giorgio/Downloads/geckodriver");	
+	public Html2PngConverter() {		
+
+//		System.setProperty("webdriver.gecko.driver", "/usr/local/bin/geckodriver");	
+//		System.setProperty("webdriver.gecko.driver", "/Users/giorgio/Downloads/geckodriver");	
+
 		System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE,"true");
 		System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, LOGGING_FILE_FAKE);
 	}
 	
 	public void convert (String inputFile, String outputFileName) {
 		try {
-			String pathToHtmlLocation = "/Users/giorgio/git/bluesheep";
-//			String pathToHtmlLocation = "/home/java/bluesheep/xhmtl";
+//			String pathToHtmlLocation = "/Users/giorgio/git/bluesheep";
+			String pathToHtmlLocation = "/home/java/bluesheep";
 	        String htmlLocation = "file://" + pathToHtmlLocation + inputFile.substring(2);
 
 			FirefoxBinary firefoxBinary = new FirefoxBinary();

@@ -58,22 +58,18 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 	 */
 	protected void startProcessingDataTransformation(List<AbstractInputRecord> inputRecordList) {
 
-		if(Service.BETFAIR_SERVICENAME.equals(serviceName) 
-				|| Service.BET365_SERVICENAME.equals(serviceName)
-				|| Service.CSV_SERVICENAME.equals(serviceName)) {
-			ICompareInformationEvents processDataManager = ProcessDataManagerFactory.getICompareInformationEventsByString(serviceName);
-			Map<Sport,List<AbstractInputRecord>> serviceNameInputData = BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName);
-			List<AbstractInputRecord> transformedRecords;
-			for(Sport sport : serviceNameInputData.keySet()) {
-				try {
-					logger.info("Starting data transformation for " + serviceName + " on sport " + sport);
-					transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(serviceNameInputData.get(sport), BlueSheepSharedResources.getEventoScommessaRecordMap());
-					logger.info("Data transformation for " + serviceName + " on sport " + sport + " completed");
+		ICompareInformationEvents processDataManager = ProcessDataManagerFactory.getICompareInformationEventsByString(serviceName);
+		Map<Sport,List<AbstractInputRecord>> serviceNameInputData = BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName);
+		List<AbstractInputRecord> transformedRecords;
+		for(Sport sport : serviceNameInputData.keySet()) {
+			try {
+				logger.info("Starting data transformation for " + serviceName + " on sport " + sport);
+				transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(serviceNameInputData.get(sport), BlueSheepSharedResources.getEventoScommessaRecordMap());
+				logger.info("Data transformation for " + serviceName + " on sport " + sport + " completed");
 
-					addToChiaveEventoScommessaMap(transformedRecords);
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
+				addToChiaveEventoScommessaMap(transformedRecords);
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}

@@ -63,7 +63,7 @@ public class ImageGenerator {
 			converter.convert(xhtmlFileName, "../xhtml/" + i + pictureFormat);		
 			
 			// Deleting the temp file
-			xhtmlFileHandler.delete(xhtmlFileName);
+//			xhtmlFileHandler.delete(xhtmlFileName);
 	    }
 		
 		return eventXHTMLStringMap;

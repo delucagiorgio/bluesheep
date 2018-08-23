@@ -36,6 +36,7 @@ public class BlueSheepSharedResources {
 	private static Map<Service, Map<Sport,List<AbstractInputRecord>>> allServiceApiMapResult;
 	private static Map<Service, List<Sport>> serviceSportMap;
 	private static int updateCallCount = 0;
+	private static List<AbstractInputRecord> exchangeRecordsList = new ArrayList<AbstractInputRecord>();
 	
 	private BlueSheepSharedResources() {}
 
@@ -182,6 +183,53 @@ public class BlueSheepSharedResources {
 
 	public static void setUpdateCallCount(int updateCallCount) {
 		BlueSheepSharedResources.updateCallCount = updateCallCount;
+	}
+
+	public static List<AbstractInputRecord> getExchangeRecordsList() {
+		return exchangeRecordsList;
+	}
+
+	/**
+	 * GD - 23/08/2018
+	 * Tiene aggiornata la lista di record finora ricevute dalle interrogazioni, tenendo conto della validità (passata o meno) 
+	 * della data dell'evento.
+	 * @param exchangeRecordsList la nuova lista di record provenienti dall'Exchange
+	 * @param startTime la data di start del processo
+	 */
+	public static void setExchangeRecordsList(List<AbstractInputRecord> exchangeRecordsList, long startTime) {
+		if(exchangeRecordsList.isEmpty() || exchangeRecordsList == null) {
+			BlueSheepSharedResources.exchangeRecordsList = exchangeRecordsList;
+		}else {
+			List<AbstractInputRecord> tempList = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.exchangeRecordsList);
+			for(AbstractInputRecord exchangeRecord : tempList) {
+				if(exchangeRecord.getDataOraEvento().getTime() - startTime < updateFrequencyDiff) {
+					BlueSheepSharedResources.exchangeRecordsList.remove(exchangeRecord);
+				}
+			}
+			
+			for(AbstractInputRecord newExchangeRecord : exchangeRecordsList) {
+				AbstractInputRecord alreadySavedExchangeRecordFound = findExchangeRecord(newExchangeRecord);
+				if(alreadySavedExchangeRecordFound == null) {
+					BlueSheepSharedResources.exchangeRecordsList.add(newExchangeRecord);
+				}
+			}
+		}
+	}
+
+	public static AbstractInputRecord findExchangeRecord(AbstractInputRecord record) {
+		AbstractInputRecord exchangeRecordFound = null;
+		if(exchangeRecordsList != null && !exchangeRecordsList.isEmpty()) {
+			for(AbstractInputRecord exchangeRecord : exchangeRecordsList) {
+				if(AbstractInputRecord.compareSport(exchangeRecord.getSport(), record.getSport())  
+						&& AbstractInputRecord.compareDate(exchangeRecord.getDataOraEvento(), record.getDataOraEvento())
+						&& (AbstractInputRecord.compareParticipants(exchangeRecord.getPartecipante1(), exchangeRecord.getPartecipante2(), record.getPartecipante1(), record.getPartecipante2()) || 
+								exchangeRecord.isSameEventSecondaryMatch(record.getDataOraEvento(), record.getSport().getCode(), record.getPartecipante1(), record.getPartecipante2()))){
+					exchangeRecordFound = exchangeRecord;
+					break;
+				}
+			}
+		}
+		return exchangeRecordFound;
 	}
 
 }
