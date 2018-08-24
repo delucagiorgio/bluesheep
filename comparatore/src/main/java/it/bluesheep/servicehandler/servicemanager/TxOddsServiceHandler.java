@@ -38,6 +38,12 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 
 			logger.info("Removing all TxOdds events: " + minutesOfValidity + " minute(s) are passed since last initial call");
 			resetAllTxOddsEvents();
+			logger.info("Starting GC...");
+			long startGc = System.currentTimeMillis();
+			System.gc();
+			long endGc = System.currentTimeMillis();
+			
+			logger.info("GC completed execution: " + (endGc - startGc) + " ms.");
 		}
 		super.addToChiaveEventoScommessaMap(inputRecordList);
 	}
