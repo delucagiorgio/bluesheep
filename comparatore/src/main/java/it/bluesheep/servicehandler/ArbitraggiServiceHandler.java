@@ -14,6 +14,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.telegram.TelegramMessageManager;
+import it.bluesheep.arbitraggi.util.AntiSpamMessageUtil;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
@@ -104,9 +105,12 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	
 			//Se ci sono aggiornamenti o nuovi arbitraggi, invia i risultati e li salva
 			if(!messageToBeSentKeysList.isEmpty()) {
+				AntiSpamMessageUtil.initialize();
 				
 				saveOutputOnFile(messageToBeSentKeysList);
 	
+				messageToBeSentKeysList = AntiSpamMessageUtil.filterRecordOutputListFromSpam(messageToBeSentKeysList);
+				
 				TelegramMessageManager tmm = new TelegramMessageManager(startTime);
 				tmm.sendMessageToTelegramGroupByBotAndStore(messageToBeSentKeysList);
 			}

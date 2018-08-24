@@ -87,6 +87,7 @@ public class BlueSheepConstants {
 	public static final String MINUTES_ODD_VALIDITY = "MINUTES_ODD_VALIDITY";
 	public static final String FREQ_ARBS_SEC = "FREQ_ARBS_SEC";
 	public static final String XHTML_PATH = "XHTML_PATH";
+	public static final String SPAM_THRESHOLD_COUNT = "SPAM_THRESHOLD_COUNT";
 		
 	
 	// SOGLIA OLTRE LA QUALE SI MOSTRANO I MISSILI NELLA NOTIFICA TELEGRAM

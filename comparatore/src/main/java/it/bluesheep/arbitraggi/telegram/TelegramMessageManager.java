@@ -29,6 +29,9 @@ public class TelegramMessageManager {
 	}
 
 	public void sendMessageToTelegramGroupByBotAndStore(List<String> outputRecordKeys) {
+		if(outputRecordKeys == null || outputRecordKeys.isEmpty()) {
+			return;
+		}
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		

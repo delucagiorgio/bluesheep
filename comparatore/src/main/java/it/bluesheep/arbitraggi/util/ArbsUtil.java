@@ -1,5 +1,6 @@
 package it.bluesheep.arbitraggi.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,4 +125,55 @@ public class ArbsUtil {
 		return "*" + string + "*";
 	}
 	
+	public static boolean isSameBetBookmakerEventRecordOutputKey(String recordKey1, String recordKey2) {
+		
+		List<String> transformedRecordKey1 = transformRecordKey(recordKey1);
+		List<String> transformedRecordKey2 = getListFromKey(recordKey2);
+		if(transformedRecordKey1 != null && transformedRecordKey2 != null) {
+			return transformedRecordKey1.equals(transformedRecordKey2);
+		}
+		return false;
+	}
+
+	public static List<String> getListFromKey(String recordKey2) {
+		return Arrays.asList(recordKey2.split(BlueSheepConstants.REGEX_CSV));
+	}
+
+	private static List<String> transformRecordKey(String recordKey) {
+		List<String> transformedRecord = null;
+		
+			
+		if(recordKey != null && !recordKey.isEmpty()) {
+			String[] splittedRecordOutputSent = recordKey.split(BlueSheepConstants.KEY_SEPARATOR);
+			if(splittedRecordOutputSent != null) {
+				String arbsKey = splittedRecordOutputSent[0];
+				String[] splittedArbsKey = arbsKey.split(BlueSheepConstants.REGEX_CSV);
+				if(splittedArbsKey != null) {
+					String evento =  splittedArbsKey[0];
+					String dataOraEvento = splittedArbsKey[1];
+					String sport = splittedArbsKey[2];
+					String book1Name = splittedArbsKey[5];
+					String scommessa1Book = splittedArbsKey[6];
+					String book2Name = splittedArbsKey[8];
+					String scommessa2Book = splittedArbsKey[9];
+					transformedRecord = Arrays.asList(evento, dataOraEvento, sport, book1Name, scommessa1Book, book2Name, scommessa2Book);
+				}
+			}
+		}
+		
+		return transformedRecord;
+	}
+	
+	public static String getTransformedKeyToString(String recordOutput) {
+		String result = "";
+		List<String> transformedKey = transformRecordKey(recordOutput);
+			
+		if(transformedKey != null) {
+			for(String field : transformedKey) {
+				result = result + field + BlueSheepConstants.REGEX_CSV;
+			}
+		}
+		return result;
+	}
+
 }
