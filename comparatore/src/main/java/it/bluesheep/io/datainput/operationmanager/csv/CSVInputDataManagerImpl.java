@@ -74,7 +74,7 @@ public class CSVInputDataManagerImpl {
 			AbstractInputRecord record = mapSplittedInfoIntoAbstractInputRecord(idLineMapKeyValues.get(idLine), idLine);
 			if(record != null) {
 				record.setPartecipante1(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante1()));
-				record.setPartecipante2(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante1()));
+				record.setPartecipante2(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante2()));
 				returnList.add(record);
 			}
 		}
