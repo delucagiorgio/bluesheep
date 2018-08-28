@@ -37,7 +37,7 @@ public class Html2PngConverter {
 	public void convert (String inputFile, String outputFileName) {
 		try {
 //			String pathToHtmlLocation = "/Users/giorgio/git/bluesheep";
-			String pathToHtmlLocation = "/home//bluesheep/java";
+			String pathToHtmlLocation = "/home/bluesheep/java";
 	        String htmlLocation = "file://" + pathToHtmlLocation + inputFile.substring(2);
 
 			FirefoxBinary firefoxBinary = new FirefoxBinary();

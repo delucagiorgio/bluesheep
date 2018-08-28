@@ -136,11 +136,20 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 						AbstractInputRecord scommessaInputRecord = bookmakerRecord1Map.get(bookmakerScommessa);
 						AbstractInputRecord oppositeScommessaInputRecord = bookmakerRecord2Map.get(bookmakerScommessaOpposite);
 
+						boolean found = false;
+						if(scommessaInputRecord.getBookmakerName().equalsIgnoreCase(BlueSheepConstants.BET365_BOOKMAKER_NAME) || oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(BlueSheepConstants.BET365_BOOKMAKER_NAME)) {
+							found = true;
+						}
+						
 						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
 						
 						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
 						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
-
+						
+						if(found && rating1 > 1D && rating2 > 1D) {
+							System.out.println("TROVATO");
+						}
+						
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
 						if(rating1 >= minThreshold && 
 						   rating2 >= minThreshold &&
@@ -192,7 +201,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 	}
 	
 	protected RecordOutput mapRecordOutput(AbstractInputRecord scommessaInputRecord, AbstractInputRecord oppositeScommessaInputRecord, double rating1) {
-		RecordBookmakerVsBookmakerOdds output = new RecordBookmakerVsBookmakerOdds();		
+		RecordBookmakerVsBookmakerOdds output = new RecordBookmakerVsBookmakerOdds();
+		
 		output.setBookmakerName1(scommessaInputRecord.getBookmakerName());
 		output.setBookmakerName2(oppositeScommessaInputRecord.getBookmakerName());
 		output.setCampionato(scommessaInputRecord.getCampionato());

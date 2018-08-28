@@ -30,7 +30,6 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 	private static final String ODDS_JSON_STRING = "odds";
 	private static final String HEADER_JSON_STRING = "header";
 	private static final String TO_WIN_MATCH_JSON_STRING = "to_win_match";
-	private static final String UPDATED_AT_JSON_STRING = "updated_at";
 	private static final String MAIN_CAT_JSON_STRING = "main";
 	
 	public Bet365InputMappingProcessor() {
@@ -108,7 +107,7 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 					JSONArray subCategoryJSONArray = Bet365BluesheepJsonConverter.getChildNodeArrayByKey(spJSONObject, correctSubCategory);
 					
 					if(subCategoryJSONArray != null && subCategoryJSONArray.length() > 0) {
-						Long updatedTime = correctCategoryJSONObject.getLong(UPDATED_AT_JSON_STRING);
+						Long updatedTime = System.currentTimeMillis();
 						if(specificTypeOdds > -1) {
 							JSONObject oddsJSONObject = subCategoryJSONArray.getJSONObject(specificTypeOdds);
 							if(oddsJSONObject != null) {
