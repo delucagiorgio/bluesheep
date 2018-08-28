@@ -26,6 +26,7 @@ import it.bluesheep.io.datainput.operationmanager.csv.CSVInputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.service.impl.Bet365InputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.service.impl.BetfairExchangeInputDataManagerImpl;
 import it.bluesheep.io.datainput.operationmanager.service.impl.TxOddsInputDataManagerImpl;
+import it.bluesheep.io.datainput.operationmanager.service.util.CSVEventRenameHelper;
 import it.bluesheep.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.util.BlueSheepLogger;
 import it.bluesheep.util.DirectoryFileUtilManager;
@@ -39,10 +40,10 @@ public class BlueSheepComparatoreMain {
 
 	public static void main(String[] args) throws Exception{
 				
-		AbstractBluesheepJsonConverter.setFormatOutput(true);		
+		AbstractBluesheepJsonConverter.setFormatOutput(false);		
         try {
-//        	InputStream in = new FileInputStream(args[0]);
-        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
+        	InputStream in = new FileInputStream(args[0]);
+//        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
             properties.load(in);
         	// va stabilito un path per il file delle proprieta'    	
             in.close();
@@ -55,6 +56,8 @@ public class BlueSheepComparatoreMain {
 		logger.log(Level.INFO, properties.entrySet().toString());
 		
 		InputDataHelper inputDataHelper = new InputDataHelper();
+		CSVEventRenameHelper csvEventRenameHelper = CSVEventRenameHelper.getCSVEventRenameHelperInstance();
+		csvEventRenameHelper.initializeMap();
 		
 		long startTime = System.currentTimeMillis();
 		/**

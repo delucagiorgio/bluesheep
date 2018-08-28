@@ -65,6 +65,7 @@ public class ComparatoreConstants {
 	
 	//csv
 	public static final String CSV_ODDS_PATH_INPUT_FILE = "PATH_INPUT_FILE";
+	public static final String CSV_PLAYER_RENAME_FILE = "CSV_PLAYER_RENAME_FILE";
 	
 	private ComparatoreConstants() {}
 

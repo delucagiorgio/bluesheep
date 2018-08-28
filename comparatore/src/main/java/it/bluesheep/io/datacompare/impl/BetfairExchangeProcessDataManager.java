@@ -37,7 +37,6 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 						String[] partecipantiSplitted = splittedEventoKey[2].split(ComparatoreConstants.REGEX_VERSUS);
 						String partecipante1 = partecipantiSplitted[0];
 						String partecipante2 = partecipantiSplitted[1];
-						
 						BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) record;
 						
 						if(exchangeRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) || 

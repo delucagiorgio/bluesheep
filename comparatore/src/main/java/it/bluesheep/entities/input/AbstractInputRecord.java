@@ -160,8 +160,8 @@ public abstract class AbstractInputRecord {
 	 * @return true, se le date sono identiche (con un errore di accettazione tra le due di UN'ORA), false altrimenti
 	 */
 	public boolean compareDate(Date dataOraEvento1, Date dataOraEvento2) {
-		return ((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() < 3600000))
-				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() < 3600000));
+		return ((dataOraEvento1.getTime() >= dataOraEvento2.getTime()) && (dataOraEvento1.getTime() - dataOraEvento2.getTime() <= 3600000))
+				|| ((dataOraEvento2.getTime() >= dataOraEvento1.getTime()) && (dataOraEvento2.getTime() - dataOraEvento1.getTime() <= 3600000));
 	}
 
 	/**
