@@ -50,10 +50,12 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 			String key = splittedEventoKeyRecord[1];
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dateMap = eventiTxOddsMap.get(Sport.valueOf(key));
 			if(dateMap != null) {
-				for(Date date : dateMap.keySet()) {
+				List<Date> dateList = new ArrayList<Date>(dateMap.keySet());
+				for(Date date : dateList) {
 					if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
 							(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
-						for(String eventoTxOdds : dateMap.get(date).keySet()) {
+						List<String> keyEventoList = new ArrayList<String>(dateMap.get(date).keySet());
+						for(String eventoTxOdds : keyEventoList) {
 							String[] splittedEventoKey = eventoTxOdds.split("\\|");
 							String sport = splittedEventoKey[1];
 							String[] partecipantiSplitted = splittedEventoKey[2].split(BlueSheepConstants.REGEX_VERSUS);
@@ -68,12 +70,14 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 								List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 								Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
 								List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
-								AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
-								exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
-								exchangeRecord.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-	//							exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
-								exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
-								exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
+								if(!bookmakerSet.isEmpty()) {
+									AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
+									exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
+									exchangeRecord.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+		//							exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
+									exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
+									exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
+								}
 								break;
 							}
 						}

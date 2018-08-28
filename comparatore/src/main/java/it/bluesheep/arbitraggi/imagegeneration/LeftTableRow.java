@@ -1,14 +1,14 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
 /*
- * Tabella di sinistra, con bookmaker, quota e disponibilit� di giocata
+ * Tabella di sinistra, con bookmaker, quota e disponibilit‡ di giocata
  */
 public class LeftTableRow extends TableRow {
 	
 	private String money;
 	
-	public LeftTableRow(String bookmaker, String odd, String money) {
-		super(bookmaker, odd);
+	public LeftTableRow(String bookmaker, String odd, String money, boolean betterOdd) {
+		super(bookmaker, odd, betterOdd);
 		this.money = money;
 	}
 
@@ -35,4 +35,9 @@ public class LeftTableRow extends TableRow {
 		}
 	}
 	
+	public void updateBetterOdd(boolean betterOdd) {
+		if (betterOdd) {
+			this.betterOdd = betterOdd;			
+		}
+	}
 }

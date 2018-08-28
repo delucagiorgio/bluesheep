@@ -1,5 +1,7 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
+import java.text.DecimalFormat;
+
 /*
  * Tabella di destra con bookmaker, quota e percentuale di guadagno netto
  */
@@ -8,10 +10,16 @@ public class RightTableRow extends TableRow {
 	private String minPercentage;
 	private String maxPercentage;
 
-	public RightTableRow(String bookmaker, String odd, String percentage) {
-		super(bookmaker, odd);
-		this.setMinPercentage(percentage);
-		this.setMaxPercentage(percentage);
+	public RightTableRow(String bookmaker, String odd, String percentage, boolean betterOdd) {
+		super(bookmaker, odd, betterOdd);
+		
+		float decimalNumber = Float.parseFloat(percentage.replace(",", "."));
+		DecimalFormat df = new DecimalFormat();
+		df.setMinimumFractionDigits(2);
+		df.setMaximumFractionDigits(2);
+			
+		this.setMinPercentage(df.format(decimalNumber).toString());
+		this.setMaxPercentage(df.format(decimalNumber).toString());
 	}
 
 	@Override
@@ -29,7 +37,7 @@ public class RightTableRow extends TableRow {
 	}
 
 	public String getMinPercentage() {
-		return minPercentage;
+		return minPercentage.replace(",", ".");
 	}
 
 	public void setMinPercentage(String minPercentage) {
@@ -37,18 +45,28 @@ public class RightTableRow extends TableRow {
 	}
 
 	public String getMaxPercentage() {
-		return maxPercentage;
+		return maxPercentage.replace(",", ".");
 	}
 
 	public void setMaxPercentage(String maxPercentage) {
 		this.maxPercentage = maxPercentage;
 	}
 	
-	public void updatePercentages(String p) {
-		if (Float.parseFloat(this.getMaxPercentage().replace(",", ".")) < Float.parseFloat(p.replace(",", "."))) {
-			maxPercentage = p;
-		} else if (Float.parseFloat(this.getMinPercentage().replace(",",  ".")) > Float.parseFloat(p.replace(",", "."))){
-			minPercentage = p;
+	public void updatePercentages(String p, boolean betterOdd) {
+		
+		float decimalNumber = Float.parseFloat(p.replace(",", "."));
+		DecimalFormat df = new DecimalFormat();
+		df.setMinimumFractionDigits(2);
+		df.setMaximumFractionDigits(2);
+		
+		if (Float.parseFloat(this.getMaxPercentage()) < decimalNumber) {
+			maxPercentage = df.format(decimalNumber);
+		} else if (Float.parseFloat(this.getMinPercentage()) > decimalNumber){
+			minPercentage = df.format(decimalNumber);
+		}
+		
+		if (betterOdd) {
+			this.betterOdd = betterOdd;			
 		}
 	}
 }

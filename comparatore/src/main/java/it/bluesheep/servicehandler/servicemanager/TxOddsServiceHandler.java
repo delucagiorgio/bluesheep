@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
+import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
@@ -38,6 +39,7 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 
 			logger.info("Removing all TxOdds events: " + minutesOfValidity + " minute(s) are passed since last initial call");
 			resetAllTxOddsEvents();
+			BookmakerLinkGenerator.initializeMap();
 			logger.info("Starting GC...");
 			long startGc = System.currentTimeMillis();
 			System.gc();

@@ -25,10 +25,10 @@ public class TennisEvent extends Event {
 
 	@Override
 	public void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2,
-			String oddsType2, String odd2, String money2) {
+			String oddsType2, String odd2, String money2, boolean betterOdd) {
 		
 		// Il tennis ha come unica opzione di gioco UNODUE
-		bet_12.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);
+		bet_12.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);
 	}
 
 	@Override

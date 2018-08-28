@@ -6,7 +6,6 @@ import java.util.logging.LogManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -22,7 +21,7 @@ import org.openqa.selenium.firefox.FirefoxOptions;
  */
 public class Html2PngConverter {
 	
-	public static WebDriver driver;  
+	private WebDriver driver;  
 	private static Logger logger = Logger.getLogger(Html2PngConverter.class);
 	private final static String LOGGING_FILE_FAKE = "../xhtml/logs.txt";
 
@@ -52,14 +51,14 @@ public class Html2PngConverter {
 	        // Vai alla pagina
 	    	driver.get(htmlLocation);
 	    	// Metti a tutto schermo
-	        //driver.manage().window().maximize();
-	        driver.manage().window().setSize(new Dimension(1200, 675));
+	        driver.manage().window().maximize();
+	        //driver.manage().window().setSize(new Dimension(1200, 675));
 	        
 	        // Fai lo screen
 	        takeScreenshot(outputFileName);
 	        // Chiudi il browser
-	        driver.close();
-	        //driver.quit();
+//	        driver.close();
+	        driver.quit();
 	        HtmlFileHandler htmlFileHandler = new HtmlFileHandler();
 	        htmlFileHandler.delete(LOGGING_FILE_FAKE);
 		}catch(Exception e) {
@@ -73,7 +72,7 @@ public class Html2PngConverter {
 	        	File f = new File(outputFileName);
 				FileUtils.copyFile(scrFile, f);
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 	    }
 }

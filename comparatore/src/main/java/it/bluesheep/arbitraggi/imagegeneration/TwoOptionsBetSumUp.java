@@ -96,12 +96,12 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 
 	@Override
 	public void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2,
-			String oddsType2, String odd2, String money2) {
+			String oddsType2, String odd2, String money2, boolean betterOdd) {
 		
 		if (oddsType1.equals(betType1Code) && oddsType2.equals(betType2Code)) {
 			// punta 1 vs punta 2
 
-			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1);
+			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta1.size(); i++) {
 				if (punta1.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -110,9 +110,11 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta1.add(temp1);
+			} else {
+				((LeftTableRow) punta1.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta2.size(); i++) {
 				if (punta2.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -122,13 +124,13 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta2.add(temp2);
 			} else {
-				((RightTableRow) punta2.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta2.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType2.equals(betType1Code) && oddsType1.equals(betType2Code)) {
 			// punta 2 vs punta 1
 			
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta1.size(); i++) {
 				if (punta1.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -137,9 +139,11 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta1.add(temp1);
+			} else {
+				((LeftTableRow) punta1.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta2.size(); i++) {
 				if (punta2.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -149,13 +153,13 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta2.add(temp2);
 			} else {
-				((RightTableRow) punta2.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta2.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 
 		} else if (oddsType1.equals(betType1Code) && oddsType2.equals(betType1Code)) {
 			// punta 1 e banca 1
 			
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < banca1stOption.size(); i++) {
 				if (banca1stOption.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -164,9 +168,11 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				banca1stOption.add(temp1);
+			} else {
+				((LeftTableRow) banca1stOption.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta1stOption.size(); i++) {
 				if (punta1stOption.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -176,13 +182,13 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta1stOption.add(temp2);
 			} else {
-				((RightTableRow) punta1stOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta1stOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 					
 		} else if (oddsType1.equals(betType2Code) && oddsType2.equals(betType2Code)) {
 			// punta 2 e banca 2
 			
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < banca2ndOption.size(); i++) {
 				if (banca2ndOption.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -191,9 +197,11 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				banca2ndOption.add(temp1);
+			}  else {
+				((LeftTableRow) banca2ndOption.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta2ndOption.size(); i++) {
 				if (punta2ndOption.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -203,7 +211,7 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta2ndOption.add(temp2);
 			} else {
-				((RightTableRow) punta2ndOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta2ndOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else {
@@ -223,6 +231,8 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 		
 		final String sheepPath = "./img/bluesheep.png";
 		final String missilePath = "./img/missile.png";
+		final String betterOddPath ="./img/up_arrow.png";
+
 		int MISSILE_TRASHOLD = Integer.parseInt(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MISSILE_TRASHOLD));
 
 		String result = "";
@@ -264,10 +274,22 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 				                "<th scope=\"row\">" +
 				                punta1.get(i).getBookmaker() + 
 				                "</th>" +
-				                "<td>" +
-				                ((LeftTableRow) punta1.get(i)).getOdd() +
-				                "</td>" +
-				              "</tr>";
+				                "<td>";
+						
+						if (punta1.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
+						
+						result+= "&nbsp; " +  ((LeftTableRow) punta1.get(i)).getOdd();
+				        
+				        if (punta1.get(i).isBetterOdd()) {
+				        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+				        }
+
+				                
+				        result+="</td>" +
+				        		"</tr>";
+
 					}
 					
 			  		result += 			
@@ -302,23 +324,31 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 					                	punta2.get(i).getBookmaker() + 
 					                "</th>" +
 					                "<td>" +
-					                	((RightTableRow) punta2.get(i)).getOdd() +
-					                "</td>" +
-					                "<td>";
-			  			
-			  			if (Float.parseFloat(((RightTableRow) punta2.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
-			  			}
-			  			if (Float.parseFloat(((RightTableRow) punta2.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta2.get(i)).getMinPercentage().replace(",", "."))) {
-			  				result += "&nbsp; " + ((RightTableRow) punta2.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta2.get(i)).getMinPercentage() + " &nbsp;";
-			  			}	else {
-			  				result += "&nbsp; " + ((RightTableRow) punta2.get(i)).getMaxPercentage() + " &nbsp;";
-			  			}
-			  			if (Float.parseFloat(((RightTableRow) punta2.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
-			  			}
-					    result += "</td>" +
-					              "</tr>";
+				                	((RightTableRow) punta2.get(i)).getOdd() +
+				                "</td>" +
+				                "<td>";
+		  			
+		  			if (Float.parseFloat(((RightTableRow) punta2.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
+		  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+		  			}
+		  			if (punta2.get(i).isBetterOdd()) {
+						result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+					}
+		  			if (Float.parseFloat(((RightTableRow) punta2.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta2.get(i)).getMinPercentage().replace(",", "."))) {
+		  				result += "&nbsp; " + ((RightTableRow) punta2.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta2.get(i)).getMinPercentage() + " &nbsp;";
+		  			}	else {
+		  				result += "&nbsp; " + ((RightTableRow) punta2.get(i)).getMaxPercentage() + " &nbsp;";
+		  			}
+		  			if (punta2.get(i).isBetterOdd()) {
+						result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+					}
+		  			if (Float.parseFloat(((RightTableRow) punta2.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
+		  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+		  			}
+		  			
+				    result += "</td>" +
+				              "</tr>";
+
 					}
 			  		
 					result +=
@@ -358,9 +388,19 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 					                "<th scope=\"row\">" +
 					                	banca1stOption.get(i).getBookmaker() + 
 					                "</th>" +
-					                "<td>" +
-					                	((LeftTableRow) banca1stOption.get(i)).getOdd() +
-					                "</td>" +
+					                "<td>";
+							
+							if (banca1stOption.get(i).isBetterOdd()) {
+								result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+							}
+							
+							result+= "&nbsp; " +  ((LeftTableRow) banca1stOption.get(i)).getOdd();
+					        
+					        if (banca1stOption.get(i).isBetterOdd()) {
+					        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+					        }
+
+					        result+="</td>" +
 					                "<td>" +
 				                		((LeftTableRow) banca1stOption.get(i)).getMoney() +
 					                "</td>" +
@@ -404,15 +444,21 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 					                "<td>";
 	
 					    if (Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-							result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+							result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+						}
+					    if (punta1stOption.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
 						}
 			  			if (Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMinPercentage().replace(",", "."))) {
 			  				result += "&nbsp; " + ((RightTableRow) punta1stOption.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta1stOption.get(i)).getMinPercentage() + " &nbsp;";
 			  			}	else {
 			  				result += "&nbsp; " + ((RightTableRow) punta1stOption.get(i)).getMaxPercentage() + " &nbsp;";
 			  			}
+			  			if (punta1stOption.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 						if (Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-							result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+							result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 						}
 						result += "</td>" +
 								  "</tr>";
@@ -455,13 +501,23 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 							                "<th scope=\"row\">" +
 							                	banca2ndOption.get(i).getBookmaker() + 
 							                "</th>" +
-							                "<td>" +
-							                	((LeftTableRow) banca2ndOption.get(i)).getOdd() +
-							                "</td>" +
-							                "<td>" +
-						                		((LeftTableRow) banca2ndOption.get(i)).getMoney() +
-							                "</td>" +
-							              "</tr>";
+							                "<td>";
+									
+							if (banca2ndOption.get(i).isBetterOdd()) {
+								result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+							}
+							
+							result+= "&nbsp; " +  ((LeftTableRow) banca2ndOption.get(i)).getOdd();
+					        
+					        if (banca2ndOption.get(i).isBetterOdd()) {
+					        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+					        }
+
+					        result+="</td>" +
+					                "<td>" +
+				                		((LeftTableRow) banca2ndOption.get(i)).getMoney() +
+					                "</td>" +
+					              "</tr>";
 							}
 							
 							result += 
@@ -501,15 +557,21 @@ public class TwoOptionsBetSumUp extends BetSumUp {
 							                "<td>";
 									
 							    if (Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-									result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+									result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+								}
+							    if (punta2ndOption.get(i).isBetterOdd()) {
+									result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
 								}
 					  			if (Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMinPercentage().replace(",", "."))) {
 					  				result += "&nbsp; " + ((RightTableRow) punta2ndOption.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta2ndOption.get(i)).getMinPercentage() + " &nbsp;";
 					  			}	else {
 					  				result += "&nbsp; " + ((RightTableRow) punta2ndOption.get(i)).getMaxPercentage() + " &nbsp;";
 					  			}
+					  			if (punta2ndOption.get(i).isBetterOdd()) {
+									result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+								}
 								if (Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-									result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+									result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 								}
 						                		
 							               result +=  "</td>" +

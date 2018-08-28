@@ -7,6 +7,7 @@ import java.util.List;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 
+
 /**
  * Format and draw a table describing a 3 options bet
  * @author Fabio
@@ -88,12 +89,12 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 
 	@Override
 	public void addRecord(String bookmaker1, String oddsType1, String odd1,
-			String money1, String bookmaker2, String oddsType2, String odd2, String money2) {
+			String money1, String bookmaker2, String oddsType2, String odd2, String money2, boolean betterOdd) {
 
 		if (oddsType1.equals(betType1Code) && oddsType2.equals(betType23Code)) {
 			// punta 1 vs punta 23
 
-			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1);
+			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta1.size(); i++) {
 				if (punta1.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -102,9 +103,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta1.add(temp1);
+			} else {
+				((LeftTableRow) punta1.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta23.size(); i++) {
 				if (punta23.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -114,13 +117,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta23.add(temp2);
 			} else {
-				((RightTableRow) punta23.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta23.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType2.equals(betType1Code) && oddsType1.equals(betType23Code)) {
 			//  punta 23 vs punta 1
 
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta1.size(); i++) {
 				if (punta1.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -129,9 +132,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta1.add(temp1);
+			} else {
+				((LeftTableRow) punta1.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta23.size(); i++) {
 				if (punta23.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -141,13 +146,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta23.add(temp2);
 			} else {
-				((RightTableRow) punta23.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta23.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType1.equals(betType2Code) && oddsType2.equals(betType13Code)) {
 			// punta 2 vs punta 13
 
-			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1);
+			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta2.size(); i++) {
 				if (punta2.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -156,9 +161,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta2.add(temp1);
+			} else {
+				((LeftTableRow) punta2.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta13.size(); i++) {
 				if (punta13.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -168,13 +175,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta13.add(temp2);
 			} else {
-				((RightTableRow) punta13.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta13.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType2.equals(betType2Code) && oddsType1.equals(betType13Code)) {
 			//  punta 13 vs punta 2
 
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta2.size(); i++) {
 				if (punta2.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -183,9 +190,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta2.add(temp1);
+			} else {
+				((LeftTableRow) punta2.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta13.size(); i++) {
 				if (punta13.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -195,13 +204,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta13.add(temp2);
 			} else {
-				((RightTableRow) punta13.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta13.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} if (oddsType1.equals(betType3Code) && oddsType2.equals(betType12Code)) {
 			// punta 3 vs punta 12
 
-			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1);
+			TableRow temp1 = new LeftTableRow(bookmaker1, odd1, money1, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta3.size(); i++) {
 				if (punta3.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -210,9 +219,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta3.add(temp1);
+			} else {
+				((LeftTableRow) punta3.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker2, odd2, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta12.size(); i++) {
 				if (punta12.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -222,13 +233,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta12.add(temp2);
 			} else {
-				((RightTableRow) punta12.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta12.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType2.equals(betType3Code) && oddsType1.equals(betType12Code)) {
 			//  punta 12 vs punta 3
 
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < punta3.size(); i++) {
 				if (punta3.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -237,9 +248,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				punta3.add(temp1);
+			} else {
+				((LeftTableRow) punta3.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta12.size(); i++) {
 				if (punta12.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -249,13 +262,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta12.add(temp2);
 			} else {
-				((RightTableRow) punta12.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta12.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType1.equals(betType1Code) && oddsType2.equals(betType1Code)) {
 			// punta 1 e banca 1
 			
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < banca1stOption.size(); i++) {
 				if (banca1stOption.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -264,9 +277,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				banca1stOption.add(temp1);
+			} else {
+				((LeftTableRow) banca1stOption.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta1stOption.size(); i++) {
 				if (punta1stOption.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -276,13 +291,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta1stOption.add(temp2);
 			} else {
-				((RightTableRow) punta1stOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta1stOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 					
 		} else if (oddsType1.equals(betType2Code) && oddsType2.equals(betType2Code)) {
 			// punta 2 e banca 2
 			
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < banca2ndOption.size(); i++) {
 				if (banca2ndOption.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -291,9 +306,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				banca2ndOption.add(temp1);
+			} else {
+				((LeftTableRow) banca2ndOption.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta2ndOption.size(); i++) {
 				if (punta2ndOption.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -303,13 +320,13 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta2ndOption.add(temp2);
 			} else {
-				((RightTableRow) punta2ndOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta2ndOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else if (oddsType1.equals(betType3Code) && oddsType2.equals(betType3Code)) {
 			// punta 3 e banca 3
 			
-			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2);
+			TableRow temp1 = new LeftTableRow(bookmaker2, odd2, money2, betterOdd);
 			int alreadyExists = -1;
 			for (int i = 0; i < banca3rdOption.size(); i++) {
 				if (banca3rdOption.get(i).getBookmaker().equals(temp1.getBookmaker())) {
@@ -318,9 +335,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}			
 			if (alreadyExists < 0) {
 				banca3rdOption.add(temp1);
+			} else {
+				((LeftTableRow) banca3rdOption.get(alreadyExists)).updateBetterOdd(betterOdd);
 			}
 			
-			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2));
+			TableRow temp2 = new RightTableRow(bookmaker1, odd1, this.calcutateIncome(odd1, odd2, oddsType1, oddsType2), betterOdd);
 			alreadyExists = -1;
 			for (int i = 0; i < punta3rdOption.size(); i++) {
 				if (punta3rdOption.get(i).getBookmaker().equals(temp2.getBookmaker())) {
@@ -330,7 +349,7 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			if (alreadyExists < 0) {
 				punta3rdOption.add(temp2);
 			} else {
-				((RightTableRow) punta3rdOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage());
+				((RightTableRow) punta3rdOption.get(alreadyExists)).updatePercentages(((RightTableRow) temp2).getMaxPercentage(), betterOdd);
 			}
 			
 		} else {
@@ -343,6 +362,8 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					
 		final String sheepPath = "./img/bluesheep.png";
 		final String missilePath = "./img/missile.png";
+		final String betterOddPath ="./img/up_arrow.png";
+		
 		int MISSILE_TRASHOLD = Integer.parseInt(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MISSILE_TRASHOLD));
 		
 		Collections.sort(punta1, Collections.reverseOrder());
@@ -399,10 +420,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 				                "<th scope=\"row\">" +
 				                punta1.get(i).getBookmaker() + 
 				                "</th>" +
-				                "<td>" +
-				                ((LeftTableRow) punta1.get(i)).getOdd() +
-				                "</td>" +
-				              "</tr>";
+				                "<td>";
+						
+						if (punta1.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
+						
+						result+= "&nbsp; " +  ((LeftTableRow) punta1.get(i)).getOdd();
+				        
+				        if (punta1.get(i).isBetterOdd()) {
+				        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+				        }
+
+				                
+				        result+="</td>" +
+				        		"</tr>";
 					}
 					
 			  		result += 			
@@ -442,15 +474,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					                "<td>";
 			  			
 			  			if (Float.parseFloat(((RightTableRow) punta23.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+			  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 			  			}
+			  			if (punta23.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 			  			if (Float.parseFloat(((RightTableRow) punta23.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta23.get(i)).getMinPercentage().replace(",", "."))) {
 			  				result += "&nbsp; " + ((RightTableRow) punta23.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta23.get(i)).getMinPercentage() + " &nbsp;";
 			  			}	else {
 			  				result += "&nbsp; " + ((RightTableRow) punta23.get(i)).getMaxPercentage() + " &nbsp;";
 			  			}
+			  			if (punta23.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 			  			if (Float.parseFloat(((RightTableRow) punta23.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+			  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 			  			}
 			  			
 					    result += "</td>" +
@@ -491,10 +529,20 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 				                "<th scope=\"row\">" +
 				                punta2.get(i).getBookmaker() + 
 				                "</th>" +
-				                "<td>" +
-				                ((LeftTableRow) punta2.get(i)).getOdd() +
-				                "</td>" +
-				              "</tr>";
+				                "<td>";
+						
+						if (punta2.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
+						
+						result+= "&nbsp; " +  ((LeftTableRow) punta2.get(i)).getOdd();
+				        
+				        if (punta2.get(i).isBetterOdd()) {
+				        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+				        }
+
+				        result+="</td>" +
+				        		"</tr>";
 					}
 					
 			  		result += 			
@@ -534,15 +582,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					                "<td>";
 			  			
 			  			if (Float.parseFloat(((RightTableRow) punta13.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+			  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 			  			}
+			  			if (punta13.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 			  			if (Float.parseFloat(((RightTableRow) punta13.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta13.get(i)).getMinPercentage().replace(",", "."))) {
 			  				result += "&nbsp; " + ((RightTableRow) punta13.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta13.get(i)).getMinPercentage() + " &nbsp;";
 			  			}	else {
 			  				result += "&nbsp; " + ((RightTableRow) punta13.get(i)).getMaxPercentage() + " &nbsp;";
 			  			}
+			  			if (punta13.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 			  			if (Float.parseFloat(((RightTableRow) punta13.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+			  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 			  			}
 					    result += "</td>" +
 					              "</tr>";
@@ -582,10 +636,20 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 				                "<th scope=\"row\">" +
 				                punta3.get(i).getBookmaker() + 
 				                "</th>" +
-				                "<td>" +
-				                ((LeftTableRow) punta3.get(i)).getOdd() +
-				                "</td>" +
-				              "</tr>";
+				                "<td>";
+						
+						if (punta3.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
+						
+						result+= "&nbsp; " +  ((LeftTableRow) punta3.get(i)).getOdd();
+				        
+				        if (punta3.get(i).isBetterOdd()) {
+				        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+				        }
+
+				        result+="</td>" +
+				        		"</tr>";
 					}
 					
 			  		result += 			
@@ -625,15 +689,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					                "<td>";
 			  			
 			  			if (Float.parseFloat(((RightTableRow) punta12.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+			  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 			  			}
+			  			if (punta12.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 			  			if (Float.parseFloat(((RightTableRow) punta12.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta12.get(i)).getMinPercentage().replace(",", "."))) {
 			  				result += "&nbsp; " + ((RightTableRow) punta12.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta12.get(i)).getMinPercentage() + " &nbsp;";
 			  			}	else {
 			  				result += "&nbsp; " + ((RightTableRow) punta12.get(i)).getMaxPercentage() + " &nbsp;";
 			  			}
+			  			if (punta12.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 			  			if (Float.parseFloat(((RightTableRow) punta12.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-			  				result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+			  				result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 			  			}
 					    result += "</td>" +
 					              "</tr>";
@@ -676,9 +746,19 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					                "<th scope=\"row\">" +
 					                	banca1stOption.get(i).getBookmaker() + 
 					                "</th>" +
-					                "<td>" +
-					                	((LeftTableRow) banca1stOption.get(i)).getOdd() +
-					                "</td>" +
+					                "<td>";
+							
+							if (banca1stOption.get(i).isBetterOdd()) {
+								result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+							}
+							
+							result+= "&nbsp; " +  ((LeftTableRow) banca1stOption.get(i)).getOdd();
+					        
+					        if (banca1stOption.get(i).isBetterOdd()) {
+					        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+					        }
+
+					        result+="</td>" +
 					                "<td>" +
 				                		((LeftTableRow) banca1stOption.get(i)).getMoney() +
 					                "</td>" +
@@ -723,15 +803,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					                "<td>";
 	
 					    if (Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-							result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+							result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+						}
+					    if (punta1stOption.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
 						}
 			  			if (Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMinPercentage().replace(",", "."))) {
 			  				result += "&nbsp; " + ((RightTableRow) punta1stOption.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta1stOption.get(i)).getMinPercentage() + " &nbsp;";
 			  			}	else {
 			  				result += "&nbsp; " + ((RightTableRow) punta1stOption.get(i)).getMaxPercentage() + " &nbsp;";
 			  			}
+			  			if (punta1stOption.get(i).isBetterOdd()) {
+							result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+						}
 						if (Float.parseFloat(((RightTableRow) punta1stOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-							result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+							result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 						}
 					                
 							result += "</td>" +
@@ -775,9 +861,19 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 							                "<th scope=\"row\">" +
 							                	banca2ndOption.get(i).getBookmaker() + 
 							                "</th>" +
-							                "<td>" +
-							                	((LeftTableRow) banca2ndOption.get(i)).getOdd() +
-							                "</td>" +
+							                "<td>";
+									
+									if (banca2ndOption.get(i).isBetterOdd()) {
+										result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+									}
+									
+									result+= "&nbsp; " +  ((LeftTableRow) banca2ndOption.get(i)).getOdd();
+							        
+							        if (banca2ndOption.get(i).isBetterOdd()) {
+							        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+							        }
+
+							        result+="</td>" +
 							                "<td>" +
 						                		((LeftTableRow) banca2ndOption.get(i)).getMoney() +
 							                "</td>" +
@@ -822,17 +918,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 							                "<td>";
 									
 							    if (Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-									result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+									result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 								}
-							             
+							    if (punta2ndOption.get(i).isBetterOdd()) {
+									result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+								}         
 					  			if (Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMinPercentage().replace(",", "."))) {
 					  				result += "&nbsp; " + ((RightTableRow) punta2ndOption.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta2ndOption.get(i)).getMinPercentage() + " &nbsp;";
 					  			}	else {
 					  				result += "&nbsp; " + ((RightTableRow) punta2ndOption.get(i)).getMaxPercentage() + " &nbsp;";
 					  			}
-								
+					  			if (punta2ndOption.get(i).isBetterOdd()) {
+									result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+								}
 								if (Float.parseFloat(((RightTableRow) punta2ndOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-									result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+									result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 								}
 	
 						                		
@@ -878,11 +978,20 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 							                "<th scope=\"row\">" +
 							                banca3rdOption.get(i).getBookmaker() + 
 							                "</th>" +
+							                "<td>";
+									if (banca3rdOption.get(i).isBetterOdd()) {
+										result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+									}
+									
+									result+= "&nbsp; " +  ((LeftTableRow) banca3rdOption.get(i)).getOdd();
+							        
+							        if (banca3rdOption.get(i).isBetterOdd()) {
+							        	result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";	
+							        }
+
+							        result+="</td>" +
 							                "<td>" +
-							                ((LeftTableRow) banca3rdOption.get(i)).getOdd() +
-							                "</td>" +
-							                "<td>" +
-							                ((LeftTableRow) banca3rdOption.get(i)).getMoney() +
+						                		((LeftTableRow) banca3rdOption.get(i)).getMoney() +
 							                "</td>" +
 							              "</tr>";
 							}
@@ -924,15 +1033,21 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 							                "<td>";
 									
 									if (Float.parseFloat(((RightTableRow) punta3rdOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-										result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+										result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+									}
+									if (punta3rdOption.get(i).isBetterOdd()) {
+										result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
 									}
 						  			if (Float.parseFloat(((RightTableRow) punta3rdOption.get(i)).getMaxPercentage().replace(",", ".")) > Float.parseFloat(((RightTableRow) punta3rdOption.get(i)).getMinPercentage().replace(",", "."))) {
 						  				result += "&nbsp; " + ((RightTableRow) punta3rdOption.get(i)).getMaxPercentage() + " - " + ((RightTableRow) punta3rdOption.get(i)).getMinPercentage() + " &nbsp;";
 						  			}	else {
 						  				result += "&nbsp; " + ((RightTableRow) punta3rdOption.get(i)).getMaxPercentage() + " &nbsp;";
 						  			}
+						  			if (punta3rdOption.get(i).isBetterOdd()) {
+										result += " <img class=\"betterodd\" src=\"" + betterOddPath + "\" alt=\"Better odd\" />";
+									}
 									if (Float.parseFloat(((RightTableRow) punta3rdOption.get(i)).getMaxPercentage().replace(",", ".")) > MISSILE_TRASHOLD) {
-										result += " <img class=\"goat\" src=\"" + missilePath + "\" alt=\"Missile\" />";
+										result += " <img class=\"missile\" src=\"" + missilePath + "\" alt=\"Missile\" />";
 									}
 									
 									result += "</td>" +

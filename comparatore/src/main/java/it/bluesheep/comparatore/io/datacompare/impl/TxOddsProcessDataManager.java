@@ -63,14 +63,17 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 		ChiaveEventoScommessaInputRecordsMap recordInputMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
 		Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportDateMap = recordInputMap.get(sport);
 		if(sportDateMap != null) {
-			for(Date date : sportDateMap.keySet()) {
-				for(String evento : sportDateMap.get(date).keySet()) {
+			List<Date> dateList = new ArrayList<Date>(sportDateMap.keySet());
+			for(Date date : dateList) {
+				List<String> eventoKeyList = new ArrayList<String>(sportDateMap.get(date).keySet());
+				for(String evento : eventoKeyList) {
 					//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
 					//quella in analisi
 					Map<Scommessa, Map<String, AbstractInputRecord>> inputRecordEventoScommessaMap = sportDateMap.get(date).get(evento);
 					Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
-					Scommessa oppositeScommessa = null;			
-					for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
+					Scommessa oppositeScommessa = null;		
+					List<Scommessa> scommessaList = new ArrayList<Scommessa>(inputRecordEventoScommessaMap.keySet());
+					for(Scommessa scommessa : scommessaList) {
 						Map<String, AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
 						if((Sport.CALCIO.equals(sport) && 
 								!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||

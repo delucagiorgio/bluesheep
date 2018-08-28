@@ -60,7 +60,7 @@ public class TelegramMessageManager {
 	        }
 	    });
 	    
-		String text = "🐑🐑🐑 " + ArbsUtil.getTelegramBoldString("LE SHEEPPATE") + " 🐑🐑🐑";
+		String text = "🐑🐑 " + ArbsUtil.getTelegramBoldString("LE SHEEPPATE") + " 🐑🐑";
 		telegramHandler.sendMessage(text, chat_ids);
 	    
 	    for (String idFile : idFileOrderedList) {

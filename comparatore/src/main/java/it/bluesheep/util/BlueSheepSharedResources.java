@@ -219,7 +219,8 @@ public class BlueSheepSharedResources {
 	public static AbstractInputRecord findExchangeRecord(AbstractInputRecord record) {
 		AbstractInputRecord exchangeRecordFound = null;
 		if(exchangeRecordsList != null && !exchangeRecordsList.isEmpty()) {
-			for(AbstractInputRecord exchangeRecord : exchangeRecordsList) {
+			List<AbstractInputRecord> exchangeRecordsListCopy = new ArrayList<AbstractInputRecord>(exchangeRecordsList);
+			for(AbstractInputRecord exchangeRecord : exchangeRecordsListCopy) {
 				if(AbstractInputRecord.compareSport(exchangeRecord.getSport(), record.getSport())  
 						&& AbstractInputRecord.compareDate(exchangeRecord.getDataOraEvento(), record.getDataOraEvento())
 						&& (AbstractInputRecord.compareParticipants(exchangeRecord.getPartecipante1(), exchangeRecord.getPartecipante2(), record.getPartecipante1(), record.getPartecipante2()) || 

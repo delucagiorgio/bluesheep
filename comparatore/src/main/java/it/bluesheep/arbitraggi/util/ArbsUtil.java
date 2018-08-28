@@ -144,7 +144,12 @@ public class ArbsUtil {
 		
 			
 		if(recordKey != null && !recordKey.isEmpty()) {
-			String[] splittedRecordOutputSent = recordKey.split(BlueSheepConstants.KEY_SEPARATOR);
+			//TODO aggiustare
+			String temp = new String(recordKey);
+			if(temp.startsWith("BETTER_ODD")) {
+				temp = temp.substring(10);
+			}
+			String[] splittedRecordOutputSent = temp.split(BlueSheepConstants.KEY_SEPARATOR);
 			if(splittedRecordOutputSent != null) {
 				String arbsKey = splittedRecordOutputSent[0];
 				String[] splittedArbsKey = arbsKey.split(BlueSheepConstants.REGEX_CSV);

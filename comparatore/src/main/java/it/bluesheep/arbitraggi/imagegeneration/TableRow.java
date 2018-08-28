@@ -6,10 +6,12 @@ package it.bluesheep.arbitraggi.imagegeneration;
 public abstract class TableRow implements Comparable<TableRow> {
 	private String bookmaker;
 	private String odd;
-	
-	public TableRow(String bookmaker, String odd) {
+	boolean betterOdd;
+
+	public TableRow(String bookmaker, String odd, boolean betterOdd) {
 		this.bookmaker = bookmaker;
 		this.odd = odd;
+		this.betterOdd = betterOdd;
 	}
 	
 	public String getBookmaker() {
@@ -25,6 +27,14 @@ public abstract class TableRow implements Comparable<TableRow> {
 		this.odd = odd;
 	}
 
+	public boolean isBetterOdd() {
+		return betterOdd;
+	}
+
+	public void setBetterOdd(boolean betterOdd) {
+		this.betterOdd = betterOdd;
+	}
+	
 	@Override
 	public abstract int compareTo(TableRow arg0);	
 }

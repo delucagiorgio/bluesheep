@@ -35,7 +35,7 @@ public abstract class Event {
 		this.linkBook = new ArrayList<String>();
 	}
 	
-	public abstract void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2, String oddsType2, String odd2, String money2);
+	public abstract void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2, String oddsType2, String odd2, String money2, boolean better_odd);
 	
 	public String toHtml(int index, int tot) {
 		

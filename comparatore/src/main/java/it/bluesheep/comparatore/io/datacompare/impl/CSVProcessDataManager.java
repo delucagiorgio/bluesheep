@@ -33,10 +33,12 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
 			String key = splittedEventoKeyRecord[1];
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dataMap = eventiTxOddsMap.get(Sport.valueOf(key));
-			for(Date date : dataMap.keySet()) {
+			List<Date> dateList = new ArrayList<Date>(dataMap.keySet());
+			for(Date date : dateList) {
 				if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
 						(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
-					for(String eventoTxOdds : dataMap.get(date).keySet()) { 
+					List<String> eventoKeyList = new ArrayList<String>(dataMap.get(date).keySet());
+					for(String eventoTxOdds : eventoKeyList) { 
 						String[] splittedEventoKey = eventoTxOdds.split("\\|");
 						String sport = splittedEventoKey[1];
 						String[] partecipantiSplitted = splittedEventoKey[2].split(BlueSheepConstants.REGEX_VERSUS);
@@ -51,21 +53,23 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 							List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 							Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
 							List<String> bookmakerList = new ArrayList<String>(bookmakerRecordMap.keySet());
-							AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerList.get(0)); 
-							AbstractInputRecord csvRecordCopy = new CSVInputRecord(csvRecord); 
-							csvRecordCopy.setCampionato(bookmakerRecord.getCampionato());
-							if(exchangeRecord != null) {
-								csvRecordCopy.setDataOraEvento(exchangeRecord.getDataOraEvento());
-							}else {
-								csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+							if(!bookmakerList.isEmpty()) {
+								AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerList.get(0)); 
+								AbstractInputRecord csvRecordCopy = new CSVInputRecord(csvRecord); 
+								csvRecordCopy.setCampionato(bookmakerRecord.getCampionato());
+								if(exchangeRecord != null) {
+									csvRecordCopy.setDataOraEvento(exchangeRecord.getDataOraEvento());
+								}else {
+									csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+								}
+								csvRecordCopy.setKeyEvento(bookmakerRecord.getKeyEvento());
+								csvRecordCopy.setPartecipante1(bookmakerRecord.getPartecipante1());
+								csvRecordCopy.setPartecipante2(bookmakerRecord.getPartecipante2());
+								csvRecordCopy.setBookmakerName(csvRecord.getBookmakerName());
+								csvRecordCopy.setQuota(csvRecord.getQuota());
+								csvRecordCopy.setTipoScommessa(csvRecord.getTipoScommessa());
+								csvEventListUpdatedInfo.add(csvRecordCopy);
 							}
-							csvRecordCopy.setKeyEvento(bookmakerRecord.getKeyEvento());
-							csvRecordCopy.setPartecipante1(bookmakerRecord.getPartecipante1());
-							csvRecordCopy.setPartecipante2(bookmakerRecord.getPartecipante2());
-							csvRecordCopy.setBookmakerName(csvRecord.getBookmakerName());
-							csvRecordCopy.setQuota(csvRecord.getQuota());
-							csvRecordCopy.setTipoScommessa(csvRecord.getTipoScommessa());
-							csvEventListUpdatedInfo.add(csvRecordCopy);
 							break;
 						}
 					}

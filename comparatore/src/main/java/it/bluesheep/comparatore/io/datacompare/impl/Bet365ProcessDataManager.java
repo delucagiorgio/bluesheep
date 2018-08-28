@@ -42,10 +42,12 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
 			String key = splittedEventoKeyRecord[1];
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dataMap = sportMap.get(Sport.valueOf(key));
-			for(Date date : dataMap.keySet()) {
+			List<Date> dateList = new ArrayList<Date>(dataMap.keySet());
+			for(Date date : dateList) {
 				if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
 						(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
-					for(String eventoTxOdds : dataMap.get(date).keySet()) {
+					List<String> eventoKeyList = new ArrayList<String>(dataMap.get(date).keySet());
+					for(String eventoTxOdds : eventoKeyList) {
 						String[] splittedEventoKey = eventoTxOdds.split("\\|");
 						String sport = splittedEventoKey[1];
 						String[] partecipantiSplitted = splittedEventoKey[2].split(BlueSheepConstants.REGEX_VERSUS);
@@ -62,18 +64,20 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 							List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 							Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
 							List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
-							AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
-							bet365Record.setCampionato(bookmakerRecord.getCampionato());
-							if(exchangeRecord != null) {
-								bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
-							}else {
-								bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-
+							if(!bookmakerSet.isEmpty()) {
+								AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
+								bet365Record.setCampionato(bookmakerRecord.getCampionato());
+								if(exchangeRecord != null) {
+									bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
+								}else {
+									bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+	
+								}
+								bet365Record.setKeyEvento(bookmakerRecord.getKeyEvento());
+								bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
+								bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
+								matchedCountEvents++;
 							}
-							bet365Record.setKeyEvento(bookmakerRecord.getKeyEvento());
-							bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
-							bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
-							matchedCountEvents++;
 							break;
 						}
 					}

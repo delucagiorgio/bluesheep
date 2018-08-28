@@ -66,8 +66,8 @@ public class AntiSpamMessageUtil {
 				Integer occurrencesRecord = null;
 				for(String recordOutputAlreadySent : keyArbsSpam) {
 					
-					logger.info("Key arbs numero " + recordOutputList.indexOf(recordOuput) + " : " + spamBookmakersEventoScommessaKey);
-					logger.info("Stringa di controllo già salvata " + recordOutputAlreadySent + " ::: " + recordOutputOccurrencesMap.get(recordOutputAlreadySent));
+					logger.debug("Key arbs numero " + recordOutputList.indexOf(recordOuput) + " : " + spamBookmakersEventoScommessaKey);
+					logger.debug("Stringa di controllo già salvata " + recordOutputAlreadySent + " ::: " + recordOutputOccurrencesMap.get(recordOutputAlreadySent));
 					
 					//Se l'ho già mappato nello spam
 					if(ArbsUtil.isSameBetBookmakerEventRecordOutputKey(recordOuput, recordOutputAlreadySent)) {
@@ -75,14 +75,14 @@ public class AntiSpamMessageUtil {
 
 						logger.info("Same event found : " + spamBookmakersEventoScommessaKey + " ::: Occurrence = " + occurrencesRecord);
 						//Le occorrenze non superano la soglia 
-						if(occurrencesRecord != null && occurrencesRecord >= THRESHOLD_SPAM_COUNT) {
+						if(occurrencesRecord != null && occurrencesRecord >= THRESHOLD_SPAM_COUNT - 1) {
 							logger.info("Record key has been detected as spam : Key = " + spamBookmakersEventoScommessaKey + " :::: Occurrences = " + occurrencesRecord);
 							filteredListBySpam.remove(recordOuput);
 							toBeUpdateList.add(spamBookmakersEventoScommessaKey);
 							break;
 						}
 					}else {
-						logger.info("Same event not found : " + spamBookmakersEventoScommessaKey);
+						logger.debug("Same event not found : " + spamBookmakersEventoScommessaKey);
 						occurrencesRecord = new Integer(0);
 					}
 				}

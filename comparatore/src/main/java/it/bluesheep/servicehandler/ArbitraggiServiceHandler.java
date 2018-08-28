@@ -29,6 +29,7 @@ import it.bluesheep.util.DirectoryFileUtilManager;
  */
 public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 
+	private static double BETTER_ODD_PERCENTAGE;
 	private static Logger logger;
 	private static ArbitraggiServiceHandler instance;
 	private static Map<String, Map<String, Map<String, String>>> alreadySentArbsOdds;
@@ -38,6 +39,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	private ArbitraggiServiceHandler() {
 		super();
 		logger = Logger.getLogger(ArbitraggiServiceHandler.class);
+		BETTER_ODD_PERCENTAGE = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETTER_ODD_PERCENTAGE));
 	}
 	
 	public static synchronized ArbitraggiServiceHandler getArbitraggiServiceHandlerInstance() {
@@ -200,7 +202,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 							}
 							//Se il record è già stato inviato in precedenza ma con dei rating più bassi, lo reinvio
 							if(rating1Stored.compareTo(rating1) < 0 && ((rating2Stored == null && rating2 == null) ||
-									(rating2Stored != null && rating2 != null && rating2Stored.compareTo(rating2) < 0))) {
+									(rating2Stored != null && rating2 != null && rating2Stored.compareTo(rating2) < 0)) && 
+									(new Double(rating1) - new Double(rating1Stored)) > BETTER_ODD_PERCENTAGE) {
 								betterRatingFound = true;
 								tmpRating1 = rating1;
 								tmpRating1Stored = rating1Stored;
@@ -212,9 +215,10 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 										"; stored_R1 = " + rating1Stored + 
 										"; new_R2 = " + rating2 + 
 										"; stored_R2 = " + rating2Stored + 
+										"; increased rating value = " + (new Double(rating1) - new Double(rating1Stored)) +
 										"; RunID = " + runId);
 							}else {
-								logger.info("Key arbitraggio " + key + 
+								logger.debug("Key arbitraggio " + key + 
 										" has been already sent, but with higher or equal on the ratings. now_R1 = " +  rating1 + 
 										"; stored_R1 = " + rating1Stored + 
 										"; new_R2 = " + rating2 + 
@@ -230,6 +234,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			if(runIdFoundWithLowerRatings != null && betterRatingFound) {
 				logger.info("Key arbitraggio " + key + " has been already sent, but with lower ratings. now_R1 = " +  tmpRating1 + "; stored_R1 = " + tmpRating1Stored + "; new_R2 = " + tmpRating2 + "; stored_R2 = " + tmpRating2Stored);
 				logger.info("Message is resent");
+				recordKey = "BETTER_ODD" + recordKey;
 				found = false;
 			}
 		}
@@ -288,7 +293,11 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			alreadySentArbsOdds.put("" + startTime, arbsLastExecutionMap);
 			//Inserisco i dati della nuova run
 			for(String record : processedRecord) {
-				String[] splittedRecord = record.split(BlueSheepConstants.KEY_SEPARATOR);
+				String temp = new String(record);
+				if(temp.startsWith("BETTER_ODD")) {
+					temp = temp.substring(10);
+				}
+				String[] splittedRecord = temp.split(BlueSheepConstants.KEY_SEPARATOR);
 				String key = ArbsUtil.createArbsKeyFromRecordKey(splittedRecord[0]);
 				Map<String, String> ratingMap = new HashMap<String, String>();
 				String[] ratings = splittedRecord[1].split(BlueSheepConstants.REGEX_CSV);

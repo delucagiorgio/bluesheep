@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import it.bluesheep.util.BlueSheepConstants;
 
@@ -16,7 +19,6 @@ import it.bluesheep.util.BlueSheepConstants;
  */
 public class ImageGenerator {
 
-	private final static String pictureFormat = ".png";
 	
 	public void delete(String filename) {
 		File file = new File(filename);
@@ -46,26 +48,60 @@ public class ImageGenerator {
     		xhtmlEvents.add(events.get(i).toHtml(i + 1, events.size()));
 	    }
 	    
-	    // Converto l'xhtml in immagine .png
-	    HtmlFileHandler xhtmlFileHandler = new HtmlFileHandler();
-		Html2PngConverter converter = new Html2PngConverter();
-		String xhtmlFileName = "../xhtml/html.html";
-		String xhtmlSourceCode;
+	    // Converto l'html in immagine .png
+		String xhtmlFilePath = "../xhtml/";
+		ExecutorService executorService = Executors.newFixedThreadPool(xhtmlEvents.size());
+
 	    for (int i = 0; i < xhtmlEvents.size(); i++) {
-			
-	    	xhtmlSourceCode = xhtmlEvents.get(i);
-	    	
-			// Create a temp file
-			xhtmlFileHandler.generateFile(xhtmlFileName, xhtmlSourceCode);
-					
-			// Converting the xhtml file to png
-			//converter.convert(xhtmlFileName, pictureFileName);
-			converter.convert(xhtmlFileName, "../xhtml/" + i + pictureFormat);		
-			
-			// Deleting the temp file
-			xhtmlFileHandler.delete(xhtmlFileName);
+	    	HTMLSender htmlSender = new HTMLSender(i, xhtmlFilePath, xhtmlEvents.get(i));
+			executorService.execute(htmlSender);
 	    }
+				
+		executorService.shutdown();
+		
+		try {
+		    if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
+		    	// chiudi tutto se dopo 1 min non ha finito con gli screen
+		        executorService.shutdownNow();
+		    } 
+		} catch (InterruptedException e) {
+		    executorService.shutdownNow();
+		}
+
 		
 		return eventXHTMLStringMap;
+	}
+}
+
+class HTMLSender implements Runnable {
+
+	private int index;
+	private String xhtmlFilePath;
+	private String xhtmlSourceCode;
+	private final static String pictureFormat = ".png";
+
+	public HTMLSender(int i, String xhtmlFilePath, String htmlEvent) {
+		super();
+		this.index = i;
+		this.xhtmlFilePath = xhtmlFilePath;
+		this.xhtmlSourceCode = htmlEvent;
+	}
+	
+	public void run(){
+				
+	    HtmlFileHandler xhtmlFileHandler = new HtmlFileHandler();
+		Html2PngConverter converter = new Html2PngConverter();
+
+		String xhtmlFileName = xhtmlFilePath + index + ".html";
+  
+		// Create a temp file
+		xhtmlFileHandler.generateFile(xhtmlFileName, xhtmlSourceCode);
+		
+		// Converting the xhtml file to png
+		//converter.convert(xhtmlFileName, pictureFileName);
+		converter.convert(xhtmlFileName, xhtmlFilePath + index + pictureFormat);		
+		
+		// Deleting the temp file
+		xhtmlFileHandler.delete(xhtmlFileName);
 	}
 }

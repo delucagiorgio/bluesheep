@@ -126,27 +126,27 @@ public class SoccerEvent extends Event {
 
 	@Override
 	public void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2,
-			String oddsType2, String odd2, String money2) {
+			String oddsType2, String odd2, String money2, boolean betterOdd) {
 		
 		if (oddsType1.equals("GOAL") || oddsType1.equals("NOGOAL")) {
-			bet_GGNG.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_GGNG.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_0.5") || oddsType1.equals("O_0.5")) {
-			bet_UO05.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO05.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_1.5") || oddsType1.equals("O_1.5")) {
-			bet_UO15.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO15.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_2.5") || oddsType1.equals("O_2.5")) {
-			bet_UO25.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO25.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_3.5") || oddsType1.equals("O_3.5")) {
-			bet_UO35.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO35.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_4.5") || oddsType1.equals("O_4.5")) {
-			bet_UO45.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO45.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_5.5") || oddsType1.equals("O_5.5")) {
-			bet_UO55.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO55.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if (oddsType1.equals("U_6.5") || oddsType1.equals("O_6.5")) {
-			bet_UO65.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_UO65.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		} else if ((oddsType1.equals("1") || oddsType1.equals("2") || oddsType1.equals("X")
 				 || oddsType1.equals("1X")  || oddsType1.equals("X2")  || oddsType1.equals("12"))) {
-			bet_1X2.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2);			
+			bet_1X2.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
 		}		
 	}
 

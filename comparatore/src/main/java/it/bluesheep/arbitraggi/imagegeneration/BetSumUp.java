@@ -1,6 +1,5 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 /**
@@ -23,11 +22,12 @@ public abstract class BetSumUp {
 		this.betType = betType;
 	}
 	
-	public abstract void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2, String oddsType2, String odd2, String money2);
+	public abstract void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2, String oddsType2, String odd2, String money2, boolean betterOdd);
 	
 	protected String calcutateIncome(String odd1, String odd2, String betType1, String betType2) {
-		DecimalFormat df = new DecimalFormat("#.##");
-		df.setRoundingMode(RoundingMode.DOWN);
+		DecimalFormat df = new DecimalFormat();
+		df.setMinimumFractionDigits(2);
+		df.setMaximumFractionDigits(2);		
 		
 		if (betType1.equals(betType2)) {
 			float odd1sNumber = Float.parseFloat(odd1.replace(",", "."));
