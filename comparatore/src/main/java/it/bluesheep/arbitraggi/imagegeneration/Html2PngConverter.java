@@ -36,6 +36,8 @@ public class Html2PngConverter {
 	
 	public void convert (String inputFile, String outputFileName) {
 		try {
+	        logger.info("Start taking a screenshot for input file : " + inputFile);
+	        long startTime = System.currentTimeMillis();
 //			String pathToHtmlLocation = "/Users/giorgio/git/bluesheep";
 			String pathToHtmlLocation = "/home/bluesheep/java";
 	        String htmlLocation = "file://" + pathToHtmlLocation + inputFile.substring(2);
@@ -54,11 +56,16 @@ public class Html2PngConverter {
 	        driver.manage().window().maximize();
 	        //driver.manage().window().setSize(new Dimension(1200, 675));
 	        
+	        
 	        // Fai lo screen
 	        takeScreenshot(outputFileName);
+	        
+
 	        // Chiudi il browser
 //	        driver.close();
 	        driver.quit();
+	        logger.info("Screenshot executed in " + (startTime - System.currentTimeMillis()) + " ms");
+
 	        HtmlFileHandler htmlFileHandler = new HtmlFileHandler();
 	        htmlFileHandler.delete(LOGGING_FILE_FAKE);
 		}catch(Exception e) {

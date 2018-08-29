@@ -19,12 +19,11 @@ import it.bluesheep.util.DirectoryFileUtilManager;
 
 public class TelegramMessageManager {
 	
-	private static Logger logger;
+	private static Logger logger = Logger.getLogger(TelegramMessageManager.class);
 	
 	private long startTimeExecution;
 	
 	public TelegramMessageManager(long startTime) {
-		logger = Logger.getLogger(TelegramMessageManager.class);
 		startTimeExecution = startTime;
 	}
 
