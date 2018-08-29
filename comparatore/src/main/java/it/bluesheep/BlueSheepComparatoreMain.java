@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import it.bluesheep.entities.input.AbstractInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.util.ComparatoreConstants;
+import it.bluesheep.entities.util.TranslatorUtil;
 import it.bluesheep.entities.util.sport.Sport;
 import it.bluesheep.io.datacompare.IProcessDataManager;
 import it.bluesheep.io.datacompare.impl.Bet365ProcessDataManager;
@@ -278,6 +279,8 @@ public class BlueSheepComparatoreMain {
 		 */
     	
 		logger.log(Level.INFO, "Total execution time = " + (endTime - startTime)/1000 + " seconds");
+		
+		TranslatorUtil.saveTranslationOnFile();
 		
 		ZipUtil zipUtil = new ZipUtil();
 		zipUtil.zipLastRunLogFiles();

@@ -62,6 +62,7 @@ public class ComparatoreConstants {
 	
 	//translation
 	public static final String NATION_PATH_INPUTFILE= "PATH_NAZIONI_TRADUZIONE_CSV";
+	public static final String TRANSLATION_PATH_INPUTFILE= "TRANSLATION_PATH_INPUTFILE_CSV";
 	
 	//csv
 	public static final String CSV_ODDS_PATH_INPUT_FILE = "PATH_INPUT_FILE";
