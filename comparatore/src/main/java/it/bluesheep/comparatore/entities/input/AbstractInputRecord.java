@@ -190,14 +190,10 @@ public abstract class AbstractInputRecord {
 			return false;
 		}
 		
-		Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
-		boolean allTest = patterMinorCategory.matcher(exPartecipante1).find() && patterMinorCategory.matcher(exPartecipante2).find() && 
-				patterMinorCategory.matcher(bmPartecipante1).find() && patterMinorCategory.matcher(bmPartecipante2).find();
-		boolean noTest = !(patterMinorCategory.matcher(exPartecipante1).find() || patterMinorCategory.matcher(exPartecipante2).find() || 
-				patterMinorCategory.matcher(bmPartecipante1).find() || patterMinorCategory.matcher(bmPartecipante2).find());
-		boolean noOneOrAllMinorCategory = allTest && noTest;
+		boolean part1AllOrNoOneMinorCategory = allOrNoOneMinorCategory(exPartecipante1, bmPartecipante1);
+		boolean part2AllOrNoOneMinorCategory = allOrNoOneMinorCategory(exPartecipante2, bmPartecipante2);
 		
-		if(noOneOrAllMinorCategory) {
+		if(!part1AllOrNoOneMinorCategory || !part2AllOrNoOneMinorCategory) {
 			return false;
 		}
 		
@@ -264,6 +260,14 @@ public abstract class AbstractInputRecord {
 		}
 	}
 	
+	private static boolean allOrNoOneMinorCategory(String playerBook1, String playerBook2) {
+		Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
+		boolean allTest = patterMinorCategory.matcher(playerBook1).find() && patterMinorCategory.matcher(playerBook2).find();
+		boolean noTest = !patterMinorCategory.matcher(playerBook1).find() && !patterMinorCategory.matcher(playerBook2).find();
+
+		return allTest || noTest;
+	}
+
 	private static boolean equalLists(List<String> one, List<String> two){     
 	    if (one == null && two == null){
 	        return true;

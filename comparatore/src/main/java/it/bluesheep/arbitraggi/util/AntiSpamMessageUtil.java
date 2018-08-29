@@ -75,7 +75,7 @@ public class AntiSpamMessageUtil {
 
 						logger.info("Same event found : " + spamBookmakersEventoScommessaKey + " ::: Occurrence = " + occurrencesRecord);
 						//Le occorrenze non superano la soglia 
-						if(occurrencesRecord != null && occurrencesRecord >= THRESHOLD_SPAM_COUNT - 1) {
+						if(occurrencesRecord != null && occurrencesRecord >= THRESHOLD_SPAM_COUNT) {
 							logger.info("Record key has been detected as spam : Key = " + spamBookmakersEventoScommessaKey + " :::: Occurrences = " + occurrencesRecord);
 							filteredListBySpam.remove(recordOuput);
 							toBeUpdateList.add(spamBookmakersEventoScommessaKey);

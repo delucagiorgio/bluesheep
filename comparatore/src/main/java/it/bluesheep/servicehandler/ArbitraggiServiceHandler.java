@@ -93,7 +93,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 				boolean isValidExchangeRecord = record instanceof RecordBookmakerVsExchangeOdds && ((RecordBookmakerVsExchangeOdds)record).getLiquidita() >= 50D;
 				if((!(record instanceof RecordBookmakerVsExchangeOdds) || isValidExchangeRecord)) {
 					//controllo che non l'abbia già mandata, se si non faccio nulla
-					if(!alreadySent(recordKey)) {
+					recordKey = alreadySent(recordKey);
+					if(recordKey != null) {
 						messageToBeSentKeysList.add(recordKey + BlueSheepConstants.KEY_SEPARATOR + record.getLinkBook1() + BlueSheepConstants.REGEX_CSV + record.getLinkBook2());
 					}else {
 						alreadySentCount++;
@@ -161,9 +162,10 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 	 * al fine di evitare lo spam. La logica del metodo può restituire un valore FALSE se il record non è stato inviato o 
 	 * è stato inviato con una condizione di vantaggio minore, restituisce TRUE in tutti gli altri casi.
 	 * @param recordKey il record univoco da verificare
-	 * @return false se non inviato o inviato con rating minore, vero altrimenti
+	 * @return il recordKey se non inviato o inviato con rating minore, null altrimenti
 	 */
-	private boolean alreadySent(String recordKey) {
+	private String alreadySent(String recordKey) {
+		String returnString = recordKey;
 		boolean found = false;
 		boolean betterRatingFound = false;
 		String runIdFoundWithLowerRatings = null;
@@ -234,11 +236,16 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			if(runIdFoundWithLowerRatings != null && betterRatingFound) {
 				logger.info("Key arbitraggio " + key + " has been already sent, but with lower ratings. now_R1 = " +  tmpRating1 + "; stored_R1 = " + tmpRating1Stored + "; new_R2 = " + tmpRating2 + "; stored_R2 = " + tmpRating2Stored);
 				logger.info("Message is resent");
-				recordKey = "BETTER_ODD" + recordKey;
+				returnString = "BETTER_ODD" + recordKey;
 				found = false;
 			}
 		}
-		return found;
+		
+		if(found) {
+			returnString = null;
+		}
+		
+		return returnString;
 	}
 	
 	/**
