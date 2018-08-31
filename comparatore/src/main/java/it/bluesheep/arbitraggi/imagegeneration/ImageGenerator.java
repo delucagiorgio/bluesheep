@@ -9,6 +9,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.util.BlueSheepConstants;
 
 /**
@@ -19,20 +22,25 @@ import it.bluesheep.util.BlueSheepConstants;
  */
 public class ImageGenerator {
 
+	private String dateStartExecution;
+	private static Logger logger = Logger.getLogger(ImageGenerator.class);
 	
+	public ImageGenerator(String dateStartExecution) {
+		this.dateStartExecution = dateStartExecution;
+	}
+
 	public void delete(String filename) {
 		File file = new File(filename);
 		file.delete();        
-        return;
 	}
 
-	public Map<String, Map<String, List<String>>> generate(List<String> inputRecords) {
+	public Map<String, Map<String, List<String>>> generate(List<ArbsRecord> inputRecords) {
 
 		Map<String, Map<String, List<String>>> eventXHTMLStringMap = new HashMap<String, Map<String, List<String>>>();
 		
 		// Converte le stringhe in oggetti rappresentanti gli eventi
 		InputReader inputReader = new InputReader();
-	    List<Event> events = inputReader.convert(inputRecords);
+	    List<Event> events = inputReader.convert(inputRecords, dateStartExecution);
 	    
 	    // Genero l'xhtml relativo ad ogni evento 
 	    for (int i = 0; i < events.size(); i++) {
@@ -50,6 +58,7 @@ public class ImageGenerator {
 	    
 	    // Converto l'html in immagine .png
 		String xhtmlFilePath = "../xhtml/";
+		logger.info("xhtmlEvents size = " + xhtmlEvents.size());
 		ExecutorService executorService = Executors.newFixedThreadPool(xhtmlEvents.size());
 
 	    for (int i = 0; i < xhtmlEvents.size(); i++) {

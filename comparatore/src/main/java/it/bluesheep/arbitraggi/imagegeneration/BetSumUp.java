@@ -37,7 +37,6 @@ public abstract class BetSumUp {
 			float r1 = 1000 * odd1sNumber;
 			float x = r1/realOdd2;
 			float p = (((r1)/(1000 + x)) - 1) * 100;			
-			//System.out.println(p);
 			return df.format(p);
 			
 		} else {
@@ -47,7 +46,6 @@ public abstract class BetSumUp {
 			float r1 = 1000 * odd1sNumber;
 			float x = r1/odd2sNumber;
 			float p = (((r1)/(1000 + x)) - 1) * 100;			
-			//System.out.println(p);
 			return df.format(p);
 		}
 	}

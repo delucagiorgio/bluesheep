@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.arbitraggi.imagegeneration.ImageGenerator;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.util.BlueSheepConstants;
@@ -27,18 +28,16 @@ public class TelegramMessageManager {
 		startTimeExecution = startTime;
 	}
 
-	public void sendMessageToTelegramGroupByBotAndStore(List<String> outputRecordKeys) {
+	public void sendMessageToTelegramGroupByBotAndStore(List<ArbsRecord> outputRecordKeys) {
 		if(outputRecordKeys == null || outputRecordKeys.isEmpty()) {
 			return;
 		}
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		
-		outputRecordKeys.add(0, "" + sdf.format(new Date(startTimeExecution)));
-		
+
 		DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary("../xhtml/");
 		
-		ImageGenerator imageGenerator = new ImageGenerator();
+		ImageGenerator imageGenerator = new ImageGenerator(sdf.format(new Date(startTimeExecution)));
 		
 		Map<String, Map<String, List<String>>> eventsIdLinkMap = imageGenerator.generate(outputRecordKeys);
 			

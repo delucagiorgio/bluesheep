@@ -13,10 +13,13 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
+import it.bluesheep.arbitraggi.entities.TwoOptionsArbsRecord;
 import it.bluesheep.arbitraggi.telegram.TelegramMessageManager;
 import it.bluesheep.arbitraggi.util.AntiSpamMessageUtil;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
+import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
@@ -86,16 +89,37 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 		outputRecordMap.clear();
 		
 		if(tabellaOutputList != null && !tabellaOutputList.isEmpty()) {
-			List<String> messageToBeSentKeysList = new ArrayList<String>();
+			List<ArbsRecord> messageToBeSentKeysList = new ArrayList<ArbsRecord>();
+			List<String> recordKeysList = new ArrayList<String>();
 			int alreadySentCount = 0;
 			for(RecordOutput record : tabellaOutputList) {
 				String recordKey = ArbsUtil.getKeyArbsFromOutputRecord(record);
 				boolean isValidExchangeRecord = record instanceof RecordBookmakerVsExchangeOdds && ((RecordBookmakerVsExchangeOdds)record).getLiquidita() >= 50D;
+				double rating2 = record instanceof RecordBookmakerVsBookmakerOdds ? ((RecordBookmakerVsBookmakerOdds) record).getRating2() : -1 ;
 				if((!(record instanceof RecordBookmakerVsExchangeOdds) || isValidExchangeRecord)) {
 					//controllo che non l'abbia già mandata, se si non faccio nulla
 					recordKey = alreadySent(recordKey);
 					if(recordKey != null) {
-						messageToBeSentKeysList.add(recordKey + BlueSheepConstants.KEY_SEPARATOR + record.getLinkBook1() + BlueSheepConstants.REGEX_CSV + record.getLinkBook2());
+						ArbsRecord arbsRecord = new TwoOptionsArbsRecord(record.getEvento(), 
+																		 record.getDataOraEvento(),
+																		 record.getSport(),
+																		 record.getCampionato(), 
+																		 record.getNazione(),
+																		 record.getBookmakerName1(), 
+								 										 record.getBookmakerName2(), 
+																		 record.getQuotaScommessaBookmaker1(), 
+																		 record.getQuotaScommessaBookmaker2(),
+																		 record.getScommessaBookmaker1(), 
+																		 record.getScommessaBookmaker2(),
+																		 record.getRating(),
+																		 rating2, 
+																		 record.getLinkBook1(), 
+																		 record.getLinkBook2());
+						if(recordKey.startsWith("BETTER_ODD")) {
+							arbsRecord.setBetterOdd(true);
+						}
+						messageToBeSentKeysList.add(arbsRecord);
+						recordKeysList.add(recordKey);
 					}else {
 						alreadySentCount++;
 					}
@@ -110,12 +134,14 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			if(!messageToBeSentKeysList.isEmpty()) {
 				AntiSpamMessageUtil.initialize();
 				
-				saveOutputOnFile(messageToBeSentKeysList);
+				saveOutputOnFile(recordKeysList);
 	
 				messageToBeSentKeysList = AntiSpamMessageUtil.filterRecordOutputListFromSpam(messageToBeSentKeysList);
 				
-				TelegramMessageManager tmm = new TelegramMessageManager(startTime);
-				tmm.sendMessageToTelegramGroupByBotAndStore(messageToBeSentKeysList);
+				if(!messageToBeSentKeysList.isEmpty()) {
+					TelegramMessageManager tmm = new TelegramMessageManager(startTime);
+					tmm.sendMessageToTelegramGroupByBotAndStore(messageToBeSentKeysList);
+				}
 			}
 		}
 		tabellaOutputList.clear();

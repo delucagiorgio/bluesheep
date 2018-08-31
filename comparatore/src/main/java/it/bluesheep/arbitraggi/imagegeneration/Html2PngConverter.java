@@ -64,7 +64,7 @@ public class Html2PngConverter {
 	        // Chiudi il browser
 //	        driver.close();
 	        driver.quit();
-	        logger.info("Screenshot executed in " + (startTime - System.currentTimeMillis()) + " ms");
+	        logger.info("Screenshot executed in " + (System.currentTimeMillis() - startTime)  + " ms");
 
 	        HtmlFileHandler htmlFileHandler = new HtmlFileHandler();
 	        htmlFileHandler.delete(LOGGING_FILE_FAKE);

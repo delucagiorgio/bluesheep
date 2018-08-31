@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
@@ -125,14 +126,8 @@ public class ArbsUtil {
 		return "*" + string + "*";
 	}
 	
-	public static boolean isSameBetBookmakerEventRecordOutputKey(String recordKey1, String recordKey2) {
-		
-		List<String> transformedRecordKey1 = transformRecordKey(recordKey1);
-		List<String> transformedRecordKey2 = getListFromKey(recordKey2);
-		if(transformedRecordKey1 != null && transformedRecordKey2 != null) {
-			return transformedRecordKey1.equals(transformedRecordKey2);
-		}
-		return false;
+	public static boolean isSameBetBookmakerEventRecordOutputKey(ArbsRecord record1, ArbsRecord record2) {
+		return ArbsRecord.isSameEventBookmakerBet(record1, record2);
 	}
 
 	public static List<String> getListFromKey(String recordKey2) {
