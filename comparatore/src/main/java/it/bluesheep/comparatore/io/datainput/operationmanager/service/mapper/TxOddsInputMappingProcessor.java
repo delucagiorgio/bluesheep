@@ -157,9 +157,11 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 								newRecord.setQuota(quotaScommessa);
 								
 								String lastUpdatedString = attributesOfferJSONObject.getString(LAST_UPDATED_JSON_STRING);
+								String boid = attributesOfferJSONObject.getString("id");
 								
 								newRecord.setTimeOfInsertionInSystem(lastUpdatedString);
 								newRecord.setSource(Service.TXODDS_SERVICENAME);
+								newRecord.setBoid(boid);
 								
 								if("BetClic.it".equalsIgnoreCase(bookmakerName)) {
 									newRecord.setFiller(attributesOfferJSONObject.getString(BMOID_JSON_STRING));

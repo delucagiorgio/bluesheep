@@ -11,6 +11,7 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 public class TxOddsInputRecord extends AbstractInputRecord{
 	
 	private static final ISO8601DateTypeAdapter adapterDate = new ISO8601DateTypeAdapter();
+	private String boid;
 	
 	public TxOddsInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {
 		super(dataOraEvento, sport, campionato, partecipante1, partecipante2, filler);
@@ -27,6 +28,14 @@ public class TxOddsInputRecord extends AbstractInputRecord{
 		} catch (ParseException e) {
 			this.setTimeInsertionInSystem(System.currentTimeMillis());
 		}
+	}
+
+	public String getBoid() {
+		return boid;
+	}
+
+	public void setBoid(String boid) {
+		this.boid = boid;
 	}
 	
 }

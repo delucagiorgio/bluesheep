@@ -37,6 +37,7 @@ public class BlueSheepSharedResources {
 	private static Map<Service, List<Sport>> serviceSportMap;
 	private static int updateCallCount = 0;
 	private static List<AbstractInputRecord> exchangeRecordsList = new ArrayList<AbstractInputRecord>();
+	private static List<String> boidOTBList = new ArrayList<String>();
 	
 	private BlueSheepSharedResources() {}
 
@@ -231,6 +232,14 @@ public class BlueSheepSharedResources {
 			}
 		}
 		return exchangeRecordFound;
+	}
+
+	public static List<String> getBoidOTBList() {
+		return boidOTBList;
+	}
+
+	public static void setBoidOTBList(List<String> boidOTBList) {
+		BlueSheepSharedResources.boidOTBList = boidOTBList;
 	}
 
 }

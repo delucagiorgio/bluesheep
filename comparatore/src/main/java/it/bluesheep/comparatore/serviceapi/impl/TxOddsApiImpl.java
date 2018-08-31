@@ -1,8 +1,14 @@
 package it.bluesheep.comparatore.serviceapi.impl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.log4j.Logger;
 
@@ -93,4 +99,45 @@ public class TxOddsApiImpl implements IApiInterface {
 		}	
 		return game;
 	}
+	
+	public String getInactiveMarketsFromTimestamp(Long timestampLastRequest) {
+		String u = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TXODDS_USER);
+		String p = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TXODDS_PASSWORD);
+		
+		String baseUrl = "https://xml2.txodds.com/feed/boid_states.php?ident=" + u + "&passwd=" + p + "&last=" + timestampLastRequest;
+		String result = null;
+		try {
+			URL url;
+			HttpsURLConnection con;
+			url = new URL(baseUrl);
+			con = (HttpsURLConnection)url.openConnection();
+		   //dump all the content
+			result = get_result(con);
+		}catch(Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		return result;
+	}
+	
+	private String get_result(HttpsURLConnection con){
+		String result = "";
+
+		if(con!=null){	
+			try {
+			   BufferedReader br = 
+				new BufferedReader(
+					new InputStreamReader(con.getInputStream()));
+			
+			   String input;
+			   while ((input = br.readLine()) != null){
+				   result += input;
+			   }
+			   br.close();
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		return result;
+	}	
 }
