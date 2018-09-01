@@ -29,7 +29,7 @@ public class InputReader {
 	public List<Event> convert(List<ArbsRecord> inputRecords,  String extractionTime) {
 	    List<Event> events = new ArrayList<Event>();
 	    
-		for (int i = 1; i < inputRecords.size(); i++) {
+		for (int i = 0; i < inputRecords.size(); i++) {
 			boolean better_odd = false;
 			ArbsRecord record = inputRecords.get(i);
     		String match = record.getKeyEvento();
