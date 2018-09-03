@@ -85,6 +85,12 @@ public class BlueSheepComparatoreMain {
 			}
 		}
 		
+		/**
+		 * 										 TXODDS 
+		 * 										
+		 * 										  END
+		 */
+		
 		txOddsMappedRecordsFromJsonBySport = null;
 		
 		/**
@@ -152,52 +158,6 @@ public class BlueSheepComparatoreMain {
 		 * 										  END
 		 */
 		
-		//Avvio comparazione quote tabella 2
-		List<RecordOutput> tabella2OutputList = new ArrayList<RecordOutput>();
-		processDataManager = new TxOddsProcessDataManager();
-		for(Sport sport : Sport.values()) {
-			List<RecordOutput> oddsComparisonList = new ArrayList<RecordOutput>();
-			try{
-				logger.log(Level.INFO, "Starting odds comparison for PUNTA-PUNTA, sport " + sport);
-				oddsComparisonList = processDataManager.compareOdds(eventoScommessaRecordMap, sport);
-				tabella2OutputList.addAll(oddsComparisonList);
-			}catch(Exception e) {
-				logger.log(Level.SEVERE, "Error with odds comparison: error is " + e.getMessage(), e);
-			}
-			logger.log(Level.INFO, "Odds comparison for PUNTA-PUNTA completed. Rows mapped for sport " + sport + " = " + oddsComparisonList.size());
-		}
-    	
-		if(tabella2OutputList != null && !tabella2OutputList.isEmpty()) {
-			logger.log(Level.INFO, "PUNTA-PUNTA process calculation completed. Exporting data in JSON");
-	    	String jsonString1 = AbstractBluesheepJsonConverter.convertToJSON(tabella2OutputList);
-	    	PrintWriter writer1 = null;
-	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.JSON_PP_RESULT_PATH) + new Timestamp(startTime).toString().replaceAll(ComparatoreConstants.REGEX_SPACE, "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
-	    	// Indico il path di destinazione dei miei dati
-	    	try {
-				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.JSON_PP_RESULT_PATH));
-	    		
-				writer1 = new PrintWriter(outputFilenameTabella2, ComparatoreConstants.ENCODING_UTF_8);    	
-		    	// Scrivo
-		    	writer1.println(jsonString1);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "Error with file during saving : error is " + e.getMessage(), e);
-			}finally {
-				if(writer1 != null) {
-					writer1.close();
-				}
-				jsonString1 = null;
-			}
-
-	    	logger.log(Level.INFO, "Export in JSON completed. File is " + outputFilenameTabella2);
-		}
-		
-		tabella2OutputList = null;
-		
-		/**
-		 * 										 TXODDS 
-		 * 										
-		 * 										  END
-		 */
 		
 		/**
 		 * 										 BETFAIR 
@@ -271,6 +231,47 @@ public class BlueSheepComparatoreMain {
 		}
 		
 		tabella1OutputList = null;
+		
+		//Avvio comparazione quote tabella 2
+		List<RecordOutput> tabella2OutputList = new ArrayList<RecordOutput>();
+		processDataManager = new TxOddsProcessDataManager();
+		for(Sport sport : Sport.values()) {
+			List<RecordOutput> oddsComparisonList = new ArrayList<RecordOutput>();
+			try{
+				logger.log(Level.INFO, "Starting odds comparison for PUNTA-PUNTA, sport " + sport);
+				oddsComparisonList = processDataManager.compareOdds(eventoScommessaRecordMap, sport);
+				tabella2OutputList.addAll(oddsComparisonList);
+			}catch(Exception e) {
+				logger.log(Level.SEVERE, "Error with odds comparison: error is " + e.getMessage(), e);
+			}
+			logger.log(Level.INFO, "Odds comparison for PUNTA-PUNTA completed. Rows mapped for sport " + sport + " = " + oddsComparisonList.size());
+		}
+    	
+		if(tabella2OutputList != null && !tabella2OutputList.isEmpty()) {
+			logger.log(Level.INFO, "PUNTA-PUNTA process calculation completed. Exporting data in JSON");
+	    	String jsonString1 = AbstractBluesheepJsonConverter.convertToJSON(tabella2OutputList);
+	    	PrintWriter writer1 = null;
+	    	String outputFilenameTabella2 = BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.JSON_PP_RESULT_PATH) + new Timestamp(startTime).toString().replaceAll(ComparatoreConstants.REGEX_SPACE, "_").replaceAll(":", "-").replaceAll("\\.", "-")  + ".json";
+	    	// Indico il path di destinazione dei miei dati
+	    	try {
+				DirectoryFileUtilManager.verifyDirectoryAndCreatePathIfNecessary(BlueSheepComparatoreMain.getProperties().getProperty(ComparatoreConstants.JSON_PP_RESULT_PATH));
+	    		
+				writer1 = new PrintWriter(outputFilenameTabella2, ComparatoreConstants.ENCODING_UTF_8);    	
+		    	// Scrivo
+		    	writer1.println(jsonString1);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Error with file during saving : error is " + e.getMessage(), e);
+			}finally {
+				if(writer1 != null) {
+					writer1.close();
+				}
+				jsonString1 = null;
+			}
+
+	    	logger.log(Level.INFO, "Export in JSON completed. File is " + outputFilenameTabella2);
+		}
+		
+		tabella2OutputList = null;
 		
 		/**
 		 * 										BETFAIR 

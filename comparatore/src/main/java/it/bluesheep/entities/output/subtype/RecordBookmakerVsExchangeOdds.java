@@ -5,7 +5,6 @@ import it.bluesheep.entities.util.ComparatoreConstants;
 
 public class RecordBookmakerVsExchangeOdds extends RecordOutput {
 
-
 	private double liquidita;
 	
 	public RecordBookmakerVsExchangeOdds() {

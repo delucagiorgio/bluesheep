@@ -10,15 +10,18 @@ import it.bluesheep.entities.util.sport.Sport;
 public class BetfairExchangeInputRecord extends AbstractInputRecord implements IKeyEventoComparator{
 
 	private double liquidita;
+	private boolean isLayRecord;
 	
 	public BetfairExchangeInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1,String partecipante2, String filler) {
 		super(dataOraEvento, sport, campionato, partecipante1, partecipante2, filler);
 		this.bookmakerName = ComparatoreConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME;
+		isLayRecord = true;
 	}
 
 	public BetfairExchangeInputRecord(BetfairExchangeInputRecord recordToBeMapped) {
 		super(recordToBeMapped);
 		this.bookmakerName = ComparatoreConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME;
+		isLayRecord = true;
 	}
 
 	public double getLiquidita() {
@@ -37,6 +40,14 @@ public class BetfairExchangeInputRecord extends AbstractInputRecord implements I
 			return true;
 		}		
 		return false;
+	}
+
+	public boolean isLayRecord() {
+		return isLayRecord;
+	}
+
+	public void setLayRecord(boolean isLayRecord) {
+		this.isLayRecord = isLayRecord;
 	}
 	
 }

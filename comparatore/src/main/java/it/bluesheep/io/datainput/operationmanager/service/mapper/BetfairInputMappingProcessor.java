@@ -21,6 +21,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	private static final String RUNNERS_JSON_STRING = "runners";
 	private static final String EXCHANGE_JSON_STRING = "ex";
 	private static final String LAY_SIDE_JSON_STRING = "availableToLay";
+	private static final String BACK_SIDE_JSON_STRING = "availableToBack";
 	private static final String PRICE_JSON_STRING = "price";
 	private static final String SIZE_JSON_STRING = "size";
 
@@ -48,9 +49,14 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 				marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
 				BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode);
 				
-				AbstractInputRecord recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
+				AbstractInputRecord[] recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
 				if(recordToBeMapped != null) {
-					recordsToBeReturned.add(recordToBeMapped);
+					if(recordToBeMapped[0] != null) {
+						recordsToBeReturned.add(recordToBeMapped[0]);
+					}
+					if(recordToBeMapped[1] != null) {
+						recordsToBeReturned.add(recordToBeMapped[1]);
+					}
 				}
 			}catch(Exception e) {
 				logger.log(Level.SEVERE, "Error during data extraction from JSON: exception is " + e.getMessage(), e);	
@@ -70,12 +76,15 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 	 * @param sport lo sport
 	 * @return Insieme di record in cui sono mappate le informazioni relative alle quote e alla loro tipologia
 	 */
-	private AbstractInputRecord mapOddsIntoAbstractInputRecord(BetfairExchangeInputRecord tempRecord, 
+	private AbstractInputRecord[] mapOddsIntoAbstractInputRecord(BetfairExchangeInputRecord tempRecord, 
 			JSONObject resultJSONObject, Scommessa scommessaTipo, Sport sport) {
 		
+		AbstractInputRecord[] exchangeRecords = new BetfairExchangeInputRecord[2];
 		AbstractBluesheepJsonConverter jsonConverter = BetfairBluesheepJsonConverter.getBetfairBluesheepJsonConverter();
 		
-		BetfairExchangeInputRecord recordToBeMapped  = null;
+		BetfairExchangeInputRecord recordLayToBeMapped  = null;
+		BetfairExchangeInputRecord recordBackToBeMapped  = null;
+
 		//Solitamente più di uno, rappresentano i dettagli delle quote
 		JSONArray runnerJSONArray = jsonConverter.getChildNodeArrayByKey(resultJSONObject, RUNNERS_JSON_STRING);
 		int correctOddIndexByScommessa = getCorrectOddIndexInJSONObjectByScommessa(scommessaTipo);
@@ -87,6 +96,8 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 			
 			//prendo le informazioni relative al lato "Banco"
 			JSONArray laySideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, LAY_SIDE_JSON_STRING);
+			//prendo le informazioni relative al lato "Punta"
+			JSONArray backSideOddsJSONArray = jsonConverter.getChildNodeArrayByKey(exchangeOddsJSONObject, BACK_SIDE_JSON_STRING);
 			
 			if(laySideOddsJSONArray.length() > 0) {
 				
@@ -98,17 +109,39 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 					double liquidita = bestPriceLayOddsJSONObject.getDouble(SIZE_JSON_STRING);
 					
 					//mappo le informazioni nel record di input generico
-					recordToBeMapped = new BetfairExchangeInputRecord(tempRecord);
-					recordToBeMapped.setQuota(quotaLayMin);
-					recordToBeMapped.setLiquidita(liquidita);
-					recordToBeMapped.setSport(sport);
-					recordToBeMapped.setTipoScommessa(scommessaTipo);
+					recordLayToBeMapped = new BetfairExchangeInputRecord(tempRecord);
+					recordLayToBeMapped.setQuota(quotaLayMin);
+					recordLayToBeMapped.setLiquidita(liquidita);
+					recordLayToBeMapped.setSport(sport);
+					recordLayToBeMapped.setTipoScommessa(scommessaTipo);
+					recordLayToBeMapped.setLayRecord(true);
+				}
+			}
+			
+			if(backSideOddsJSONArray.length() > 0) {
+				
+				//prendo il prezzo più basso
+				JSONObject bestPricebackOddsJSONObject = backSideOddsJSONArray.optJSONObject(0);
+				
+				if(bestPricebackOddsJSONObject != null) {
+					double quotaLayMin = bestPricebackOddsJSONObject.getDouble(PRICE_JSON_STRING);
+					double liquidita = bestPricebackOddsJSONObject.getDouble(SIZE_JSON_STRING);
 					
+					//mappo le informazioni nel record di input generico
+					recordBackToBeMapped = new BetfairExchangeInputRecord(tempRecord);
+					recordBackToBeMapped.setQuota(quotaLayMin);
+					recordBackToBeMapped.setLiquidita(liquidita);
+					recordBackToBeMapped.setSport(sport);
+					recordBackToBeMapped.setTipoScommessa(scommessaTipo);
+					recordBackToBeMapped.setLayRecord(false);
 				}
 			}
 		}
 		
-		return recordToBeMapped;
+		exchangeRecords[0] = recordLayToBeMapped;
+		exchangeRecords[1] = recordBackToBeMapped;
+		
+		return exchangeRecords;
 	}
 	
 	/**

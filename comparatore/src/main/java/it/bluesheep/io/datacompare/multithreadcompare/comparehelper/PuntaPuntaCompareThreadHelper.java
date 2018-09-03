@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
+import it.bluesheep.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.entities.output.RecordOutput;
 import it.bluesheep.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.entities.util.ComparatoreConstants;
@@ -35,7 +37,6 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 
 	@Override
 	public void run() {
-		
 		List<RecordOutput> mappedOutputRecord = new ArrayList<RecordOutput>();
 		//per ogni evento in input
 		for(Date date : keyList) {
@@ -63,7 +64,7 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 			}
 		}
 		oddsComparisonThreadMap.put("" + this.getId(), mappedOutputRecord);
-
+		logger.log(Level.INFO, "Thread " + this.getId() + " completed execution. Mapped records are " + mappedOutputRecord.size());
 	}
 	
 	/**
@@ -98,29 +99,50 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 			while(itrScommessa.hasNext()) {
 				
 				AbstractInputRecord scommessaInputRecord = itrScommessa.next();
+				boolean isScommessaInputRecordExchangeRecord = scommessaInputRecord instanceof BetfairExchangeInputRecord;
+				boolean isScommessaInputRecordBackExchangeRecord = false;
+				if(isScommessaInputRecordExchangeRecord) {
+					isScommessaInputRecordBackExchangeRecord = !((BetfairExchangeInputRecord) scommessaInputRecord).isLayRecord();
+				}
 				
-				//per ogni quota disponibile sulla scommessa tipo 2
-				Iterator<AbstractInputRecord> itrOppositeScommessa = oppositeScommessaInputDataRecordList.iterator();
-				while(itrOppositeScommessa.hasNext()) {
-					
-					AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
-					
-					if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName())) { 
+				if(!isScommessaInputRecordExchangeRecord || isScommessaInputRecordBackExchangeRecord) {
+					//per ogni quota disponibile sulla scommessa tipo 2
+					Iterator<AbstractInputRecord> itrOppositeScommessa = oppositeScommessaInputDataRecordList.iterator();
+					while(itrOppositeScommessa.hasNext()) {
 						
-						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
+						AbstractInputRecord oppositeScommessaInputRecord = itrOppositeScommessa.next();
 						
-						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
-						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
-
-						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(rating1 >= minThreshold && 
-						   rating2 >= minThreshold &&
-						   rating1 <= maxThreshold && 
-						   rating2 <= maxThreshold
-						   ) {
-							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
-							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
-							outputRecordList.add(outputRecord);
+						boolean isOppositeScommessaInputRecordExchangeRecord = oppositeScommessaInputRecord instanceof BetfairExchangeInputRecord;
+						boolean isOppositeScommessaInputRecordBackExchangeRecord = false;
+	
+						if(isOppositeScommessaInputRecordExchangeRecord) {
+							isOppositeScommessaInputRecordBackExchangeRecord = !((BetfairExchangeInputRecord) oppositeScommessaInputRecord).isLayRecord();
+						}
+						
+						if(!oppositeScommessaInputRecord.getBookmakerName().equalsIgnoreCase(scommessaInputRecord.getBookmakerName()) 
+								&& (!isOppositeScommessaInputRecordExchangeRecord || isOppositeScommessaInputRecordBackExchangeRecord)) { 
+							
+							List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord, isScommessaInputRecordExchangeRecord, isOppositeScommessaInputRecordExchangeRecord);
+							
+							double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+							double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+	
+							//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
+							if(rating1 >= minThreshold && 
+							   rating2 >= minThreshold &&
+							   rating1 <= maxThreshold && 
+							   rating2 <= maxThreshold
+							   ) {
+								RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
+								RecordBookmakerVsBookmakerOdds bookVsBookRecord = (RecordBookmakerVsBookmakerOdds) outputRecord;
+								bookVsBookRecord.setRating2(rating2 * 100);
+								if(isScommessaInputRecordExchangeRecord) {
+									bookVsBookRecord.setLiquidita(((BetfairExchangeInputRecord) scommessaInputRecord).getLiquidita());
+								}else if(isOppositeScommessaInputRecordExchangeRecord) {
+									bookVsBookRecord.setLiquidita(((BetfairExchangeInputRecord) oppositeScommessaInputRecord).getLiquidita());
+								}
+								outputRecordList.add(bookVsBookRecord);
+							}
 						}
 					}
 				}
@@ -152,21 +174,36 @@ public class PuntaPuntaCompareThreadHelper extends CompareThreadHelper {
 	
 	/**
 	 * GD - 29/05/18
-	 * Ordina i record di input in base al valore di quota
+	 * Ordina i record di input in base al valore di quota. Se uno dei due 
 	 * @param scommessaInputRecord input1
 	 * @param oppositeScommessaInputRecord input2
+	 * @param isScommessaInputRecordExchangeRecord true se input1 è un record dell'exchange
+	 * @param isOppositeScommessaInputRecordExchangeRecord true se input2 è record dell'exchange
 	 * @return la lista in cui il primo elemento è quello con la quota superiore, il secondo quello con la quota inferiore.
 	 */
 	private List<AbstractInputRecord> getOrderedQuotaList(AbstractInputRecord scommessaInputRecord,
-			AbstractInputRecord oppositeScommessaInputRecord) {
+			AbstractInputRecord oppositeScommessaInputRecord, boolean isScommessaInputRecordExchangeRecord, boolean isOppositeScommessaInputRecordExchangeRecord) {
 		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>(2);
 		
-		if(scommessaInputRecord.getQuota() >= oppositeScommessaInputRecord.getQuota()) {
-			returnList.add(0, scommessaInputRecord);
-			returnList.add(1, oppositeScommessaInputRecord);
+		//Se uno dei due record è dell'exchange (BACK SIDE) allora il record dell'exchange va messo come secondo bookmaker
+		if(isScommessaInputRecordExchangeRecord || isOppositeScommessaInputRecordExchangeRecord) {
+			
+			if(isScommessaInputRecordExchangeRecord) {
+				returnList.add(0, oppositeScommessaInputRecord);
+				returnList.add(1, scommessaInputRecord);
+			}else {
+				returnList.add(0, scommessaInputRecord);
+				returnList.add(1, oppositeScommessaInputRecord);
+			}
+			
 		}else {
-			returnList.add(0, oppositeScommessaInputRecord);
-			returnList.add(1, scommessaInputRecord);
+			if(scommessaInputRecord.getQuota() >= oppositeScommessaInputRecord.getQuota()) {
+				returnList.add(0, scommessaInputRecord);
+				returnList.add(1, oppositeScommessaInputRecord);
+			}else {
+				returnList.add(0, oppositeScommessaInputRecord);
+				returnList.add(1, scommessaInputRecord);
+			}
 		}
 		
 		return returnList;

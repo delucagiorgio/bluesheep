@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import it.bluesheep.BlueSheepComparatoreMain;
 import it.bluesheep.entities.input.AbstractInputRecord;
@@ -44,7 +45,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 				Map<Scommessa,List<AbstractInputRecord>> inputRecordEventoScommessaMap = dateMap.get(date).get(evento);
 				for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
 					List<AbstractInputRecord> eventoScommessaRecordList = inputRecordEventoScommessaMap.get(scommessa);
-					AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
+					BetfairExchangeInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
 					//Se trovato
 					if(exchangeRecord != null) {
 						List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(eventoScommessaRecordList,exchangeRecord);
@@ -54,6 +55,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 			}
 		}
 		oddsComparisonThreadMap.put("" + this.getId(), mappedOutputRecord);
+		logger.log(Level.INFO, "Thread " + this.getId() + " completed execution. Mapped records are " + mappedOutputRecord.size());
 	}
 
 	@Override
@@ -117,11 +119,11 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 	 * @param scommessaRecordList lista di offerte quote
 	 * @return il record relativo alle quote offerte da Betfair Exchange, null se non trovato
 	 */
-	private AbstractInputRecord findExchangeRecord(List<AbstractInputRecord> scommessaRecordList) {
-		AbstractInputRecord exchangeRecord = null;
+	private BetfairExchangeInputRecord findExchangeRecord(List<AbstractInputRecord> scommessaRecordList) {
+		BetfairExchangeInputRecord exchangeRecord = null;
 		for(AbstractInputRecord record : scommessaRecordList) {
-			if(ComparatoreConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equals(record.getBookmakerName())) {
-				exchangeRecord = record;
+			if(ComparatoreConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equals(record.getBookmakerName()) && ((BetfairExchangeInputRecord) record).isLayRecord()) {
+				exchangeRecord = (BetfairExchangeInputRecord) record;
 				break;
 			}
 		}
