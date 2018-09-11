@@ -93,12 +93,15 @@ public class CSVInputDataManagerImpl {
 		try {
 			String dataOraEventoString = map.get(DATA_ORA_EVENTO);
 			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+			Sport sport = getCorrectSport(map.get(SPORT), id);
+			Scommessa scommessa = getCorrectScommessa(map.get(SCOMMESSA), id);
 			
 			Date dataOraEvento = null;
 				dataOraEvento = sdf.parse(dataOraEventoString);
-			if(dataOraEvento != null && (dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff)) {
-				Sport sport = getCorrectSport(map.get(SPORT), id);
-				Scommessa scommessa = getCorrectScommessa(map.get(SCOMMESSA), id);
+			if(dataOraEvento != null && 
+					(dataOraEvento.getTime() - DirectoryFileUtilManager.TODAY.getTime() > updateFrequencyDiff) &&
+					sport != null && 
+					scommessa != null) {
 				String campionato = map.get(CAMPIONATO);
 				String bookmaker = map.get(BOOKMAKER);
 				String partecipante1 = map.get(PARTECIPANTE1);
