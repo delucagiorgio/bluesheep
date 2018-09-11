@@ -1,6 +1,4 @@
-package it.bluesheep.comparatore.entities.util.rating.impl;
-
-import it.bluesheep.comparatore.entities.util.rating.RatingCalculator;
+package it.bluesheep.comparatore.entities.util.comparevalue.rating;
 
 /**
  * Classe che definisce il calcolo dei rating1 per la categoria di confronto quote Bookmaker - Exchange
@@ -9,8 +7,12 @@ import it.bluesheep.comparatore.entities.util.rating.RatingCalculator;
  */
 public class RatingCalculatorBookMakerExchangeOdds extends RatingCalculator {
 
+	protected RatingCalculatorBookMakerExchangeOdds() {
+		super();
+	}
+	
 	@Override
-	public double calculateRating(double quotaBookmaker1, double quotaBookmaker2) {
+	protected double calculateRating(double quotaBookmaker1, double quotaBookmaker2) {
 		double returnValue = 0;
 		
 		if(quotaBookmaker1 == 0 || quotaBookmaker2 == 0) {
@@ -24,7 +26,7 @@ public class RatingCalculatorBookMakerExchangeOdds extends RatingCalculator {
 	}
 
 	@Override
-	public double calculateRiskFreeRating(double quotaBookmaker1, double quotaBookmaker2) {
+	protected double calculateRiskFreeRating(double quotaBookmaker1, double quotaBookmaker2) {
 		return 0;
 //		double returnValue = 0;
 //		

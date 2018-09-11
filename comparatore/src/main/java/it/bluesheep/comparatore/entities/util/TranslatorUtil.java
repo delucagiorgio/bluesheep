@@ -1,11 +1,12 @@
 package it.bluesheep.comparatore.entities.util;
-
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -23,17 +24,26 @@ public class TranslatorUtil {
 	
 	private static Map<String, String> codeTranslationMap;
 	private static Map<String, String> apiTranslationMap;
-	private static Logger logger;
+	private static Logger logger = Logger.getLogger(TranslatorUtil.class);
 	private static final String ENGLISH = "en";
 	private static final String ITALIAN = "it";
+	private static boolean upToDate = false;
 	
 	public static void initializeMapFromFile(){
 		InputStream csvFileStream = null;
 		try {
 			csvFileStream = new FileInputStream(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.NATION_PATH_INPUTFILE));
 		} catch (FileNotFoundException e1) {
-			logger.error("Error during initialization of codeTranslationMap : error is " + e1.getMessage());
+			logger.error("Error during initialization of codeTranslationMap : error is " + e1.getMessage(), e1);
 		}
+		
+		InputStream translationFilStream = null;
+		try {
+			translationFilStream = new FileInputStream(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TRANSLATION_PATH_INPUTFILE));
+		} catch (FileNotFoundException e1) {
+			logger.error("Error during initialization of toBeTranslatedToTranslationMap : error is " + e1.getMessage(), e1);
+		}
+		
         BufferedReader br = null;
         String line = "";
         codeTranslationMap = new HashMap<String, String>();
@@ -42,32 +52,62 @@ public class TranslatorUtil {
         if(csvFileStream != null) {
 	        try {
 
-	            br = new BufferedReader(new InputStreamReader(csvFileStream, BlueSheepConstants.ENCODING_UTF_8));
+	            br = new BufferedReader(new InputStreamReader(csvFileStream));
 	            while ((line = br.readLine()) != null) {
 
 	                // use comma as separator
 	                String[] countryDefinition = line.split(BlueSheepConstants.REGEX_CSV);
-	                codeTranslationMap.put(countryDefinition[1], countryDefinition[0]);
+	                if(countryDefinition != null && countryDefinition.length == 2) {
+	                	codeTranslationMap.put(countryDefinition[1], countryDefinition[0]);
+	                }
 	            }
 
 	        } catch (Exception e) {
-	        	logger.error("Error during translation initialization map. Error is " + e.getMessage());
+	            logger.error("Error during translation initialization map. Error is " + e.getMessage(), e);
 	        } finally {
 	            if (br != null) {
 	                try {
 	                	csvFileStream.close();
 	                    br.close();
 	                } catch (IOException e) {
-	                	logger.error("Error during translation initialization map. Error is " + e.getMessage());
+	    	            logger.error("Error during translation initialization map. Error is " + e.getMessage(), e);
 	                }
 	            }
 	        }
         }
+        
+        if(translationFilStream != null) {
+	        try {
+
+	            br = new BufferedReader(new InputStreamReader(translationFilStream));
+	            while ((line = br.readLine()) != null) {
+	            	if(!line.isEmpty()) {
+		                // use comma as separator
+		                String[] valueKeysPair = line.split(BlueSheepConstants.REGEX_CSV);
+		                if(valueKeysPair != null && valueKeysPair.length == 2) {
+		                	apiTranslationMap.put(valueKeysPair[0], valueKeysPair[1]);
+		                }
+	            	}
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error during initialization map toBeTranslatedToTranslationMap. Error is " + e.getMessage(), e);
+	        } finally {
+	            if (br != null) {
+	                try {
+	                	translationFilStream.close();
+	                    br.close();
+	                } catch (IOException e) {
+	    	            logger.error("Error during initialization map toBeTranslatedToTranslationMap. Error is " + e.getMessage(), e);
+	                }
+	            }
+	        }
+        }
+        
+        upToDate = true;
 	}
 	
-	private TranslatorUtil() {
-		logger = Logger.getLogger(TranslatorUtil.class);
-	}
+	private TranslatorUtil() {}
 	
 	/**
 	 * GD - 30/04/2018
@@ -76,7 +116,8 @@ public class TranslatorUtil {
 	 * @return parola tradotta in italiano, la parola inglese se non riesce ad effettuare la traduzione
 	 */
 	private static String getItalianTranslation(String toBeTranslatedString) {
-		String translatedString = null;
+		String translatedString = apiTranslationMap.get(toBeTranslatedString);
+		if(translatedString == null) {
 			try {
 				String url = "https://translate.googleapis.com/translate_a/single?"+
 					    "client=gtx&"+
@@ -99,9 +140,11 @@ public class TranslatorUtil {
 					  
 				translatedString = parseResult(response.toString());
 				apiTranslationMap.put(toBeTranslatedString, translatedString);
+				upToDate = false;
 			}catch(Exception e) {
-				logger.error("Error during translation initialization map. No translation is applied. Error is " + e.getMessage());
+	            logger.error("Error during translation initialization map. No translation is applied. Error is " + e.getMessage(), e);
 	            translatedString = toBeTranslatedString;
+			}
 		}
 		 
 		return translatedString;
@@ -144,17 +187,13 @@ public class TranslatorUtil {
 				}
 				String countryCodeFootball = splittedCampionato[0].substring(startIndex, splittedCampionato[0].length());
 				String nation = TranslatorUtil.getNationTranslation(countryCodeFootball);
-				if(nation == null) {
-					nation = "";
-				}
-				recordOutput.setNazione(nation);
-
 				if("INT".equalsIgnoreCase(countryCodeFootball)) {
 					String[] eventoSplitted = recordOutput.getEvento().split("\\|");
 					String partecipante1 = getTraduzioneItaliana(eventoSplitted[0]);
 					String partecipante2 = getTraduzioneItaliana(eventoSplitted[1]);
-					recordOutput.setEvento(partecipante1 + BlueSheepConstants.REGEX_PIPE + partecipante2); 
+					recordOutput.setEvento(partecipante1 + "|" + partecipante2); 
 				}
+				recordOutput.setNazione(nation);
 			}
 		}
 		return recordOutput;
@@ -176,6 +215,36 @@ public class TranslatorUtil {
 			translatedString = TranslatorUtil.getItalianTranslation(toBeTranslatedString);
 		}
 		return translatedString;
+	}
+	
+	public static void saveTranslationOnFile() {
+		
+		if(!upToDate) {
+			PrintWriter writer1 = null;
+			
+			try {
+				String filename = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TRANSLATION_PATH_INPUTFILE);
+	    		File outputFile = new File(filename);
+	    		if(outputFile.exists() && !outputFile.isDirectory()) {
+	    			outputFile.delete();
+	    		}
+	    		writer1 = new PrintWriter(filename, BlueSheepConstants.ENCODING_UTF_8); 
+	    		
+	    		for(String toBeTranslatedString : apiTranslationMap.keySet()) {
+	    			String line = toBeTranslatedString + BlueSheepConstants.REGEX_CSV + apiTranslationMap.get(toBeTranslatedString) + System.lineSeparator();
+	    			writer1.write(line);
+	    		}
+	    		
+			}catch(IOException e) {
+				logger.error(e.getMessage(), e);
+			}finally {
+				if(writer1 != null) {
+					writer1.close();
+				}
+			}
+			
+			upToDate = true;
+		}
 	}
 
 

@@ -15,6 +15,7 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
+import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
@@ -24,6 +25,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	protected Bet365ProcessDataManager() {
 		super();
 		this.logger = Logger.getLogger(Bet365ProcessDataManager.class);
+		service = Service.BET365_SERVICENAME;
 	}
 	
 	@Override
@@ -56,7 +58,6 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 						
 						Bet365InputRecord bet365Record = (Bet365InputRecord) record;
 						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record);
-
 						
 						if(bet365Record.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) ||
 								bet365Record.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
@@ -71,11 +72,13 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 									bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
 								}else {
 									bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-	
 								}
-								bet365Record.setKeyEvento(bookmakerRecord.getKeyEvento());
 								bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
 								bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
+								bet365Record.setKeyEvento("" + bet365Record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+										bet365Record.getSport() + BlueSheepConstants.REGEX_PIPE + 
+										bet365Record.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
+										bet365Record.getPartecipante2());
 								matchedCountEvents++;
 							}
 							break;

@@ -13,6 +13,7 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
+import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
@@ -21,6 +22,7 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 	
 	protected CSVProcessDataManager() {
 		super();
+		service = Service.CSV_SERVICENAME;
 	}
 
 	@Override
@@ -62,9 +64,12 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 								}else {
 									csvRecordCopy.setDataOraEvento(bookmakerRecord.getDataOraEvento());
 								}
-								csvRecordCopy.setKeyEvento(bookmakerRecord.getKeyEvento());
 								csvRecordCopy.setPartecipante1(bookmakerRecord.getPartecipante1());
 								csvRecordCopy.setPartecipante2(bookmakerRecord.getPartecipante2());
+								csvRecordCopy.setKeyEvento("" + csvRecordCopy.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+										csvRecordCopy.getSport() + BlueSheepConstants.REGEX_PIPE + 
+										csvRecordCopy.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
+										csvRecordCopy.getPartecipante2());
 								csvRecordCopy.setBookmakerName(csvRecord.getBookmakerName());
 								csvRecordCopy.setQuota(csvRecord.getQuota());
 								csvRecordCopy.setTipoScommessa(csvRecord.getTipoScommessa());

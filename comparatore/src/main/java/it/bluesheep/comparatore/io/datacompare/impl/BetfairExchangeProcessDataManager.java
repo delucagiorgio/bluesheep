@@ -2,15 +2,19 @@ package it.bluesheep.comparatore.io.datacompare.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.BetfairExchangeInputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
-import it.bluesheep.comparatore.entities.util.rating.impl.RatingCalculatorBookMakerExchangeOdds;
+import it.bluesheep.comparatore.entities.util.comparevalue.CompareValueFactory;
+import it.bluesheep.comparatore.entities.util.comparevalue.rating.RatingCalculatorFactory;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.AbstractProcessDataManager;
@@ -40,6 +44,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		startComparisonTime = System.currentTimeMillis();
 		minimumOddValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINIMUM_ODD_VALUE));
 		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
+		service = Service.BETFAIR_SERVICENAME;
 	}
 	
 	@Override
@@ -73,10 +78,13 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 								if(!bookmakerSet.isEmpty()) {
 									AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
 									exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
-									exchangeRecord.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-		//							exchangeRecord.setKeyEvento(bookmakerRecord.getKeyEvento());
 									exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
 									exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
+									exchangeRecord.setKeyEvento("" + exchangeRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+												exchangeRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
+												exchangeRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
+												exchangeRecord.getPartecipante2());
+
 								}
 								break;
 							}
@@ -103,18 +111,21 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		ChiaveEventoScommessaInputRecordsMap recordInputMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
 		Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportDateMap = recordInputMap.get(sport);
 		if(sportDateMap != null) {
-			for(Date date : sportDateMap.keySet()) {
+			Set<Date> dateSet = new HashSet<Date>(sportDateMap.keySet());
+			for(Date date : dateSet) {
+				Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportDateMap.get(date);
+				Set<String> eventoSet = new HashSet<String>(dateMap.keySet());
 				//per ogni evento in input
-				for(String evento : sportDateMap.get(date).keySet()) {
-					
+				for(String evento : eventoSet) {
 					//per ogni scommessa, cerco il record relativo alle quote dell'Exchange
-					Map<Scommessa,Map<String, AbstractInputRecord>> inputRecordEventoScommessaMap = sportDateMap.get(date).get(evento);
-					for(Scommessa scommessa : inputRecordEventoScommessaMap.keySet()) {
+					Map<Scommessa,Map<String, AbstractInputRecord>> inputRecordEventoScommessaMap = dateMap.get(evento);
+					Set<Scommessa> scommessaSet = new HashSet<Scommessa>(inputRecordEventoScommessaMap.keySet());
+					for(Scommessa scommessa : scommessaSet) {
 						AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
 						//Se trovato
 						if(exchangeRecord != null) {
 							List<RecordOutput> outputRecordsList = 
-									verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa), exchangeRecord);
+									verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa), exchangeRecord, bluesheepServiceType);
 							mappedOutputRecord.addAll(outputRecordsList);	
 						}
 					}
@@ -164,18 +175,21 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	 * @param exchangeRecord la quota offerta da Betfair Exchange relativa all'evento-scommessa in analisi 
 	 * @return la lista di comparazioni mappate in base ai requisiti minimi
 	 */
-	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> eventoScommessaRecordList, AbstractInputRecord exchangeRecord) {
+	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> eventoScommessaRecordList, AbstractInputRecord exchangeRecord, AbstractBlueSheepService bluesheepServiceType) {
 		
 		List<RecordOutput> outputRecordList = new ArrayList<RecordOutput>();
-		
-		for(String bookmaker : eventoScommessaRecordList.keySet()) {
+		Set<String> bookmakerSet = new HashSet<String>(eventoScommessaRecordList.keySet());
+		for(String bookmaker : bookmakerSet) {
 			AbstractInputRecord record = eventoScommessaRecordList.get(bookmaker);
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
 			if(record != exchangeRecord && record.getQuota() >= minimumOddValue) {
-				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
+				double compareValue = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepServiceType).getCompareValue(record.getQuota(), exchangeRecord.getQuota());
 				//se il rating1 è sufficientemente alto
-				if(rating1 >= minThreshold && 
-				   rating1 <= maxThreshold && 
+				if(compareValue >= minThreshold && (
+						(controlValidityOdds && ArbsUtil.validOddsRatio(record.getQuota(), exchangeRecord.getQuota(), service))
+						||
+						(!controlValidityOdds && compareValue <= maxThreshold)) 
+						&& 
 					   (!controlValidityOdds || 
 							   (
 									   !record.getSource().equals(Service.CSV_SERVICENAME) &&
@@ -184,7 +198,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 							   )
 						)
 					) {
-					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, rating1);
+					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, getRatingByScommessaPair(record, exchangeRecord));
 					outputRecordList.add(recordOutput);
 				}
 			}
@@ -193,7 +207,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	}
 	
 	private double getRatingByScommessaPair(AbstractInputRecord scommessaInputRecord1, AbstractInputRecord scommessaInputRecord2){
-		return (new RatingCalculatorBookMakerExchangeOdds()).calculateRating(scommessaInputRecord1.getQuota(), scommessaInputRecord2.getQuota());
+		return RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(scommessaInputRecord1.getQuota(), scommessaInputRecord2.getQuota());
 	}
 	
 	private boolean hasBeenRecentlyUpdated(AbstractInputRecord scommessaInputRecord) {

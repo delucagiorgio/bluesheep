@@ -12,9 +12,7 @@ public class InputDataHelper {
 	private static List<String> excludedBookmakers;
 	
 	public InputDataHelper() {
-		if(excludedBookmakers == null) {
-			excludedBookmakers = getListBlockedBookmakers();
-		}
+		excludedBookmakers = getListBlockedBookmakers();
 	}
 	
 	/**

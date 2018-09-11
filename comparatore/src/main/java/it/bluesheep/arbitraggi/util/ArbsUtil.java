@@ -10,10 +10,13 @@ import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
+import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
 
 public class ArbsUtil {
 
+	private static double RATIO_ODDS_VALIDITY = new Double((3.0/7.0));
+	
 	private ArbsUtil() {};
 	
 	public static String getKeyArbsFromStoredRunRecord(String toBeSplittedLine) {
@@ -174,6 +177,25 @@ public class ArbsUtil {
 			}
 		}
 		return result;
+	}
+	
+	public static boolean validOddsRatio(double odd1, double odd2, Service service) {
+		//Calcolo la quota reale relativa alla bancata
+		
+		if(Service.BETFAIR_SERVICENAME.equals(service)) {
+			odd2 = 1 / (1 - (1 / odd2));
+		}
+		
+		double minOdd;
+		double maxOdd;
+		if(odd1 > odd2) {
+			maxOdd = odd1;
+			minOdd = odd2;
+		}else {
+			maxOdd = odd2;
+			minOdd = odd1;
+		}
+		return minOdd / maxOdd >= RATIO_ODDS_VALIDITY;
 	}
 
 }

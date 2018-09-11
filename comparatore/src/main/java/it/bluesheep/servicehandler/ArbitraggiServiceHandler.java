@@ -21,6 +21,7 @@ import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
+import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
@@ -61,6 +62,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			
 			long endTime = System.currentTimeMillis();
 			
+			TranslatorUtil.saveTranslationOnFile();
+			
 			logger.info("Arbitraggi execution terminated in " + (endTime - startTime)/1000 + " seconds.");
 		}catch(Exception e) {
 			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
@@ -94,12 +97,30 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 			int alreadySentCount = 0;
 			for(RecordOutput record : tabellaOutputList) {
 				String recordKey = ArbsUtil.getKeyArbsFromOutputRecord(record);
-				boolean isValidExchangeRecord = record instanceof RecordBookmakerVsExchangeOdds && ((RecordBookmakerVsExchangeOdds)record).getLiquidita() >= 50D;
+				boolean isExchangeRecord = record instanceof RecordBookmakerVsExchangeOdds;
+				boolean isValidExchangeRecord = isExchangeRecord && ((RecordBookmakerVsExchangeOdds)record).getLiquidita() >= 50D;
 				double rating2 = record instanceof RecordBookmakerVsBookmakerOdds ? ((RecordBookmakerVsBookmakerOdds) record).getRating2() : -1 ;
+//				Creo mapping tra le chiavi evento (data-sport-partecipanti) "recordKeyList" e i record di output
 				if((!(record instanceof RecordBookmakerVsExchangeOdds) || isValidExchangeRecord)) {
 					//controllo che non l'abbia già mandata, se si non faccio nulla
+					
+//					Il metodo prenderà in input tutta la mappa calcolata sopra, restituisce una mappa la cui chiave è la chiave evento, 
+//					i valori sono tutti i record di output trovati ed eventualmente da rinviare, differenziondoli a loro volta per tipo
+//					("nuovo arbitraggio - mai inviato prima" o "arbitraggio già inviato - inviato per completezza di informazione")
+//					
+//					NB:
+//					tengo conto del possibile aumento della quota: nel caso in cui la quota sia migliorata ed è anche da rinviare a 
+//					seguito di una nuova coppia di bookmaker mai inviata prima, utilizzo due campi: uno per indicare se la quota è migliorata
+//					l'altro per indicare se da rinviare per motivi di completezza. Segue poi una logica per priorità per capire se l'occorrenza
+//					di invio nel filtro anti-spam va aumentato (l'occorrenza andrebbe aumentata solo se il record per le condizioni "normali"
+//					antecedenti questa modifica lo prevedono - logica trasparente alla modifica)
 					recordKey = alreadySent(recordKey);
+					
+//					Creo tutti i record di arbitraggi con i dati necessari e li colleziono in due liste differenti: in una lista quelli 
+//					la tipologia di record ("nuovo arbitraggio - mai inviato prima"); nella seconda per la tipologia di record ("arbitraggio 
+//					già inviato - inviato per completezza di informazione")
 					if(recordKey != null) {
+						double liquidita = isExchangeRecord ? ((RecordBookmakerVsExchangeOdds)record).getLiquidita() : -1;
 						ArbsRecord arbsRecord = new TwoOptionsArbsRecord(record.getEvento(), 
 																		 record.getDataOraEvento(),
 																		 record.getSport(),
@@ -114,11 +135,16 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService{
 																		 record.getRating(),
 																		 rating2, 
 																		 record.getLinkBook1(), 
-																		 record.getLinkBook2());
+																		 record.getLinkBook2(), 
+																		 liquidita);
+						
+//						Lo controllo solo sulle quote già inviate
 						if(recordKey.startsWith("BETTER_ODD")) {
 							arbsRecord.setBetterOdd(true);
 						}
+//						Aggiungo solo i record nuovi nella mappa
 						messageToBeSentKeysList.add(arbsRecord);
+//						Tutti i record, al fine di garantire la storicità del miglioramento della quota anche non superiore alla soglia di trigger-reinvio
 						recordKeysList.add(recordKey);
 					}else {
 						alreadySentCount++;

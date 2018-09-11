@@ -19,6 +19,7 @@ public abstract class ArbsRecord{
 	protected String link1;
 	protected String link2;
 	protected String country;
+	protected double liquidita;
 	
 	protected abstract void calculateNetProfit();
 	
@@ -94,5 +95,9 @@ public abstract class ArbsRecord{
 
 	public String getCountry() {
 		return country;
+	}
+
+	public double getLiquidita() {
+		return liquidita;
 	}
 }

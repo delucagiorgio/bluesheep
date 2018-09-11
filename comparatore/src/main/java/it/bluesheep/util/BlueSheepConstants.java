@@ -20,6 +20,7 @@ public class BlueSheepConstants {
 	public static final String SERVICE_NAME_LIST = "ACTIVE_SERVICE_NAME";
 	public static final String PATH_TO_RESOURCES = "../RISORSE_BLUESHEEP/";
 	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatusOn.txt";
+	public static final String TRADUZIONI_API_FILENAME = "translationCsv.csv";
 	
 	//json
 	public static final String JSON_PP_RESULT_PATH = "PATH_OUTPUT_TABLE2";
@@ -63,7 +64,8 @@ public class BlueSheepConstants {
 	public static final String FREQ_TXODDS_SEC = "FREQ_TXODDS_SEC";
 	
 	//translation
-	public static final String NATION_PATH_INPUTFILE= "PATH_NAZIONI_TRADUZIONE_CSV";
+	public static final String NATION_PATH_INPUTFILE = "PATH_NAZIONI_TRADUZIONE_CSV";
+	public static final String TRANSLATION_PATH_INPUTFILE = "TRANSLATION_PATH_INPUTFILE_CSV";
 	
 	//link bookmaker
 	public static final String LINK_BOOKMAKER_FILE_PATH = "LINK_BOOKMAKER_FILENAME";

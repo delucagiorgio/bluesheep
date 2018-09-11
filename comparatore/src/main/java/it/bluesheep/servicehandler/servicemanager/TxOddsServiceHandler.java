@@ -54,7 +54,7 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 			
 			logger.info("GC completed execution: " + (endGc - startGc) + " ms.");
 		}
-		super.addToChiaveEventoScommessaMap(inputRecordList);
+		super.startProcessingDataTransformation(inputRecordList);
 	}
 	
 	/**

@@ -10,7 +10,7 @@ public class TwoOptionsArbsRecord extends ArbsRecord {
 	private double rating1;
 	private double rating2;
 	
-	public TwoOptionsArbsRecord(String keyEvento, Date date, String sport, String championship, String country, String bookmaker1, String bookmaker2, double odd1, double odd2, String bet1, String bet2, double rating1, double rating2, String link1, String link2) {
+	public TwoOptionsArbsRecord(String keyEvento, Date date, String sport, String championship, String country, String bookmaker1, String bookmaker2, double odd1, double odd2, String bet1, String bet2, double rating1, double rating2, String link1, String link2, double liquidita) {
 		this.keyEvento = keyEvento;
 		this.date = date;
 		this.sport = sport;
@@ -27,6 +27,7 @@ public class TwoOptionsArbsRecord extends ArbsRecord {
 		this.link1 = link1;
 		this.link2 = link2;
 		betterOdd = false;
+		this.liquidita = liquidita;
 		calculateNetProfit();
 	}
 	

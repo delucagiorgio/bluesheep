@@ -58,10 +58,11 @@ public class InputReader {
     		odd2 = df.format(decimalNumber).toString();
 
     		String money2 = null;
-    		String temp = "" + record.getNetProfit();
-	    	decimalNumber = Float.parseFloat(temp.replace(",", "."));
-	    	money2 = df.format(decimalNumber).toString();
-	    	
+    		if(record.getLiquidita() > 0) {
+	    		String temp = "" + record.getLiquidita();
+		    	decimalNumber = Float.parseFloat(temp.replace(",", "."));
+		    	money2 = df.format(decimalNumber).toString();
+    		}
     		String linkBook1 = record.getLink1();
     		String linkBook2 = record.getLink2();
 			try {

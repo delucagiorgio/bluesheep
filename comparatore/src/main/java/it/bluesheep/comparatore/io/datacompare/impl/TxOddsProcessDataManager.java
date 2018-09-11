@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsBookmakerOdds;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
-import it.bluesheep.comparatore.entities.util.rating.impl.RatingCalculatorBookmakersOdds;
+import it.bluesheep.comparatore.entities.util.comparevalue.CompareValueFactory;
+import it.bluesheep.comparatore.entities.util.comparevalue.rating.RatingCalculatorBookmakersOdds;
+import it.bluesheep.comparatore.entities.util.comparevalue.rating.RatingCalculatorFactory;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.AbstractProcessDataManager;
@@ -46,6 +49,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 		controlValidityOdds = false;
 		startComparisonTime = System.currentTimeMillis();
 		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
+		service = Service.TXODDS_SERVICENAME;
 	}
 	
 	@Override
@@ -82,7 +86,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 							
 							oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
 							if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-								List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa));
+								List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa), bluesheepServiceType);
 								mappedOutputRecord.addAll(outputRecordsList);
 								processedScommessaTypes.put(scommessa, oppositeScommessa);
 							}
@@ -115,7 +119,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 	 * @param bookmakerRecord2Map lista delle quote con scommessa opposta alla scommessa in analisi
 	 * @return tutti i record mappati secondo il record di output che superano un rating1 del 70%
 	 */
-	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> bookmakerRecord1Map, Map<String, AbstractInputRecord> bookmakerRecord2Map) {
+	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> bookmakerRecord1Map, Map<String, AbstractInputRecord> bookmakerRecord2Map, AbstractBlueSheepService bluesheepService) {
 		
 		List<RecordOutput> outputRecordList = new ArrayList<RecordOutput>();
 		
@@ -138,14 +142,18 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 						
 						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
 						
-						double rating1 = (new RatingCalculatorBookmakersOdds()).calculateRating(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
-						double rating2 = (new RatingCalculatorBookmakersOdds()).calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+						double compareValue1 = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepService).getCompareValue(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+						double rating2 = RatingCalculatorBookmakersOdds.calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
 						
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(rating1 >= minThreshold && 
-						   rating2 >= minThreshold &&
-						   rating1 <= maxThreshold && 
-						   rating2 <= maxThreshold &&
+						if(compareValue1 >= minThreshold && (
+										(controlValidityOdds && ArbsUtil.validOddsRatio(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota(), service))
+										||
+										(!controlValidityOdds && 
+										rating2 >= minThreshold &&
+										compareValue1 <= maxThreshold && 
+										rating2 <= maxThreshold)
+								) &&
 						   (!controlValidityOdds || 
 								   (!scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) && 
 										   !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) &&
@@ -153,7 +161,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 										   hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
 									)
 						   )) {
-							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), rating1);
+							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota()));
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);
 						}
@@ -218,8 +226,12 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 			AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord);
 			if(exchangeRecord != null) {
 				txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
+				txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+						txOddsRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
+						txOddsRecord.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
+						txOddsRecord.getPartecipante2());
 			}
 		}
-		return null;
+		return bookmakerList;
 	}
 }

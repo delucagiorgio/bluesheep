@@ -1,6 +1,4 @@
-package it.bluesheep.comparatore.entities.util.rating.impl;
-
-import it.bluesheep.comparatore.entities.util.rating.RatingCalculator;
+package it.bluesheep.comparatore.entities.util.comparevalue.rating;
 
 /**
  * Classe che definisce il calcolo dei rating1 per la categoria di confronto quote Bookmaker - Bookmaker
@@ -9,8 +7,12 @@ import it.bluesheep.comparatore.entities.util.rating.RatingCalculator;
  */
 public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 
+	protected RatingCalculatorBookmakersOdds() {
+		super();
+	}
+	
 	@Override
-	public double calculateRating(double quotaBookmaker1, double quotaBookmaker2) {
+	protected double calculateRating(double quotaBookmaker1, double quotaBookmaker2) {
 		double y = (100 * quotaBookmaker1)/quotaBookmaker2;
 		
 		y = Math.round(y);
@@ -21,7 +23,7 @@ public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 	}
 
 	@Override
-	public double calculateRiskFreeRating(double quotaBookmaker1, double quotaBookmaker2) {
+	protected double calculateRiskFreeRating(double quotaBookmaker1, double quotaBookmaker2) {
 		double returnValue = 0;
 		
 //		if(quotaBookmaker1 == 0 || quotaBookmaker2 == 0) {
@@ -34,7 +36,7 @@ public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 		return returnValue;
 	}
 	
-	public double calculateRatingApprox(double quotaBookmaker1, double quotaBookmaker2) {		
+	public static double calculateRatingApprox(double quotaBookmaker1, double quotaBookmaker2) {		
 		double y = (100 * quotaBookmaker1)/quotaBookmaker2;
 		
 		y = Math.round(y);

@@ -56,10 +56,8 @@ public class Html2PngConverter {
 	        driver.manage().window().maximize();
 	        //driver.manage().window().setSize(new Dimension(1200, 675));
 	        
-	        
 	        // Fai lo screen
 	        takeScreenshot(outputFileName);
-	        
 
 	        // Chiudi il browser
 //	        driver.close();

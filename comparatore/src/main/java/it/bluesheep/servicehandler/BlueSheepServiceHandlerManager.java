@@ -111,9 +111,11 @@ public final class BlueSheepServiceHandlerManager {
 		                logger.info("Event kind:" + kind + " - File affected: " + event.context());
 		                
 		                if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-			                switch(event.context().toString()) {
+		                	String fileName = event.context().toString();
+			                switch(fileName) {
 			                	case BlueSheepConstants.TRADUZIONI_NAZIONI_FILENAME:
-			                		logger.info("File " + BlueSheepConstants.TRADUZIONI_NAZIONI_FILENAME + " has changed. Map of data is going to be updated.");
+			                	case BlueSheepConstants.TRADUZIONI_API_FILENAME:
+			                		logger.info("File " + fileName + " has changed. Map of data is going to be updated.");
 			                		TranslatorUtil.initializeMapFromFile();
 			                		break;
 			                	case BlueSheepConstants.CSV_FILENAME:
@@ -159,6 +161,9 @@ public final class BlueSheepServiceHandlerManager {
 					
 					executor.shutdown();
 					terminatedCorrectly = executor.awaitTermination(timeout, timeUnitTimeout);
+					if(!terminatedCorrectly) {
+						executor.shutdownNow();
+					}
 				}
 				
 				logger.info("Application completes the executions correctly = " + terminatedCorrectly);
@@ -196,7 +201,6 @@ public final class BlueSheepServiceHandlerManager {
 			}else {
 				System.out.println("Error retrieving properties\n" + e.getMessage());
 			}
-			System.exit(-1);
 		}
 	}
 }

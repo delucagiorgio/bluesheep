@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.output.RecordOutput;
+import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepConstants;
@@ -48,6 +49,8 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 			startComparisonForBonusAbusingAndExportOnFiles();
 			
 			long endTime = System.currentTimeMillis();
+			
+			TranslatorUtil.saveTranslationOnFile();
 			
 			logger.info("Export data completed in " + (endTime - startTime) / 1000 + " seconds");
 		}catch(Exception e) {

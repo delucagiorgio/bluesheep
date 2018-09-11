@@ -18,6 +18,7 @@ public abstract class RecordOutput {
 	protected String nazione;
 	protected String linkBook1;
 	protected String linkBook2;
+	protected double netProfit;
 	
 	public Date getDataOraEvento() {
 		return dataOraEvento;
@@ -129,6 +130,14 @@ public abstract class RecordOutput {
 
 	public void setLinkBook2(String linkBook2) {
 		this.linkBook2 = linkBook2;
+	}
+
+	public double getNetProfit() {
+		return netProfit;
+	}
+
+	public void setNetProfit(double netProfit) {
+		this.netProfit = netProfit;
 	}
 	
 }
