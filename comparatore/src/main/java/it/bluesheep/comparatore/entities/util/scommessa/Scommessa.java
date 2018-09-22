@@ -31,4 +31,13 @@ public enum Scommessa {
 	public String getCode() {
 		return code;
 	}
+
+	public static Object getScommessaByCode(String scommessaBookmaker) {
+		for(Scommessa scommessa : Scommessa.values()) {
+			if(scommessa.getCode().equalsIgnoreCase(scommessaBookmaker)) {
+				return scommessa;
+			}
+		}
+		return null;
+	}
 }

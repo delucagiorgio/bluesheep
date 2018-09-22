@@ -1,7 +1,6 @@
 package it.bluesheep.comparatore.io.datacompare;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,6 +12,7 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.impl.ProcessDataManagerFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
+import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 public class CompareProcessFactory {
@@ -31,7 +31,12 @@ public class CompareProcessFactory {
 		Map<Service, List<RecordOutput>> returnMap = new TreeMap<Service, List<RecordOutput>>();
 		
 		IProcessDataManager processDataManager;
-		List<Service> serviceList = Arrays.asList(Service.TXODDS_SERVICENAME, Service.BETFAIR_SERVICENAME);
+		List<Service> serviceList = new ArrayList<Service>();
+		serviceList.add(Service.TXODDS_SERVICENAME);
+		
+		if(!(bluesheepService instanceof ArbitraggiServiceHandler)) {
+			serviceList.add(Service.BETFAIR_SERVICENAME);
+		}
 		
 		for(Service service : serviceList) {
 			
@@ -41,7 +46,7 @@ public class CompareProcessFactory {
 			
 			for(Sport sport : Sport.values()) {
 				try {
-					outputRecord = processDataManager.compareOdds(BlueSheepSharedResources.getEventoScommessaRecordMap(), sport, bluesheepService);
+					outputRecord = processDataManager.compareTwoWayOdds(BlueSheepSharedResources.getEventoScommessaRecordMap(), sport, bluesheepService);
 					logger.info("" + service.getCode() + " :: Odds comparison result size for sport " + sport + " is " + outputRecord.size());
 					tabellaOutputList.addAll(outputRecord);
 				} catch (Exception e) {

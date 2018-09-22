@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.Bet365InputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
@@ -29,8 +30,8 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	}
 	
 	@Override
-	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
-		throw new Exception("Incorrect implementation of compareOdds");
+	public List<RecordOutput> compareTwoWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
+		throw new Exception("Incorrect implementation of compareTwoWayOdds");
 		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
 	}
 
@@ -91,6 +92,11 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 		logger.info("Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
 		
 		return bookmakerList;
+	}
+
+	@Override
+	public List<ArbsRecord> compareThreeWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
+		throw new Exception("Incorrect implementation of compareTwoWayOdds");
 	}
 
 }

@@ -64,10 +64,14 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 		
 		try {
 			executor.shutdown();
-			
-			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
+		    if (timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES)) {
+		    	executor.shutdownNow();
+		    } 
 		} catch (InterruptedException e) {
 			logger.error(e.getMessage(), e);
+			if(!executor.isShutdown()) {
+				executor.shutdownNow();
+			}
 		}
 		if(timeoutReached) {
 			logger.warn("" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);

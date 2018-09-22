@@ -27,6 +27,7 @@ public abstract class AbstractInputRecord {
 	protected String filler;
 	protected long timeOfInsertionInSystem;
 	protected Service source;
+	protected double liquidita;
 	
 	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {	
 		if(dataOraEvento != null) {
@@ -40,6 +41,7 @@ public abstract class AbstractInputRecord {
 		this.filler = filler;
 		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_VERSUS + this.partecipante2;
 		this.timeOfInsertionInSystem = System.currentTimeMillis();
+		this.liquidita = -1;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {
@@ -62,7 +64,7 @@ public abstract class AbstractInputRecord {
 
 	public void setDataOraEvento(Date dataOraEvento) {
 		this.dataOraEvento = dataOraEvento;
-		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_VERSUS + this.partecipante2;
+		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_PIPE + this.partecipante2;
 	}
 
 	public Sport getSport() {

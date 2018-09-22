@@ -33,9 +33,15 @@ public class Bet365RequestHandler extends AbstractRequestHandler {
 				try {
 					executor.shutdown();
 
-					timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
+					timeoutReached = !executor.awaitTermination(120, TimeUnit.SECONDS);
+					if(timeoutReached) {
+						executor.shutdownNow();
+					}
 				} catch (InterruptedException e) {
 					logger.error(e.getMessage(), e);
+					if(!executor.isShutdown()) {
+						executor.shutdownNow();
+					}
 				}
 				if(!isLastQueueRequest) {
 					executor = Executors.newFixedThreadPool(maxThreadPoolSize);

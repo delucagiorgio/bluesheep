@@ -21,6 +21,9 @@ public class BlueSheepConstants {
 	public static final String PATH_TO_RESOURCES = "../RISORSE_BLUESHEEP/";
 	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatusOn.txt";
 	public static final String TRADUZIONI_API_FILENAME = "translationCsv.csv";
+	public static final String STATUS1_ARBS_RECORD = "1";
+	public static final String STATUS0_ARBS_RECORD = "0";
+	public static final String STATUSINVALID_ARBS_RECORD = "-1";
 	
 	//json
 	public static final String JSON_PP_RESULT_PATH = "PATH_OUTPUT_TABLE2";
@@ -77,7 +80,10 @@ public class BlueSheepConstants {
 	//arbitraggi
 	public static final String RATING1 = "R1";
 	public static final String RATING2 = "R2";
-	public static final String FILENAME_PREVIOUS_RUNS = "previousRunFile.txt";
+	public static final String FILENAME_PREVIOUS_RUNS_2WAY = "previousRunFile_2w.txt";
+	public static final String FILENAME_PREVIOUS_RUNS_3WAY = "previousRunFile_3w.txt";
+
+
 	public static final String PREVIOUS_RUN_PATH = "PREVIOUS_RUN_PATH";
 	public static final String CHAT_ID = "CHAT_ID";
 	public static final int STORED_RUNS_MAX = 40;
@@ -91,6 +97,8 @@ public class BlueSheepConstants {
 	public static final String XHTML_PATH = "XHTML_PATH";
 	public static final String SPAM_THRESHOLD_COUNT = "SPAM_THRESHOLD_COUNT";
 	public static final String BETTER_ODD_PERCENTAGE = "BETTER_ODD_PERCENTAGE";
+	public static final String THREEWAY_NET_PROFIT = "THREEWAY_NET_PROFIT";
+	public static final String MARATHON_BET_BOOKMAKER_NAME = "Marathonbet";
 		
 	
 	// SOGLIA OLTRE LA QUALE SI MOSTRANO I MISSILI NELLA NOTIFICA TELEGRAM

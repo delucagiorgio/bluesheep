@@ -10,8 +10,8 @@ public class RightTableRow extends TableRow {
 	private String minPercentage;
 	private String maxPercentage;
 
-	public RightTableRow(String bookmaker, String odd, String percentage, boolean betterOdd) {
-		super(bookmaker, odd, betterOdd);
+	public RightTableRow(String bookmaker, String odd, String percentage, String money, boolean betterOdd, boolean removedOdd) {
+		super(bookmaker, odd, money, betterOdd, removedOdd);
 		
 		float decimalNumber = Float.parseFloat(percentage.replace(",", "."));
 		DecimalFormat df = new DecimalFormat();
@@ -20,20 +20,6 @@ public class RightTableRow extends TableRow {
 			
 		this.setMinPercentage(df.format(decimalNumber).toString());
 		this.setMaxPercentage(df.format(decimalNumber).toString());
-	}
-
-	@Override
-	public int compareTo(TableRow arg0) {
-		float income1 = Float.parseFloat(this.maxPercentage.replace(",", "."));
-		float income2 = Float.parseFloat(((RightTableRow) arg0).getMaxPercentage().replace(",", "."));
-		
-		if (income1 > income2){
-			return 1;
-		} else if (income1 < income2) {
-			return -1;
-		} else {
-			return 0;
-		}
 	}
 
 	public String getMinPercentage() {
@@ -52,8 +38,7 @@ public class RightTableRow extends TableRow {
 		this.maxPercentage = maxPercentage;
 	}
 	
-	public void updatePercentages(String p, boolean betterOdd) {
-		
+	public void updatePercentages(String p) {
 		float decimalNumber = Float.parseFloat(p.replace(",", "."));
 		DecimalFormat df = new DecimalFormat();
 		df.setMinimumFractionDigits(2);
@@ -63,10 +48,6 @@ public class RightTableRow extends TableRow {
 			maxPercentage = df.format(decimalNumber);
 		} else if (Float.parseFloat(this.getMinPercentage()) > decimalNumber){
 			minPercentage = df.format(decimalNumber);
-		}
-		
-		if (betterOdd) {
-			this.betterOdd = betterOdd;			
-		}
+		}		
 	}
 }

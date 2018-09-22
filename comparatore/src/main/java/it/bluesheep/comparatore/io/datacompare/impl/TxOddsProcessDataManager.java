@@ -1,11 +1,18 @@
 package it.bluesheep.comparatore.io.datacompare.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
+import it.bluesheep.arbitraggi.entities.BetReference;
+import it.bluesheep.arbitraggi.entities.ThreeOptionsArbsRecord;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
@@ -43,6 +50,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 	private boolean controlValidityOdds;
 	private long startComparisonTime;
 	private long minutesOfOddValidity;
+	private static double THREEWAY_NET_PROFIT;
 	
 	protected TxOddsProcessDataManager() {
 		super();
@@ -50,10 +58,11 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 		startComparisonTime = System.currentTimeMillis();
 		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
 		service = Service.TXODDS_SERVICENAME;
+		THREEWAY_NET_PROFIT = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.THREEWAY_NET_PROFIT));
 	}
 	
 	@Override
-	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap sportMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) {
+	public List<RecordOutput> compareTwoWayOdds(ChiaveEventoScommessaInputRecordsMap sportMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) {
 		Map<Service, Map<String, Double>> mapThresholdMap = ThresholdRatingFactory.getThresholdMapByAbstractBlueSheepService(bluesheepServiceType);
 		this.minThreshold = mapThresholdMap.get(Service.TXODDS_SERVICENAME).get(BlueSheepConstants.PP_MIN);
 		this.maxThreshold = mapThresholdMap.get(Service.TXODDS_SERVICENAME).get(BlueSheepConstants.PP_MAX);
@@ -206,7 +215,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 		output.setBookmakerName2(oppositeScommessaInputRecord.getBookmakerName());
 		output.setCampionato(scommessaInputRecord.getCampionato());
 		output.setDataOraEvento(scommessaInputRecord.getDataOraEvento());
-		output.setEvento(scommessaInputRecord.getPartecipante1() + BlueSheepConstants.REGEX_PIPE + scommessaInputRecord.getPartecipante2());
+		output.setEvento(scommessaInputRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS + scommessaInputRecord.getPartecipante2());
 		output.setQuotaScommessaBookmaker1(scommessaInputRecord.getQuota());
 		output.setQuotaScommessaBookmaker2(oppositeScommessaInputRecord.getQuota());
 		output.setRating(rating1 * 100);
@@ -233,5 +242,106 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 			}
 		}
 		return bookmakerList;
+	}
+
+	@Override
+	public List<ArbsRecord> compareThreeWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
+		
+		List<ArbsRecord> threeWayRecordOutput = new ArrayList<ArbsRecord>();
+		Set<String> bookmakerSet;
+		
+		Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = dataMap.get(sport);
+		if(sportMap != null) {
+			Set<Date> dateSet = new HashSet<Date>(sportMap.keySet());
+			for(Date date : dateSet) {
+				Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> eventoMap = sportMap.get(date);
+				if(eventoMap != null) {
+					Set<String> eventoSet = new HashSet<String>(eventoMap.keySet());
+					for(String evento : eventoSet) {
+						bookmakerSet = new HashSet<String>();
+						Map<Scommessa, Map<String, AbstractInputRecord>> scommessaMap = eventoMap.get(evento);
+						if(scommessaMap != null) {
+							Map<String, AbstractInputRecord> homeWinRecordMap = scommessaMap.get(Scommessa.SFIDANTE1VINCENTE_1);
+							Map<String, AbstractInputRecord> awayWinRecordMap = scommessaMap.get(Scommessa.SFIDANTE2VINCENTE_2);
+							Map<String, AbstractInputRecord> drawRecordMap = scommessaMap.get(Scommessa.PAREGGIO_X);
+							
+							if(homeWinRecordMap != null && awayWinRecordMap != null && drawRecordMap != null) {
+								List<AbstractInputRecord> homeWinRecordList = new ArrayList<AbstractInputRecord>(homeWinRecordMap.values());
+								List<AbstractInputRecord> awayWinRecordList = new ArrayList<AbstractInputRecord>(awayWinRecordMap.values());
+								List<AbstractInputRecord> drawRecordList = new ArrayList<AbstractInputRecord>(drawRecordMap.values());
+
+								homeWinRecordList = orderByQuotaListDesc(homeWinRecordList);
+								awayWinRecordList = orderByQuotaListDesc(awayWinRecordList);
+								drawRecordList = orderByQuotaListDesc(drawRecordList);
+								
+								
+								for(int i = 0; i < homeWinRecordList.size() && bookmakerSet.size() <= 8; i++) {
+									AbstractInputRecord homeWinRecord = homeWinRecordList.get(i);
+									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(homeWinRecord.getBookmakerName())) {
+										for(int j = 0; j < awayWinRecordList.size() && bookmakerSet.size() <= 8; j++) {
+											AbstractInputRecord awayWinRecord = awayWinRecordList.get(j);
+											if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(awayWinRecord.getBookmakerName())) {
+												for(int k = 0; k < drawRecordList.size() && bookmakerSet.size() <= 8; k++) {
+													AbstractInputRecord drawRecord = drawRecordList.get(k);
+													if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(drawRecord.getBookmakerName())) {
+														if(ArbsUtil.getThreeWayNetProfit(homeWinRecord, awayWinRecord, drawRecord) >= THREEWAY_NET_PROFIT) {
+															if(!homeWinRecord.getBookmakerName().equalsIgnoreCase(awayWinRecord.getBookmakerName()) || 
+																	!homeWinRecord.getBookmakerName().equalsIgnoreCase(drawRecord.getBookmakerName()) || 
+																	!awayWinRecord.getBookmakerName().equalsIgnoreCase(drawRecord.getBookmakerName())) {
+																bookmakerSet.add(homeWinRecord.getBookmakerName());
+																bookmakerSet.add(awayWinRecord.getBookmakerName());
+																bookmakerSet.add(drawRecord.getBookmakerName());
+															}
+														}else {
+															continue;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+								
+								if(bookmakerSet.size() > 0) {
+									BetReference[] referenceArray = ArbsUtil.findReferenceFromBookmakerMap(homeWinRecordMap, awayWinRecordMap, drawRecordMap);
+									
+									for(String bookmaker : bookmakerSet) {
+										AbstractInputRecord homeWinRecord = homeWinRecordMap.get(bookmaker);
+										AbstractInputRecord awayWinRecord = awayWinRecordMap.get(bookmaker);
+										AbstractInputRecord drawRecord = drawRecordMap.get(bookmaker);
+										
+										if(homeWinRecord != null && awayWinRecord != null && drawRecord != null) {
+											ArbsRecord arbRecord = new ThreeOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD, bookmaker, bookmaker, bookmaker, 
+													homeWinRecord.getQuota(), drawRecord.getQuota(), awayWinRecord.getQuota(), 
+													homeWinRecord.getTipoScommessa().getCode(), drawRecord.getTipoScommessa().getCode(), awayWinRecord.getTipoScommessa().getCode(), 
+													date.toString(), homeWinRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS + homeWinRecord.getPartecipante2(),
+													homeWinRecord.getCampionato(), sport.getCode(), 
+													BookmakerLinkGenerator.getBookmakerLinkEvent(homeWinRecord), BookmakerLinkGenerator.getBookmakerLinkEvent(drawRecord), BookmakerLinkGenerator.getBookmakerLinkEvent(awayWinRecord),
+													"",
+													-1, -1, -1, false, false, false, false, false, false, referenceArray[0], referenceArray[1]);
+											threeWayRecordOutput.add(arbRecord);
+										}
+									}
+								}
+								
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return threeWayRecordOutput;
+	}
+
+	private List<AbstractInputRecord> orderByQuotaListDesc(List<AbstractInputRecord> recordList) {
+		Collections.sort(recordList, new Comparator<AbstractInputRecord>() {
+
+			@Override
+			public int compare(AbstractInputRecord o1, AbstractInputRecord o2) {
+				return (new Double(o2.getQuota())).compareTo(new Double(o1.getQuota()));
+			}
+		});
+		return recordList;
 	}
 }

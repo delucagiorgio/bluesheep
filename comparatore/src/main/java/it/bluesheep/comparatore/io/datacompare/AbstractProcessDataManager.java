@@ -18,5 +18,5 @@ public abstract class AbstractProcessDataManager implements IProcessDataManager 
 	protected AbstractProcessDataManager() {}
 	
 	@Override
-	public abstract List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception;	
+	public abstract List<RecordOutput> compareTwoWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception;	
 }

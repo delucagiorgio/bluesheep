@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -39,7 +40,7 @@ public class TelegramMessageManager {
 		
 		ImageGenerator imageGenerator = new ImageGenerator(sdf.format(new Date(startTimeExecution)));
 		
-		Map<String, Map<String, List<String>>> eventsIdLinkMap = imageGenerator.generate(outputRecordKeys);
+		Map<String, Map<String, Set<String>>> eventsIdLinkMap = imageGenerator.generate(outputRecordKeys);
 			
 		// Fase di invio tramite telegram
 	    TelegramHandler telegramHandler = new TelegramHandler();
@@ -62,7 +63,7 @@ public class TelegramMessageManager {
 		telegramHandler.sendMessage(text, chat_ids);
 	    
 	    for (String idFile : idFileOrderedList) {
-	    	Map<String, List<String>> recordKeyLinksMap = eventsIdLinkMap.get(idFile);
+	    	Map<String, Set<String>> recordKeyLinksMap = eventsIdLinkMap.get(idFile);
 	    	int i = Integer.parseInt(idFile);
 	    	
 	    	//Dovrebbe essere sempre unico
@@ -89,7 +90,7 @@ public class TelegramMessageManager {
 	    }
 	}
 
-	private String createCaptionDescription(String eventoIdLink, List<String> linkBookmakerList) throws ParseException {
+	private String createCaptionDescription(String eventoIdLink, Set<String> linkBookmakerList) throws ParseException {
 		String[] eventoIdLinkSplitted = eventoIdLink.split(BlueSheepConstants.IMAGE_ID);
 		String[] eventoSplittedKey = eventoIdLinkSplitted[0].split(BlueSheepConstants.REGEX_CSV);
 		SimpleDateFormat sdfOutput = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -100,7 +101,6 @@ public class TelegramMessageManager {
 			String[] splittedBookmakerLink = bookmakerLink.split(BlueSheepConstants.KEY_SEPARATOR);
 			linkBookmakers += ArbsUtil.getTelegramBoldString(splittedBookmakerLink[0] + ":") + " " + splittedBookmakerLink[1] + System.lineSeparator();
 		}
-		
 		
 		return ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + eventoIdLinkSplitted[1] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Evento:") + " " + eventoSplittedKey[0] + BlueSheepConstants.REGEX_VERSUS + eventoSplittedKey[1] + System.lineSeparator() + 

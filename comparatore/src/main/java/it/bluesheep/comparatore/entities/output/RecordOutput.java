@@ -19,6 +19,8 @@ public abstract class RecordOutput {
 	protected String linkBook1;
 	protected String linkBook2;
 	protected double netProfit;
+	protected double liquidita1;
+	protected double liquidita2;
 	
 	public Date getDataOraEvento() {
 		return dataOraEvento;
@@ -138,6 +140,22 @@ public abstract class RecordOutput {
 
 	public void setNetProfit(double netProfit) {
 		this.netProfit = netProfit;
+	}
+
+	public double getLiquidita1() {
+		return liquidita1;
+	}
+
+	public void setLiquidita1(double liquidita) {
+		this.liquidita1 = liquidita;
+	}
+	
+	public double getLiquidita2() {
+		return liquidita2;
+	}
+
+	public void setLiquidita2(double liquidita) {
+		this.liquidita2 = liquidita;
 	}
 	
 }

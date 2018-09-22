@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -34,9 +35,9 @@ public class ImageGenerator {
 		file.delete();        
 	}
 
-	public Map<String, Map<String, List<String>>> generate(List<ArbsRecord> inputRecords) {
+	public Map<String, Map<String, Set<String>>> generate(List<ArbsRecord> inputRecords) {
 
-		Map<String, Map<String, List<String>>> eventXHTMLStringMap = new HashMap<String, Map<String, List<String>>>();
+		Map<String, Map<String, Set<String>>> eventXHTMLStringMap = new HashMap<String, Map<String, Set<String>>>();
 		
 		// Converte le stringhe in oggetti rappresentanti gli eventi
 		InputReader inputReader = new InputReader();
@@ -44,7 +45,7 @@ public class ImageGenerator {
 	    
 	    // Genero l'xhtml relativo ad ogni evento 
 	    for (int i = 0; i < events.size(); i++) {
-	    	Map<String, List<String>> recordKeyLinksMap = new HashMap<String, List<String>>(); 
+	    	Map<String, Set<String>> recordKeyLinksMap = new HashMap<String, Set<String>>(); 
 	    	recordKeyLinksMap.put(events.get(i).getUnifiedKeyAndLinks() + BlueSheepConstants.IMAGE_ID + (i + 1), events.get(i).getLinkBook());
     		eventXHTMLStringMap.put("" + (i + 1), recordKeyLinksMap);
 	    }
@@ -59,24 +60,38 @@ public class ImageGenerator {
 	    // Converto l'html in immagine .png
 		String xhtmlFilePath = "../xhtml/";
 		logger.info("xhtmlEvents size = " + xhtmlEvents.size());
-		ExecutorService executorService = Executors.newFixedThreadPool(xhtmlEvents.size());
+		int maxThreadPoolSize = 10;
+		ExecutorService executorService = Executors.newFixedThreadPool(maxThreadPoolSize);
 
 	    for (int i = 0; i < xhtmlEvents.size(); i++) {
 	    	HTMLSender htmlSender = new HTMLSender(i, xhtmlFilePath, xhtmlEvents.get(i));
 			executorService.execute(htmlSender);
-	    }
-				
-		executorService.shutdown();
-		
-		try {
-		    if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
-		    	// chiudi tutto se dopo 1 min non ha finito con gli screen
-		        executorService.shutdownNow();
-		    } 
-		} catch (InterruptedException e) {
-		    executorService.shutdownNow();
-		}
+			
+			boolean isLastQueueRequest = (i + 1) == xhtmlEvents.size();
+			if((i + 1) % maxThreadPoolSize == 0 || isLastQueueRequest) {
+				boolean timeoutReached = true;
+				try {
+					executorService.shutdown();
 
+					timeoutReached = !executorService.awaitTermination(60, TimeUnit.SECONDS);
+					if(timeoutReached) {
+						executorService.shutdownNow();
+					}
+				} catch (InterruptedException e) {
+					logger.error(e.getMessage(), e);
+					if(!executorService.isShutdown()) {
+						executorService.shutdownNow();
+					}
+				}
+				if(!isLastQueueRequest) {
+					executorService = Executors.newFixedThreadPool(maxThreadPoolSize);
+				}
+				
+				if(timeoutReached) {
+					logger.warn("" + this.getClass().getSimpleName() + " timeout reached = " + timeoutReached);
+				}				
+			}
+	    }
 		
 		return eventXHTMLStringMap;
 	}

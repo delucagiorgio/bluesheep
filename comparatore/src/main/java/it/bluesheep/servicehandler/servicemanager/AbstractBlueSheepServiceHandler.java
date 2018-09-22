@@ -105,8 +105,14 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 		try {			
 			executor.shutdown();
 			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
+			if(timeoutReached) {
+				executor.shutdownNow();
+			}
 		} catch (InterruptedException e) {
 			logger.warn(e.getMessage(), e);
+			if(!executor.isTerminated()) {
+				executor.shutdownNow();
+			}
 		}
 		
 		logger.info("" + serviceName + " service handler for data retrieval completed for all sports. Timeout reached = " + timeoutReached);

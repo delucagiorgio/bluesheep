@@ -45,10 +45,16 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 		boolean timeoutReached = true;
 		try {
 			executor.shutdown();
-			
-			timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES);
+
+			timeoutReached = !executor.awaitTermination(60, TimeUnit.SECONDS);
+			if(timeoutReached) {
+				executor.shutdownNow();
+			}
 		} catch (InterruptedException e) {
 			logger.error(e.getMessage(), e);
+			if(!executor.isShutdown()) {
+				executor.shutdownNow();
+			}
 		}
 		
 		if(timeoutReached) {

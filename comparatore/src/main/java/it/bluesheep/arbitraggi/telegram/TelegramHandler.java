@@ -75,7 +75,9 @@ public class TelegramHandler {
 			    } 
 			} catch (InterruptedException e) {
 				logger.error(e.getMessage(), e);
-			    executorService.shutdownNow();
+				if(!executorService.isShutdown()) {
+					executorService.shutdownNow();
+				}
 			}
 		}
 	}
@@ -96,7 +98,9 @@ public class TelegramHandler {
 			    } 
 			} catch (InterruptedException e) {
 				logger.error(e.getMessage(), e);
-			    executorService.shutdownNow();
+				if(!executorService.isShutdown()) {
+					executorService.shutdownNow();
+				}
 			}
 		}
 	}

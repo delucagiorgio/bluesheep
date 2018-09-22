@@ -1,5 +1,11 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
+import java.io.IOException;
+
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
+import it.bluesheep.arbitraggi.util.urlshortener.TinyUrlShortener;
+import it.bluesheep.util.BlueSheepConstants;
+
 /**
  * Evento di tennis
  * @author Fabio
@@ -13,9 +19,8 @@ public class TennisEvent extends Event {
 
 	TwoOptionsBetSumUp bet_12;
 	
-	public TennisEvent(String participant1, String participant2, String date, String sport, String country,
-			String championship, String extractionTime) {
-		super(participant1, participant2, date, sport, country, championship, extractionTime);
+	public TennisEvent(ArbsRecord arbsRecord, String extractionTime) {
+		super(arbsRecord, extractionTime);
 		bet_12 = new TwoOptionsBetSumUp(UNODUE, UNO, DUE, UNO, DUE);
 	}
 	
@@ -24,13 +29,29 @@ public class TennisEvent extends Event {
 	}
 
 	@Override
-	public void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2,
-			String oddsType2, String odd2, String money2, boolean betterOdd) {
+	public void addRecord(ArbsRecord arbsRecord) {
 		
 		// Il tennis ha come unica opzione di gioco UNODUE
-		bet_12.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);
+		bet_12.addRecord(arbsRecord, false);
+		
+		String linkBook1 = arbsRecord.getLink1();
+		String linkBook2 = arbsRecord.getLink2();
+		try {
+			if(!"null".equals(linkBook1) && linkBook1 != null) {
+				linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook1);
+			}
+			if(!"null".equals(linkBook2)  && linkBook2 != null) {
+				linkBook2 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook2);
+			}
+		} catch (IOException e) {
+//			logger.error(e.getMessage(), e);
+		}
+		if(linkBook1 != null && !"null".equals(linkBook1) && linkBook2 != null && !"null".equals(linkBook2)) {
+			this.getLinkBook().add(arbsRecord.getBookmaker1() + BlueSheepConstants.KEY_SEPARATOR + linkBook1);
+			this.getLinkBook().add(arbsRecord.getBookmaker2() + BlueSheepConstants.KEY_SEPARATOR + linkBook2);
+		}
 	}
-
+	
 	@Override
 	public String drawHeaderBallImage() {
 		final String tennisballPath = "./img/tennis-ball.png";

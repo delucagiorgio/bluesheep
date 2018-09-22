@@ -6,34 +6,74 @@
 		class="org.apache.log4j.ConsoleAppender">
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern"
-			value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" />
+				value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" />
 		</layout>
 	</appender>
 
-<!-- 	<appender name="file" -->
-<!-- 		class="org.apache.log4j.RollingFileAppender"> -->
-<!-- 		<param name="append" value="false" /> -->
-<!-- 		<param name="maxFileSize" value="100MB" /> -->
-<!-- 		<param name="maxBackupIndex" value="10" /> -->
+	<appender name="file"
+		class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="../LOG/BluesheepApplication.log" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd-HH" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" />
+		</layout>
+	</appender>
+
+<!-- 	<appender name="arbitraggiAppender" -->
+<!-- 		class="org.apache.log4j.DailyRollingFileAppender"> -->
 <!-- 		<param name="file" -->
-<!-- 			value="../LOG/BluesheepApplication.log" /> -->
+<!-- 			value="../LOG/BluesheepApplicationArbitraggi.log" /> -->
+<!-- 		<param name="DatePattern" value="'.'yyyy-MM-dd-HH" /> -->
+<!-- 		<param name="append" value="false" /> -->
 <!-- 		<layout class="org.apache.log4j.PatternLayout"> -->
 <!-- 			<param name="ConversionPattern" -->
-<!-- 				value="[%d{yyyy-MM-dd HH:mm:ss}] - %-5p - %c{1}: %L | %m%n" /> -->
+<!-- 				value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" /> -->
 <!-- 		</layout> -->
 <!-- 	</appender> -->
 	
-	<appender name="file" class="org.apache.log4j.DailyRollingFileAppender">
-       <param name="file" value="../LOG/BluesheepApplication.log" />
-       <param name="DatePattern" value="'.'yyyy-MM-dd-HH" />
-       <layout class="org.apache.log4j.PatternLayout">
-          <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n"/>          
-       </layout>
-    </appender>
+<!-- 	<logger name="it.bluesheep.arbitraggi" additivity="false"> -->
+<!-- 		<level value="info" /> -->
+<!-- 		<appender-ref ref="arbitraggiAppender" /> -->
+<!-- 	</logger> -->
+	
+<!-- 	<appender name="serviceHandlerAppender" -->
+<!-- 		class="org.apache.log4j.DailyRollingFileAppender"> -->
+<!-- 		<param name="file" -->
+<!-- 			value="../LOG/BluesheepApplicationServiceHandler.log" /> -->
+<!-- 		<param name="DatePattern" value="'.'yyyy-MM-dd-HH" /> -->
+<!-- 		<param name="append" value="false" /> -->
+<!-- 		<layout class="org.apache.log4j.PatternLayout"> -->
+<!-- 			<param name="ConversionPattern" -->
+<!-- 				value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" /> -->
+<!-- 		</layout> -->
+<!-- 	</appender> -->
+
+<!-- 	<logger name="it.bluesheep.servicehandler" additivity="false"> -->
+<!-- 		<level value="info" /> -->
+<!-- 		<appender-ref ref="serviceHandlerAppender" /> -->
+<!-- 	</logger> -->
+
+<!-- 	<appender name="comparatoreAppender" -->
+<!-- 		class="org.apache.log4j.DailyRollingFileAppender"> -->
+<!-- 		<param name="file" -->
+<!-- 			value="../LOG/BluesheepApplicationComparatore.log" /> -->
+<!-- 		<param name="DatePattern" value="'.'yyyy-MM-dd-HH" /> -->
+<!-- 		<param name="append" value="false" /> -->
+<!-- 		<layout class="org.apache.log4j.PatternLayout"> -->
+<!-- 			<param name="ConversionPattern" -->
+<!-- 				value="[%d{yyyy-MM-dd HH:mm:ss:SSS}] - [%-0.25t] - %-30c %x- %M - %L - [%-0.5p] | %m%n" /> -->
+<!-- 		</layout> -->
+<!-- 	</appender> -->
+
+<!-- 	<logger name="it.bluesheep.comparatore.io" additivity="false"> -->
+<!-- 		<level value="info" /> -->
+<!-- 		<appender-ref ref="comparatoreAppender" /> -->
+<!-- 	</logger> -->
 
 	<root>
 		<level value="INFO" />
-<!-- 		<appender-ref ref="console"/> -->
-		<appender-ref ref="file"/>
+		<!-- <appender-ref ref="console"/> -->
+		<appender-ref ref="file" />
 	</root>
 </log4j:configuration>

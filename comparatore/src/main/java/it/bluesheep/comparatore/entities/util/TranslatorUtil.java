@@ -188,7 +188,7 @@ public class TranslatorUtil {
 				String countryCodeFootball = splittedCampionato[0].substring(startIndex, splittedCampionato[0].length());
 				String nation = TranslatorUtil.getNationTranslation(countryCodeFootball);
 				if("INT".equalsIgnoreCase(countryCodeFootball)) {
-					String[] eventoSplitted = recordOutput.getEvento().split("\\|");
+					String[] eventoSplitted = recordOutput.getEvento().split(BlueSheepConstants.REGEX_VERSUS);
 					String partecipante1 = getTraduzioneItaliana(eventoSplitted[0]);
 					String partecipante2 = getTraduzioneItaliana(eventoSplitted[1]);
 					recordOutput.setEvento(partecipante1 + "|" + partecipante2); 

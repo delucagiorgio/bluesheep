@@ -1,8 +1,11 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
+import it.bluesheep.arbitraggi.util.urlshortener.TinyUrlShortener;
 import it.bluesheep.util.BlueSheepConstants;
 
 /**
@@ -19,24 +22,40 @@ public abstract class Event {
 	private String sport;
 	private String country;
 	private String championship;
-	private List<String> linkBook;
+	private Set<String> linkBook;
 
 	
-	public Event(String participant1, String participant2, String date, String sport, String country,
-			String championship, String extractionTime)  {
-		super();
-		this.participant1 = participant1;
-		this.participant2 = participant2;
-		this.sport = sport;
-		this.date = date;
-		this.country = country;
-		this.championship = championship;
+	public Event(ArbsRecord arbsRecord, String extractionTime) {
+		this.participant1 = arbsRecord.getParticipant1();
+		this.participant2 = arbsRecord.getParticipant2();
+		this.date = arbsRecord.getDate().toString();
+		this.country = arbsRecord.getCountry();
+		this.championship = arbsRecord.getChampionship();
 		this.setExtractionTime(extractionTime);
-		this.linkBook = new ArrayList<String>();
+		this.sport = arbsRecord.getSport();
+		if(linkBook == null) {
+			linkBook = new HashSet<String>();
+		}
+		String linkBook1 = arbsRecord.getLink1();
+		String linkBook2 = arbsRecord.getLink2();
+		try {
+			if(!"null".equals(linkBook1) && linkBook1 != null) {
+				linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook1);
+			}
+			if(!"null".equals(linkBook2)  && linkBook2 != null) {
+				linkBook2 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook2);
+			}
+		} catch (IOException e) {
+//			logger.error(e.getMessage(), e);
+		}
+		if(linkBook1 != null && !"null".equals(linkBook1) && linkBook2 != null && !"null".equals(linkBook2)) {
+			this.getLinkBook().add(arbsRecord.getBookmaker1() + BlueSheepConstants.KEY_SEPARATOR + linkBook1);
+			this.getLinkBook().add(arbsRecord.getBookmaker2() + BlueSheepConstants.KEY_SEPARATOR + linkBook2);
+		}
 	}
 	
-	public abstract void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2, String oddsType2, String odd2, String money2, boolean better_odd);
-	
+    public abstract void addRecord(ArbsRecord arbsRecord);
+    
 	public String toHtml(int index, int tot) {
 		
 		final String bootstrapPath = "./bootstrap.min.css";
@@ -190,7 +209,7 @@ public abstract class Event {
 				
 	}
 
-	public List<String> getLinkBook() {
+	public Set<String> getLinkBook() {
 		return linkBook;
 	}
 }

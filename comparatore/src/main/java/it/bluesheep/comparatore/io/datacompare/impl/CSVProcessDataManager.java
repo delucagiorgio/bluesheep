@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.CSVInputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
@@ -85,9 +86,15 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 	}
 
 	@Override
-	public List<RecordOutput> compareOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
-		throw new Exception("Incorrect implementation of getRatingByScommessaPair");
+	public List<RecordOutput> compareTwoWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
+		throw new Exception("Incorrect implementation of compareTwoWayOdds");
 		//Viene lasciato fare al processManager di TxOdds : tratterà gli eventi di Bet365 come un normale Bookmaker in più
+	}
+
+	@Override
+	public List<ArbsRecord> compareThreeWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport,
+			AbstractBlueSheepService bluesheepServiceType) throws Exception {
+		throw new Exception("Incorrect implementation of compareThreeWayOdds");
 	}
 
 }

@@ -1,5 +1,12 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
+import java.io.IOException;
+
+import it.bluesheep.arbitraggi.entities.ArbsRecord;
+import it.bluesheep.arbitraggi.entities.ThreeOptionsArbsRecord;
+import it.bluesheep.arbitraggi.util.urlshortener.TinyUrlShortener;
+import it.bluesheep.util.BlueSheepConstants;
+
 /**
  * Evento di calcio
  * @author Fabio
@@ -74,9 +81,8 @@ public class SoccerEvent extends Event {
 	TwoOptionsBetSumUp bet_GGNG;
 	ThreeOptionsBetSumUp bet_1X2;
 	
-	public SoccerEvent(String participant1, String participant2, String date, String sport, String country,
-			String championship, String extractionTime) {
-		super(participant1, participant2, date, sport, country, championship, extractionTime);
+	public SoccerEvent(ArbsRecord arbsRecord, String extractionTime) {
+		super(arbsRecord, extractionTime);
 		bet_UO05 = new TwoOptionsBetSumUp(UNDEROVER05, UNDER05, OVER05, UNDER05CODE, OVER05CODE);
 		bet_UO15 = new TwoOptionsBetSumUp(UNDEROVER15, UNDER15, OVER15, UNDER15CODE, OVER15CODE);
 		bet_UO25 = new TwoOptionsBetSumUp(UNDEROVER25, UNDER25, OVER25, UNDER25CODE, OVER25CODE);
@@ -125,29 +131,51 @@ public class SoccerEvent extends Event {
 	}
 
 	@Override
-	public void addRecord(String bookmaker1, String oddsType1, String odd1, String money1, String bookmaker2,
-			String oddsType2, String odd2, String money2, boolean betterOdd) {
+	public void addRecord(ArbsRecord arbsRecord) {
+		
+		String oddsType1 = arbsRecord.getBet1();
 		
 		if (oddsType1.equals("GOAL") || oddsType1.equals("NOGOAL")) {
-			bet_GGNG.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_GGNG.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_0.5") || oddsType1.equals("O_0.5")) {
-			bet_UO05.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_UO05.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_1.5") || oddsType1.equals("O_1.5")) {
-			bet_UO15.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_UO15.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_2.5") || oddsType1.equals("O_2.5")) {
-			bet_UO25.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_UO25.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_3.5") || oddsType1.equals("O_3.5")) {
-			bet_UO35.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_UO35.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_4.5") || oddsType1.equals("O_4.5")) {
-			bet_UO45.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_UO45.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_5.5") || oddsType1.equals("O_5.5")) {
-			bet_UO55.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_UO55.addRecord(arbsRecord, false);			
 		} else if (oddsType1.equals("U_6.5") || oddsType1.equals("O_6.5")) {
-			bet_UO65.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
-		} else if ((oddsType1.equals("1") || oddsType1.equals("2") || oddsType1.equals("X")
+			bet_UO65.addRecord(arbsRecord, false);			
+		} else if (arbsRecord instanceof ThreeOptionsArbsRecord &&
+				arbsRecord.getBookmaker1().equals(arbsRecord.getBookmaker2()) &&
+				arbsRecord.getBookmaker1().equals(((ThreeOptionsArbsRecord) arbsRecord).getBookmaker3())) {
+			bet_1X2.addRecord(arbsRecord, true);			
+		} else if (!(arbsRecord instanceof ThreeOptionsArbsRecord) && (oddsType1.equals("1") || oddsType1.equals("2") || oddsType1.equals("X")
 				 || oddsType1.equals("1X")  || oddsType1.equals("X2")  || oddsType1.equals("12"))) {
-			bet_1X2.addRecord(bookmaker1, oddsType1, odd1, null, bookmaker2, oddsType2, odd2, money2, betterOdd);			
+			bet_1X2.addRecord(arbsRecord, false);			
 		}		
+		
+		String linkBook1 = arbsRecord.getLink1();
+		String linkBook2 = arbsRecord.getLink2();
+		try {
+			if(!"null".equals(linkBook1) && linkBook1 != null) {
+				linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook1);
+			}
+			if(!"null".equals(linkBook2)  && linkBook2 != null) {
+				linkBook2 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook2);
+			}
+		} catch (IOException e) {
+//			logger.error(e.getMessage(), e);
+		}
+		if(linkBook1 != null && !"null".equals(linkBook1) && linkBook2 != null && !"null".equals(linkBook2)) {
+			this.getLinkBook().add(arbsRecord.getBookmaker1() + BlueSheepConstants.KEY_SEPARATOR + linkBook1);
+			this.getLinkBook().add(arbsRecord.getBookmaker2() + BlueSheepConstants.KEY_SEPARATOR + linkBook2);
+		}
 	}
 
 	@Override
