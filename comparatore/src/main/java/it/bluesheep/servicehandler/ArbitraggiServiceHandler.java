@@ -5,10 +5,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -18,12 +22,10 @@ import org.apache.log4j.Logger;
 import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.arbitraggi.entities.ArbsType;
 import it.bluesheep.arbitraggi.entities.BetReference;
-import it.bluesheep.arbitraggi.entities.ThreeOptionsArbsRecord;
 import it.bluesheep.arbitraggi.entities.TwoOptionsArbsRecord;
 import it.bluesheep.arbitraggi.telegram.TelegramMessageManager;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
-import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
@@ -43,6 +45,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 	private static ArbitraggiServiceHandler instance;
 	private static Map<String, Map<String, List<ArbsRecord>>> twoWayArbsRecordHistoryStatus;
 	private static Map<String, Map<String, List<ArbsRecord>>> threeWayArbsRecordHistoryStatus;
+	private static List<ArbsRecord> twoWayMessageToBeSentKeysList;
+	private static List<ArbsRecord> threeWayMessageToBeSentKeysList;
 	private static long startTime;
 
 	private ArbitraggiServiceHandler() {
@@ -62,10 +66,9 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 		try {
 			startTime = System.currentTimeMillis();
 
-			startTwoWayOptionProcess();
-			saveOutputOnFile(ArbsType.TWO_WAY);
+			collectDataAndCheckHistoryAndSend();
 			
-			startThreeWayOptionProcess();
+			saveOutputOnFile(ArbsType.TWO_WAY);
 			saveOutputOnFile(ArbsType.THREE_WAY);
 
 			long endTime = System.currentTimeMillis();
@@ -79,171 +82,14 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 	}
 
 	/**
-	 * GD - 19/09/18 Avvia il processo che calcola gli arbitraggi a tre vie. 1.
-	 * comparazione delle quote 2. creazione dei record univoci di arbitraggio 3.
-	 * filtraggio degli arbitraggi già inviati 4. salvataggio degli arbitraggi da
-	 * inviare su file 5. invio tramite TelegramBot dei messaggi
-	 */
-	private void startThreeWayOptionProcess() {
-
-		getAlreadySentArbsOddsThreeWay();
-
-		IProcessDataManager processDataManager = ProcessDataManagerFactory
-				.getProcessDataManagerByString(Service.TXODDS_SERVICENAME);
-
-		List<ArbsRecord> returnList = new ArrayList<ArbsRecord>();
-		for (Sport sport : Sport.values()) {
-			try {
-				returnList.addAll(processDataManager.compareThreeWayOdds(BlueSheepSharedResources.getEventoScommessaRecordMap(), sport, this));
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-
-		logger.info("3-way arbs size = " + returnList.size());
-		List<ArbsRecord> toBeSentRecordList = new ArrayList<ArbsRecord>();
-		
-		int alreadySentCount = 0;
-		
-		for (ArbsRecord record : returnList) {
-
-			record = hasBeenAlreadySentThreeWay(record);
-
-			if (record != null) {
-				Map<String, List<ArbsRecord>> runMap = threeWayArbsRecordHistoryStatus.get(BlueSheepConstants.STATUS0_ARBS_RECORD);
-				if (runMap == null) {
-					runMap = new HashMap<String, List<ArbsRecord>>();
-					threeWayArbsRecordHistoryStatus.put(BlueSheepConstants.STATUS0_ARBS_RECORD, runMap);
-					List<ArbsRecord> arbsRecordList = new ArrayList<ArbsRecord>();
-					arbsRecordList.add(record);
-					runMap.put("" + startTime, arbsRecordList);
-				}else {
-					List<ArbsRecord> arbsRecordList = runMap.get("" + startTime);
-					if(arbsRecordList == null) {
-						arbsRecordList = new ArrayList<ArbsRecord>();
-					}
-					arbsRecordList.add(record);
-					runMap.put("" + startTime, arbsRecordList);
-				}
-				toBeSentRecordList.add(record);
-			}else {
-				alreadySentCount++;
-			}
-		}
-		
-		logger.info("" + toBeSentRecordList.size() + " message(s) to be sent. Message(s) already sent "
-				+ alreadySentCount + "/" + returnList.size());		
-		if(toBeSentRecordList != null && !toBeSentRecordList.isEmpty()) {
-			
-//		uta
-			
-			Map<String, List<ArbsRecord>> toBeSentForUpdate = threeWayArbsRecordHistoryStatus.get(BlueSheepConstants.STATUS0_ARBS_RECORD);
-			List<ArbsRecord> arbsRecordToBeSent = getAllArbsRecordRequired(toBeSentForUpdate, threeWayArbsRecordHistoryStatus);
-			if(arbsRecordToBeSent != null && !arbsRecordToBeSent.isEmpty()) {
-//				System.out.println("**********************************************************************");
-//
-//				for(ArbsRecord record : arbsRecordToBeSent) {
-//					System.out.println(record.getKeyEventoBookmakerBet());
-//				}
-//				System.out.println("**********************************************************************");
-
-				TelegramMessageManager tmm = new TelegramMessageManager(startTime);
-				tmm.sendMessageToTelegramGroupByBotAndStore(arbsRecordToBeSent);
-			}
-		}
-	}
-
-	private ArbsRecord hasBeenAlreadySentThreeWay(ArbsRecord record) {
-		boolean found = false;
-
-		ThreeOptionsArbsRecord threeWayRecord = (ThreeOptionsArbsRecord) record;
-		
-		if (threeWayArbsRecordHistoryStatus != null && !threeWayArbsRecordHistoryStatus.isEmpty()) {
-			// Se non ho trovato una run con lo stesso record ma con rating inferiore o
-			// quella che ho trovato è precedente a runId
-			Map<String, List<ArbsRecord>> statusRunList = threeWayArbsRecordHistoryStatus.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD);
-			if (statusRunList != null) {
-				Set<String> runSet = new HashSet<String>(statusRunList.keySet());
-				for (String run : runSet) {
-					List<ArbsRecord> arbsList = new ArrayList<ArbsRecord>(statusRunList.get(run));
-					for (ArbsRecord arbStored : arbsList) {
-						if (arbStored.isSameEventBookmakerBet(threeWayRecord)) {
-							found = true;
-							arbStored.changeStatus();
-							statusRunList.get(run).remove(arbStored);
-							Map<String, List<ArbsRecord>> alreadySentArbsRecord = threeWayArbsRecordHistoryStatus
-									.get(BlueSheepConstants.STATUS1_ARBS_RECORD);
-							if (alreadySentArbsRecord == null) {
-								alreadySentArbsRecord = new HashMap<String, List<ArbsRecord>>();
-							}
-							List<ArbsRecord> arbsRecordList = alreadySentArbsRecord.get(run);
-							if (arbsRecordList == null) {
-								arbsRecordList = new ArrayList<ArbsRecord>();
-							}
-							
-							BetReference[] betReferenceArray = ArbsUtil.findReferenceInMapFromOutputRecord(threeWayRecord);
-							BetReference betRef = betReferenceArray[0];
-							BetReference betAverage = betReferenceArray[1];
-							
-							ArbsRecord arbsRecord = new ThreeOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD,
-									threeWayRecord.getBookmaker1(), threeWayRecord.getBookmaker2(), threeWayRecord.getBookmaker3(),
-									threeWayRecord.getOdd1(), threeWayRecord.getOdd2(), threeWayRecord.getOdd3(), 
-									threeWayRecord.getBet1(), threeWayRecord.getBet2(), threeWayRecord.getBet3(),
-									threeWayRecord.getDate(), threeWayRecord.getKeyEvento(), threeWayRecord.getChampionship(), 
-									threeWayRecord.getSport(), threeWayRecord.getLink1(), threeWayRecord.getLink2(), threeWayRecord.getLink3(),
-									threeWayRecord.getCountry(), threeWayRecord.getLiquidita1(), threeWayRecord.getLiquidita2(), threeWayRecord.getLiquidita3(),
-									false, false, false, false, false, false, betRef, betAverage);
-							
-							arbsRecordList.add(arbsRecord);
-							alreadySentArbsRecord.put(run, arbsRecordList);
-							threeWayArbsRecordHistoryStatus.put(BlueSheepConstants.STATUS1_ARBS_RECORD, alreadySentArbsRecord);
-							logger.debug("Updated status for key " + arbStored.getKeyEventoBookmakerBet());
-							break;
-						}
-					}
-					if(found) {
-						break;
-					}
-				}
-			}
-		}
-
-		return found ? null : record;
-	}
-
-	private void getAlreadySentArbsOddsThreeWay() {
-		if (threeWayArbsRecordHistoryStatus == null) {
-			threeWayArbsRecordHistoryStatus = new TreeMap<String, Map<String, List<ArbsRecord>>>();
-		}
-		String filenamePath = BlueSheepServiceHandlerManager.getProperties()
-				.getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS_3WAY;
-		List<String> inputFileList = new ArrayList<String>();
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(filenamePath));
-
-			String line = br.readLine();
-			while (line != null) {
-				inputFileList.add(line);
-				line = br.readLine();
-			}
-			br.close();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-
-		threeWayArbsRecordHistoryStatus = ArbsUtil.initializePreviousRunRecordsMap(inputFileList);
-		logger.info("There are already " + threeWayArbsRecordHistoryStatus.size() + " run collection of message sent.");
-	}
-
-	/**
 	 * GD - 05/08/18 Avvia il processo che calcola gli arbitraggi. 1. comparazione
 	 * delle quote 2. creazione dei record univoci di arbitraggio 3. filtraggio
 	 * degli arbitraggi già inviati 4. salvataggio degli arbitraggi da inviare su
 	 * file 5. invio tramite TelegramBot dei messaggi
 	 */
-	private void startTwoWayOptionProcess() {
+	private void collectDataAndCheckHistoryAndSend() {
 
-		getAlreadySentArbsOddsTwoWay();
+		initializeHistoryMaps();
 
 		Map<Service, List<RecordOutput>> outputRecordMap = CompareProcessFactory.startComparisonOdds(this);
 		List<RecordOutput> tabellaOutputList = new ArrayList<RecordOutput>();
@@ -253,110 +99,101 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 
 		outputRecordMap.clear();
 
-		if (tabellaOutputList != null && !tabellaOutputList.isEmpty()) {
-			List<ArbsRecord> messageToBeSentKeysList = new ArrayList<ArbsRecord>();
-			List<String> recordKeysList = new ArrayList<String>();
+		List<ArbsRecord> recordCompared = new ArrayList<ArbsRecord>(tabellaOutputList.size());
+		for(RecordOutput record : tabellaOutputList) {
+			BetReference[] referencesArray = ArbsUtil.findReferenceInMapFromOutputRecord(record);
+			ArbsRecord arbRecord = new TwoOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD, record, referencesArray[0], referencesArray[1]);
+			recordCompared.add(arbRecord);
+		}
+		
+		IProcessDataManager processorTxOdds = ProcessDataManagerFactory.getProcessDataManagerByString(Service.TXODDS_SERVICENAME);
+		List<ArbsRecord> resultList = null;
+		try {
+			resultList = processorTxOdds.compareThreeWayOdds(BlueSheepSharedResources.getEventoScommessaRecordMap(), Sport.CALCIO, this);
+			if(resultList != null && !resultList.isEmpty()) {
+				recordCompared.addAll(resultList);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);		
+		}
+
+		if (recordCompared != null && !recordCompared.isEmpty()) {
+
 			int alreadySentCount = 0;
-			for (RecordOutput record : tabellaOutputList) {
-				String recordKey = ArbsUtil.getKeyArbsTwoWayFromOutputRecord(record);
-				boolean isExchangeRecord = record instanceof RecordBookmakerVsExchangeOdds;
-				boolean isValidExchangeRecord = isExchangeRecord
-						&& ((RecordBookmakerVsExchangeOdds) record).getLiquidita2() >= 50D;
-				// Creo mapping tra le chiavi evento (data-sport-partecipanti) "recordKeyList" e
-				// i record di output
-				if ((!(record instanceof RecordBookmakerVsExchangeOdds) || isValidExchangeRecord)) {
-					// controllo che non l'abbia già mandata, se si non faccio nulla
-
-					// Il metodo prenderà in input tutta la mappa calcolata sopra, restituisce una
-					// mappa la cui chiave è la chiave evento,
-					// i valori sono tutti i record di output trovati ed eventualmente da rinviare,
-					// differenziondoli a loro volta per tipo
-					// ("nuovo arbitraggio - mai inviato prima" o "arbitraggio già inviato - inviato
-					// per completezza di informazione")
-					//
-					recordKey = hasBeenAlreadySentTwoWay(recordKey);
-
-					// Creo tutti i record di arbitraggi con i dati necessari e li colleziono in due
-					// liste differenti: in una lista quelli
-					// la tipologia di record ("nuovo arbitraggio - mai inviato prima"); nella
-					// seconda per la tipologia di record ("arbitraggio
-					// già inviato - inviato per completezza di informazione")
-					if (recordKey != null) {
-
-						BetReference[] betReferenceArray = ArbsUtil.findReferenceInMapFromOutputRecord(record);
-						BetReference betRef = betReferenceArray[0];
-						BetReference betAverage = betReferenceArray[1];
-
-						ArbsRecord arbsRecord = new TwoOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD,
-								record.getBookmakerName1(), record.getBookmakerName2(),
-								record.getQuotaScommessaBookmaker1(), record.getQuotaScommessaBookmaker2(),
-								record.getScommessaBookmaker1(), record.getScommessaBookmaker2(),
-								record.getDataOraEvento().toString(), record.getEvento(), record.getCampionato(),
-								record.getSport(), record.getLinkBook1(), record.getLinkBook2(), record.getNazione(),
-								record.getLiquidita1(), record.getLiquidita2(), false, false, false, false, betRef,
-								betAverage);
-						// Aggiungo solo i record nuovi nella mappa
-						messageToBeSentKeysList.add(arbsRecord);
-						Map<String, List<ArbsRecord>> runMap = twoWayArbsRecordHistoryStatus
-								.get(BlueSheepConstants.STATUS0_ARBS_RECORD);
+			for (ArbsRecord record : recordCompared) {
+				record = isToBeSentRecord(record);
+					
+				if (record != null) {
+					// Aggiungo solo i record nuovi nella mappa
+					Map<String, Map<String, List<ArbsRecord>>> mapToUse = getCorrectMapByArbsType(record.getArbType());
+					List<ArbsRecord> listToUse = getCorrectListByArbsType(record.getArbType());
+					Map<String, List<ArbsRecord>> runMap = null;
+					
+					if(mapToUse != null && listToUse != null) {
+						listToUse.add(record);
+						runMap = mapToUse.get(BlueSheepConstants.STATUS0_ARBS_RECORD);
 						if (runMap == null) {
 							runMap = new HashMap<String, List<ArbsRecord>>();
-							twoWayArbsRecordHistoryStatus.put(BlueSheepConstants.STATUS0_ARBS_RECORD, runMap);
-							runMap.put("" + startTime, messageToBeSentKeysList);
+							mapToUse.put(BlueSheepConstants.STATUS0_ARBS_RECORD, runMap);
 						}
+						runMap.put("" + startTime, new ArrayList<ArbsRecord>(listToUse));
 
-						// Tutti i record
-						recordKeysList.add(recordKey);
-					} else {
-						alreadySentCount++;
+					}else {
+						logger.warn("Type of arb not supported " + record.getArbType().getCode());
 					}
 				} else {
-					logger.info("Insufficient size (liquidità) by requirements : " + 50D);
+					alreadySentCount++;
 				}
 			}
 
-			// Inviare tutta la lista degli arbitraggi secondo gli eventi che si ricevono,
-			// pescando dalla history tutti gli arbitraggi necessari.
-
-			logger.info("" + messageToBeSentKeysList.size() + " message(s) to be sent. Message(s) already sent "
-					+ alreadySentCount + "/" + tabellaOutputList.size());
+			logger.info("Message(s) already sent " + alreadySentCount + "/" + recordCompared.size());
 
 			// Se ci sono aggiornamenti o nuovi arbitraggi, invia i risultati e li salva
-			if (!messageToBeSentKeysList.isEmpty()) {
 
-				TelegramMessageManager tmm = new TelegramMessageManager(startTime);
-				Map<String, List<ArbsRecord>> toBeSentForUpdate = twoWayArbsRecordHistoryStatus
+
+			TelegramMessageManager tmm = new TelegramMessageManager(startTime);
+			for(ArbsType arbsType : ArbsType.values()) {
+				logger.info("Sending info via Telegram for ArbsType " + arbsType);
+				if (!getCorrectListByArbsType(arbsType).isEmpty()) {
+					Map<String, Map<String, List<ArbsRecord>>> correctMap = getCorrectMapByArbsType(arbsType);
+					Map<String, List<ArbsRecord>> toBeSentForNewRecord = correctMap
 						.get(BlueSheepConstants.STATUS0_ARBS_RECORD);
-				List<ArbsRecord> arbsRecordToBeSent = getAllArbsRecordRequired(toBeSentForUpdate, twoWayArbsRecordHistoryStatus);
-				if (arbsRecordToBeSent != null && !arbsRecordToBeSent.isEmpty()) {
-					tmm.sendMessageToTelegramGroupByBotAndStore(arbsRecordToBeSent);
+					List<ArbsRecord> arbsRecordToBeSent = getAllArbsRecordRequired(arbsType, toBeSentForNewRecord, correctMap);
+					if (arbsRecordToBeSent != null && !arbsRecordToBeSent.isEmpty()) {
+						tmm.sendMessageToTelegramGroupByBotAndStore(arbsRecordToBeSent);
+					}
 				}
+				logger.info("Sending info via Telegram for ArbsType " + arbsType + " completed");
+
 			}
 		}
 		tabellaOutputList.clear();
 	}
 
-	private List<ArbsRecord> getAllArbsRecordRequired(Map<String, List<ArbsRecord>> toBeSentForUpdate, Map<String, Map<String, List<ArbsRecord>>> arbsRecordHistoryStatus) {
+	private List<ArbsRecord> getAllArbsRecordRequired(ArbsType type, Map<String, List<ArbsRecord>> toBeSentForNewRecord, Map<String, Map<String, List<ArbsRecord>>> arbsRecordHistoryStatus) {
 		Set<ArbsRecord> returnList = new HashSet<ArbsRecord>();
-
-		for (String runId : toBeSentForUpdate.keySet()) {
-			List<ArbsRecord> list = toBeSentForUpdate.get(runId);
-			for (ArbsRecord record : list) {
-				Map<String, List<ArbsRecord>> repeatedMessageMap = arbsRecordHistoryStatus
-						.get(BlueSheepConstants.STATUS1_ARBS_RECORD);
-				if (repeatedMessageMap != null && !repeatedMessageMap.isEmpty()) {
-					for (String runIdRepeated : repeatedMessageMap.keySet()) {
-						List<ArbsRecord> messageList = repeatedMessageMap.get(runIdRepeated);
-						if (messageList != null && !messageList.isEmpty()) {
-							for (ArbsRecord recordRepeated : messageList) {
-								if (ArbsRecord.isSameEventBookmakerBet(recordRepeated, record)) {
-									returnList.add(recordRepeated);
+		if(toBeSentForNewRecord != null && !toBeSentForNewRecord.isEmpty()) {
+			for (String runId : toBeSentForNewRecord.keySet()) {
+				List<ArbsRecord> list = toBeSentForNewRecord.get(runId);
+				for (ArbsRecord record : list) {
+					if(record.getArbType().equals(type)) {
+						Map<String, List<ArbsRecord>> repeatedMessageMap = arbsRecordHistoryStatus
+								.get(BlueSheepConstants.STATUS1_ARBS_RECORD);
+						if (repeatedMessageMap != null && !repeatedMessageMap.isEmpty()) {
+							for (String runIdRepeated : repeatedMessageMap.keySet()) {
+								List<ArbsRecord> messageList = repeatedMessageMap.get(runIdRepeated);
+								if (messageList != null && !messageList.isEmpty()) {
+									for (ArbsRecord recordRepeated : messageList) {
+										if (ArbsRecord.isSameEventBookmakerBet(recordRepeated, record)) {
+											returnList.add(recordRepeated);
+										}
+									}
 								}
 							}
 						}
 					}
+					returnList.add(record);
 				}
-				returnList.add(record);
 			}
 		}
 
@@ -373,12 +210,60 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 	 * @throws IOException
 	 *             nel caso succeda un problema con la lettura del file
 	 */
-	private void getAlreadySentArbsOddsTwoWay() {
-		if (twoWayArbsRecordHistoryStatus == null) {
-			twoWayArbsRecordHistoryStatus = new TreeMap<String, Map<String, List<ArbsRecord>>>();
-		}
-		String filenamePath = BlueSheepServiceHandlerManager.getProperties()
+	private void initializeHistoryMaps() {
+
+		String filenamePath2Way = BlueSheepServiceHandlerManager.getProperties()
 				.getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS_2WAY;
+		String filenamePath3Way = BlueSheepServiceHandlerManager.getProperties()
+				.getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS_3WAY;
+		
+		List<String> twoWayInputStringList = getInputDataFromFile(filenamePath2Way);
+
+		twoWayArbsRecordHistoryStatus = ArbsUtil.initializePreviousRunRecordsMap(twoWayInputStringList);
+		logger.info("There are already " + twoWayArbsRecordHistoryStatus.size() + " run collection of message sent.");
+		
+		List<String> threeWayInputStringList = getInputDataFromFile(filenamePath3Way);
+
+		threeWayArbsRecordHistoryStatus = ArbsUtil.initializePreviousRunRecordsMap(threeWayInputStringList);
+		logger.info("There are already " + twoWayArbsRecordHistoryStatus.size() + " run collection of message sent.");
+		
+		twoWayMessageToBeSentKeysList = new ArrayList<ArbsRecord>();
+		threeWayMessageToBeSentKeysList = new ArrayList<ArbsRecord>();
+		
+		removeOldNetProfitHistory();
+	}
+
+	private void removeOldNetProfitHistory() {
+		Map<ArbsType, Map<String, Double>> netProfitHistoryMap = BlueSheepSharedResources.getArbsNetProfitHistoryMap();
+		if(netProfitHistoryMap != null && !netProfitHistoryMap.isEmpty()) {
+			Set<ArbsType> arbsTypeSet = new HashSet<ArbsType>(netProfitHistoryMap.keySet());
+			for(ArbsType arbsType : arbsTypeSet) {
+				Map<String, Double> arbsTypeNetProfitMap = netProfitHistoryMap.get(arbsType);
+				if(arbsTypeNetProfitMap != null && !arbsTypeNetProfitMap.isEmpty()) {
+					Set<String> eventoKeySet = new HashSet<String>(arbsTypeNetProfitMap.keySet());
+					for(String eventoKey : eventoKeySet) {
+						String dateString = eventoKey.split(BlueSheepConstants.KEY_SEPARATOR)[0].split(BlueSheepConstants.REGEX_CSV)[1];
+						if(dateString != null) {
+							Date date = null;
+							SimpleDateFormat sdfInput = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", Locale.ENGLISH);
+							try {
+								date = sdfInput.parse(dateString);
+							} catch (ParseException e) {
+								logger.error(e.getMessage(), e);
+								continue;
+							}
+							
+							if(date != null && date.getTime() < System.currentTimeMillis()) {
+								arbsTypeNetProfitMap.remove(eventoKey);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private List<String> getInputDataFromFile(String filenamePath) {
 		List<String> inputFileList = new ArrayList<String>();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filenamePath));
@@ -392,9 +277,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
-
-		twoWayArbsRecordHistoryStatus = ArbsUtil.initializePreviousRunRecordsMap(inputFileList);
-		logger.info("There are already " + twoWayArbsRecordHistoryStatus.size() + " run collection of message sent.");
+		return inputFileList;
 	}
 
 	/**
@@ -404,31 +287,33 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 	 * stato inviato o è stato inviato con una condizione di vantaggio minore,
 	 * restituisce TRUE in tutti gli altri casi.
 	 * 
-	 * @param recordKey
+	 * @param nowComparedRecord
 	 *            il record univoco da verificare
 	 * @return il recordKey se non inviato o inviato con rating minore, null
 	 *         altrimenti
 	 */
-	private String hasBeenAlreadySentTwoWay(String recordKey) {
-		String returnString = recordKey;
+	private ArbsRecord isToBeSentRecord(ArbsRecord nowComparedRecord) {
 		boolean found = false;
+		
+		Map<String, Map<String, List<ArbsRecord>>> mapToBeUsed = getCorrectMapByArbsType(nowComparedRecord.getArbType());
 
-		if (twoWayArbsRecordHistoryStatus != null && !twoWayArbsRecordHistoryStatus.isEmpty()) {
+		if (mapToBeUsed != null && !mapToBeUsed.isEmpty()) {
 			// Se non ho trovato una run con lo stesso record ma con rating inferiore o
 			// quella che ho trovato è precedente a runId
-			Map<String, List<ArbsRecord>> statusRunList = twoWayArbsRecordHistoryStatus.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD);
+			Map<String, List<ArbsRecord>> statusRunList = mapToBeUsed.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD);
 			if (statusRunList != null) {
 				Set<String> runSet = new HashSet<String>(statusRunList.keySet());
 				for (String run : runSet) {
 					List<ArbsRecord> arbsList = new ArrayList<ArbsRecord>(statusRunList.get(run));
 					for (ArbsRecord arbStoredKey : arbsList) {
-						if (arbStoredKey.isSameEventBookmakerBet(recordKey.split(BlueSheepConstants.KEY_SEPARATOR)[0])) {
+						if (ArbsRecord.isSameEventBookmakerBet(nowComparedRecord, arbStoredKey)) {
+							
+							logger.info("Already sent record: updating information and re-sent");
+							logger.info("Already sent record is " + nowComparedRecord.getKeyEventoBookmakerBet());
+							
 							found = true;
 							
-							arbStoredKey.changeStatus();
-							statusRunList.get(run).remove(arbStoredKey);
-			
-							Map<String, List<ArbsRecord>> alreadySentArbsRecord = twoWayArbsRecordHistoryStatus
+							Map<String, List<ArbsRecord>> alreadySentArbsRecord = mapToBeUsed
 									.get(BlueSheepConstants.STATUS1_ARBS_RECORD);
 							if (alreadySentArbsRecord == null) {
 								alreadySentArbsRecord = new HashMap<String, List<ArbsRecord>>();
@@ -438,29 +323,9 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 								arbsRecordList = new ArrayList<ArbsRecord>();
 							}
 							
-							BetReference[] betReferenceArray = ArbsUtil.findReferenceInMapFromString(recordKey);
-							BetReference betRef = betReferenceArray[0];
-							BetReference betAverage = betReferenceArray[1];
-
-							String[] splittedKey = recordKey.split(BlueSheepConstants.KEY_SEPARATOR);
-							String[] splittedEventoInfo = splittedKey[0].split(BlueSheepConstants.REGEX_CSV);
-							String[] splittedLink = splittedKey[1].split(BlueSheepConstants.REGEX_CSV);
-							String[] splittedSize = splittedKey[2].split(BlueSheepConstants.REGEX_CSV);
-							
-							ArbsRecord arbsRecord = new TwoOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD,
-									splittedEventoInfo[5], splittedEventoInfo[7],
-									Double.parseDouble(splittedEventoInfo[9]), Double.parseDouble(splittedEventoInfo[10]),
-									splittedEventoInfo[6], splittedEventoInfo[8],
-									splittedEventoInfo[1], splittedEventoInfo[0], splittedEventoInfo[4],
-									splittedEventoInfo[2], splittedLink[0], splittedLink[1], splittedEventoInfo[3],
-									Double.parseDouble(splittedSize[0]), Double.parseDouble(splittedSize[1]), false, false, false, false, betRef,
-									betAverage);
-							
-							
-							arbsRecordList.add(arbsRecord);
+							arbsRecordList.add(nowComparedRecord);
 							alreadySentArbsRecord.put(run, arbsRecordList);
-							twoWayArbsRecordHistoryStatus.put(BlueSheepConstants.STATUS1_ARBS_RECORD, alreadySentArbsRecord);
-							logger.info("Updated status for key " + arbStoredKey.getKeyEventoBookmakerBet());
+							mapToBeUsed.put(BlueSheepConstants.STATUS1_ARBS_RECORD, alreadySentArbsRecord);
 							break;
 						}
 					}
@@ -471,7 +336,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 			}
 		}
 
-		return found ? null : returnString;
+		return found ? null : nowComparedRecord;
 	}
 
 	/**
@@ -489,14 +354,12 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 		PrintWriter writer1 = null;
 		String filenameOutput = null;
 		
-		Map<String, Map<String, List<ArbsRecord>>> mapToBeSaved = null;
+		Map<String, Map<String, List<ArbsRecord>>> mapToBeSaved = getCorrectMapByArbsType(typeOfDataToBeSaved);
 		
 		if(ArbsType.THREE_WAY.equals(typeOfDataToBeSaved)) {
 			filenameOutput = BlueSheepConstants.FILENAME_PREVIOUS_RUNS_3WAY;
-			mapToBeSaved = threeWayArbsRecordHistoryStatus;
 		}else if(ArbsType.TWO_WAY.equals(typeOfDataToBeSaved)) {
 			filenameOutput = BlueSheepConstants.FILENAME_PREVIOUS_RUNS_2WAY;
-			mapToBeSaved = twoWayArbsRecordHistoryStatus;
 		}
 		String filename = BlueSheepServiceHandlerManager.getProperties()
 				.getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + filenameOutput;
@@ -546,25 +409,18 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 
 	private void removeOldOrTooMuchStoredRecord(ArbsType arbsType) {
 		
-		Map<String, Map<String, List<ArbsRecord>>> mapToBeChecked = null;
-		if(ArbsType.THREE_WAY.equals(arbsType)) {
-			mapToBeChecked = threeWayArbsRecordHistoryStatus;
-		}else if(ArbsType.TWO_WAY.equals(arbsType)) {
-			mapToBeChecked = twoWayArbsRecordHistoryStatus;
-		}
+		Map<String, Map<String, List<ArbsRecord>>> mapToBeChecked = getCorrectMapByArbsType(arbsType);
 		
 		if (mapToBeChecked != null && mapToBeChecked.keySet().size() > 0) {
 			long checkBoundTime = System.currentTimeMillis();
-			if (mapToBeChecked != null && !mapToBeChecked.isEmpty()
-					&& !(mapToBeChecked.values().size() < BlueSheepConstants.STORED_RUNS_MAX)) {
-				// Se la run è entro la mezz'ora, allora ok, altrimenti scartala a prescindere
-				Map<String, List<ArbsRecord>> runIdMap = mapToBeChecked.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD);
-				if(runIdMap != null) {
-					Set<String> runIdSet = new HashSet<String>(runIdMap.keySet());
-					for(String runId : runIdSet) {
-						if (checkBoundTime - new Long(runId) >= 60 * 60 * 1000L) {
-							runIdMap.remove(runId);
-						}
+				
+			// Se la run è entro la mezz'ora, allora ok, altrimenti scartala a prescindere
+			Map<String, List<ArbsRecord>> runIdMap = mapToBeChecked.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD);
+			if(runIdMap != null) {
+				Set<String> runIdSet = new HashSet<String>(runIdMap.keySet());
+				for(String runId : runIdSet) {
+					if (checkBoundTime - new Long(runId) >= 2 * 60 * 60 * 1000L) {
+						runIdMap.remove(runId);
 					}
 				}
 				// Se dopo la rimozione delle run non più valide, sono ancora presenti più di un
@@ -572,8 +428,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 				if (!(mapToBeChecked.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD).keySet()
 						.size() < BlueSheepConstants.STORED_RUNS_MAX)) {
 					// set delle runId aggiornato, senza le run non valide
-					Set<String> runIdSet = new HashSet<String>(
-							mapToBeChecked.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD).keySet());
+					runIdSet = new HashSet<String>(
+						mapToBeChecked.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD).keySet());
 					// Cerco la run più vecchia, che sia per ordine oltre la k-esima esecuzione
 					String oldestRun = null;
 					for (String runId : runIdSet) {
@@ -590,12 +446,32 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 		}
 	}
 
-	public static Map<String, Map<String, List<ArbsRecord>>> getThreeWayArbsRecordHistoryStatus() {
+	public Map<String, Map<String, List<ArbsRecord>>> getThreeWayArbsRecordHistoryStatus() {
 		return threeWayArbsRecordHistoryStatus;
 	}
 
-	public static void setThreeWayArbsRecordHistoryStatus(
+	public void setThreeWayArbsRecordHistoryStatus(
 			Map<String, Map<String, List<ArbsRecord>>> threeWayArbsRecordHistoryStatus) {
 		ArbitraggiServiceHandler.threeWayArbsRecordHistoryStatus = threeWayArbsRecordHistoryStatus;
+	}
+	
+	private Map<String, Map<String, List<ArbsRecord>>> getCorrectMapByArbsType(ArbsType type){
+		if(ArbsType.THREE_WAY.equals(type)) {
+			return threeWayArbsRecordHistoryStatus;
+		}else if(ArbsType.TWO_WAY.equals(type)) {
+			return twoWayArbsRecordHistoryStatus;
+		}else {
+			return null;
+		}
+	}
+	
+	private List<ArbsRecord> getCorrectListByArbsType(ArbsType type){
+		if(ArbsType.THREE_WAY.equals(type)) {
+			return threeWayMessageToBeSentKeysList;
+		}else if(ArbsType.TWO_WAY.equals(type)) {
+			return twoWayMessageToBeSentKeysList;
+		}else {
+			return null;
+		}
 	}
 }

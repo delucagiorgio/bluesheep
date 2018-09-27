@@ -333,6 +333,14 @@ public class ArbsUtil {
 				record.getLiquidita1()+ BlueSheepConstants.REGEX_CSV +
 				record.getLiquidita2();
 	}
+	
+	public static String getKeyArbsThreeWayFromInputRecord(AbstractInputRecord homeWinRecord) {
+		
+		return homeWinRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS + homeWinRecord.getPartecipante2() + BlueSheepConstants.REGEX_CSV +
+				homeWinRecord.getDataOraEvento() + BlueSheepConstants.REGEX_CSV +
+				homeWinRecord.getSport() + BlueSheepConstants.REGEX_CSV + 
+				homeWinRecord.getCampionato() + BlueSheepConstants.REGEX_CSV;
+	}
 
 
 	

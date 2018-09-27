@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import it.bluesheep.arbitraggi.entities.ArbsRecord;
+import it.bluesheep.arbitraggi.entities.ArbsType;
 import it.bluesheep.arbitraggi.entities.BetReference;
 import it.bluesheep.arbitraggi.entities.ThreeOptionsArbsRecord;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
@@ -170,7 +171,9 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 										   hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
 									)
 						   )) {
-							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota()));
+							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), 
+									RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), 
+																										 orderedListByQuota.get(1).getQuota()));
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);
 						}
@@ -274,23 +277,86 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 								awayWinRecordList = orderByQuotaListDesc(awayWinRecordList);
 								drawRecordList = orderByQuotaListDesc(drawRecordList);
 								
+								String keyEventoArbs = null;
+								double maxStoredProfitRun  = -1;
 								
 								for(int i = 0; i < homeWinRecordList.size() && bookmakerSet.size() <= 8; i++) {
 									AbstractInputRecord homeWinRecord = homeWinRecordList.get(i);
-									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(homeWinRecord.getBookmakerName())) {
+									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(homeWinRecord.getBookmakerName()) && 
+											!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && hasBeenRecentlyUpdated(homeWinRecord)) {
 										for(int j = 0; j < awayWinRecordList.size() && bookmakerSet.size() <= 8; j++) {
 											AbstractInputRecord awayWinRecord = awayWinRecordList.get(j);
-											if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(awayWinRecord.getBookmakerName())) {
+											if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(awayWinRecord.getBookmakerName()) && 
+													!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && hasBeenRecentlyUpdated(awayWinRecord)) {
 												for(int k = 0; k < drawRecordList.size() && bookmakerSet.size() <= 8; k++) {
 													AbstractInputRecord drawRecord = drawRecordList.get(k);
-													if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(drawRecord.getBookmakerName())) {
-														if(ArbsUtil.getThreeWayNetProfit(homeWinRecord, awayWinRecord, drawRecord) >= THREEWAY_NET_PROFIT) {
+													if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(drawRecord.getBookmakerName()) && 
+															!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && hasBeenRecentlyUpdated(drawRecord)) {
+														double netProfitCombination = ArbsUtil.getThreeWayNetProfit(homeWinRecord, awayWinRecord, drawRecord);
+														
+
+														if(netProfitCombination >= THREEWAY_NET_PROFIT) {
+															
 															if(!homeWinRecord.getBookmakerName().equalsIgnoreCase(awayWinRecord.getBookmakerName()) || 
 																	!homeWinRecord.getBookmakerName().equalsIgnoreCase(drawRecord.getBookmakerName()) || 
 																	!awayWinRecord.getBookmakerName().equalsIgnoreCase(drawRecord.getBookmakerName())) {
-																bookmakerSet.add(homeWinRecord.getBookmakerName());
-																bookmakerSet.add(awayWinRecord.getBookmakerName());
-																bookmakerSet.add(drawRecord.getBookmakerName());
+																Map<String, Double> threeWayStoredNetProfitMap = BlueSheepSharedResources.getArbsNetProfitHistoryMap().get(ArbsType.THREE_WAY);
+																
+																if(threeWayStoredNetProfitMap != null) {
+																	Double maxNetProfitStored = BlueSheepSharedResources.getArbsNetProfitHistoryMap().get(ArbsType.THREE_WAY).get(ArbsUtil.getKeyArbsThreeWayFromInputRecord(homeWinRecord));
+																	
+																	if(maxNetProfitStored != null) {
+																		//Esiste un record con questa chiave evento
+																		
+																		//Se la combinazione è maggiore del doppio di quella salvata o 
+																		//è già stata trovata una combinazione con questa condizione vera
+																		if(netProfitCombination >= (maxNetProfitStored * 2) || maxStoredProfitRun > 0) {
+																			
+																			//Dovrebbe inizializzarlo solo la prima volta, per ogni evento
+																			//Il codice sotto si basa su questo assunto
+																			if(maxStoredProfitRun < 0) {
+																				maxStoredProfitRun = netProfitCombination;
+																			}
+																			
+																			if(keyEventoArbs == null) {
+																				keyEventoArbs = ArbsUtil.getKeyArbsThreeWayFromInputRecord(homeWinRecord);
+																			}
+																			
+																			bookmakerSet.add(homeWinRecord.getBookmakerName());
+																			bookmakerSet.add(awayWinRecord.getBookmakerName());
+																			bookmakerSet.add(drawRecord.getBookmakerName());
+																		}
+																	}else {//Non esiste il record relativo a questo evento nella mappa dei profitti netti di tipo 3way
+																		
+																		//Dovrebbe inizializzarlo solo la prima volta, per ogni evento
+																		//Il codice sotto si basa su questo assunto
+																		if(maxStoredProfitRun < 0) {
+																			maxStoredProfitRun = netProfitCombination;
+																		}
+																		
+																		if(keyEventoArbs == null) {
+																			keyEventoArbs = ArbsUtil.getKeyArbsThreeWayFromInputRecord(homeWinRecord);
+																		}
+																		bookmakerSet.add(homeWinRecord.getBookmakerName());
+																		bookmakerSet.add(awayWinRecord.getBookmakerName());
+																		bookmakerSet.add(drawRecord.getBookmakerName());
+																	}
+																}else { // Non esiste ancora nessun record nella mappa dei profitti netti di tipo 3way
+																	
+																	//Dovrebbe inizializzarlo solo la prima volta, per ogni evento
+																	//Il codice sotto si basa su questo assunto
+																	if(maxStoredProfitRun < 0) {
+																		maxStoredProfitRun = netProfitCombination;
+																	}
+																	
+																	if(keyEventoArbs == null) {
+																		keyEventoArbs = ArbsUtil.getKeyArbsThreeWayFromInputRecord(homeWinRecord);
+																	}
+																	
+																	bookmakerSet.add(homeWinRecord.getBookmakerName());
+																	bookmakerSet.add(awayWinRecord.getBookmakerName());
+																	bookmakerSet.add(drawRecord.getBookmakerName());
+																}
 															}
 														}else {
 															continue;
@@ -302,15 +368,32 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 									}
 								}
 								
+								if(maxStoredProfitRun > 0 && keyEventoArbs != null) {
+									Map<String, Double> threeWayNetProfitMap = BlueSheepSharedResources.getArbsNetProfitHistoryMap().get(ArbsType.THREE_WAY);
+									if(threeWayNetProfitMap == null) {
+										threeWayNetProfitMap = new HashMap<String, Double>();
+										BlueSheepSharedResources.getArbsNetProfitHistoryMap().put(ArbsType.THREE_WAY, threeWayNetProfitMap);
+									}
+									threeWayNetProfitMap.put(keyEventoArbs, new Double(maxStoredProfitRun));
+								}
+								
 								if(bookmakerSet.size() > 0) {
-									BetReference[] referenceArray = ArbsUtil.findReferenceFromBookmakerMap(homeWinRecordMap, awayWinRecordMap, drawRecordMap);
 									
 									for(String bookmaker : bookmakerSet) {
 										AbstractInputRecord homeWinRecord = homeWinRecordMap.get(bookmaker);
 										AbstractInputRecord awayWinRecord = awayWinRecordMap.get(bookmaker);
 										AbstractInputRecord drawRecord = drawRecordMap.get(bookmaker);
 										
-										if(homeWinRecord != null && awayWinRecord != null && drawRecord != null) {
+										if(homeWinRecord != null && 
+												awayWinRecord != null && 
+												drawRecord != null && 
+												!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && 
+												!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && 
+												!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && 
+												BlueSheepSharedResources.getArbsNetProfitHistoryMap().get(ArbsType.THREE_WAY).containsKey(ArbsUtil.getKeyArbsThreeWayFromInputRecord(homeWinRecord))) {
+											
+											BetReference[] referenceArray = ArbsUtil.findReferenceFromBookmakerMap(homeWinRecordMap, awayWinRecordMap, drawRecordMap);
+
 											ArbsRecord arbRecord = new ThreeOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD, bookmaker, bookmaker, bookmaker, 
 													homeWinRecord.getQuota(), drawRecord.getQuota(), awayWinRecord.getQuota(), 
 													homeWinRecord.getTipoScommessa().getCode(), drawRecord.getTipoScommessa().getCode(), awayWinRecord.getTipoScommessa().getCode(), 
@@ -319,11 +402,11 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 													BookmakerLinkGenerator.getBookmakerLinkEvent(homeWinRecord), BookmakerLinkGenerator.getBookmakerLinkEvent(drawRecord), BookmakerLinkGenerator.getBookmakerLinkEvent(awayWinRecord),
 													"",
 													-1, -1, -1, false, false, false, false, false, false, referenceArray[0], referenceArray[1]);
+
 											threeWayRecordOutput.add(arbRecord);
 										}
 									}
 								}
-								
 							}
 						}
 					}

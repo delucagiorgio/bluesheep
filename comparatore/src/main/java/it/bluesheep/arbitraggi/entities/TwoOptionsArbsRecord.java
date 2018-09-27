@@ -2,6 +2,7 @@ package it.bluesheep.arbitraggi.entities;
 
 import java.text.DecimalFormat;
 
+import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.util.BlueSheepConstants;
 
 public class TwoOptionsArbsRecord extends ArbsRecord {
@@ -17,6 +18,28 @@ public class TwoOptionsArbsRecord extends ArbsRecord {
 				odd2, bet1, bet2, date, keyEvento,
 				championship, sport, link1,
 				link2, country, liquidita1, liquidita2, betterOdd1, betterOdd2, removedOdd1, removedOdd2, 
+				ref, average);
+		this.type = ArbsType.TWO_WAY;
+	}
+	
+	public TwoOptionsArbsRecord(String status, RecordOutput recordOutput, BetReference ref, BetReference average) {
+		super(status, 
+				recordOutput.getBookmakerName1(), 
+				recordOutput.getBookmakerName2(), 
+				recordOutput.getQuotaScommessaBookmaker1(),
+				recordOutput.getQuotaScommessaBookmaker2(),
+				recordOutput.getScommessaBookmaker1(),
+				recordOutput.getScommessaBookmaker2(),
+				recordOutput.getDataOraEvento().toString(),
+				recordOutput.getEvento(),
+				recordOutput.getCampionato(), 
+				recordOutput.getSport(), 
+				recordOutput.getLinkBook1(),
+				recordOutput.getLinkBook2(),
+				recordOutput.getNazione(),
+				recordOutput.getLiquidita1(),
+				recordOutput.getLiquidita2(),
+				false, false, false, false, 
 				ref, average);
 		this.type = ArbsType.TWO_WAY;
 	}

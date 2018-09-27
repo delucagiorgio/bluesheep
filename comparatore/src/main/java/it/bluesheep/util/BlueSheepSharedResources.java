@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import it.bluesheep.arbitraggi.entities.ArbsType;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
@@ -38,6 +39,7 @@ public class BlueSheepSharedResources {
 	private static int updateCallCount = 0;
 	private static List<AbstractInputRecord> exchangeRecordsList = new ArrayList<AbstractInputRecord>();
 	private static List<String> boidOTBList = new ArrayList<String>();
+	private static Map<ArbsType, Map<String, Double>> arbsNetProfitHistoryMap = new HashMap<ArbsType, Map<String, Double>>();
 	
 	private BlueSheepSharedResources() {}
 
@@ -240,6 +242,10 @@ public class BlueSheepSharedResources {
 
 	public static void setBoidOTBList(List<String> boidOTBList) {
 		BlueSheepSharedResources.boidOTBList = boidOTBList;
+	}
+
+	public static Map<ArbsType, Map<String, Double>> getArbsNetProfitHistoryMap() {
+		return arbsNetProfitHistoryMap;
 	}
 
 }

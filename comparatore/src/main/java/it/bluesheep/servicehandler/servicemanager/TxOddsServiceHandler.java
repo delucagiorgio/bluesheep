@@ -100,6 +100,10 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 		Long timestampLastRequest = new Long(BlueSheepSharedResources.getTxOddsNowMinimumUpdateTimestamp());
 		BlueSheepSharedResources.setTxOddsUpdateTimestamp(timestampLastRequest);
 		
+		if(timestampLastRequest > 0L) {
+			deleteNotAvailableMarkets(timestampLastRequest);
+		}
+		
 		int secondFrequencyTxOdds = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_TXODDS_SEC));
 		int minutesOfValidity = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60;
 		
@@ -112,10 +116,6 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 		}
 		
 		super.startProcess();
-		
-		if(timestampLastRequest > 0L) {
-			deleteNotAvailableMarkets(timestampLastRequest);
-		}
 		
 		//Set the number of updateCount already processed
 		BlueSheepSharedResources.setUpdateCallCount(BlueSheepSharedResources.getUpdateCallCount() + 1);
@@ -140,6 +140,7 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 		
 		Set<Sport> sportSet = new HashSet<Sport>(map.keySet());
 		
+		int count = 0;
 		for(Sport sport : sportSet) {
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dateMap = map.get(sport);
 			
@@ -162,7 +163,7 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 								TxOddsInputRecord txOddsRecord = (TxOddsInputRecord) record;
 								int index = Collections.binarySearch(BlueSheepSharedResources.getBoidOTBList(), txOddsRecord.getBoid());
 								if(index >= 0) {
-									logger.info("Removing invalid odd: Event key = " + evento + "; Scommessa = " + scommessa + "; Bookmaker = " + bookmaker);
+									count++;
 									bookmakerMap.remove(bookmaker);
 									if(bookmakerMap.isEmpty()) {
 										scommessaMap.remove(scommessa);
@@ -180,6 +181,9 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 				}
 			}
 		}
+		
+		logger.info("" + count + " odds have been removed since not valid");
+		
 	}
 
 }
