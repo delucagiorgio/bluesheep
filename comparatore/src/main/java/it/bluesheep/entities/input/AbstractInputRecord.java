@@ -23,6 +23,7 @@ public abstract class AbstractInputRecord {
 	protected double quota;
 	protected Scommessa tipoScommessa;
 	protected String filler;
+	protected double liquidita;
 	
 	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {	
 		if(dataOraEvento != null) {
@@ -51,6 +52,7 @@ public abstract class AbstractInputRecord {
 		this.campionato = record.getCampionato();
 		this.keyEvento = record.getKeyEvento();
 		this.filler = record.getFiller();
+		this.liquidita = record.getLiquidita();
 	}
 
 	public Date getDataOraEvento() {
@@ -273,6 +275,14 @@ public abstract class AbstractInputRecord {
 		
 		}
 		return false;
+	}
+
+	public double getLiquidita() {
+		return liquidita;
+	}
+
+	public void setLiquidita(double liquidita) {
+		this.liquidita = liquidita;
 	}
 	
 }

@@ -12,11 +12,13 @@ public class Bet365InputRecord extends AbstractInputRecord implements IKeyEvento
 	public Bet365InputRecord(Date dataOraEvento, Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {
 		super(dataOraEvento, sport, campionato, partecipante1, partecipante2, filler);
 		this.bookmakerName = ComparatoreConstants.BET365_BOOKMAKER_NAME;
+		this.liquidita = -1;
 	}
 	
 	public Bet365InputRecord(Bet365InputRecord recordToBeMapped) {
 		super(recordToBeMapped);
 		this.bookmakerName = ComparatoreConstants.BET365_BOOKMAKER_NAME;
+		this.liquidita = -1;
 	}
 	
 	@Override

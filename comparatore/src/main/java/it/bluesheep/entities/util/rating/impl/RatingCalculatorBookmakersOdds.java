@@ -43,5 +43,26 @@ public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 		
 		return approxRating / 100.00;
 	}
+	
+	public double calculateRatingBackSideExchange(double backOdd, double bookOdd) {
+		double y = (100 * backOdd) + (100 * (backOdd - 1) * 0.05) / bookOdd;
+		
+		y = Math.round(y);
+		
+		double approxRating = (100 * backOdd) - y;
+		
+		return approxRating / 100.00;	
+		
+	}
+
+	public double calculateRatingApproxBackSiceExchange(double backOdd, double bookOdd) {
+		double y = (100 * backOdd) + (100 * (backOdd - 1) * 0.05) / bookOdd;
+		
+		y = Math.round(y);
+		
+		double approxRating = y * (bookOdd - 1);
+		
+		return approxRating / 100.00;
+	}
 
 }

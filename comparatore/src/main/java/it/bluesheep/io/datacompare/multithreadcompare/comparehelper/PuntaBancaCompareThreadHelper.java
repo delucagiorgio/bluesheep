@@ -73,8 +73,8 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 		recordOutput.setScommessaBookmaker1(scommessaInputRecord1.getTipoScommessa().getCode());
 		recordOutput.setScommessaBookmaker2(scommessaInputRecord2.getTipoScommessa().getCode());
 		recordOutput.setSport(scommessaInputRecord1.getSport().toString());
-		BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord)scommessaInputRecord2;
-		recordOutput.setLiquidita(exchangeRecord.getLiquidita());
+		recordOutput.setLiquidita1(scommessaInputRecord1.getLiquidita());
+		recordOutput.setLiquidita2(scommessaInputRecord2.getLiquidita());
 		recordOutput = (RecordBookmakerVsExchangeOdds)TranslatorUtil.translateFieldAboutCountry(recordOutput);
 		recordOutput.setLinkBook1(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord1));
 		recordOutput.setLinkBook2(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord2));
@@ -100,7 +100,7 @@ public class PuntaBancaCompareThreadHelper extends CompareThreadHelper {
 		
 		for(AbstractInputRecord record : eventoScommessaRecordList) {
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord && record.getQuota() >= minimumOddValue) {
+			if(record != exchangeRecord && !ComparatoreConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(record.getBookmakerName()) && record.getQuota() >= minimumOddValue) {
 				double rating1 = getRatingByScommessaPair(record, exchangeRecord);
 				//se il rating1 è sufficientemente alto
 				if(rating1 >= minThreshold && 

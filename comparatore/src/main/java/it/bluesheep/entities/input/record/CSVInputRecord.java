@@ -16,10 +16,12 @@ public class CSVInputRecord extends AbstractInputRecord implements IKeyEventoCom
 	
 	public CSVInputRecord(AbstractInputRecord record) {
 		super(record);
+		this.liquidita = -1;
 	}
 	
 	public CSVInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {
 		super(dataOraEvento, sport, campionato, partecipante1, partecipante2, filler);
+		this.liquidita = -1;
 	}
 
 	@Override

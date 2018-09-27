@@ -41,10 +41,10 @@ public class BlueSheepComparatoreMain {
 
 	public static void main(String[] args) throws Exception{
 				
-		AbstractBluesheepJsonConverter.setFormatOutput(false);		
+		AbstractBluesheepJsonConverter.setFormatOutput(true);		
         try {
-        	InputStream in = new FileInputStream(args[0]);
-//        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
+//        	InputStream in = new FileInputStream(args[0]);
+        	InputStream in = new FileInputStream("../RISORSE_BLUESHEEP/bluesheepComparatore.properties");
             properties.load(in);
         	// va stabilito un path per il file delle proprieta'    	
             in.close();

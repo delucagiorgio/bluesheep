@@ -47,7 +47,7 @@ public final class BetfairInputMappingProcessor extends AbstractInputMappingProc
 				resultJSONObject = resultArrayJSONObject.getJSONObject(i);
 				
 				marketNode = resultJSONObject.getString(MARKETID_JSON_STRING);
-				BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode);
+				BetfairExchangeInputRecord tempRecord = new BetfairExchangeInputRecord(null, sport, null, null, null, marketNode, -1, false);
 				
 				AbstractInputRecord[] recordToBeMapped = mapOddsIntoAbstractInputRecord(tempRecord, resultJSONObject, scommessaTipo, sport);
 				if(recordToBeMapped != null) {
