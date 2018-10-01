@@ -159,6 +159,9 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 						Set<String> bookmakerSet = new HashSet<String>(bookmakerMap.keySet());
 						for(String bookmaker : bookmakerSet) {
 							AbstractInputRecord record = bookmakerMap.get(bookmaker);
+							if(record != null && record.getSource() == null) {
+								record.toString();
+							}
 							if(record != null && record.getSource().equals(Service.TXODDS_SERVICENAME)) {
 								TxOddsInputRecord txOddsRecord = (TxOddsInputRecord) record;
 								int index = Collections.binarySearch(BlueSheepSharedResources.getBoidOTBList(), txOddsRecord.getBoid());

@@ -37,16 +37,16 @@ public class BasketballEvent extends Event {
 		String linkBook1 = arbsRecord.getLink1();
 		String linkBook2 = arbsRecord.getLink2();
 		try {
-			if(!"null".equals(linkBook1) && linkBook1 != null) {
+			if(!"null".equals(linkBook1) && linkBook1 != null && !linkBook1.isEmpty()) {
 				linkBook1 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook1);
 			}
-			if(!"null".equals(linkBook2)  && linkBook2 != null) {
+			if(!"null".equals(linkBook2)  && linkBook2 != null && !linkBook2.isEmpty()) {
 				linkBook2 = TinyUrlShortener.getShortenedURLFromLongURL(linkBook2);
 			}
 		} catch (IOException e) {
 //			logger.error(e.getMessage(), e);
 		}
-		if(linkBook1 != null && !"null".equals(linkBook1) && linkBook2 != null && !"null".equals(linkBook2)) {
+		if(linkBook1 != null && !"null".equals(linkBook1) && !linkBook1.isEmpty() &&  linkBook2 != null && !"null".equals(linkBook2) && !linkBook2.isEmpty()) {
 			this.getLinkBook().add(arbsRecord.getBookmaker1() + BlueSheepConstants.KEY_SEPARATOR + linkBook1);
 			this.getLinkBook().add(arbsRecord.getBookmaker2() + BlueSheepConstants.KEY_SEPARATOR + linkBook2);
 		}

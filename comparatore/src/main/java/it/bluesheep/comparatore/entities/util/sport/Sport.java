@@ -15,4 +15,13 @@ public enum Sport {
 		return code;
 	}
 	
+	public static Sport getSportByCode(String sportBookmaker) {
+		for(Sport sport : Sport.values()) {
+			if(sport.getCode().equalsIgnoreCase(sportBookmaker)) {
+				return sport;
+			}
+		}
+		return null;
+	}
+	
 }

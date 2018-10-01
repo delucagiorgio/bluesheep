@@ -38,7 +38,8 @@ public class BookmakerLinkGenerator {
 		String sourceOfURL = "URL";
 		if("betclic.it".equalsIgnoreCase(record.getBookmakerName())) {
 			sourceOfURL = "Tx-Odds";
-		}else if (BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(record.getBookmakerName())) {
+		}else if (BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(record.getBookmakerName()) 
+				|| BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(record.getBookmakerName())) {
 			sourceOfURL = "BetfairAPI";
 		}
 		
@@ -55,7 +56,7 @@ public class BookmakerLinkGenerator {
 	 * @return il link dell'evento
 	 */
 	private static String getURLFromMapBySourceAndRecord(AbstractInputRecord record, String sourceOfURL) {
-		String returnString = null;
+		String returnString = "";
 		if("Tx-Odds".equals(sourceOfURL)) {
 			returnString = record.getFiller();
 		}else {
@@ -63,19 +64,27 @@ public class BookmakerLinkGenerator {
 			if(sportBookmakerMap != null) {
 				Map<String, String> bookmakerURLMap = sportBookmakerMap.get(record.getSport());
 				if(bookmakerURLMap != null) {
-					String specificOrGeneralURL = bookmakerURLMap.get(record.getBookmakerName());
-					if(specificOrGeneralURL != null) {
-						String[] splittedSpecificOrGeneralURL = specificOrGeneralURL.split(BlueSheepConstants.KEY_SEPARATOR);
-						returnString = splittedSpecificOrGeneralURL[1];
-						if("si".equalsIgnoreCase(splittedSpecificOrGeneralURL[0])) {
-							String specificField = record.getFiller();
-							if(!sourceOfURL.equals("BetfairAPI")) {
-								specificField = getPartecipanteStringForSearch(record);
-							}	
-							returnString += specificField;
+					String bookmakerName = record.getBookmakerName();
+					if(bookmakerName != null && !bookmakerName.isEmpty()) {
+						if(bookmakerName.startsWith("Betfair Exchange")) {
+							bookmakerName = "Betfair Exchange";
+						}
+						String specificOrGeneralURL = bookmakerURLMap.get(bookmakerName);
+						if(specificOrGeneralURL != null) {
+							String[] splittedSpecificOrGeneralURL = specificOrGeneralURL.split(BlueSheepConstants.KEY_SEPARATOR);
+							returnString = splittedSpecificOrGeneralURL[1];
+							if("si".equalsIgnoreCase(splittedSpecificOrGeneralURL[0])) {
+								String specificField = record.getFiller();
+								if(!sourceOfURL.equals("BetfairAPI")) {
+									specificField = getPartecipanteStringForSearch(record);
+								}	
+								returnString += specificField;
+							}
+						}else {
+							logger.warn(bookmakerName + " is not present in linkBookmakerSportMap. Values available are " + linkBookmakerSportMap.toString());
 						}
 					}else {
-						logger.warn(record.getBookmakerName() + " is not present in linkBookmakerSportMap. Values available are " + linkBookmakerSportMap.toString());
+						logger.warn("Bookmaker name is null. Cannot associate link");
 					}
 				}
 			}

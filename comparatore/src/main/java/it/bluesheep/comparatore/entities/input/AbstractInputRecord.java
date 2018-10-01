@@ -41,7 +41,6 @@ public abstract class AbstractInputRecord {
 		this.filler = filler;
 		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_VERSUS + this.partecipante2;
 		this.timeOfInsertionInSystem = System.currentTimeMillis();
-		this.liquidita = -1;
 	}
 	
 	public AbstractInputRecord(AbstractInputRecord record) {
@@ -56,6 +55,7 @@ public abstract class AbstractInputRecord {
 		this.keyEvento = record.getKeyEvento();
 		this.filler = record.getFiller();
 		this.timeOfInsertionInSystem = System.currentTimeMillis();
+		this.liquidita = record.getLiquidita();
 	}
 
 	public Date getDataOraEvento() {
@@ -310,6 +310,14 @@ public abstract class AbstractInputRecord {
 
 	public void setSource(Service source) {
 		this.source = source;
+	}
+
+	public double getLiquidita() {
+		return liquidita;
+	}
+
+	public void setLiquidita(double liquidita) {
+		this.liquidita = liquidita;
 	}
 	
 }

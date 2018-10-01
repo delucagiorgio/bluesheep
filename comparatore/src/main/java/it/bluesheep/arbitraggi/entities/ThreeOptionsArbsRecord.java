@@ -38,7 +38,10 @@ public class ThreeOptionsArbsRecord extends ArbsRecord{
 	
 	@Override
 	protected void calculateNetProfit() {
-		netProfit = ((1 / ((1 / odd1) + (1 / odd2) + (1 / odd3))) - 1) * 100;
+		double tempOdd1 = super.getActualOddValue(bookmaker1, odd1);
+		double tempOdd2 = super.getActualOddValue(bookmaker2, odd2);
+		double tempOdd3 = super.getActualOddValue(bookmaker3, odd3);
+		netProfit = ((1 / ((1 / tempOdd1) + (1 / tempOdd2) + (1 / tempOdd3))) - 1) * 100;
 	}
 	
 	@Override
@@ -134,7 +137,10 @@ public class ThreeOptionsArbsRecord extends ArbsRecord{
 		return getKeyEventoBookmakerBet() + BlueSheepConstants.KEY_SEPARATOR + getStatus()
 				+ BlueSheepConstants.KEY_SEPARATOR + getLink1()
 				+ BlueSheepConstants.REGEX_CSV + getLink2()
-				+ BlueSheepConstants.REGEX_CSV + getLink3();
+				+ BlueSheepConstants.REGEX_CSV + getLink3()
+				+ BlueSheepConstants.KEY_SEPARATOR + getLiquidita1()
+				+ BlueSheepConstants.REGEX_CSV + getLiquidita2()
+				+ BlueSheepConstants.REGEX_CSV + getLiquidita3();
 	}
 }
 

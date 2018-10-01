@@ -12,7 +12,6 @@ import it.bluesheep.comparatore.entities.input.record.Bet365InputRecord;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
-import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.json.Bet365BluesheepJsonConverter;
 
 public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
@@ -117,7 +116,6 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 								recordToBeMapped.setSport(sport);
 								recordToBeMapped.setTipoScommessa(scommessaTipo);
 								recordToBeMapped.setTimeInsertionInSystem(updatedTime);
-								recordToBeMapped.setSource(Service.BET365_SERVICENAME);
 							}
 						}else if(underOverHandicap != null) {
 							for(int i = 0; i < subCategoryJSONArray.length(); i++) {
@@ -135,7 +133,6 @@ public class Bet365InputMappingProcessor extends AbstractInputMappingProcessor{
 									recordToBeMapped.setSport(sport);
 									recordToBeMapped.setTipoScommessa(scommessaTipo);
 									recordToBeMapped.setTimeInsertionInSystem(updatedTime);
-									recordToBeMapped.setSource(Service.BET365_SERVICENAME);
 								}
 							}
 						}

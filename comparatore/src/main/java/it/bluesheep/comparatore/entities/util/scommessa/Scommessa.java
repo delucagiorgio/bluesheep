@@ -32,7 +32,7 @@ public enum Scommessa {
 		return code;
 	}
 
-	public static Object getScommessaByCode(String scommessaBookmaker) {
+	public static Scommessa getScommessaByCode(String scommessaBookmaker) {
 		for(Scommessa scommessa : Scommessa.values()) {
 			if(scommessa.getCode().equalsIgnoreCase(scommessaBookmaker)) {
 				return scommessa;

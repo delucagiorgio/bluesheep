@@ -70,11 +70,13 @@ public final class BlueSheepServiceHandlerManager {
 		boolean stopApplication = false;
 		boolean propertiesConfigurationChanged = false;
 		
+		boolean firstStartExecuted = false;
+		
 		do {
 			BlueSheepSharedResources.initializeDataStructures();
 			
 			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 2);
-			long initialDelay = 60;
+			long initialDelay = firstStartExecuted ? 0 : 60;
 
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
 				if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
@@ -82,7 +84,7 @@ public final class BlueSheepServiceHandlerManager {
 				}
 				
 				executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
-				initialDelay = 60;
+				initialDelay = firstStartExecuted ? 0 : 60;
 			}
 			
 			long arbsFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_ARBS_SEC));
@@ -96,6 +98,8 @@ public final class BlueSheepServiceHandlerManager {
 			}
 			
 			WatchService ws = null;
+			
+			firstStartExecuted = true;
 			
 			try {
 				ws = FileSystems.getDefault().newWatchService();

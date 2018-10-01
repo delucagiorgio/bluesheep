@@ -26,6 +26,7 @@ import it.bluesheep.arbitraggi.entities.TwoOptionReference;
 import it.bluesheep.arbitraggi.entities.TwoOptionsArbsRecord;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
+import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
@@ -62,7 +63,7 @@ public class ArbsUtil {
 		String odds = splittedLine[3];
 		String status = getCorrectStatusChange(splittedLine[4]);
 		String links = splittedLine[5];
-//		String sizeLiquidita = splittedLine[6];
+		String sizeLiquidita = splittedLine[6];
 		
 		Map<String, List<ArbsRecord>> keyArbsMap = alreadySentArbsOdds.get(status);
 		if (keyArbsMap == null) {
@@ -95,12 +96,9 @@ public class ArbsUtil {
 				eventoInfo.split(BlueSheepConstants.REGEX_CSV)[4], eventoInfo.split(BlueSheepConstants.REGEX_CSV)[2],
 				links.split(BlueSheepConstants.REGEX_CSV)[0], links.split(BlueSheepConstants.REGEX_CSV)[1], links.split(BlueSheepConstants.REGEX_CSV)[2],
 				eventoInfo.split(BlueSheepConstants.REGEX_CSV)[3],
-				-1,
-				-1,
-				-1,
-//				Double.parseDouble(sizeLiquidita.split(BlueSheepConstants.REGEX_CSV)[0]),
-//				Double.parseDouble(sizeLiquidita.split(BlueSheepConstants.REGEX_CSV)[1]),
-//				Double.parseDouble(sizeLiquidita.split(BlueSheepConstants.REGEX_CSV)[2]),
+				Double.parseDouble(sizeLiquidita.split(BlueSheepConstants.REGEX_CSV)[0]),
+				Double.parseDouble(sizeLiquidita.split(BlueSheepConstants.REGEX_CSV)[1]),
+				Double.parseDouble(sizeLiquidita.split(BlueSheepConstants.REGEX_CSV)[2]),
 				false, false, false, false, false, false,
 				betRef, betAverage));
 		keyArbsMap.put(runId, keyArbsList);
@@ -234,25 +232,31 @@ public class ArbsUtil {
 								
 								List<AbstractInputRecord> recordBet1List = new ArrayList<AbstractInputRecord>();
 								for(String bookmaker : bookmakerBet1List) {
+									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmaker)) {
 									AbstractInputRecord record = bookmakerBet1Map.get(bookmaker);
-									if(record != null) {
-										recordBet1List.add(record);
+										if(record != null) {
+											recordBet1List.add(record);
+										}
 									}
 								}
 							  
 								List<AbstractInputRecord> recordBet2List = new ArrayList<AbstractInputRecord>();
 								for(String bookmaker : bookmakerBet2List) {
-									AbstractInputRecord record = bookmakerBet2Map.get(bookmaker);
-									if(record != null) {
-										recordBet2List.add(record);
+									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmaker)) {
+										AbstractInputRecord record = bookmakerBet2Map.get(bookmaker);
+										if(record != null) {
+											recordBet2List.add(record);
+										}
 									}
 								}
 								
 								List<AbstractInputRecord> recordBet3List = new ArrayList<AbstractInputRecord>();
 								for(String bookmaker : bookmakerBet3List) {
-									AbstractInputRecord record = bookmakerBet3Map.get(bookmaker);
-									if(record != null) {
-										recordBet3List.add(record);
+									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmaker)) {
+										AbstractInputRecord record = bookmakerBet3Map.get(bookmaker);
+										if(record != null) {
+											recordBet3List.add(record);
+										}
 									}
 								}
 								
@@ -370,7 +374,7 @@ public class ArbsUtil {
 	public static boolean validOddsRatio(double odd1, double odd2, Service service) {
 		
 		if(Service.BETFAIR_SERVICENAME.equals(service)) {
-			odd2 = 1 / (1 - (1 / odd2));
+			odd2 = 1 / (1 - (1 / ((odd2 - 1) * 0.95 + 1)));
 		}
 		
 		double minOdd;
@@ -386,33 +390,63 @@ public class ArbsUtil {
 	}
 
 	public static double getThreeWayNetProfit(AbstractInputRecord homeWinRecord, AbstractInputRecord awayWinRecord, AbstractInputRecord drawRecord) {
-		return ((1 / ((1 / homeWinRecord.getQuota()) + (1 / awayWinRecord.getQuota()) + (1 / drawRecord.getQuota()))) - 1) * 100;
+		double odd1 = homeWinRecord.getQuota();
+		double odd2 = awayWinRecord.getQuota();
+		double oddX = drawRecord.getQuota();
+		
+		if(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(homeWinRecord.getBookmakerName())) {
+			odd1 = (odd1 - 1) * 0.95 + 1;
+		}
+		
+		if(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(awayWinRecord.getBookmakerName())) {
+			odd2 = (odd2 - 1) * 0.95 + 1;
+		}
+		
+		if(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(drawRecord.getBookmakerName())) {
+			oddX = (oddX - 1) * 0.95 + 1;
+		}
+		
+		return ((1 / ((1 / odd1) + (1 / odd2) + (1 / oddX))) - 1) * 100;
 	}
 
 	public static BetReference[] findReferenceInMapFromOutputRecord(RecordOutput record) {
-		BetReference[] returnArray = findReferenceInMapFromString("" + record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-																  record.getSport() + BlueSheepConstants.REGEX_PIPE + 
-																  record.getEvento(), record.getDataOraEvento().toString(), record.getSport(), record.getScommessaBookmaker1(), record.getScommessaBookmaker2(), null);
-		return returnArray;
+		String keyEvento = "" + record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+				  record.getSport() + BlueSheepConstants.REGEX_PIPE + 
+				  record.getEvento();
+		String dateString = record.getDataOraEvento().toString();
+		String sportString = record.getSport();
+		
+		String scommessa1String = null;
+		String scommessa2String = null;
+		String scommessa3String = null;
+		
+		
+		if((BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(record.getBookmakerName2()) ||
+				BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(record.getBookmakerName1())) &&
+				ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(Scommessa.getScommessaByCode(record.getScommessaBookmaker1())) &&
+				record.getScommessaBookmaker1().equalsIgnoreCase(record.getScommessaBookmaker2())) {
+			scommessa1String = Scommessa.SFIDANTE1VINCENTE_1.getCode();
+			scommessa2String = Scommessa.SFIDANTE2VINCENTE_2.getCode();
+			scommessa3String = Scommessa.PAREGGIO_X.getCode();
+		}else {
+			scommessa1String = record.getScommessaBookmaker1();
+			scommessa2String = ScommessaUtilManager.getOppositeScommessaByScommessa(Scommessa.getScommessaByCode(scommessa1String), Sport.getSportByCode(record.getSport())).getCode();
+		}
+
+		return findReferenceInMapFromString(keyEvento, dateString, sportString, scommessa1String, scommessa2String, scommessa3String);
 	}
 	
 	public static BetReference[] findReferenceInMapFromOutputRecord(ArbsRecord record) {
+		String bet1 = Scommessa.getScommessaByCode(record.getBet1()).toString();
+		String bet2 = ScommessaUtilManager.getOppositeScommessaByScommessa(Scommessa.getScommessaByCode(record.getBet1()), Sport.getSportByCode(record.getSport())).toString();
 		String bet3 = null;
 		if(record instanceof ThreeOptionsArbsRecord) {
 			bet3 = ((ThreeOptionsArbsRecord) record).getBet3();
 		}
 		BetReference[] returnArray = findReferenceInMapFromString("" + record.getDate() + BlueSheepConstants.REGEX_PIPE + 
 																  record.getSport() + BlueSheepConstants.REGEX_PIPE + 
-																  record.getKeyEvento(), record.getDate(), record.getSport(), record.getBet1(), record.getBet2(), bet3);
+																  record.getKeyEvento(), record.getDate(), record.getSport(), bet1, bet2, bet3);
 		return returnArray;
-	}
-	
-	public static BetReference[] findReferenceInMapFromString(String recordKey) {
-		String[] splittedKey = recordKey.split(BlueSheepConstants.REGEX_CSV);
-		BetReference[] betReferenceArray = ArbsUtil.findReferenceInMapFromString(splittedKey[1] + BlueSheepConstants.REGEX_PIPE + 
-																				 splittedKey[2] + BlueSheepConstants.REGEX_PIPE + 
-																				 splittedKey[0], splittedKey[1], splittedKey[2], splittedKey[6],  splittedKey[8], null);
-		return betReferenceArray;
 	}
 
 	public static BetReference[] findReferenceFromBookmakerMap(Map<String, AbstractInputRecord> homeWinRecordMap,
@@ -427,7 +461,7 @@ public class ArbsUtil {
 			List<AbstractInputRecord> record1List = new ArrayList<AbstractInputRecord>();
 			for(String bookmaker : bookmaker1Set) {
 				AbstractInputRecord record = homeWinRecordMap.get(bookmaker);
-				if(record != null && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(bookmaker)) {
+				if(record != null && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmaker)) {
 					record1List.add(record);
 				}
 			}
@@ -435,7 +469,7 @@ public class ArbsUtil {
 			List<AbstractInputRecord> recordXList = new ArrayList<AbstractInputRecord>();
 			for(String bookmaker : bookmakerXSet) {
 				AbstractInputRecord record = drawRecordMap.get(bookmaker);
-				if(record != null && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(bookmaker)) {
+				if(record != null && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmaker)) {
 					recordXList.add(record);
 				}
 			}
@@ -443,7 +477,7 @@ public class ArbsUtil {
 			List<AbstractInputRecord> record2List = new ArrayList<AbstractInputRecord>();
 			for(String bookmaker : bookmaker2Set) {
 				AbstractInputRecord record = awayWinRecordMap.get(bookmaker);
-				if(record != null && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(bookmaker)) {
+				if(record != null && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmaker)) {
 					record2List.add(record);
 				}
 			}
@@ -452,7 +486,6 @@ public class ArbsUtil {
 
 				@Override
 				public int compare(AbstractInputRecord o1, AbstractInputRecord o2) {
-					// TODO Auto-generated method stub
 					return new Double(o1.getQuota()).compareTo(new Double(o2.getQuota()));
 				}
 			});
@@ -461,7 +494,6 @@ public class ArbsUtil {
 
 				@Override
 				public int compare(AbstractInputRecord o1, AbstractInputRecord o2) {
-					// TODO Auto-generated method stub
 					return new Double(o1.getQuota()).compareTo(new Double(o2.getQuota()));
 				}
 			});
@@ -470,7 +502,6 @@ public class ArbsUtil {
 
 				@Override
 				public int compare(AbstractInputRecord o1, AbstractInputRecord o2) {
-					// TODO Auto-generated method stub
 					return new Double(o1.getQuota()).compareTo(new Double(o2.getQuota()));
 				}
 			});

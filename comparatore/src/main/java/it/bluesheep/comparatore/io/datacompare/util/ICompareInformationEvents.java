@@ -22,6 +22,6 @@ public interface ICompareInformationEvents {
 	 * @throws Exception 
 	 */
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds
-	(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception;
+	(List<AbstractInputRecord> bookmakerList) throws Exception;
 
 }

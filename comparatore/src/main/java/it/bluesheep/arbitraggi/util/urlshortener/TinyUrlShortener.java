@@ -20,7 +20,7 @@ public class TinyUrlShortener {
 	public static String getShortenedURLFromLongURL(String longUrl) throws IOException {
         String returnUrl = longUrl;
 
-		if(longUrl != null && !"null".equalsIgnoreCase(longUrl)) {
+		if(longUrl != null && !"null".equalsIgnoreCase(longUrl) && !longUrl.isEmpty()) {
 			String shortedURL = urlShortenerMap.get(longUrl);
 			
 			if(shortedURL == null) {

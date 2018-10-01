@@ -49,8 +49,9 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	}
 	
 	@Override
-	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds
-					(List<AbstractInputRecord> exchangeList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap) throws Exception{
+	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> exchangeList) throws Exception{
+		ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
+		
 		for(AbstractInputRecord record : exchangeList) {
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
 			String key = splittedEventoKeyRecord[1];
@@ -77,15 +78,16 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 								Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
 								List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
 								if(!bookmakerSet.isEmpty()) {
-									AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
-									exchangeRecord.setCampionato(bookmakerRecord.getCampionato());
-									exchangeRecord.setPartecipante1(bookmakerRecord.getPartecipante1());
-									exchangeRecord.setPartecipante2(bookmakerRecord.getPartecipante2());
-									exchangeRecord.setKeyEvento("" + exchangeRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-												exchangeRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
-												exchangeRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
-												exchangeRecord.getPartecipante2());
-
+									AbstractInputRecord txOddsReference = findTxOddsRecord(bookmakerSet, bookmakerRecordMap);
+									if(txOddsReference != null) {
+										exchangeRecord.setCampionato(txOddsReference.getCampionato());
+										exchangeRecord.setPartecipante1(txOddsReference.getPartecipante1());
+										exchangeRecord.setPartecipante2(txOddsReference.getPartecipante2());
+										exchangeRecord.setKeyEvento("" + exchangeRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+													exchangeRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
+													exchangeRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
+													exchangeRecord.getPartecipante2());
+									}
 								}
 								break;
 							}
@@ -95,6 +97,21 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 			}
 		}
 		return exchangeList;
+	}
+
+	private AbstractInputRecord findTxOddsRecord(List<String> bookmakerSet, Map<String, AbstractInputRecord> bookmakerRecordMap) {
+		
+		AbstractInputRecord txOddsRecord = null;
+		
+		for(String bookmaker : bookmakerSet) {
+			AbstractInputRecord record = bookmakerRecordMap.get(bookmaker);
+			if(record.getSource().equals(Service.TXODDS_SERVICENAME)) {
+				txOddsRecord = record;
+				break;
+			}
+		}
+		
+		return txOddsRecord;
 	}
 
 	@Override
@@ -150,8 +167,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		recordOutput.setScommessaBookmaker1(scommessaInputRecord1.getTipoScommessa().getCode());
 		recordOutput.setScommessaBookmaker2(scommessaInputRecord2.getTipoScommessa().getCode());
 		recordOutput.setSport(scommessaInputRecord1.getSport().toString());
-		BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) scommessaInputRecord2;
-		recordOutput.setLiquidita2(exchangeRecord.getLiquidita());
+		recordOutput.setLiquidita1(scommessaInputRecord1.getLiquidita());
+		recordOutput.setLiquidita2(scommessaInputRecord2.getLiquidita());
 		recordOutput = (RecordBookmakerVsExchangeOdds) TranslatorUtil.translateFieldAboutCountry(recordOutput);
 		recordOutput.setLinkBook1(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord1));
 		recordOutput.setLinkBook2(BookmakerLinkGenerator.getBookmakerLinkEvent(scommessaInputRecord2));
@@ -164,8 +181,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	 * @param scommessaRecordList lista di offerte quote
 	 * @return il record relativo alle quote offerte da Betfair Exchange, null se non trovato
 	 */
-	private AbstractInputRecord findExchangeRecord(Map<String, AbstractInputRecord> scommessaRecordList) {
-		return scommessaRecordList.get(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME);
+	private BetfairExchangeInputRecord findExchangeRecord(Map<String, AbstractInputRecord>  scommessaRecordList) {
+		return (BetfairExchangeInputRecord) scommessaRecordList.get(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY);
 	}
 	
 	/**
@@ -183,7 +200,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		for(String bookmaker : bookmakerSet) {
 			AbstractInputRecord record = eventoScommessaRecordList.get(bookmaker);
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord && record.getQuota() >= minimumOddValue) {
+			if(record != exchangeRecord && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(record.getBookmakerName()) && record.getQuota() >= minimumOddValue) {
 				double compareValue = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepServiceType).getCompareValue(record.getQuota(), exchangeRecord.getQuota());
 				//se il rating1 è sufficientemente alto
 				if(compareValue >= minThreshold && (

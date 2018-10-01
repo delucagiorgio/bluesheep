@@ -48,7 +48,7 @@ public abstract class Event {
 		} catch (IOException e) {
 //			logger.error(e.getMessage(), e);
 		}
-		if(linkBook1 != null && !"null".equals(linkBook1) && linkBook2 != null && !"null".equals(linkBook2)) {
+		if(linkBook1 != null && !"null".equals(linkBook1) && !linkBook1.isEmpty() &&  linkBook2 != null && !"null".equals(linkBook2) && !linkBook2.isEmpty()) {
 			this.getLinkBook().add(arbsRecord.getBookmaker1() + BlueSheepConstants.KEY_SEPARATOR + linkBook1);
 			this.getLinkBook().add(arbsRecord.getBookmaker2() + BlueSheepConstants.KEY_SEPARATOR + linkBook2);
 		}

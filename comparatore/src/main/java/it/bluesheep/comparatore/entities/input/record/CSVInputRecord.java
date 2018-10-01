@@ -8,6 +8,7 @@ import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.util.IKeyEventoComparator;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.CosineSimilarityUtil;
+import it.bluesheep.comparatore.serviceapi.Service;
 
 public class CSVInputRecord extends AbstractInputRecord implements IKeyEventoComparator {
 
@@ -16,10 +17,14 @@ public class CSVInputRecord extends AbstractInputRecord implements IKeyEventoCom
 	public CSVInputRecord(AbstractInputRecord record) {
 		super(record);
 		logger = Logger.getLogger(CSVInputRecord.class);
+		this.liquidita = -1;
+		this.source = Service.CSV_SERVICENAME;
 	}
 	
 	public CSVInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {
 		super(dataOraEvento, sport, campionato, partecipante1, partecipante2, filler);
+		this.liquidita = -1;
+		this.source = Service.CSV_SERVICENAME;
 	}
 
 	@Override

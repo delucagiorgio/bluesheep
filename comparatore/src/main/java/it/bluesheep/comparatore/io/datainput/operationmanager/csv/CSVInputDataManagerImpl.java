@@ -119,7 +119,6 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 					record.setBookmakerName(bookmaker);
 					record.setTipoScommessa(scommessa);
 					record.setQuota(quota);
-					record.setSource(serviceName);
 				}
 			}
 		} catch (ParseException e) {

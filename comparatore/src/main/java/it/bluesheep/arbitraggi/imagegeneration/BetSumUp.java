@@ -1,6 +1,5 @@
 package it.bluesheep.arbitraggi.imagegeneration;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 import it.bluesheep.arbitraggi.entities.ArbsRecord;
@@ -48,32 +47,6 @@ public abstract class BetSumUp {
         this.average = average;
     }
     
-	protected String calcutateIncome(String odd1, String odd2, String betType1, String betType2) {
-		DecimalFormat df = new DecimalFormat();
-		df.setMinimumFractionDigits(2);
-		df.setMaximumFractionDigits(2);		
-		
-		if (betType1.equals(betType2)) {
-			float odd1sNumber = Float.parseFloat(odd1.replace(",", "."));
-			float odd2sNumber = Float.parseFloat(odd2.replace(",", "."));
-			
-			float realOdd2 = 1 / (1 - (1/odd2sNumber));
-			float r1 = 1000 * odd1sNumber;
-			float x = (r1/realOdd2) / new Float(0.95);
-			float p = (((r1)/(1000 + x)) - 1) * 100;			
-			return df.format(p);
-			
-		} else {
-			float odd1sNumber = Float.parseFloat(odd1.replace(",", "."));
-			float odd2sNumber = Float.parseFloat(odd2.replace(",", "."));
-			
-			float r1 = 1000 * odd1sNumber;
-			float x = r1/odd2sNumber;
-			float p = (((r1)/(1000 + x)) - 1) * 100;			
-			return df.format(p);
-		}
-	}
-	
 	protected String drawSingleTable(String action1, String betType1, String action2, String betType2, List<TableRow> p1, List<TableRow> p2) {
         final String missilePath = "./img/missile.png";
         final String betterOddPath ="./img/up_arrow.png";

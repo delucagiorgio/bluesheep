@@ -1,6 +1,8 @@
 package it.bluesheep.comparatore.io.datacompare.util;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -95,5 +97,48 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 					recordOfBookmaker.getBookmakerName());
 		}
 		bookmakerRecordMap.put(record.getBookmakerName(), record);
+	}
+
+	public List<AbstractInputRecord> findDeleteAbstractInputRecordInMap(List<AbstractInputRecord> recordList) {
+		List<AbstractInputRecord> returnRecord = new ArrayList<AbstractInputRecord>();
+		for(AbstractInputRecord record : recordList) {
+			if(record != null) {
+				Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dateMap = get(record.getSport());
+				if(dateMap != null) {
+					Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> eventoMap = dateMap.get(record.getDataOraEvento());
+					if(eventoMap != null) {
+						Map<Scommessa, Map<String, AbstractInputRecord>> scommessaMap = eventoMap.get(record.getKeyEvento());
+						if(scommessaMap != null) {
+							Map<String, AbstractInputRecord> bookmakerMap = scommessaMap.get(record.getTipoScommessa());
+							if(bookmakerMap != null) {
+								AbstractInputRecord bookmakerRecord = bookmakerMap.get(record.getBookmakerName());
+								if(bookmakerRecord != null) {
+									returnRecord.add(bookmakerRecord);
+								}
+								bookmakerMap.remove(record.getBookmakerName());
+								
+								if(bookmakerMap.isEmpty()) {
+									scommessaMap.remove(record.getTipoScommessa());
+								
+									if(scommessaMap.isEmpty()) {
+										eventoMap.remove(record.getKeyEvento());
+										
+										if(eventoMap.isEmpty()) {
+											dateMap.remove(record.getDataOraEvento());
+											
+											if(dateMap.isEmpty()) {
+												remove(record.getSport());
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return returnRecord;
 	}
 }

@@ -7,6 +7,7 @@ import com.betfair.util.ISO8601DateTypeAdapter;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
+import it.bluesheep.comparatore.serviceapi.Service;
 
 public class TxOddsInputRecord extends AbstractInputRecord{
 	
@@ -15,10 +16,14 @@ public class TxOddsInputRecord extends AbstractInputRecord{
 	
 	public TxOddsInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {
 		super(dataOraEvento, sport, campionato, partecipante1, partecipante2, filler);
+		this.liquidita = -1;
+		this.source = Service.TXODDS_SERVICENAME;
 	}
 	
 	public TxOddsInputRecord(TxOddsInputRecord recordToBeMapped) {
 		super(recordToBeMapped);
+		this.liquidita = -1;
+		this.source = Service.TXODDS_SERVICENAME;
 	}
 
 	public void setTimeOfInsertionInSystem(String stringFromJSON) {

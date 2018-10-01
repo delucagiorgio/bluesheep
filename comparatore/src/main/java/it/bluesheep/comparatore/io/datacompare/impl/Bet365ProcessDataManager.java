@@ -36,7 +36,10 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	}
 
 	@Override
-	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList, ChiaveEventoScommessaInputRecordsMap sportMap) throws Exception {
+	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
+		
+		ChiaveEventoScommessaInputRecordsMap sportMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
+		
 		logger.info("Start matching informartion for Bet365 on TxOdds events : "
 				+ "input size Bet365 events is " + bookmakerList.size() 
 				+ "; input size TxOdds events is " + sportMap.keySet().size());

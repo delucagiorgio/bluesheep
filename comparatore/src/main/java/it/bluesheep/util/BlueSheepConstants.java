@@ -4,7 +4,8 @@ public class BlueSheepConstants {
 	//general
 	public static final String ENCODING_UTF_8 = "UTF-8";
 	public static final String BET365_BOOKMAKER_NAME = "Bet365";
-	public static final String BETFAIR_EXCHANGE_BOOKMAKER_NAME = "Betfair Exchange";
+	public static final String BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY = "Betfair Exchange Banco";
+	public static final String BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK = "Betfair Exchange Punta";
 	public static final String REGEX_COMMERCIAL_E = "&";
 	public static final String REGEX_SLASH = "/";
 	public static final String REGEX_PIPE = "|";

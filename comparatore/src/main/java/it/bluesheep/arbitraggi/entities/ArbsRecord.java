@@ -229,4 +229,8 @@ public abstract class ArbsRecord{
 	public ArbsType getArbType() {
 		return type;
 	}
+	
+	protected double getActualOddValue(String bookmaker, double oddValue) {
+		return bookmaker != null && bookmaker.startsWith("Betfair Exchange") ? (oddValue - 1) * 0.95 + 1 : oddValue;
+	}
 }

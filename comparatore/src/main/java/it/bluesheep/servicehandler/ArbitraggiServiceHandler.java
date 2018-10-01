@@ -105,7 +105,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 			ArbsRecord arbRecord = new TwoOptionsArbsRecord(BlueSheepConstants.STATUS0_ARBS_RECORD, record, referencesArray[0], referencesArray[1]);
 			recordCompared.add(arbRecord);
 		}
-		
+
 		IProcessDataManager processorTxOdds = ProcessDataManagerFactory.getProcessDataManagerByString(Service.TXODDS_SERVICENAME);
 		List<ArbsRecord> resultList = null;
 		try {

@@ -1,7 +1,5 @@
 package it.bluesheep.arbitraggi.entities;
 
-import java.text.DecimalFormat;
-
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.util.BlueSheepConstants;
 
@@ -46,18 +44,17 @@ public class TwoOptionsArbsRecord extends ArbsRecord {
 	
 	@Override
 	protected void calculateNetProfit() {
-		DecimalFormat df = new DecimalFormat();
-		df.setMinimumFractionDigits(2);
-		df.setMaximumFractionDigits(2);		
+		double odd1 = super.getActualOddValue(bookmaker1, getOdd1());
+		double odd2 = super.getActualOddValue(bookmaker2, getOdd2());
 		
 		if (getBet1().equals(getBet2())) {
-			double realOdd2 = 1 / (1 - (1/getOdd2()));
-			double r1 = 1000 * getOdd1();
+			double realOdd2 = 1 / (1 - (1/odd2));
+			double r1 = 1000 * odd1;
 			double x = r1/realOdd2;
 			netProfit = ((((r1)/(1000 + x)) - 1) * 100);			
 		} else {
-			double r1 = 1000 * getOdd1();
-			double x = r1/getOdd2();
+			double r1 = 1000 * odd1;
+			double x = r1/odd2;
 			netProfit = ((((r1)/(1000 + x)) - 1) * 100);			
 		}
 	}

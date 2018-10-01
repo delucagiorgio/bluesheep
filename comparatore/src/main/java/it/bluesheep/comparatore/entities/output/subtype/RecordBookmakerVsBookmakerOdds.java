@@ -8,8 +8,6 @@ public class RecordBookmakerVsBookmakerOdds extends RecordOutput {
 	
 	public RecordBookmakerVsBookmakerOdds() {
 		super();
-		this.liquidita1 = -1;
-		this.liquidita2 = -1;
 	}
 
 	public double getRating2() {

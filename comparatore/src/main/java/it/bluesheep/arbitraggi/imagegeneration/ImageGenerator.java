@@ -54,13 +54,16 @@ public class ImageGenerator {
 	    // Genero l'xhtml relativo ad ogni evento 
 		List<String> xhtmlEvents = new ArrayList<String>();
 	    for (int i = 0; i < events.size(); i++) {
-    		xhtmlEvents.add(events.get(i).toHtml(i + 1, events.size()));
+	    	String result = events.get(i).toHtml(i + 1, events.size());
+    		if(result != null) {
+    			xhtmlEvents.add(result);
+    		}
 	    }
 	    
 	    // Converto l'html in immagine .png
 		String xhtmlFilePath = "../xhtml/";
 		logger.info("xhtmlEvents size = " + xhtmlEvents.size());
-		int maxThreadPoolSize = 10;
+		int maxThreadPoolSize = 5;
 		ExecutorService executorService = Executors.newFixedThreadPool(maxThreadPoolSize);
 
 	    for (int i = 0; i < xhtmlEvents.size(); i++) {

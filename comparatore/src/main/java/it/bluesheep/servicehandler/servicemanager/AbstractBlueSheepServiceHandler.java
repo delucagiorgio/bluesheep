@@ -63,10 +63,13 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 		List<AbstractInputRecord> transformedRecords;
 		for(Sport sport : serviceNameInputData.keySet()) {
 			try {
+				List<AbstractInputRecord> recordDeleted = BlueSheepSharedResources.getEventoScommessaRecordMap().findDeleteAbstractInputRecordInMap(serviceNameInputData.get(sport));
+				logger.info("Deleted record for update count = " + recordDeleted.size());
+				
 				logger.info("Starting data transformation for " + serviceName + " on sport " + sport);
-				transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(serviceNameInputData.get(sport), BlueSheepSharedResources.getEventoScommessaRecordMap());
+				transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(serviceNameInputData.get(sport));
 				logger.info("Data transformation for " + serviceName + " on sport " + sport + " completed");
-
+				
 				addToChiaveEventoScommessaMap(transformedRecords);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

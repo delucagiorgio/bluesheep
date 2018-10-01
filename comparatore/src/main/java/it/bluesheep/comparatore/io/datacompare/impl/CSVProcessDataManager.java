@@ -27,9 +27,9 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 	}
 
 	@Override
-	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(
-			List<AbstractInputRecord> csvEventList, ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap)
-			throws Exception {
+	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> csvEventList) throws Exception {
+		
+		ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
 		
 		List<AbstractInputRecord> csvEventListUpdatedInfo = new ArrayList<AbstractInputRecord>();
 		for(AbstractInputRecord record : csvEventList) {

@@ -16,7 +16,6 @@ import it.bluesheep.comparatore.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
-import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
@@ -160,7 +159,6 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 								String boid = attributesOfferJSONObject.getString("id");
 								
 								newRecord.setTimeOfInsertionInSystem(lastUpdatedString);
-								newRecord.setSource(Service.TXODDS_SERVICENAME);
 								newRecord.setBoid(boid);
 								
 								if("BetClic.it".equalsIgnoreCase(bookmakerName)) {
