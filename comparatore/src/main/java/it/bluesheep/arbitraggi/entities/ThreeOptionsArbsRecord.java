@@ -50,7 +50,6 @@ public class ThreeOptionsArbsRecord extends ArbsRecord{
 				   date + BlueSheepConstants.REGEX_CSV + 
 				   sport + BlueSheepConstants.REGEX_CSV +
 				   country + BlueSheepConstants.REGEX_CSV + 
-				   championship + BlueSheepConstants.REGEX_CSV + 
 				   bookmaker1 + BlueSheepConstants.REGEX_CSV + 
 				   bet1 + BlueSheepConstants.REGEX_CSV + 
 				   bookmaker2 + BlueSheepConstants.REGEX_CSV +
@@ -128,13 +127,25 @@ public class ThreeOptionsArbsRecord extends ArbsRecord{
 		return keyEvento + BlueSheepConstants.REGEX_CSV + 
 				   date + BlueSheepConstants.REGEX_CSV + 
 				   sport + BlueSheepConstants.REGEX_CSV +
-				   country + BlueSheepConstants.REGEX_CSV + 
-				   championship + BlueSheepConstants.REGEX_CSV;
+				   country + BlueSheepConstants.REGEX_CSV;
 	}
 
 	@Override
 	public String getStoredDataFormat() {
-		return getKeyEventoBookmakerBet() + BlueSheepConstants.KEY_SEPARATOR + getStatus()
+		return keyEvento + BlueSheepConstants.REGEX_CSV + 
+				   date + BlueSheepConstants.REGEX_CSV + 
+				   sport + BlueSheepConstants.REGEX_CSV +
+				   country + BlueSheepConstants.REGEX_CSV + 
+				   championship + BlueSheepConstants.REGEX_CSV + 
+				   bookmaker1 + BlueSheepConstants.REGEX_CSV + 
+				   bet1 + BlueSheepConstants.REGEX_CSV + 
+				   bookmaker2 + BlueSheepConstants.REGEX_CSV +
+				   bet2 + BlueSheepConstants.REGEX_CSV +
+				   bookmaker3 + BlueSheepConstants.REGEX_CSV + 
+				   bet3 + BlueSheepConstants.KEY_SEPARATOR + 
+				   odd1 + BlueSheepConstants.REGEX_CSV +
+				   odd2 + BlueSheepConstants.REGEX_CSV +
+				   odd3 + BlueSheepConstants.KEY_SEPARATOR + getStatus()
 				+ BlueSheepConstants.KEY_SEPARATOR + getLink1()
 				+ BlueSheepConstants.REGEX_CSV + getLink2()
 				+ BlueSheepConstants.REGEX_CSV + getLink3()

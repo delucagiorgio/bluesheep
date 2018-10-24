@@ -152,58 +152,60 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmakerScommessa)) { 
 						
 						AbstractInputRecord scommessaInputRecord = bookmakerRecord1Map.get(bookmakerScommessa);
-						boolean isScommessaInputRecordExchangeRecord = scommessaInputRecord instanceof BetfairExchangeInputRecord;
-						boolean isScommessaInputRecordBackExchangeRecord = false;
-						if(isScommessaInputRecordExchangeRecord) {
-							isScommessaInputRecordBackExchangeRecord = !((BetfairExchangeInputRecord) scommessaInputRecord).isLayRecord();
-						}
-						
 						AbstractInputRecord oppositeScommessaInputRecord = bookmakerRecord2Map.get(bookmakerScommessaOpposite);
-						boolean isOppositeScommessaInputRecordExchangeRecord = oppositeScommessaInputRecord instanceof BetfairExchangeInputRecord;
-						boolean isOppositeScommessaInputRecordBackExchangeRecord = false;
-	
-						if(isOppositeScommessaInputRecordExchangeRecord) {
-							isOppositeScommessaInputRecordBackExchangeRecord = !((BetfairExchangeInputRecord) oppositeScommessaInputRecord).isLayRecord();
-						}
 						
-						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
-						
-						double maxOdd = orderedListByQuota.get(0).getQuota();
-						double minOdd = orderedListByQuota.get(1).getQuota();;
-						if((scommessaInputRecord.equals(orderedListByQuota.get(0)) && isScommessaInputRecordBackExchangeRecord) || 
-								(oppositeScommessaInputRecord.equals(orderedListByQuota.get(0)) && isOppositeScommessaInputRecordBackExchangeRecord)) {
-							double temp = orderedListByQuota.get(0).getQuota();
-							maxOdd = (temp - 1) * 0.95 + 1;
-						}else if((scommessaInputRecord.equals(orderedListByQuota.get(1)) && isScommessaInputRecordBackExchangeRecord) || 
-								(oppositeScommessaInputRecord.equals(orderedListByQuota.get(1)) && isOppositeScommessaInputRecordBackExchangeRecord)) {
-							double temp = orderedListByQuota.get(1).getQuota();
-							minOdd = (temp - 1) * 0.95 + 1;
-						}
-						
-						double compareValue1 = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepService).getCompareValue(maxOdd, minOdd);
-						double rating2 = RatingCalculatorBookmakersOdds.calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
-						
-						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(compareValue1 >= minThreshold && (
-										(controlValidityOdds && ArbsUtil.validOddsRatio(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota(), service))
-										||
-										(!controlValidityOdds && 
-										rating2 >= minThreshold &&
-										compareValue1 <= maxThreshold && 
-										rating2 <= maxThreshold)
-								) &&
-						   (!controlValidityOdds || 
-								   (!scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) && 
-										   !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) &&
-										   hasBeenRecentlyUpdated(scommessaInputRecord) && 
-										   hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
-									)
-						   )) {
-							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), 
-									RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), 
-																										 orderedListByQuota.get(1).getQuota()));
-							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
-							outputRecordList.add(outputRecord);
+						if(scommessaInputRecord != null && oppositeScommessaInputRecord != null) {
+							boolean isScommessaInputRecordExchangeRecord = scommessaInputRecord instanceof BetfairExchangeInputRecord;
+							boolean isScommessaInputRecordBackExchangeRecord = false;
+							if(isScommessaInputRecordExchangeRecord) {
+								isScommessaInputRecordBackExchangeRecord = !((BetfairExchangeInputRecord) scommessaInputRecord).isLayRecord();
+							}
+							
+							boolean isOppositeScommessaInputRecordExchangeRecord = oppositeScommessaInputRecord instanceof BetfairExchangeInputRecord;
+							boolean isOppositeScommessaInputRecordBackExchangeRecord = false;
+		
+							if(isOppositeScommessaInputRecordExchangeRecord) {
+								isOppositeScommessaInputRecordBackExchangeRecord = !((BetfairExchangeInputRecord) oppositeScommessaInputRecord).isLayRecord();
+							}
+							List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
+							
+							double maxOdd = orderedListByQuota.get(0).getQuota();
+							double minOdd = orderedListByQuota.get(1).getQuota();;
+							if((scommessaInputRecord.equals(orderedListByQuota.get(0)) && isScommessaInputRecordBackExchangeRecord) || 
+									(oppositeScommessaInputRecord.equals(orderedListByQuota.get(0)) && isOppositeScommessaInputRecordBackExchangeRecord)) {
+								double temp = orderedListByQuota.get(0).getQuota();
+								maxOdd = (temp - 1) * 0.95 + 1;
+							}else if((scommessaInputRecord.equals(orderedListByQuota.get(1)) && isScommessaInputRecordBackExchangeRecord) || 
+									(oppositeScommessaInputRecord.equals(orderedListByQuota.get(1)) && isOppositeScommessaInputRecordBackExchangeRecord)) {
+								double temp = orderedListByQuota.get(1).getQuota();
+								minOdd = (temp - 1) * 0.95 + 1;
+							}
+							
+							double compareValue1 = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepService).getCompareValue(maxOdd, minOdd);
+							double rating2 = RatingCalculatorBookmakersOdds.calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+							
+							//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
+							if(compareValue1 >= minThreshold && (
+											(controlValidityOdds && ArbsUtil.validOddsRatio(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota(), service))
+											||
+											(!controlValidityOdds && 
+											rating2 >= minThreshold &&
+											compareValue1 <= maxThreshold && 
+											rating2 <= maxThreshold)
+									) &&
+							   (!controlValidityOdds || 
+									   (!scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) && 
+											   !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) &&
+											   hasBeenRecentlyUpdated(scommessaInputRecord) && 
+											   hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
+										)
+							   )) {
+								RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), 
+										RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), 
+																											 orderedListByQuota.get(1).getQuota()));
+								((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
+								outputRecordList.add(outputRecord);
+							}
 						}
 					}
 				}
@@ -264,16 +266,17 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
-		
-		for(AbstractInputRecord txOddsRecord : bookmakerList) {
-			AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord);
-			if(exchangeRecord != null) {
-				txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
-				txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-						txOddsRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
-						txOddsRecord.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
-						txOddsRecord.getPartecipante2());
-				
+		if(bookmakerList != null && !bookmakerList.isEmpty() && Sport.CALCIO.equals(bookmakerList.get(0).getSport())) {
+			for(AbstractInputRecord txOddsRecord : bookmakerList) {
+				AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord);
+				if(exchangeRecord != null) {
+					txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
+					txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+							txOddsRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
+							txOddsRecord.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
+							txOddsRecord.getPartecipante2());
+					
+				}
 			}
 		}
 		
@@ -452,6 +455,9 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 				}
 			}
 		}
+		
+		logger.info("TXODDS ::: Three-way comparison completed. Result size = " + threeWayRecordOutput.size());
+		
 		return threeWayRecordOutput;
 	}
 

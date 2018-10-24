@@ -524,6 +524,9 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			float tempQ1;
 			float tempQ2;
 			float tempQ3;
+			float realExchangeQ1 = 0;
+			float realExchangeQ2 = 0;
+			float realExchangeQ3 = 0;
 			float l1 = -1;
 			float l2 = -1;
 			float l3 = -1;
@@ -540,9 +543,11 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 					books1.remove(i);
 					i--;
 				}else if(books1.get(i).getBookmaker().startsWith("Betfair Exchange")) {
+					//quota reale exchange
 					tempQ1 = (Float.parseFloat(books1.get(i).getOdd()) - 1F) * 0.95F + 1F; 
 					if(tempQ1 > temp) {
-						temp = Float.parseFloat(books1.get(i).getOdd());
+						temp = tempQ1;
+						realExchangeQ1 = Float.parseFloat(books1.get(i).getOdd());
 						b1 = books1.get(i).getBookmaker();
 						l1 = Float.parseFloat(books1.get(i).getMoney());
 					}
@@ -553,13 +558,6 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 				}
 			}
 			q1 = temp;
-
-			//TODO DA GESTIRE 
-			if(b1.startsWith("Betfair Exchange")) {
-				tempQ1 = (temp - 1F) * 0.95F + 1F; 
-			}else {
-				tempQ1 = q1;
-			}
 			
 			temp = 0;
 			for (int i = 0; i < books2.size(); i++) {
@@ -570,7 +568,8 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 				}else if(books2.get(i).getBookmaker().startsWith("Betfair Exchange")) {
 					tempQ2 = (Float.parseFloat(books2.get(i).getOdd()) - 1F) * 0.95F + 1F; 
 					if(tempQ2 > temp) {
-						temp = Float.parseFloat(books2.get(i).getOdd());
+						temp = tempQ2; 
+						realExchangeQ2 = Float.parseFloat(books2.get(i).getOdd());
 						b2 = books2.get(i).getBookmaker();
 						l2 = Float.parseFloat(books2.get(i).getMoney());
 					}
@@ -582,13 +581,6 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}
 			q2 = temp;
 			
-			//TODO DA GESTIRE 
-			if(b2.startsWith("Betfair Exchange")) {
-				tempQ2 = (temp - 1F) * 0.95F + 1F; 
-			}else {
-				tempQ2 = q2;
-			}
-			
 			temp = 0;
 			for (int i = 0; i < books3.size(); i++) {
 				if (books3.get(i).isRemovedOdd()) {
@@ -598,7 +590,8 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 				}else if(books3.get(i).getBookmaker().startsWith("Betfair Exchange")) {
 					tempQ3 = (Float.parseFloat(books3.get(i).getOdd()) - 1F) * 0.95F + 1F; 
 					if(tempQ3 > temp) {
-						temp = Float.parseFloat(books3.get(i).getOdd());
+						temp = tempQ3;
+						realExchangeQ3 = Float.parseFloat(books3.get(i).getOdd());
 						b3 = books3.get(i).getBookmaker();
 						l3 = Float.parseFloat(books3.get(i).getMoney());
 					}
@@ -610,15 +603,8 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 			}
 			q3 = temp;
 			
-			//TODO DA GESTIRE 
-			if(b3.startsWith("Betfair Exchange")) {
-				tempQ3 = (temp - 1F) * 0.95F + 1F; 
-			}else {
-				tempQ3 = q3;
-			}
-			
 			// QUI DOVREI CALCOLARE IL BEST INCOME
-			bestP = (( 1 / ( (1 / tempQ1) + (1 / tempQ2) + (1 / tempQ3) )) - 1) * 100;
+			bestP = (( 1 / ( (1 / q1) + (1 / q2) + (1 / q3) )) - 1) * 100;
 			DecimalFormat df = new DecimalFormat();
 			df.setMaximumFractionDigits(2);
 			df.setMinimumFractionDigits(2);
@@ -657,7 +643,7 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 								((Float.parseFloat(books1.get(i).getOdd()) == q1 && !books1.get(i).getBookmaker().startsWith("Betfair Exchange")) 
 										||
 										(books1.get(i).getBookmaker().startsWith("Betfair Exchange") && 
-												(Float.parseFloat(books1.get(i).getOdd()) - 1F) * 0.95F + 1F == tempQ1))) {
+												(Float.parseFloat(books1.get(i).getOdd()) - 1F) * 0.95F + 1F == q1))) {
 							result += "<td class=\"best-odd\">";
 						} else {
 							result += "<td>";	
@@ -684,7 +670,7 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 								((Float.parseFloat(books2.get(i).getOdd()) == q2 && !books2.get(i).getBookmaker().startsWith("Betfair Exchange")) 
 										||
 										(books2.get(i).getBookmaker().startsWith("Betfair Exchange") && 
-												(Float.parseFloat(books2.get(i).getOdd()) - 1F) * 0.95F + 1F == tempQ2))) {
+												(Float.parseFloat(books2.get(i).getOdd()) - 1F) * 0.95F + 1F == q2))) {
 							result += "<td class=\"best-odd\">";
 						} else {
 							result += "<td>";	
@@ -710,7 +696,7 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 								((Float.parseFloat(books3.get(i).getOdd()) == q3 && !books3.get(i).getBookmaker().startsWith("Betfair Exchange")) 
 										||
 										(books3.get(i).getBookmaker().startsWith("Betfair Exchange") && 
-												(Float.parseFloat(books3.get(i).getOdd()) - 1F) * 0.95F + 1F == tempQ3))) {		
+												(Float.parseFloat(books3.get(i).getOdd()) - 1F) * 0.95F + 1F == q3))) {		
 							result += "<td class=\"best-odd\">";
 						} else {
 							result += "<td>";	
@@ -819,6 +805,12 @@ public class ThreeOptionsBetSumUp extends BetSumUp {
 						result += "<td>" + ((RightTableRow)books3Removed.get(i)).getMaxPercentage() + "</td>" +
 				       "</tr>";			
 			}
+			
+			q1 = b1.startsWith("Betfair Exchange") && realExchangeQ1 > 0 ? realExchangeQ1 : q1;
+			q2 = b2.startsWith("Betfair Exchange") && realExchangeQ2 > 0 ? realExchangeQ2 : q2;
+			q3 = b3.startsWith("Betfair Exchange") && realExchangeQ3 > 0 ? realExchangeQ3 : q3;
+
+			
 			
 				result += "<tr><td colspan=\"5\"></td></tr>";
 				result += 

@@ -99,21 +99,6 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		return exchangeList;
 	}
 
-	private AbstractInputRecord findTxOddsRecord(List<String> bookmakerSet, Map<String, AbstractInputRecord> bookmakerRecordMap) {
-		
-		AbstractInputRecord txOddsRecord = null;
-		
-		for(String bookmaker : bookmakerSet) {
-			AbstractInputRecord record = bookmakerRecordMap.get(bookmaker);
-			if(record.getSource().equals(Service.TXODDS_SERVICENAME)) {
-				txOddsRecord = record;
-				break;
-			}
-		}
-		
-		return txOddsRecord;
-	}
-
 	@Override
 	public List<RecordOutput> compareTwoWayOdds(ChiaveEventoScommessaInputRecordsMap sportMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) {
 

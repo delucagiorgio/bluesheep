@@ -212,9 +212,10 @@ public class BlueSheepSharedResources {
 			
 			for(AbstractInputRecord newExchangeRecord : exchangeRecordsList) {
 				AbstractInputRecord alreadySavedExchangeRecordFound = findExchangeRecord(newExchangeRecord);
-				if(alreadySavedExchangeRecordFound == null) {
-					BlueSheepSharedResources.exchangeRecordsList.add(newExchangeRecord);
+				if(alreadySavedExchangeRecordFound != null) {
+					BlueSheepSharedResources.exchangeRecordsList.remove(alreadySavedExchangeRecordFound);
 				}
+				BlueSheepSharedResources.exchangeRecordsList.add(newExchangeRecord);
 			}
 		}
 	}

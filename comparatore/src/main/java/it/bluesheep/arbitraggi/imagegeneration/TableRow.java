@@ -21,8 +21,11 @@ public abstract class TableRow implements Comparable<TableRow> {
 	@Override
 	public int compareTo(TableRow arg0) {
 
-		float q1 = Float.parseFloat(this.getOdd().replace(",", "."));
-		float q2 = Float.parseFloat(arg0.getOdd().replace(",", "."));
+		float odd1 = Float.parseFloat(this.getOdd().replace(",", "."));
+		float odd2 = Float.parseFloat(arg0.getOdd().replace(",", "."));
+		
+		float q1 = this.getBookmaker().startsWith("Betfair Exchange") ? (odd1 - 1) * 0.95F + 1F : odd1;
+		float q2 = arg0.getBookmaker().startsWith("Betfair Exchange") ? (odd2 - 1) * 0.95F + 1F : odd2;
 		
 		if (q1 > q2){
 			return 1;

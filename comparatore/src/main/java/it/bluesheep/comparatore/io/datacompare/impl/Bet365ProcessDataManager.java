@@ -70,20 +70,22 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 							Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
 							List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
 							if(!bookmakerSet.isEmpty()) {
-								AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
-								bet365Record.setCampionato(bookmakerRecord.getCampionato());
-								if(exchangeRecord != null) {
-									bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
-								}else {
-									bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+								AbstractInputRecord bookmakerRecord = findTxOddsRecord(bookmakerSet, bookmakerRecordMap);
+								if(bookmakerRecord != null) {
+									bet365Record.setCampionato(bookmakerRecord.getCampionato());
+									if(exchangeRecord != null) {
+										bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
+									}else {
+										bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
+									}
+									bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
+									bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
+									bet365Record.setKeyEvento("" + bet365Record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+											bet365Record.getSport() + BlueSheepConstants.REGEX_PIPE + 
+											bet365Record.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
+											bet365Record.getPartecipante2());
+									matchedCountEvents++;
 								}
-								bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
-								bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
-								bet365Record.setKeyEvento("" + bet365Record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-										bet365Record.getSport() + BlueSheepConstants.REGEX_PIPE + 
-										bet365Record.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
-										bet365Record.getPartecipante2());
-								matchedCountEvents++;
 							}
 							break;
 						}

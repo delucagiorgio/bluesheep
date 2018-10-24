@@ -308,8 +308,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 					for (ArbsRecord arbStoredKey : arbsList) {
 						if (ArbsRecord.isSameEventBookmakerBet(nowComparedRecord, arbStoredKey)) {
 							
-							logger.info("Already sent record: updating information and re-sent");
-							logger.info("Already sent record is " + nowComparedRecord.getKeyEventoBookmakerBet());
+							logger.debug("Already sent record: updating information and re-sent");
+							logger.debug("Already sent record is " + nowComparedRecord.getKeyEventoBookmakerBet());
 							
 							found = true;
 							
@@ -414,12 +414,13 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 		if (mapToBeChecked != null && mapToBeChecked.keySet().size() > 0) {
 			long checkBoundTime = System.currentTimeMillis();
 				
-			// Se la run è entro la mezz'ora, allora ok, altrimenti scartala a prescindere
+			// Se la run è entro il timeout, allora ok, altrimenti scartala a prescindere
 			Map<String, List<ArbsRecord>> runIdMap = mapToBeChecked.get(BlueSheepConstants.STATUSINVALID_ARBS_RECORD);
 			if(runIdMap != null) {
 				Set<String> runIdSet = new HashSet<String>(runIdMap.keySet());
 				for(String runId : runIdSet) {
-					if (checkBoundTime - new Long(runId) >= 2 * 60 * 60 * 1000L) {
+					//Controlla se è nella history da più di un giorno
+					if (checkBoundTime - new Long(runId) >= 1440 * 60 * 1000L) {
 						runIdMap.remove(runId);
 					}
 				}
