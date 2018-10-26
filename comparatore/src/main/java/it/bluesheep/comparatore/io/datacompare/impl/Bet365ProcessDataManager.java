@@ -39,10 +39,9 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
 		
 		ChiaveEventoScommessaInputRecordsMap sportMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
-		
+		List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
 		logger.info("Start matching informartion for Bet365 on TxOdds events : "
-				+ "input size Bet365 events is " + bookmakerList.size() 
-				+ "; input size TxOdds events is " + sportMap.keySet().size());
+				+ "input size Bet365 events is " + bookmakerList.size());
 		int matchedCountEvents = 0;
 		for(AbstractInputRecord record : bookmakerList) {
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
@@ -61,7 +60,7 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 						String partecipante2 = partecipantiSplitted[1];
 						
 						Bet365InputRecord bet365Record = (Bet365InputRecord) record;
-						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record);
+						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record, listExchangeRecordListCopy);
 						
 						if(bet365Record.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) ||
 								bet365Record.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {

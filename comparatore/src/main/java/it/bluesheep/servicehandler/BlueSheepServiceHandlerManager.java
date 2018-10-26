@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
 import it.bluesheep.util.BlueSheepConstants;
@@ -69,6 +70,9 @@ public final class BlueSheepServiceHandlerManager {
 		logger.info("Starting all active services");
 		boolean stopApplication = false;
 		boolean propertiesConfigurationChanged = false;
+		
+		//Avvio il bot handler
+//		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
 		
 		boolean firstStartExecuted = false;
 		
@@ -133,6 +137,7 @@ public final class BlueSheepServiceHandlerManager {
 			                	case BlueSheepConstants.PROPERTIES_FILENAME:
 			                		logger.info("File " + BlueSheepConstants.PROPERTIES_FILENAME + " has changed. Properties are going to be updated");
 			                		updateInformationFromProperties();
+			                		InputDataHelper.getInputDataHelperInstance().forceUpdateMapBlockedBookmakers();
 			                		propertiesConfigurationChanged = true;
 			                		break;
 			                	default:
@@ -151,7 +156,7 @@ public final class BlueSheepServiceHandlerManager {
 				
 				boolean terminatedCorrectly = true;
 				if(stopApplication || propertiesConfigurationChanged) {
-					long timeout = 3;
+					long timeout = 5;
 					TimeUnit timeUnitTimeout = TimeUnit.MINUTES;
 					String message = "all executors";
 					
@@ -179,6 +184,9 @@ public final class BlueSheepServiceHandlerManager {
 				}
 			}
 		}while(!stopApplication || propertiesConfigurationChanged);
+		
+//		TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+
 	}
 
 	public static Properties getProperties() {

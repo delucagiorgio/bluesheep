@@ -2,6 +2,7 @@ package it.bluesheep.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,6 @@ import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
-import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 
@@ -40,6 +40,8 @@ public class BlueSheepSharedResources {
 	private static List<AbstractInputRecord> exchangeRecordsList = new ArrayList<AbstractInputRecord>();
 	private static List<String> boidOTBList = new ArrayList<String>();
 	private static Map<ArbsType, Map<String, Double>> arbsNetProfitHistoryMap = new HashMap<ArbsType, Map<String, Double>>();
+	private static long timeReferenceOfToday = System.currentTimeMillis();
+	private static int arbsIdOfToday = 0;
 	
 	private BlueSheepSharedResources() {}
 
@@ -81,16 +83,10 @@ public class BlueSheepSharedResources {
 	 */
 	private static void populateServiceSportMap() {
 		
-		InputDataHelper inputDataHelper = new InputDataHelper();
 		serviceSportMap = new ConcurrentHashMap<Service, List<Sport>>();
 		if(activeServices != null) {
 			for(Service serviceName : activeServices.keySet()) {
 				List<Sport> sportList = new ArrayList<Sport>();
-				if(serviceName.equals(Service.BET365_SERVICENAME)) {
-					if(inputDataHelper.isBlockedBookmaker("BET365")) {
-						continue;
-					}
-				}
 				if(serviceName != null) {
 					switch(serviceName) {
 						case TXODDS_SERVICENAME:
@@ -200,29 +196,12 @@ public class BlueSheepSharedResources {
 	 * @param startTime la data di start del processo
 	 */
 	public static void setExchangeRecordsList(List<AbstractInputRecord> exchangeRecordsList, long startTime) {
-		if(exchangeRecordsList.isEmpty() || exchangeRecordsList == null) {
-			BlueSheepSharedResources.exchangeRecordsList = exchangeRecordsList;
-		}else {
-			List<AbstractInputRecord> tempList = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.exchangeRecordsList);
-			for(AbstractInputRecord exchangeRecord : tempList) {
-				if(exchangeRecord.getDataOraEvento().getTime() - startTime < updateFrequencyDiff) {
-					BlueSheepSharedResources.exchangeRecordsList.remove(exchangeRecord);
-				}
-			}
-			
-			for(AbstractInputRecord newExchangeRecord : exchangeRecordsList) {
-				AbstractInputRecord alreadySavedExchangeRecordFound = findExchangeRecord(newExchangeRecord);
-				if(alreadySavedExchangeRecordFound == null) {
-					BlueSheepSharedResources.exchangeRecordsList.add(newExchangeRecord);
-				}
-			}
-		}
+		BlueSheepSharedResources.exchangeRecordsList = exchangeRecordsList;
 	}
 
-	public static AbstractInputRecord findExchangeRecord(AbstractInputRecord record) {
+	public static AbstractInputRecord findExchangeRecord(AbstractInputRecord record, List<AbstractInputRecord> exchangeRecordsListCopy) {
 		AbstractInputRecord exchangeRecordFound = null;
 		if(exchangeRecordsList != null && !exchangeRecordsList.isEmpty()) {
-			List<AbstractInputRecord> exchangeRecordsListCopy = new ArrayList<AbstractInputRecord>(exchangeRecordsList);
 			for(AbstractInputRecord exchangeRecord : exchangeRecordsListCopy) {
 				if(AbstractInputRecord.compareSport(exchangeRecord.getSport(), record.getSport())  
 						&& AbstractInputRecord.compareDate(exchangeRecord.getDataOraEvento(), record.getDataOraEvento())
@@ -246,6 +225,23 @@ public class BlueSheepSharedResources {
 
 	public static Map<ArbsType, Map<String, Double>> getArbsNetProfitHistoryMap() {
 		return arbsNetProfitHistoryMap;
+	}
+	
+	public static int getCorrectArbsIdOfToday(long startTime) {
+		Calendar refCalendar = Calendar.getInstance();
+		refCalendar.setTimeInMillis(timeReferenceOfToday);
+		Calendar arbsNotificationCalendar = Calendar.getInstance();
+		arbsNotificationCalendar.setTimeInMillis(startTime);
+		
+		if(refCalendar.get(Calendar.DAY_OF_YEAR) == arbsNotificationCalendar.get(Calendar.DAY_OF_YEAR) &&
+				refCalendar.get(Calendar.YEAR) == arbsNotificationCalendar.get(Calendar.YEAR)) {
+			arbsIdOfToday++;
+		}else {
+			arbsIdOfToday = 1;
+			timeReferenceOfToday = System.currentTimeMillis();
+		}
+		
+		return arbsIdOfToday;
 	}
 
 }

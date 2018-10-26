@@ -2,7 +2,6 @@ package it.bluesheep.arbitraggi.imagegeneration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.LogManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -46,7 +45,6 @@ public class Html2PngConverter {
 			firefoxBinary.addCommandLineOptions("--headless");
 			FirefoxOptions firefoxOptions = new FirefoxOptions();
 	        firefoxOptions.setBinary(firefoxBinary);
-	        LogManager.getLogManager().reset();
 
 	    	// Apri Firefox
 	        driver = new FirefoxDriver(firefoxOptions);

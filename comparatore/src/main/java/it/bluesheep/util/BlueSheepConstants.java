@@ -25,6 +25,8 @@ public class BlueSheepConstants {
 	public static final String STATUS1_ARBS_RECORD = "1";
 	public static final String STATUS0_ARBS_RECORD = "0";
 	public static final String STATUSINVALID_ARBS_RECORD = "-1";
+	public static final String BLOCKED_BOOKMAKER_BONUS_ABUSING = "BLOCKED_BOOKMAKER_BONUS_ABUSING";
+	public static final String BLOCKED_BOOKMAKER_SUREBET = "BLOCKED_BOOKMAKER_SUREBET";
 	
 	//json
 	public static final String JSON_PP_RESULT_PATH = "PATH_OUTPUT_TABLE2";
@@ -94,6 +96,7 @@ public class BlueSheepConstants {
 	public static final String ARBS_PP_MIN_THRESHOLD = "ARBS_TXODDS_MIN_THRESHOLD";
 	public static final String ARBS_PP_MAX_THRESHOLD = "ARBS_TXODDS_MAX_THRESHOLD";
 	public static final String MINUTES_ODD_VALIDITY = "MINUTES_ODD_VALIDITY";
+	public static final String ARBS_SIZE_MIN_VALUE = "ARBS_SIZE_MIN_VALUE";
 	public static final String FREQ_ARBS_SEC = "FREQ_ARBS_SEC";
 	public static final String XHTML_PATH = "XHTML_PATH";
 	public static final String SPAM_THRESHOLD_COUNT = "SPAM_THRESHOLD_COUNT";
@@ -107,6 +110,8 @@ public class BlueSheepConstants {
 
 	// TELEGRAM BOT KEY
 	public static final String TELEGRAMBOTKEY = "TELEGRAMBOTKEY";
+	public static final String TELEGRAMBOTNAME = "TELEGRAMBOTNAME";
+	public static final String REGEX_TELEGRAMBOTACTION = " - ";
 	
 	// TELEGRAM TERMINAL USERS IDS FILE
 	public static final String TERMINALUSERSFILE = "TERMINALUSERSFILE";

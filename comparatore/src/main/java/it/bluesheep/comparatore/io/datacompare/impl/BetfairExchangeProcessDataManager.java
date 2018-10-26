@@ -23,6 +23,7 @@ import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.comparatore.io.datacompare.util.ThresholdRatingFactory;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
@@ -38,6 +39,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	private long startComparisonTime;
 	private double minimumOddValue;
 	private long minutesOfOddValidity;
+	private InputDataHelper helper;
+	private static double minSizeRequiredArbsValue;
 	
 	protected BetfairExchangeProcessDataManager() {
 		super();
@@ -46,6 +49,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		minimumOddValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINIMUM_ODD_VALUE));
 		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
 		service = Service.BETFAIR_SERVICENAME;
+		helper = InputDataHelper.getInputDataHelperInstance();
+		minSizeRequiredArbsValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ARBS_SIZE_MIN_VALUE));
 	}
 	
 	@Override
@@ -194,27 +199,31 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	 * @return la lista di comparazioni mappate in base ai requisiti minimi
 	 */
 	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> eventoScommessaRecordList, AbstractInputRecord exchangeRecord, AbstractBlueSheepService bluesheepServiceType) {
+		String blockedBookmakerListServiceType = BlueSheepConstants.BLOCKED_BOOKMAKER_BONUS_ABUSING;
+		if(bluesheepServiceType instanceof ArbitraggiServiceHandler) {
+			blockedBookmakerListServiceType = BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET;
+		}
 		
 		List<RecordOutput> outputRecordList = new ArrayList<RecordOutput>();
 		Set<String> bookmakerSet = new HashSet<String>(eventoScommessaRecordList.keySet());
 		for(String bookmaker : bookmakerSet) {
 			AbstractInputRecord record = eventoScommessaRecordList.get(bookmaker);
 			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord && !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(record.getBookmakerName()) && record.getQuota() >= minimumOddValue) {
+			if(record != exchangeRecord 
+					&& !helper.isBlockedBookmaker(record.getBookmakerName(), blockedBookmakerListServiceType)
+					&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(record.getBookmakerName()) 
+					&& record.getQuota() >= minimumOddValue) {
 				double compareValue = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepServiceType).getCompareValue(record.getQuota(), exchangeRecord.getQuota());
 				//se il rating1 è sufficientemente alto
-				if(compareValue >= minThreshold && (
-						(controlValidityOdds && ArbsUtil.validOddsRatio(record.getQuota(), exchangeRecord.getQuota(), service))
+				if(compareValue >= minThreshold 
+						&& ((controlValidityOdds 
+								&& ArbsUtil.validOddsRatio(record.getQuota(), exchangeRecord.getQuota(), service))
+								&& !record.getSource().equals(Service.CSV_SERVICENAME) 
+								&& hasBeenRecentlyUpdated(record) 
+								&& hasBeenRecentlyUpdated(exchangeRecord)
+								&& exchangeRecord.getLiquidita() >= minSizeRequiredArbsValue
 						||
-						(!controlValidityOdds && compareValue <= maxThreshold)) 
-						&& 
-					   (!controlValidityOdds || 
-							   (
-									   !record.getSource().equals(Service.CSV_SERVICENAME) &&
-									   hasBeenRecentlyUpdated(record) && 
-									   hasBeenRecentlyUpdated(exchangeRecord)
-							   )
-						)
+						(!controlValidityOdds && compareValue <= maxThreshold))
 					) {
 					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, getRatingByScommessaPair(record, exchangeRecord));
 					outputRecordList.add(recordOutput);

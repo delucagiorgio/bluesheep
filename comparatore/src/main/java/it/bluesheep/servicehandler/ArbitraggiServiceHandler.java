@@ -308,8 +308,8 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 					for (ArbsRecord arbStoredKey : arbsList) {
 						if (ArbsRecord.isSameEventBookmakerBet(nowComparedRecord, arbStoredKey)) {
 							
-							logger.info("Already sent record: updating information and re-sent");
-							logger.info("Already sent record is " + nowComparedRecord.getKeyEventoBookmakerBet());
+							logger.debug("Already sent record: updating information and re-sent");
+							logger.debug("Already sent record is " + nowComparedRecord.getKeyEventoBookmakerBet());
 							
 							found = true;
 							

@@ -30,7 +30,7 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> csvEventList) throws Exception {
 		
 		ChiaveEventoScommessaInputRecordsMap eventiTxOddsMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
-		
+		List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
 		List<AbstractInputRecord> csvEventListUpdatedInfo = new ArrayList<AbstractInputRecord>();
 		for(AbstractInputRecord record : csvEventList) {
 			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
@@ -49,7 +49,7 @@ public class CSVProcessDataManager extends AbstractProcessDataManager implements
 						String partecipante2 = partecipantiSplitted[1];
 						
 						CSVInputRecord csvRecord = (CSVInputRecord) record;
-						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record);
+						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record, listExchangeRecordListCopy);
 						
 						if(csvRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2)) {
 							Map<Scommessa, Map<String, AbstractInputRecord>> mapScommessaRecord = dataMap.get(date).get(eventoTxOdds);

@@ -33,6 +33,7 @@ import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.comparatore.io.datacompare.util.ThresholdRatingFactory;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
@@ -55,6 +56,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 	private long startComparisonTime;
 	private long minutesOfOddValidity;
 	private static double THREEWAY_NET_PROFIT;
+	private InputDataHelper helper;
+	private static double minSizeRequiredArbsValue;
 	
 	protected TxOddsProcessDataManager() {
 		super();
@@ -64,6 +67,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
 		service = Service.TXODDS_SERVICENAME;
 		THREEWAY_NET_PROFIT = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.THREEWAY_NET_PROFIT));
+		helper = InputDataHelper.getInputDataHelperInstance();
+		minSizeRequiredArbsValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ARBS_SIZE_MIN_VALUE));
 	}
 	
 	@Override
@@ -134,6 +139,10 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 	 * @return tutti i record mappati secondo il record di output che superano un rating1 del 70%
 	 */
 	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> bookmakerRecord1Map, Map<String, AbstractInputRecord> bookmakerRecord2Map, AbstractBlueSheepService bluesheepService) {
+		String blockedBookmakerListServiceType = BlueSheepConstants.BLOCKED_BOOKMAKER_BONUS_ABUSING;
+		if(bluesheepService instanceof ArbitraggiServiceHandler) {
+			blockedBookmakerListServiceType = BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET;
+		}
 		
 		List<RecordOutput> outputRecordList = new ArrayList<RecordOutput>();
 		
@@ -148,6 +157,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 				for(String bookmakerScommessaOpposite : bookmakerOppositeScommessaSet) {
 					
 					if(!bookmakerScommessa.equalsIgnoreCase(bookmakerScommessaOpposite) 
+							&& !helper.isBlockedBookmaker(bookmakerScommessa, blockedBookmakerListServiceType) 
+							&& !helper.isBlockedBookmaker(bookmakerScommessaOpposite, blockedBookmakerListServiceType)
 							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmakerScommessaOpposite) 
 							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmakerScommessa)) { 
 						
@@ -169,36 +180,41 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 						List<AbstractInputRecord> orderedListByQuota = getOrderedQuotaList(scommessaInputRecord, oppositeScommessaInputRecord);
 						
 						double maxOdd = orderedListByQuota.get(0).getQuota();
-						double minOdd = orderedListByQuota.get(1).getQuota();;
+						double minOdd = orderedListByQuota.get(1).getQuota();
+						boolean validSizeBiggerOdd = true;
+						boolean validSizeSmallerOdd = true;
 						if((scommessaInputRecord.equals(orderedListByQuota.get(0)) && isScommessaInputRecordBackExchangeRecord) || 
 								(oppositeScommessaInputRecord.equals(orderedListByQuota.get(0)) && isOppositeScommessaInputRecordBackExchangeRecord)) {
 							double temp = orderedListByQuota.get(0).getQuota();
 							maxOdd = (temp - 1) * 0.95 + 1;
+							validSizeBiggerOdd = orderedListByQuota.get(0).getLiquidita() >= minSizeRequiredArbsValue;
 						}else if((scommessaInputRecord.equals(orderedListByQuota.get(1)) && isScommessaInputRecordBackExchangeRecord) || 
 								(oppositeScommessaInputRecord.equals(orderedListByQuota.get(1)) && isOppositeScommessaInputRecordBackExchangeRecord)) {
 							double temp = orderedListByQuota.get(1).getQuota();
 							minOdd = (temp - 1) * 0.95 + 1;
+							validSizeSmallerOdd = orderedListByQuota.get(1).getLiquidita() >= minSizeRequiredArbsValue;
 						}
 						
 						double compareValue1 = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepService).getCompareValue(maxOdd, minOdd);
 						double rating2 = RatingCalculatorBookmakersOdds.calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
 						
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
-						if(compareValue1 >= minThreshold && (
-										(controlValidityOdds && ArbsUtil.validOddsRatio(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota(), service))
-										||
-										(!controlValidityOdds && 
+						if(compareValue1 >= minThreshold 
+								&& 
+									((controlValidityOdds 
+											&& ArbsUtil.validOddsRatio(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota(), service)
+											&& !scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) 
+											&& !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) 
+											&& hasBeenRecentlyUpdated(scommessaInputRecord) 
+											&& hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
+											&& validSizeBiggerOdd
+											&& validSizeSmallerOdd
+									) || (!controlValidityOdds && 
 										rating2 >= minThreshold &&
 										compareValue1 <= maxThreshold && 
 										rating2 <= maxThreshold)
-								) &&
-						   (!controlValidityOdds || 
-								   (!scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) && 
-										   !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) &&
-										   hasBeenRecentlyUpdated(scommessaInputRecord) && 
-										   hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
-									)
-						   )) {
+									) 
+							) {
 							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), 
 									RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), 
 																										 orderedListByQuota.get(1).getQuota()));
@@ -265,8 +281,9 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
 		
+		List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
 		for(AbstractInputRecord txOddsRecord : bookmakerList) {
-			AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord);
+			AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord, listExchangeRecordListCopy);
 			if(exchangeRecord != null) {
 				txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
 				txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
@@ -316,15 +333,18 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 								for(int i = 0; i < homeWinRecordList.size() && bookmakerSet.size() <= 8; i++) {
 									AbstractInputRecord homeWinRecord = homeWinRecordList.get(i);
 									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(homeWinRecord.getBookmakerName()) && 
-											!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && hasBeenRecentlyUpdated(homeWinRecord)) {
+											!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && hasBeenRecentlyUpdated(homeWinRecord) &&
+											!helper.isBlockedBookmaker(homeWinRecord.getBookmakerName(), BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET)) {
 										for(int j = 0; j < awayWinRecordList.size() && bookmakerSet.size() <= 8; j++) {
 											AbstractInputRecord awayWinRecord = awayWinRecordList.get(j);
 											if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(awayWinRecord.getBookmakerName()) && 
-													!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && hasBeenRecentlyUpdated(awayWinRecord)) {
+													!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && hasBeenRecentlyUpdated(awayWinRecord) &&
+													!helper.isBlockedBookmaker(awayWinRecord.getBookmakerName(), BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET)) {
 												for(int k = 0; k < drawRecordList.size() && bookmakerSet.size() <= 8; k++) {
 													AbstractInputRecord drawRecord = drawRecordList.get(k);
 													if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(drawRecord.getBookmakerName()) && 
-															!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && hasBeenRecentlyUpdated(drawRecord)) {
+															!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && hasBeenRecentlyUpdated(drawRecord) &&
+															!helper.isBlockedBookmaker(drawRecord.getBookmakerName(), BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET)) {
 														double netProfitCombination = ArbsUtil.getThreeWayNetProfit(homeWinRecord, awayWinRecord, drawRecord);
 														
 														if(netProfitCombination >= THREEWAY_NET_PROFIT) {

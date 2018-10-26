@@ -17,6 +17,7 @@ import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.arbitraggi.imagegeneration.ImageGenerator;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.util.BlueSheepConstants;
+import it.bluesheep.util.BlueSheepSharedResources;
 import it.bluesheep.util.DirectoryFileUtilManager;
 
 public class TelegramMessageManager {
@@ -65,18 +66,18 @@ public class TelegramMessageManager {
 	    for (String idFile : idFileOrderedList) {
 	    	Map<String, Set<String>> recordKeyLinksMap = eventsIdLinkMap.get(idFile);
 	    	int i = Integer.parseInt(idFile);
-	    	
+	    	int arbsIdOfDay = BlueSheepSharedResources.getCorrectArbsIdOfToday(startTimeExecution);
 	    	//Dovrebbe essere sempre unico
 	    	String recordKey = new ArrayList<String>(recordKeyLinksMap.keySet()).get(0);
 	    	
 	    	// Aggiungere la parte della didascalia coi link
 	    	try {
-				caption = createCaptionDescription(recordKey, recordKeyLinksMap.get(recordKey));
+				caption = createCaptionDescription(recordKey, recordKeyLinksMap.get(recordKey), arbsIdOfDay);
 			} catch (ParseException e) {
 				logger.error(e.getMessage(), e);			
 			}
 	    					
-	    	telegramHandler.sendPicture("../xhtml/" + (i - 1) + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + i, chat_ids);
+	    	telegramHandler.sendPicture("../xhtml/" + (i - 1) + pictureFormat, ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + arbsIdOfDay, chat_ids);
 			telegramHandler.sendMessage(caption, chat_ids);
 	    	
 		    imageGenerator.delete("../xhtml/" + (i - 1) + pictureFormat);
@@ -90,7 +91,7 @@ public class TelegramMessageManager {
 	    }
 	}
 
-	private String createCaptionDescription(String eventoIdLink, Set<String> linkBookmakerList) throws ParseException {
+	private String createCaptionDescription(String eventoIdLink, Set<String> linkBookmakerList, int arbsIdOfDay) throws ParseException {
 		String[] eventoIdLinkSplitted = eventoIdLink.split(BlueSheepConstants.IMAGE_ID);
 		String[] eventoSplittedKey = eventoIdLinkSplitted[0].split(BlueSheepConstants.REGEX_CSV);
 		SimpleDateFormat sdfOutput = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -102,7 +103,7 @@ public class TelegramMessageManager {
 			linkBookmakers += ArbsUtil.getTelegramBoldString(splittedBookmakerLink[0] + ":") + " " + splittedBookmakerLink[1] + System.lineSeparator();
 		}
 		
-		return ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + eventoIdLinkSplitted[1] + System.lineSeparator() + 
+		return ArbsUtil.getTelegramBoldString("Segnalazione numero:") + " " + arbsIdOfDay + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Evento:") + " " + eventoSplittedKey[0] + BlueSheepConstants.REGEX_VERSUS + eventoSplittedKey[1] + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Data e ora:") + " " + sdfOutput.format(sdfInput.parse(eventoSplittedKey[2])) + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Links:") + System.lineSeparator() + 

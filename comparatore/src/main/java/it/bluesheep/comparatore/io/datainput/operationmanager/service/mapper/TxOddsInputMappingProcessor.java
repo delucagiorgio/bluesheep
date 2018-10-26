@@ -15,7 +15,6 @@ import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.input.record.TxOddsInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
-import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.json.TxOddsBluesheepJsonConverter;
@@ -46,7 +45,6 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 	private static final String LEOVEGAS_BOOKMAKER_VALUE = "LeoVegas.it";
 	
 	private static Long updateFrequencyDiff;
-	private InputDataHelper inputDataHelper = new InputDataHelper();
 	
 	public TxOddsInputMappingProcessor() {
 		super();
@@ -144,30 +142,27 @@ public final class TxOddsInputMappingProcessor extends AbstractInputMappingProce
 							TxOddsInputRecord newRecord = new TxOddsInputRecord(recordToBeMapped);	
 							
 							String bookmakerName = TxOddsBluesheepJsonConverter.getAttributesNodeFromJSONObject(bookmakerJSONObject).getString(NAME_JSON_STRING);
-							if(!inputDataHelper.isBlockedBookmaker(bookmakerName)) {
-								if(STANLEYBET_BOOKMAKER_VALUE.equals(bookmakerName)  || 
-										SKYBET_BOOKMAKER_VALUE.equals(bookmakerName) ||
-										SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName) ||
-										LEOVEGAS_BOOKMAKER_VALUE.equals(bookmakerName)) {
-									bookmakerName = bookmakerName.substring(0, bookmakerName.length() - 3);
-								}
-								newRecord.setBookmakerName(bookmakerName);
-								newRecord.setTipoScommessa(scommessaTipo);
-								newRecord.setQuota(quotaScommessa);
-								
-								String lastUpdatedString = attributesOfferJSONObject.getString(LAST_UPDATED_JSON_STRING);
-								String boid = attributesOfferJSONObject.getString("id");
-								
-								newRecord.setTimeOfInsertionInSystem(lastUpdatedString);
-								newRecord.setBoid(boid);
-								
-								if("BetClic.it".equalsIgnoreCase(bookmakerName)) {
-									newRecord.setFiller(attributesOfferJSONObject.getString(BMOID_JSON_STRING));
-								}
-							
-								recordToBeReturned.add(newRecord);
+							if(STANLEYBET_BOOKMAKER_VALUE.equals(bookmakerName)  || 
+									SKYBET_BOOKMAKER_VALUE.equals(bookmakerName) ||
+									SPORTPESA_BOOKMAKER_VALUE.equals(bookmakerName) ||
+									LEOVEGAS_BOOKMAKER_VALUE.equals(bookmakerName)) {
+								bookmakerName = bookmakerName.substring(0, bookmakerName.length() - 3);
 							}
+							newRecord.setBookmakerName(bookmakerName);
+							newRecord.setTipoScommessa(scommessaTipo);
+							newRecord.setQuota(quotaScommessa);
 							
+							String lastUpdatedString = attributesOfferJSONObject.getString(LAST_UPDATED_JSON_STRING);
+							String boid = attributesOfferJSONObject.getString("id");
+							
+							newRecord.setTimeOfInsertionInSystem(lastUpdatedString);
+							newRecord.setBoid(boid);
+							
+							if("BetClic.it".equalsIgnoreCase(bookmakerName)) {
+								newRecord.setFiller(attributesOfferJSONObject.getString(BMOID_JSON_STRING));
+							}
+						
+							recordToBeReturned.add(newRecord);
 						}
 					}
 				}
