@@ -218,14 +218,10 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 				.getProperty(BlueSheepConstants.PREVIOUS_RUN_PATH) + BlueSheepConstants.FILENAME_PREVIOUS_RUNS_3WAY;
 		
 		List<String> twoWayInputStringList = getInputDataFromFile(filenamePath2Way);
-
 		twoWayArbsRecordHistoryStatus = ArbsUtil.initializePreviousRunRecordsMap(twoWayInputStringList);
-		logger.info("There are already " + twoWayArbsRecordHistoryStatus.size() + " run collection of message sent.");
 		
 		List<String> threeWayInputStringList = getInputDataFromFile(filenamePath3Way);
-
 		threeWayArbsRecordHistoryStatus = ArbsUtil.initializePreviousRunRecordsMap(threeWayInputStringList);
-		logger.info("There are already " + twoWayArbsRecordHistoryStatus.size() + " run collection of message sent.");
 		
 		twoWayMessageToBeSentKeysList = new ArrayList<ArbsRecord>();
 		threeWayMessageToBeSentKeysList = new ArrayList<ArbsRecord>();
@@ -419,7 +415,7 @@ public final class ArbitraggiServiceHandler extends AbstractBlueSheepService {
 			if(runIdMap != null) {
 				Set<String> runIdSet = new HashSet<String>(runIdMap.keySet());
 				for(String runId : runIdSet) {
-					if (checkBoundTime - new Long(runId) >= 2 * 60 * 60 * 1000L) {
+					if (checkBoundTime - new Long(runId) >= 24 * 60 * 60 * 1000L) {
 						runIdMap.remove(runId);
 					}
 				}

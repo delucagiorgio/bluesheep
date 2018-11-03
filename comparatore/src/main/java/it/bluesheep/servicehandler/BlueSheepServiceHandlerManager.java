@@ -80,15 +80,19 @@ public final class BlueSheepServiceHandlerManager {
 			BlueSheepSharedResources.initializeDataStructures();
 			
 			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 2);
-			long initialDelay = firstStartExecuted ? 0 : 60;
+			long initialDelay = firstStartExecuted ? 0 : 120;
 
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
 				if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
+				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
+					initialDelay = 60;
+				}else {
+					initialDelay = 120;
 				}
 				
 				executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
-				initialDelay = firstStartExecuted ? 0 : 60;
+				initialDelay = firstStartExecuted ? 0 : 120;
 			}
 			
 			long arbsFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_ARBS_SEC));

@@ -280,17 +280,18 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
-		
-		List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
-		for(AbstractInputRecord txOddsRecord : bookmakerList) {
-			AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord, listExchangeRecordListCopy);
-			if(exchangeRecord != null) {
-				txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
-				txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-						txOddsRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
-						txOddsRecord.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
-						txOddsRecord.getPartecipante2());
-				
+		if(bookmakerList != null && !bookmakerList.isEmpty() && Sport.CALCIO.equals(bookmakerList.get(0).getSport())) {
+			List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
+			for(AbstractInputRecord txOddsRecord : bookmakerList) {
+				AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord, listExchangeRecordListCopy);
+				if(exchangeRecord != null) {
+					txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
+					txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+							txOddsRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
+							txOddsRecord.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
+							txOddsRecord.getPartecipante2());
+					
+				}
 			}
 		}
 		

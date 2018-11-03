@@ -39,7 +39,7 @@ public class ArbsUtil {
 	private static double RATIO_ODDS_VALIDITY = new Double((3.0/7.0));
 	private static Logger logger = Logger.getLogger(ArbsUtil.class);
 	
-	private ArbsUtil() {};
+	private ArbsUtil() {}
 	
 	public static Map<String, Map<String, List<ArbsRecord>>> initializePreviousRunRecordsMap(List<String> linesFromFile){
 		Map<String, Map<String, List<ArbsRecord>>> alreadySentArbsOdds = new TreeMap<String, Map<String, List<ArbsRecord>>>();
@@ -284,9 +284,9 @@ public class ArbsUtil {
 									}
 								});
 								
-								int indexMediana1 = recordBet1List.size() / 2 + recordBet1List.size() % 2;
-								int indexMediana2 = recordBet2List.size() / 2 + recordBet2List.size() % 2;
-								int indexMediana3 = recordBet3List.size() / 2 + recordBet3List.size() % 2;
+								int indexMediana1 = recordBet1List.size() / 2 - recordBet1List.size() % 2;
+								int indexMediana2 = recordBet2List.size() / 2 - recordBet2List.size() % 2;
+								int indexMediana3 = recordBet3List.size() / 2 - recordBet3List.size() % 2;
 								
 								if(bet3 == null) {
 									returnArray[1] = new TwoOptionReference(recordBet1List.get(indexMediana1).getBookmakerName(), bet1, "" + StringUtils.substring("" + recordBet1List.get(indexMediana1).getQuota(), 0, 5), recordBet2List.get(indexMediana2).getBookmakerName(), bet2, "" + StringUtils.substring("" + recordBet2List.get(indexMediana2).getQuota(), 0, 5));
@@ -536,13 +536,6 @@ public class ArbsUtil {
 		}
 		
 		return returnArray;
-	}
-	
-	public static ArbsRecord getArbsRecordFromStoredData(String storedData) {
-		
-		
-		
-		return null;
 	}
 	
 }

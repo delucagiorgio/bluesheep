@@ -1,6 +1,7 @@
 package it.bluesheep.servicehandler;
 
 import org.apache.log4j.Logger;
+import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 
 import it.bluesheep.telegrambot.TelegramBotHandler;
@@ -25,7 +26,7 @@ public final class TelegramBotServiceHandler extends AbstractBlueSheepService {
 	public void run() {
 		
 		logger.info("TelegramBotChat handler starting");
-		
+		ApiContextInitializer.init();
         TelegramBotsApi botApi = new TelegramBotsApi();
         
         try {
