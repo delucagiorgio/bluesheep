@@ -537,5 +537,9 @@ public class ArbsUtil {
 		
 		return returnArray;
 	}
+
+	public static String getTelegramInlineURLAlias(String alias, String url) {
+		return "[" + alias + "](" + url + ")";
+	}
 	
 }

@@ -101,7 +101,11 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 
 		for(Sport sport : sportToBeRetrieved) {
 			logger.info("Starting data retrivial for " + serviceName + " on sport " + sport);
-			executor.submit(InputDataManagerFactory.getInputDataManagerByString(sport, serviceName));
+			if(InputDataManagerFactory.getInputDataManagerByString(sport, serviceName) != null) {
+				executor.submit(InputDataManagerFactory.getInputDataManagerByString(sport, serviceName));
+			}else {
+				logger.warn("Cannot start InputDataManager for " + serviceName);
+			}
 		}
 		boolean timeoutReached = true;
 		

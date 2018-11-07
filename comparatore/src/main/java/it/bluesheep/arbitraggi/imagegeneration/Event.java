@@ -135,7 +135,7 @@ public abstract class Event {
 								 "PARTICIPANT 2 = " + this.participant2 + "\n" + 
 								 "DATE = " + this.date + "\n" + 
 								 "COUNTRY = " + this.country + "\n" + 
-								 "CHAMPIONSHIP = " + this.championship + "\n\n";
+								 "CHAMPIONSHIP_BONUS_ABUSING = " + this.championship + "\n\n";
 
 		return result;
 		

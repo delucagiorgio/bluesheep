@@ -16,6 +16,8 @@ public class BlueSheepServiceHandlerFactory {
 			return new TxOddsServiceHandler();
 		case CSV_SERVICENAME:
 			return new CSVServiceHandler();
+		case EVERY_MATRIX:
+			return new EveryMatrixServiceHandler();
 		default:
 			return null;
 		}

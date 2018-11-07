@@ -30,7 +30,7 @@ public class RatingCalculatorBookmakersOdds extends RatingCalculator {
 //			//TODO gestire caso di errore
 //		}
 //		
-//		//RF = (quotaBookmaker1 - 1) * (1 - 1 / quotaBookmaker2)
+//		//RF_BONUS_ABUSING = (quotaBookmaker1 - 1) * (1 - 1 / quotaBookmaker2)
 //		returnValue = (quotaBookmaker1 - 1) * (1 - 1 / quotaBookmaker2);
 		
 		return returnValue;

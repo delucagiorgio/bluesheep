@@ -93,6 +93,7 @@ public class BlueSheepSharedResources {
 						case BETFAIR_SERVICENAME:
 						case BET365_SERVICENAME:
 						case CSV_SERVICENAME:
+						case EVERY_MATRIX:
 							sportList = Arrays.asList(Sport.CALCIO, Sport.TENNIS);
 							break;
 						default:
@@ -156,6 +157,8 @@ public class BlueSheepSharedResources {
 				case "TXODDS":
 					activeServicesList.put(Service.TXODDS_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_TXODDS_SEC)));
 					break;
+				case "EVERYMATRIX":
+					activeServicesList.put(Service.EVERY_MATRIX, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_EVERYMATRIX_SEC)));
 				default:
 						break;
 				}

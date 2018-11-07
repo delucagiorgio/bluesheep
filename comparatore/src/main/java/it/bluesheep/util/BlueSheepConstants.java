@@ -11,6 +11,7 @@ public class BlueSheepConstants {
 	public static final String REGEX_PIPE = "|";
 	public static final String REGEX_VERSUS = " vs ";
 	public static final String REGEX_CSV = ";";
+	public static final String REGEX_COMMA = ",";
 	public static final String REGEX_SPACE = " ";
 	public static final String REGEX_MINUS = " - ";
 	public static final String KEY_SEPARATOR = "BS_KEY";
@@ -22,6 +23,7 @@ public class BlueSheepConstants {
 	public static final String PATH_TO_RESOURCES = "../RISORSE_BLUESHEEP/";
 	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatusOn.txt";
 	public static final String TRADUZIONI_API_FILENAME = "translationCsv.csv";
+	public static final String FILE_USER_TELEGRAM = "telegramUsersInfo.csv";
 	public static final String STATUS1_ARBS_RECORD = "1";
 	public static final String STATUS0_ARBS_RECORD = "0";
 	public static final String STATUSINVALID_ARBS_RECORD = "-1";
@@ -68,6 +70,7 @@ public class BlueSheepConstants {
 	public static final String TXODDS_USER = "TXODDS_USER";
 	public static final String TXODDS_PASSWORD = "TXODDS_PASSWORD";
 	public static final String FREQ_TXODDS_SEC = "FREQ_TXODDS_SEC";
+	public static final String FREQ_EVERYMATRIX_SEC = "FREQ_EVERYMATRIX_SEC";
 	
 	//translation
 	public static final String NATION_PATH_INPUTFILE = "PATH_NAZIONI_TRADUZIONE_CSV";
@@ -108,13 +111,22 @@ public class BlueSheepConstants {
 	// SOGLIA OLTRE LA QUALE SI MOSTRANO I MISSILI NELLA NOTIFICA TELEGRAM
 	public static final String MISSILE_TRASHOLD = "MISSILE_TRASHOLD";
 
-	// TELEGRAM BOT KEY
+	// TELEGRAM BOT
 	public static final String TELEGRAMBOTKEY = "TELEGRAMBOTKEY";
 	public static final String TELEGRAMBOTNAME = "TELEGRAMBOTNAME";
-	public static final String REGEX_TELEGRAMBOTACTION = " - ";
 	
 	// TELEGRAM TERMINAL USERS IDS FILE
 	public static final String TERMINALUSERSFILE = "TERMINALUSERSFILE";
+
+	//DATABASE
+	public static final String DATABASE_USER = "java.application";
+	public static final String DATABASE_PASSWORD = "bluesheep2018";
+
+	//CHAT_BOT
+	public static final String CHAT_BOT_MAX_PREF = "CHAT_BOT_MAX_PREF";
+	public static final String TELEGRAM_USER_CHATID_REGEX = "CHAT_ID=";
+	public static final String REGEX_TELEGRAMBOTACTION = " - ";
+	public static final String MAX_PREFERENCE_BOOKMAKER_USER = "MAX_PREFERENCE_BOOKMAKER_USER";
 	
 	private BlueSheepConstants() {}
 }

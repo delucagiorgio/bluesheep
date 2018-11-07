@@ -21,7 +21,9 @@ import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
+import it.bluesheep.database.BlueSheepDatabaseManager;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
+import it.bluesheep.telegrambot.TelegramBotHandler;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
@@ -35,6 +37,7 @@ import it.bluesheep.util.BlueSheepSharedResources;
  */
 public final class BlueSheepServiceHandlerManager {
 
+	private static final long SINGLE_EXECUTION = -129;
 	private static BlueSheepServiceHandlerManager instance;
 	private static Logger logger;
 	private static Properties properties = new Properties(); 
@@ -49,6 +52,7 @@ public final class BlueSheepServiceHandlerManager {
 		BookmakerLinkGenerator.initializeMap();
 		logger = Logger.getLogger(BlueSheepServiceHandlerManager.class);
 		logger.info(properties.toString());
+		logger.info("DB connection: " + BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().getStatus());
 	}
 	
 	public static synchronized BlueSheepServiceHandlerManager getBlueSheepServiceHandlerInstance() {
@@ -71,8 +75,10 @@ public final class BlueSheepServiceHandlerManager {
 		boolean stopApplication = false;
 		boolean propertiesConfigurationChanged = false;
 		
+		
+		
 		//Avvio il bot handler
-//		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
+		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
 		
 		boolean firstStartExecuted = false;
 		
@@ -90,20 +96,28 @@ public final class BlueSheepServiceHandlerManager {
 				}else {
 					initialDelay = 120;
 				}
-				
-				executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
+				if(BlueSheepSharedResources.getActiveServices().get(activeService) > 0) {
+					executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
+				}else if(BlueSheepSharedResources.getActiveServices().get(activeService) == SINGLE_EXECUTION) {
+					executor.submit(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService));
+				}
 				initialDelay = firstStartExecuted ? 0 : 120;
 			}
 			
 			long arbsFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_ARBS_SEC));
 			if(arbsFrequencySeconds > 0) {
 				executor.scheduleWithFixedDelay(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance(), initialDelay, arbsFrequencySeconds, TimeUnit.SECONDS);
+			}else if(arbsFrequencySeconds == SINGLE_EXECUTION){
+				executor.submit(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance());
 			}
 			
 			long jsonFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_JSON_SEC));
 			if(jsonFrequencySeconds > 0) {
 				executor.scheduleAtFixedRate(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance(), initialDelay, jsonFrequencySeconds, TimeUnit.SECONDS);
+			}else if(arbsFrequencySeconds == SINGLE_EXECUTION){
+				executor.submit(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance());
 			}
+			
 			
 			WatchService ws = null;
 			
@@ -189,7 +203,7 @@ public final class BlueSheepServiceHandlerManager {
 			}
 		}while(!stopApplication || propertiesConfigurationChanged);
 		
-//		TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+		TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
 
 	}
 

@@ -178,7 +178,7 @@ public class TranslatorUtil {
 	 */
 	public static RecordOutput translateFieldAboutCountry(RecordOutput recordOutput) {
 		String campionato = recordOutput.getCampionato();
-		if(campionato.startsWith("FB") || campionato.startsWith("WFB")) {
+		if(campionato != null && campionato.startsWith("FB") || campionato.startsWith("WFB")) {
 			String[] splittedCampionato = campionato.split(" ");
 			if(splittedCampionato != null) {
 				int startIndex = 2;
