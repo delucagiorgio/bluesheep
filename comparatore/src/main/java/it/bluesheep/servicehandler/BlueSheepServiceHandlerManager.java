@@ -21,9 +21,7 @@ import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
-import it.bluesheep.database.BlueSheepDatabaseManager;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
-import it.bluesheep.telegrambot.TelegramBotHandler;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
@@ -52,7 +50,7 @@ public final class BlueSheepServiceHandlerManager {
 		BookmakerLinkGenerator.initializeMap();
 		logger = Logger.getLogger(BlueSheepServiceHandlerManager.class);
 		logger.info(properties.toString());
-		logger.info("DB connection: " + BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().getStatus());
+//		logger.info("DB connection: " + BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().getStatus());
 	}
 	
 	public static synchronized BlueSheepServiceHandlerManager getBlueSheepServiceHandlerInstance() {
@@ -78,7 +76,7 @@ public final class BlueSheepServiceHandlerManager {
 		
 		
 		//Avvio il bot handler
-		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
+//		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
 		
 		boolean firstStartExecuted = false;
 		
@@ -203,7 +201,7 @@ public final class BlueSheepServiceHandlerManager {
 			}
 		}while(!stopApplication || propertiesConfigurationChanged);
 		
-		TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+//		TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
 
 	}
 

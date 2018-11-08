@@ -64,7 +64,7 @@ public abstract class AbstractInputRecord {
 
 	public void setDataOraEvento(Date dataOraEvento) {
 		this.dataOraEvento = dataOraEvento;
-		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_PIPE + this.partecipante2;
+		this.keyEvento = "" + this.dataOraEvento + BlueSheepConstants.REGEX_PIPE + this.sport + BlueSheepConstants.REGEX_PIPE + this.partecipante1 + BlueSheepConstants.REGEX_VERSUS + this.partecipante2;
 	}
 
 	public Sport getSport() {

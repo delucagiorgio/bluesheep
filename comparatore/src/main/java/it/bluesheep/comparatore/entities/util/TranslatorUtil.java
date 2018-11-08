@@ -191,7 +191,7 @@ public class TranslatorUtil {
 					String[] eventoSplitted = recordOutput.getEvento().split(BlueSheepConstants.REGEX_VERSUS);
 					String partecipante1 = getTraduzioneItaliana(eventoSplitted[0]);
 					String partecipante2 = getTraduzioneItaliana(eventoSplitted[1]);
-					recordOutput.setEvento(partecipante1 + "|" + partecipante2); 
+					recordOutput.setEvento(partecipante1 + " " + BlueSheepConstants.REGEX_VERSUS + " " + partecipante2); 
 				}
 				recordOutput.setNazione(nation);
 			}
