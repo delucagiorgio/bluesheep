@@ -268,7 +268,7 @@ public abstract class AbstractInputRecord {
 		boolean allTest = patterMinorCategory.matcher(playerBook1).find() && patterMinorCategory.matcher(playerBook2).find();
 		boolean noTest = !patterMinorCategory.matcher(playerBook1).find() && !patterMinorCategory.matcher(playerBook2).find();
 
-		return ((allTest && new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF))) || noTest);
+		return ((allTest && new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF))) || noTest) ;
 	}
 
 	private static boolean equalLists(List<String> one, List<String> two){     
