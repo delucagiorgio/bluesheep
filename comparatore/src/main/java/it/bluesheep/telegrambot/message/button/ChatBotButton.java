@@ -32,14 +32,16 @@ public class ChatBotButton {
 			buttonTelegram.setText(callbackData.getLastChatBotCallbackFilter().getValue());
 		}
 		String str = callbackData.getRootCommand().getCode() + BlueSheepConstants.REGEX_COMMA;
-		for(ChatBotCallbackFilter filter : callbackData.getFilterCommandsList()) {
-			str = str + filter.getSpecificCallbackData();
-			if(callbackData.getFilterCommandsList().indexOf(filter) + 1 != callbackData.getFilterCommandsList().size()) {
-				str = str + BlueSheepConstants.REGEX_COMMA;
+		if(callbackData.getFilterCommandsList() != null) {
+			for(ChatBotCallbackFilter filter : callbackData.getFilterCommandsList()) {
+				str = str + filter.getSpecificCallbackData();
+				if(callbackData.getFilterCommandsList().indexOf(filter) + 1 != callbackData.getFilterCommandsList().size()) {
+					str = str + BlueSheepConstants.REGEX_COMMA;
+				}
 			}
-		}
-		if(callbackData.getNavigationCommand() != null) {
-			str = str + BlueSheepConstants.REGEX_COMMA + callbackData.getNavigationCommand().getCode();
+			if(callbackData.getNavigationCommand() != null) {
+				str = str + BlueSheepConstants.REGEX_COMMA + callbackData.getNavigationCommand().getCode();
+			}
 		}
 		buttonTelegram.setCallbackData(str);
 	}

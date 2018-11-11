@@ -78,9 +78,13 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 	}
 
 	public List<Bookmaker> getLikeBookmakerNameByInitalChar(String initialChar) {
-		return getMappedObjectBySelect(getBasicSelectQuery() + WHERE + BOOKMAKERNAME + LIKE + "'" + initialChar + "%'" 
+		if(initialChar == null) {
+			return getAllActiveBookmakerOrderedByName();
+		}else {
+			return getMappedObjectBySelect(getBasicSelectQuery() + WHERE + BOOKMAKERNAME + LIKE + "'" + initialChar + "%'" 
 															+ AND + ACTIVE + IS + true 
 															+ ORDERBY + BOOKMAKERNAME + ASC);
+		}
 	}
 
 	public List<Bookmaker> getBookmakerPageByInitialChar(String initialChar, boolean isGreater) {

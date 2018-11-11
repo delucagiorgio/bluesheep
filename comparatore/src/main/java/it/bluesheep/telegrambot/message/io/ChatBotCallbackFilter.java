@@ -17,6 +17,8 @@ public abstract class ChatBotCallbackFilter{
 	protected boolean isIdFilter;
 	
 	protected int pageNumber;
+	
+	protected boolean pagination;
 
 	
 	protected ChatBotCallbackFilter(ChatBotFilterCommand filter, String value, String callbackInfo, boolean idFilter) {
@@ -24,6 +26,7 @@ public abstract class ChatBotCallbackFilter{
 		this.value = value;
 		this.specificCallbackData = filter.getCode() + BlueSheepConstants.REGEX_CSV + callbackInfo;
 		this.isIdFilter = idFilter;
+		this.pagination = "1".equals(callbackInfo.split(BlueSheepConstants.REGEX_TWOPOINTS)[0]);
 	}
 
 	public ChatBotFilterCommand getFilter() {
@@ -56,6 +59,14 @@ public abstract class ChatBotCallbackFilter{
 
 	public void setPageNumber(int pageNumber) {
 		this.pageNumber = pageNumber;
+	}
+
+	public boolean isPagination() {
+		return pagination;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 	
 }
