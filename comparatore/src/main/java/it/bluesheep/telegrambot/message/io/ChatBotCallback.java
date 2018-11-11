@@ -58,4 +58,14 @@ public abstract class ChatBotCallback {
 		this.navigationCommand = navigationCommand;
 	}
 	
+	public void removeLastChatBotCallbackFilter() {
+		ChatBotCallbackFilter filter = getLastChatBotCallbackFilter();
+		if(filter != null) {
+			filterCommandsList.remove(filter);
+			if(filterCommandsList.size() == 0) {
+				filterCommandsList = null;
+			}
+		}
+	}
+	
 }

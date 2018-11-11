@@ -101,7 +101,9 @@ public class ChatBotButtonManager {
 		int maxRow = 3;
 		boolean pagination = false;
 		
-		if(bookmakerCount > maxRow * columnNumber) {
+		if(commandList.getLastChatBotCallbackFilter() != null) {
+			pagination = commandList.getLastChatBotCallbackFilter().isPagination();
+		}else if(bookmakerCount > maxRow * columnNumber) {
 			pagination = true;
 		}
 		
@@ -112,6 +114,7 @@ public class ChatBotButtonManager {
 			int columnNumber, boolean pagination, int pageIndex) {
 		
 		int pageNumber = pageIndex;
+		int filterPageNumber = commandList.getLastChatBotCallbackFilter() != null ? commandList.getLastChatBotCallbackFilter().getPageNumber() : -1;
 		
 		boolean partialResult = false;
 		boolean isId = commandList.getLastChatBotCallbackFilter() != null && commandList.getLastChatBotCallbackFilter().isIdFilter();
@@ -124,40 +127,55 @@ public class ChatBotButtonManager {
 
 		if(pagination) { // Se il risultato è paginato
 			
-			if(!isId) { // Se il valore di filtro NON è un id del record
+			// Se il valore di filtro NON è un id del record e si tratta di un'azione di navigazione, mostro la parte mancante della tastiera
+			if(!isId && (commandList.getNavigationCommand() != null || commandList.getFilterCommandsList() == null)) { 
 				
 				//Calcolo tutte le possibili iniziali dei record
 				buttonTextLabel = getKeyboardFromInitialChar(availableEntity);
-				if(buttonTextLabel.size() > maxRow * columnNumber || availableEntity.size() > maxRow * columnNumber) { // se NON stanno tutti nella tastiera
-					//I bottoni sono iniziali e contengono la pagina corrente
-					partialResult = true;
-					buttonTextLabel = buttonTextLabel.subList(0, Math.min(maxRow * columnNumber, buttonTextLabel.size()));
-				}else {
-					buttonTextLabel = getListEntityValues(availableEntity);
-					if(buttonTextLabel.size() > maxRow * columnNumber) { // se NON stanno tutti nella tastiera
-						//I bottoni sono caratteri iniziali e contengono la pagina corrente
-						partialResult = true;
-						buttonTextLabel = buttonTextLabel.subList(0, Math.min(maxRow * columnNumber, buttonTextLabel.size()));
-					}
-					isId = true;
+				
+				//Se il comando è di pagina precedente allora inverto la lista per prendere gli ultimi risultati
+				if(filterPageNumber >= 0 && filterPageNumber > pageNumber) {
+					Collections.reverse(buttonTextLabel);
 				}
+				if(buttonTextLabel.size() > maxRow * columnNumber) {
+					partialResult = true;
+				}
+				buttonTextLabel = buttonTextLabel.subList(0, Math.min(maxRow * columnNumber, buttonTextLabel.size()));
+
 			}else { // Se il valore di filtro è un id del record
 				buttonTextLabel = getListEntityValues(availableEntity);
 				if(buttonTextLabel.size() > maxRow * columnNumber) { // se NON stanno tutti nella tastiera
 					//I bottoni sono iniziali e contengono la pagina corrente
+					
+					//Se il comando è di pagina precedente allora inverto la lista per prendere gli ultimi risultati
+					if(filterPageNumber >= 0 && filterPageNumber > pageNumber) {
+						Collections.reverse(buttonTextLabel);
+					}
+					pageNumber = 0;
+					existsPreviousPage = false;
 					partialResult = true;
 					buttonTextLabel = buttonTextLabel.subList(0, Math.min(maxRow * columnNumber, buttonTextLabel.size()));
 				}
 			}
 		}else {
 			buttonTextLabel = getListEntityValues(availableEntity);
-			buttonTextLabel = buttonTextLabel.subList(0, Math.min(maxRow * columnNumber, buttonTextLabel.size()));
+			if(buttonTextLabel.size() > maxRow * columnNumber) {
+				pagination = true;
+				partialResult = true;
+			}
 			isId = true;
+			pageNumber = 0;
+			existsPreviousPage = false;
+			buttonTextLabel = buttonTextLabel.subList(0, Math.min(maxRow * columnNumber, buttonTextLabel.size()));
 		}
 		
-		logger.info("ButtonTextLabel size = " + buttonTextLabel.size() + "; availableEntity Size = " + availableEntity.size());
+		logger.info("ButtonTextLabel size = " + buttonTextLabel.size() 
+											  + "; availableEntity Size = " + availableEntity.size());
 		
-		
+		if(commandList.getNavigationCommand() != null) {
+			commandList.setNavigationCommand(null);
+			commandList.removeLastChatBotCallbackFilter();
+		}
 		Collections.sort(buttonTextLabel);
 		
 		logger.info("pagination = " + pagination + "; partialResult = " + partialResult + "; isId = " + isId + "; pageNumber = " + pageNumber);
@@ -251,7 +269,9 @@ public class ChatBotButtonManager {
 			
 			InlineKeyboardButton previousPageButton = new ChatBotButton(backToKeyboardRecord).getButtonTelegram();
 			showInline.add(previousPageButton);
-			table.add(showInline);
+			if(!table.contains(showInline)) {
+				table.add(showInline);
+			}
 		}
 		
 		return table;

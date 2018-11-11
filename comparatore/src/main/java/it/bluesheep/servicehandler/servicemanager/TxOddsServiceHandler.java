@@ -105,7 +105,7 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 		}
 		
 		int secondFrequencyTxOdds = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_TXODDS_SEC));
-		int minutesOfValidity = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60;
+		int minutesOfValidity = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY));
 		
 		boolean overMinutesOfValidityByCountCall = BlueSheepSharedResources.getUpdateCallCount() > (minutesOfValidity / secondFrequencyTxOdds);
 		

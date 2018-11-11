@@ -88,7 +88,6 @@ public class ChatBotCallbackCommand extends ChatBotCallback {
 			}
 		}
 		return null;
-		
 	}
 	
 }

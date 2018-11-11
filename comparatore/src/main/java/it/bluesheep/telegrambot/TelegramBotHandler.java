@@ -2,7 +2,6 @@ package it.bluesheep.telegrambot;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -223,14 +222,13 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        	else if(ChatBotCommand.PREVIOUS_PAGE.equals(command.getNavigationCommand())) {
 	        	        ChatBotCallbackFilter filter = command.getLastChatBotCallbackFilter();
 		        		String initialChar = filter.getValue();
-		        		command.setNavigationCommand(null);
-		        		command.setFilterCommandsList(null);
+//		        		command.setNavigationCommand(null);
+//		        		command.setFilterCommandsList(null);
 		        		
 		        		List<Bookmaker> bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getBookmakerPageByInitialChar(initialChar.substring(0, 1), false);
 		        		if(bookmakerPage == null) {
 		        			bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getAllActiveBookmakerOrderedByName();
 		        		}
-		        		Collections.reverse(bookmakerPage);
 		        		showAddPreferencesMenu(command, userMessage, receivedMessage, bookmakerPage, filter.getPageNumber() - 1);
 		        	}
 		        	
@@ -238,8 +236,8 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        	else if(ChatBotCommand.NEXT_PAGE.equals(command.getNavigationCommand())) {
 	        	        ChatBotCallbackFilter filter = command.getLastChatBotCallbackFilter();
 		        		String initialChar = filter.getValue();
-		        		command.setNavigationCommand(null);
-		        		command.setFilterCommandsList(null);
+//		        		command.setNavigationCommand(null);
+//		        		command.setFilterCommandsList(null);
 		        		
 		        		List<Bookmaker> bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getBookmakerPageByInitialChar(initialChar.substring(0, 1), true);
 		        		if(bookmakerPage == null) {
