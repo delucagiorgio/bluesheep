@@ -9,7 +9,7 @@ import it.bluesheep.database.entities.TelegramUser;
 public class AlreadyActiveBookmakerPreference extends BluesheepChatBotException {
 
 	public AlreadyActiveBookmakerPreference(TelegramUser user, Message message, Bookmaker bookmaker) {
-		super("‼️" + " Preferenza sul bookmaker " + ArbsUtil.getTelegramBoldString(bookmaker.getBookmakerName()) + " già attiva." + 
+		super("‼️" + " Preferenza sul bookmaker " + ArbsUtil.getTelegramBoldString(bookmaker.getBookmakerName()) + " già salvata." + 
 				System.lineSeparator(), user);
 		this.markupOriginMessage = message;
 	}

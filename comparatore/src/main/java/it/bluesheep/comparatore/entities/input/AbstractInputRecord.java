@@ -11,6 +11,7 @@ import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.CosineSimilarityUtil;
 import it.bluesheep.comparatore.serviceapi.Service;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 
 public abstract class AbstractInputRecord {
@@ -267,7 +268,7 @@ public abstract class AbstractInputRecord {
 		boolean allTest = patterMinorCategory.matcher(playerBook1).find() && patterMinorCategory.matcher(playerBook2).find();
 		boolean noTest = !patterMinorCategory.matcher(playerBook1).find() && !patterMinorCategory.matcher(playerBook2).find();
 
-		return allTest || noTest;
+		return (allTest || noTest) && new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF));
 	}
 
 	private static boolean equalLists(List<String> one, List<String> two){     

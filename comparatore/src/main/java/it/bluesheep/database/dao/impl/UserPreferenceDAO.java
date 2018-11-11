@@ -9,6 +9,8 @@ import java.util.List;
 import it.bluesheep.database.entities.Bookmaker;
 import it.bluesheep.database.entities.TelegramUser;
 import it.bluesheep.database.entities.UserPreference;
+import it.bluesheep.database.exception.MoreThanOneResultException;
+import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.telegrambot.exception.AskToUsException;
 import it.bluesheep.util.BlueSheepConstants;
 
@@ -50,12 +52,12 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			Bookmaker bookmakerDB = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getEntityById(bookmaker);
 			
 			if(userDB != null && bookmakerDB != null) {
-				Double rating = returnSelect.getDouble(RATING);
-				Double rf = returnSelect.getDouble(RF);
-				Double liquidita = returnSelect.getDouble(LIQUIDITA);
+				Double rating = returnSelect.getDouble(RATING) == 0 ? null : returnSelect.getDouble(RATING);
+				Double rf = returnSelect.getDouble(RF) == 0 ? null : returnSelect.getDouble(RF);
+				Double liquidita = returnSelect.getDouble(LIQUIDITA) == 0 ? null : returnSelect.getDouble(LIQUIDITA);
 				String event = returnSelect.getString(EVENT);
 				String championship = returnSelect.getString(CHAMPIONSHIP);
-				Double minOddValue = returnSelect.getDouble(MINODDVALUE);
+				Double minOddValue = returnSelect.getDouble(MINODDVALUE) == 0 ? null : returnSelect.getDouble(MINODDVALUE);
 				boolean active = returnSelect.getBoolean(ACTIVE);
 				long id = returnSelect.getLong(ID);
 				
@@ -94,11 +96,19 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 		
 		List<UserPreference> resultList = getMappedObjectBySelect(query);
 		
-		if(resultList == null || resultList.size() > 2) {
+		if(resultList == null || resultList.size() > Integer.parseInt(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CHAT_BOT_MAX_PREF))) {
 			throw new AskToUsException(userMessage);
 		}
 		
 		return resultList;
+	}
+
+	public UserPreference getUserPreferenceFromUserAndBookmaker(TelegramUser userMessage, Bookmaker bookmaker) throws MoreThanOneResultException {
+		String query = getBasicSelectQuery() + WHERE + USER + " = " + userMessage.getId() + AND + BOOKMAKER + " = " + bookmaker.getId();
+		
+		UserPreference userPreference = getSingleResult(getMappedObjectBySelect(query));
+		
+		return userPreference;
 	}
 
 }

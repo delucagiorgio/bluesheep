@@ -50,7 +50,6 @@ public final class BlueSheepServiceHandlerManager {
 		BookmakerLinkGenerator.initializeMap();
 		logger = Logger.getLogger(BlueSheepServiceHandlerManager.class);
 		logger.info(properties.toString());
-//		logger.info("DB connection: " + BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().getStatus());
 	}
 	
 	public static synchronized BlueSheepServiceHandlerManager getBlueSheepServiceHandlerInstance() {
@@ -72,8 +71,6 @@ public final class BlueSheepServiceHandlerManager {
 		logger.info("Starting all active services");
 		boolean stopApplication = false;
 		boolean propertiesConfigurationChanged = false;
-		
-		
 		
 		//Avvio il bot handler
 //		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
@@ -155,6 +152,7 @@ public final class BlueSheepServiceHandlerManager {
 			                		updateInformationFromProperties();
 			                		InputDataHelper.getInputDataHelperInstance().forceUpdateMapBlockedBookmakers();
 			                		propertiesConfigurationChanged = true;
+			                		logger.info(getProperties().toString());
 			                		break;
 			                	default:
 			                		logger.info("No particular actions are required for the changed file");
@@ -171,8 +169,8 @@ public final class BlueSheepServiceHandlerManager {
 				ws.close();
 				
 				boolean terminatedCorrectly = true;
-				if(stopApplication || propertiesConfigurationChanged) {
-					long timeout = 5;
+				if(stopApplication) {
+					long timeout = 30;
 					TimeUnit timeUnitTimeout = TimeUnit.MINUTES;
 					String message = "all executors";
 					

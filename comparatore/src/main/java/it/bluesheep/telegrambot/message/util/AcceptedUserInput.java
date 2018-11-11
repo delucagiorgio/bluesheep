@@ -1,4 +1,4 @@
-package it.bluesheep.telegrambot;
+package it.bluesheep.telegrambot.message.util;
 
 import java.util.HashSet;
 import java.util.Set;

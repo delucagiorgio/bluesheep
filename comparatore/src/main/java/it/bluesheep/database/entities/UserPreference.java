@@ -122,4 +122,9 @@ public class UserPreference extends AbstractBlueSheepEntity {
 		return super.sameRecord(userPreference);
 	}
 
+	@Override
+	public String getTelegramButtonText() {
+		return bookmaker.getBookmakerName();
+	}
+
 }

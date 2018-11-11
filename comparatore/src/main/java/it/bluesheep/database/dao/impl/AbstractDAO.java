@@ -34,6 +34,14 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	protected static final String AND = " AND ";
 	protected static final String OR = " OR ";
 	protected static final String SET = " SET ";
+	protected static final String LIKE = " LIKE ";
+	protected static final String ORDERBY = " ORDER BY ";
+	protected static final String ASC = " ASC ";
+	protected static final String DESC = " DESC ";
+	protected static final String GREAT = " > ";
+	protected static final String LESS = " < ";
+	protected static final String GREAT_EQ = " => ";
+	protected static final String LESS_EQ = " <= ";
 	protected static Logger logger = Logger.getLogger(AbstractDAO.class);
 	protected Connection connection;
 	private Class<T> type;

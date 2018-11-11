@@ -37,4 +37,5 @@ public final class TelegramBotServiceHandler extends AbstractBlueSheepService {
         	instance = null;
         }
 	}
+	
 }

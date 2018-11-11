@@ -4,8 +4,8 @@ public class MoreThanOneResultException extends BlueSheepDatabaseException {
 
 	private static final long serialVersionUID = 1L;
 	
-	public MoreThanOneResultException(String query) {
-		super("More than single result excepected from query " + query);
+	public MoreThanOneResultException(String tableName) {
+		super("More than single result excepected from table " + tableName);
 	}
 
 }

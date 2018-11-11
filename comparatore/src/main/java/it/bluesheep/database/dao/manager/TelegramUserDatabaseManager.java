@@ -10,12 +10,12 @@ import it.bluesheep.database.dao.impl.UserPreferenceDAO;
 import it.bluesheep.database.entities.TelegramUser;
 import it.bluesheep.database.entities.UserPreference;
 import it.bluesheep.database.exception.MoreThanOneResultException;
-import it.bluesheep.telegrambot.ChatBotCommand;
-import it.bluesheep.telegrambot.ChatBotCommandUtilManager;
 import it.bluesheep.telegrambot.exception.AlreadyRegisteredUserChatBotException;
 import it.bluesheep.telegrambot.exception.AskToUsException;
 import it.bluesheep.telegrambot.exception.BluesheepChatBotException;
 import it.bluesheep.telegrambot.exception.InsertBlueSheepEntityException;
+import it.bluesheep.telegrambot.message.util.ChatBotCommand;
+import it.bluesheep.telegrambot.message.util.ChatBotCommandUtilManager;
 
 public class TelegramUserDatabaseManager {
 	
@@ -24,9 +24,9 @@ public class TelegramUserDatabaseManager {
 	/**
 	 * GD - 04/11/18
 	 * @param message the message received containing info related to user
-	 * @return null if 
-	 * @throws BluesheepChatBotException
-	 * @throws MoreThanOneResultException 
+	 * @return the telegram user
+	 * @throws BluesheepChatBotException se qualcosa non è previsto nel workflow
+	 * @throws MoreThanOneResultException  se il db non è consistente
 	 */
 	public static synchronized TelegramUser addUserArbsMap(TelegramUser userToSave, Connection connection) throws BluesheepChatBotException, SQLException, MoreThanOneResultException {
 		userToSave.setActive(Boolean.TRUE);

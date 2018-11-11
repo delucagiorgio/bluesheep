@@ -94,4 +94,9 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 	public void setLastMessageId(Long messageId) {
 		this.lastMessageId = messageId;
 	}
+
+	@Override
+	public String getTelegramButtonText() {
+		return null;
+	}
 }

@@ -1,7 +1,6 @@
 package it.bluesheep.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,50 +8,46 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-import it.bluesheep.util.BlueSheepConstants;
-
 
 public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 
 	private static BlueSheepDatabaseManager instance;
 	private static Logger logger;
 	private boolean status;
-	public static Connection connection;
 	
 	private BlueSheepDatabaseManager() {
 		logger = Logger.getLogger(BlueSheepDatabaseManager.class);
-        connectToDatabase();
 	}
 	
-	public Connection connectToDatabase() {
-		status = false;
-		try {
-			if(connection == null) {
-				connection = DriverManager
-				        .getConnection("jdbc:mysql:"
-				        		+ "//86.107.98.176:3306"
-				        		+ "/bluesheepUsers?"
-				        		+ "useSSL=false" 
-				        		+ "&autoReconnect=true" 
-				        		+ "&useUnicode=yes" 
-				        		+ "&connectTimeout=0"
-				        		+ "&socketTimeout=0"
-				        		+ "&characterEncoding=UTF-8"
-				                + "&user=" 
-				        		+ BlueSheepConstants.DATABASE_USER
-				        		+ "&password=" 
-				        		+ BlueSheepConstants.DATABASE_PASSWORD);
-				connection.createStatement().execute("USE bluesheepUsers");
-				connection.setAutoCommit(false);
-				connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-				logger.info("Connected successfully to database of USERS");
-				status = true;
-			}
-        }catch(Exception e) {
-        	logger.error(e.getMessage(), e);
-        }
-		return connection;
-	}
+//	public Connection connectToDatabase() {
+//		status = false;
+//		try {
+//			if(connection == null) {
+//				connection = DriverManager
+//				        .getConnection("jdbc:mysql:"
+//				        		+ "//86.107.98.176:3306"
+//				        		+ "/bluesheepUsers?"
+//				        		+ "useSSL=false" 
+//				        		+ "&autoReconnect=true" 
+//				        		+ "&useUnicode=yes" 
+//				        		+ "&connectTimeout=0"
+//				        		+ "&socketTimeout=0"
+//				        		+ "&characterEncoding=UTF-8"
+//				                + "&user=" 
+//				        		+ BlueSheepConstants.DATABASE_USER
+//				        		+ "&password=" 
+//				        		+ BlueSheepConstants.DATABASE_PASSWORD);
+//				connection.createStatement().execute("USE bluesheepUsers");
+//				connection.setAutoCommit(false);
+//				connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+//				logger.info("Connected successfully to database of USERS");
+//				status = true;
+//			}
+//        }catch(Exception e) {
+//        	logger.error(e.getMessage(), e);
+//        }
+//		return connection;
+//	}
 
 	public static synchronized BlueSheepDatabaseManager getBlueSheepDatabaseManagerInstance() {
 		if(instance == null) {

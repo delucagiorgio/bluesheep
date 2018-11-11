@@ -14,6 +14,7 @@ public class BlueSheepConstants {
 	public static final String REGEX_COMMA = ",";
 	public static final String REGEX_SPACE = " ";
 	public static final String REGEX_MINUS = " - ";
+	public static final String REGEX_TWOPOINTS = ":";
 	public static final String KEY_SEPARATOR = "BS_KEY";
 	public static final String PROPERTIES_FILENAME = "bluesheepComparatore.properties";
 	public static final String TRADUZIONI_NAZIONI_FILENAME = "Country-Nazione_Code.csv";
@@ -46,6 +47,7 @@ public class BlueSheepConstants {
 	public static final String PP_MAX = "PP_MAX";
 	public static final String PB_MIN = "PB_MIN";
 	public static final String PB_MAX = "PB_MAX";
+	public static final String MINOR_CATEGORY_ONOFF = "MINOR_CATEGORY_ONOFF";
 	
 	//betfair
 	public static final String BETFAIR_ENDPOINT = "SPORTS_APING_V1_0";
@@ -126,7 +128,6 @@ public class BlueSheepConstants {
 	public static final String CHAT_BOT_MAX_PREF = "CHAT_BOT_MAX_PREF";
 	public static final String TELEGRAM_USER_CHATID_REGEX = "CHAT_ID=";
 	public static final String REGEX_TELEGRAMBOTACTION = " - ";
-	public static final String MAX_PREFERENCE_BOOKMAKER_USER = "MAX_PREFERENCE_BOOKMAKER_USER";
 	
 	private BlueSheepConstants() {}
 }

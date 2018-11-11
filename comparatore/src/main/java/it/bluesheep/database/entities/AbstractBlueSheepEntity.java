@@ -14,8 +14,9 @@ public abstract class AbstractBlueSheepEntity {
 		return id;
 	}
 	
-	protected boolean sameRecord(AbstractBlueSheepEntity entity) {
+	public boolean sameRecord(AbstractBlueSheepEntity entity) {
 		return this.id.equals(entity.getId());
 	}
 	
+	public abstract String getTelegramButtonText();	
 }

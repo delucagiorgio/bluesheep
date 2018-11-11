@@ -146,9 +146,9 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 		return returnUser;
 	}
 
-	public void updateLastMessageSent(Message lastMessageSent, TelegramUser userDB) {
+	public void updateLastMessageSent(TelegramUser userDB) {
 		
-		String query = UPDATE + tableName + SET + LASTMESSAGEID + " = " + lastMessageSent.getMessageId() + WHERE + ID + " = " + userDB.getId();
+		String query = UPDATE + tableName + SET + LASTMESSAGEID + " = " + userDB.getLastMessageId() + WHERE + ID + " = " + userDB.getId();
 		
 		BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(query, connection);
 	}

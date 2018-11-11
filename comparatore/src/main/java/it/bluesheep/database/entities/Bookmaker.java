@@ -28,10 +28,6 @@ public class Bookmaker extends AbstractBlueSheepEntity {
 	public static Bookmaker getBlueSheepBookmakerFromBookmakerNameInfo(String bookmakerName) {
 		return new Bookmaker(bookmakerName);
 	}
-	
-	public boolean sameRecord(Bookmaker bookmaker) {
-		return super.sameRecord(bookmaker);
-	}
 
 	public boolean isActive() {
 		return active;
@@ -39,6 +35,11 @@ public class Bookmaker extends AbstractBlueSheepEntity {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	@Override
+	public String getTelegramButtonText() {
+		return bookmakerName;
 	}
 	
 }
