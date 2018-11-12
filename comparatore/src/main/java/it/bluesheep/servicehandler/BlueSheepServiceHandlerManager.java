@@ -81,7 +81,7 @@ public final class BlueSheepServiceHandlerManager {
 		do {
 			BlueSheepSharedResources.initializeDataStructures();
 			
-			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 2);
+			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 3);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
@@ -113,6 +113,8 @@ public final class BlueSheepServiceHandlerManager {
 			}else if(arbsFrequencySeconds == SINGLE_EXECUTION){
 				executor.submit(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance());
 			}
+			
+			executor.scheduleAtFixedRate(DatabasePollingServiceHandler.getDatabasePollingServiceHandlerInstance(), 0, 90, TimeUnit.SECONDS);
 			
 			
 			WatchService ws = null;

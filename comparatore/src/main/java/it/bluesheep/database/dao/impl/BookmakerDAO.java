@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,15 +37,19 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 			String bookmakerName = returnSelect.getString(BOOKMAKERNAME);
 			boolean active = returnSelect.getBoolean(ACTIVE);
 			long id = returnSelect.getLong(ID);
+			Timestamp createTime = getTimestampFromResultSet(returnSelect, CREATETIME);
+			Timestamp updateTime = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			dataMapped.add(Bookmaker.getBlueSheepBookmakerFromDatabaseInfo(bookmakerName, id, active));
+			dataMapped.add(Bookmaker.getBlueSheepBookmakerFromDatabaseInfo(bookmakerName, id, active, createTime, updateTime));
 		}
 		return dataMapped;
 	}
 
 	@Override
 	protected String getAllColumnValuesFromEntity(Bookmaker entity) {
-		return "('" + entity.getBookmakerName() + BlueSheepConstants.REGEX_COMMA + ACTIVE + "')";
+		return "'" + entity.getBookmakerName() + BlueSheepConstants.REGEX_COMMA + ACTIVE + "'" + BlueSheepConstants.REGEX_COMMA +
+				"?" + BlueSheepConstants.REGEX_COMMA +
+				"?" +")";
 	}
 	
 	public Bookmaker getBookmakerFromBookmakerName(String bookmakerName) throws MoreThanOneResultException {

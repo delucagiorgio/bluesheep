@@ -1,5 +1,7 @@
 package it.bluesheep.database.entities;
 
+import java.sql.Timestamp;
+
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 
@@ -23,8 +25,8 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		active = false;
 	}
 
-	private TelegramUser(String firstName, String lastName, Long chatId, Boolean active, Long date, Long id, Long lastMessageId) {
-		super(id);
+	private TelegramUser(String firstName, String lastName, Long chatId, Boolean active, Long date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
+		super(id, createTime, updateTime);
 		this.chatId = chatId;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -33,8 +35,8 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		this.lastMessageId = lastMessageId;
 	}
 	
-	public static TelegramUser getBlueSheepTelegramUserFromDatabaseInfo(String firstName, String lastName, Long chatId, Boolean active, Long date, Long id, Long lastMessageId) {
-		return new TelegramUser(firstName, lastName, chatId, active, date, id, lastMessageId);
+	public static TelegramUser getBlueSheepTelegramUserFromDatabaseInfo(String firstName, String lastName, Long chatId, Boolean active, Long date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
+		return new TelegramUser(firstName, lastName, chatId, active, date, id, lastMessageId, createTime, updateTime);
 	}
 	
 	public static TelegramUser getBlueSheepTelegramUserFromNewInfo(String firstName, String lastName, Long chatId) {

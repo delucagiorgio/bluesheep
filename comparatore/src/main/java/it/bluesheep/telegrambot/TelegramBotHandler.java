@@ -2,7 +2,6 @@ package it.bluesheep.telegrambot;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -22,10 +21,12 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.database.BlueSheepDatabaseManager;
 import it.bluesheep.database.ConnectionPool;
+import it.bluesheep.database.dao.impl.AbstractDAO;
 import it.bluesheep.database.dao.impl.BookmakerDAO;
 import it.bluesheep.database.dao.impl.TelegramUserDAO;
 import it.bluesheep.database.dao.impl.UserPreferenceDAO;
 import it.bluesheep.database.dao.manager.TelegramUserDatabaseManager;
+import it.bluesheep.database.entities.AbstractBlueSheepEntity;
 import it.bluesheep.database.entities.Bookmaker;
 import it.bluesheep.database.entities.TelegramUser;
 import it.bluesheep.database.entities.UserPreference;
@@ -45,6 +46,7 @@ import it.bluesheep.telegrambot.message.io.ChatBotCallbackFilter;
 import it.bluesheep.telegrambot.message.util.AcceptedUserInput;
 import it.bluesheep.telegrambot.message.util.ChatBotCommand;
 import it.bluesheep.telegrambot.message.util.ChatBotFilterCommand;
+import it.bluesheep.telegrambot.message.util.ChatBotFilterCommandUtilManager;
 import it.bluesheep.util.BlueSheepConstants;
 
 public class TelegramBotHandler extends TelegramLongPollingBot {
@@ -328,14 +330,15 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 
 	private void showAvailableFilterValues(ChatBotCallbackCommand command) {
 		
-//		AbstractDAO<? extends AbstractBlueSheepEntity> dao = ChatBotFilterCommandUtilManager.getCorrectDAOByChatBotCallackCommand(command, connection);
+		AbstractDAO<? extends AbstractBlueSheepEntity> dao = ChatBotFilterCommandUtilManager.getCorrectDAOByChatBotCallackCommand(command, connection);
 		
+		List<? extends AbstractBlueSheepEntity> returnFilterRow = dao.getAllActiveRows();
 		
 		
 		
 	}
 
-	private void showAddPreferencesMenu(ChatBotCallbackCommand command, TelegramUser userMessage, Message receivedMessage, List<Bookmaker> bookmakerAvailable, int pageIndex) {
+	private void showAddPreferencesMenu(ChatBotCallbackCommand command, TelegramUser userMessage, Message receivedMessage, List<? extends AbstractBlueSheepEntity> bookmakerAvailable, int pageIndex) {
         EditMessageText new_message = null;
         
         List<List<InlineKeyboardButton>> listOfCommandButtonOneColumn = ChatBotButtonManager.getBookmakerButtonListNColumns(command, bookmakerAvailable, 2, pageIndex);
@@ -542,14 +545,22 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		
 	}
 	
-	private void updateLastMessageIdUser(Message lastMessageSent, TelegramUser userDB) {
+	private void updateLastMessageIdUser(Message lastMessageSent, TelegramUser userDB) throws AskToUsException {
 		userDB.setLastMessageId(new Long(lastMessageSent.getMessageId()));
-		TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).updateLastMessageSent(userDB);
+		try {
+			TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).updateLastMessageSent(userDB);
+		} catch (SQLException e) {
+			throw new AskToUsException(userDB);
+		}
 	}
 	
-	private void updateLastMessageIdUser(EditMessageText lastMessageSent, TelegramUser userDB) {
+	private void updateLastMessageIdUser(EditMessageText lastMessageSent, TelegramUser userDB) throws AskToUsException {
 		userDB.setLastMessageId(new Long(lastMessageSent.getMessageId()));
-		TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).updateLastMessageSent(userDB);
+		try {
+			TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).updateLastMessageSent(userDB);
+		} catch (SQLException e) {
+			throw new AskToUsException(userDB);
+		}
 	}
 
 }

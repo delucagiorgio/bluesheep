@@ -1,5 +1,7 @@
 package it.bluesheep.database.entities;
 
+import java.sql.Timestamp;
+
 public class Bookmaker extends AbstractBlueSheepEntity {
 
 	private String bookmakerName;
@@ -11,8 +13,8 @@ public class Bookmaker extends AbstractBlueSheepEntity {
 		setActive(true);
 	}
 	
-	private Bookmaker(String name, long id, boolean active) {
-		super(id);
+	private Bookmaker(String name, long id, boolean active, Timestamp createTime, Timestamp updateTime) {
+		super(id, createTime, createTime);
 		bookmakerName = name;
 		setActive(active);
 	}
@@ -21,8 +23,8 @@ public class Bookmaker extends AbstractBlueSheepEntity {
 		return bookmakerName;
 	}
 	
-	public static Bookmaker getBlueSheepBookmakerFromDatabaseInfo(String bookmakerName, long id, boolean active) {
-		return new Bookmaker(bookmakerName, id, active);
+	public static Bookmaker getBlueSheepBookmakerFromDatabaseInfo(String bookmakerName, long id, boolean active, Timestamp createTime, Timestamp updateTime) {
+		return new Bookmaker(bookmakerName, id, active, createTime, updateTime);
 	}
 	
 	public static Bookmaker getBlueSheepBookmakerFromBookmakerNameInfo(String bookmakerName) {

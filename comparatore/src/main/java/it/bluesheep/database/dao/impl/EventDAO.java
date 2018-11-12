@@ -43,8 +43,10 @@ public class EventDAO extends AbstractDAO<Event> {
 			Timestamp dateEvent = returnSelect.getTimestamp(DATEEVENT);
 			boolean active = returnSelect.getBoolean(ACTIVE);
 			long id = returnSelect.getLong(ID);
+			Timestamp createTime = getTimestampFromResultSet(returnSelect, CREATETIME);
+			Timestamp updateTime = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			eventList.add(Event.getEventFromDatabaseInfo(eventName, partecipant1, partecipant2, dateEvent, id, active));
+			eventList.add(Event.getEventFromDatabaseInfo(eventName, partecipant1, partecipant2, dateEvent, id, active, createTime, updateTime));
 		}
 		
 		return eventList;
@@ -56,7 +58,9 @@ public class EventDAO extends AbstractDAO<Event> {
 				+ EVENTNAME + BlueSheepConstants.REGEX_COMMA
 				+ PARTECIPANT1 + BlueSheepConstants.REGEX_COMMA
 				+ PARTECIPANT2 + BlueSheepConstants.REGEX_COMMA
-				+ ACTIVE + ")";
+				+ ACTIVE + BlueSheepConstants.REGEX_COMMA +
+				"?" + BlueSheepConstants.REGEX_COMMA +
+				"?" +")";
 	}
 
 }

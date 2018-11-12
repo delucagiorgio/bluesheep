@@ -1,5 +1,7 @@
 package it.bluesheep.database.entities;
 
+import java.sql.Timestamp;
+
 public class UserPreference extends AbstractBlueSheepEntity {
 	
 	private Bookmaker bookmaker;
@@ -25,8 +27,8 @@ public class UserPreference extends AbstractBlueSheepEntity {
 		this.active = active;
 	}
 	
-	private UserPreference(Bookmaker bookmaker, TelegramUser user, Double rating, Double rf, Double liquidita, String event, String championship, Double minOddValue, boolean active, long id) {
-		super(id);
+	private UserPreference(Bookmaker bookmaker, TelegramUser user, Double rating, Double rf, Double liquidita, String event, String championship, Double minOddValue, boolean active, long id, Timestamp createTime, Timestamp updateTime) {
+		super(id, createTime, updateTime);
 		this.bookmaker = bookmaker;
 		this.user = user;
 		this.rating = rating;
@@ -38,8 +40,8 @@ public class UserPreference extends AbstractBlueSheepEntity {
 		this.active = active;
 	}
 	
-	public static UserPreference getBlueSheepUserPreferenceFromDatabaseInfo(Bookmaker bookmaker, TelegramUser user, Double rating, Double rf, Double liquidita, String event, String championship, Double minOddValue, boolean active, long id) {
-		return new UserPreference(bookmaker, user, rating, rf, liquidita, event, championship, minOddValue, active, id);
+	public static UserPreference getBlueSheepUserPreferenceFromDatabaseInfo(Bookmaker bookmaker, TelegramUser user, Double rating, Double rf, Double liquidita, String event, String championship, Double minOddValue, boolean active, long id, Timestamp createTime, Timestamp updateTime) {
+		return new UserPreference(bookmaker, user, rating, rf, liquidita, event, championship, minOddValue, active, id, createTime, updateTime);
 	}
 	
 	public static UserPreference getBlueSheepUserPreferenceFromUserInfo(Bookmaker bookmaker, TelegramUser user, Double rating, Double rf, Double liquidita, String event, String championship, Double minOddValue, boolean active) {

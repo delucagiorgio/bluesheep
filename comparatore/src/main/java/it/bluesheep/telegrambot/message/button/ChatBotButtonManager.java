@@ -13,7 +13,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import it.bluesheep.database.entities.AbstractBlueSheepEntity;
-import it.bluesheep.database.entities.Bookmaker;
 import it.bluesheep.database.entities.TelegramUser;
 import it.bluesheep.database.entities.UserPreference;
 import it.bluesheep.telegrambot.exception.AskToUsException;
@@ -96,7 +95,7 @@ public class ChatBotButtonManager {
 	 * @param pageIndex l'indice della pagina
 	 * @return i pulsanti cliccabili dall'utente, ognuno con il preciso valore da mostrare e con il corrispettivo callback corretto.
 	 */
-	public static List<List<InlineKeyboardButton>> getBookmakerButtonListNColumns(ChatBotCallbackCommand commandList, List<Bookmaker> bookmakerAvailable, int columnNumber, int pageIndex) {
+	public static List<List<InlineKeyboardButton>> getBookmakerButtonListNColumns(ChatBotCallbackCommand commandList, List<? extends AbstractBlueSheepEntity> bookmakerAvailable, int columnNumber, int pageIndex) {
 		int bookmakerCount = bookmakerAvailable.size();
 		int maxRow = 3;
 		boolean pagination = false;
@@ -111,7 +110,7 @@ public class ChatBotButtonManager {
 		return createTableMessage(bookmakerAvailable, commandList, maxRow, columnNumber, pagination, pageIndex);
 	}
 	
-	private static List<List<InlineKeyboardButton>> createTableMessage(List<Bookmaker> availableEntity, ChatBotCallbackCommand commandList, int maxRow,
+	private static List<List<InlineKeyboardButton>> createTableMessage(List<? extends AbstractBlueSheepEntity> availableEntity, ChatBotCallbackCommand commandList, int maxRow,
 			int columnNumber, boolean pagination, int pageIndex) {
 		
 		int pageNumber = pageIndex;
@@ -246,7 +245,7 @@ public class ChatBotButtonManager {
 		}
 		
 		if(isId) {
-			if(showInline.size() > columnNumber) {
+			if(showInline.size() + 1 > columnNumber) {
 				showInline = new ArrayList<InlineKeyboardButton>();
 				table.add(showInline);
 			}
@@ -262,7 +261,7 @@ public class ChatBotButtonManager {
 		return table;
 	}
 					
-	private static List<String> getListEntityValues(List<Bookmaker> availableEntity) {
+	private static List<String> getListEntityValues(List<? extends AbstractBlueSheepEntity> availableEntity) {
 		List<String> entityValues = new ArrayList<String>();
 		for(AbstractBlueSheepEntity entity : availableEntity) {
 			entityValues.add(entity.getTelegramButtonText());
@@ -271,7 +270,7 @@ public class ChatBotButtonManager {
 	}
 
 
-	private static List<String> getKeyboardFromInitialChar(List<Bookmaker> availableEntity) {
+	private static List<String> getKeyboardFromInitialChar(List<? extends AbstractBlueSheepEntity> availableEntity) {
 		Set<String> entityValuesSet = new HashSet<String>();
 		
 		//Trova il giusto accoppiamento di suffissi rispetto alle entità disponibili considerando il numero di pulsanti

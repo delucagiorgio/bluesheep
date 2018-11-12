@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,9 @@ import it.bluesheep.util.BlueSheepConstants;
 public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	
 	protected String tableName;
-	protected static String ID = "id";
+	protected static final String ID = "id";
+	protected static final String CREATETIME = "createTimestamp";
+	protected static final String UPDATETIME = "updateTimestamp";
 	protected static final String WHERE = " WHERE ";
 	protected static final String SELECT = " SELECT ";
 	protected static final String SELECT_ALL = " SELECT * ";
@@ -68,6 +71,14 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	public List<T> getAllRows(){
 		
 		String queryStatement = SELECT_ALL + FROM  + tableName + ";";
+		List<T> returnList = getMappedObjectBySelect(queryStatement);
+		
+		return returnList;
+	}
+	
+	public List<T> getAllActiveRows(){
+		
+		String queryStatement = SELECT_ALL + FROM  + tableName + WHERE + "active" + IS + true;
 		List<T> returnList = getMappedObjectBySelect(queryStatement);
 		
 		return returnList;
@@ -138,18 +149,21 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 			str = str + field.getName();
 		}
 		
-		str = str + ")";
+		str = str + BlueSheepConstants.REGEX_COMMA + CREATETIME + BlueSheepConstants.REGEX_COMMA + UPDATETIME +")";
 		
 		return str;
 	}
 	
-	public boolean insertRow(T entity) {
+	public boolean insertRow(T entity) throws SQLException {
 		
 		String query = getinsertBaseTableNameQuery() + getAllColumnValuesFromEntity(entity);
 		
+		PreparedStatement ps = connection.prepareStatement(query);
+		ps.setTimestamp(1, entity.getCreateTime());
+		ps.setTimestamp(2, entity.getUpdateTime());
 		
 		logger.info("Executing insert query " + query);
-		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeInsert(query, connection);
+		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeInsert(ps, connection);
 	}
 	
 	protected String getinsertBaseTableNameQuery() {
@@ -178,5 +192,9 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		}
 		
 		throw new MoreThanOneResultException(tableName);
+	}
+	
+	protected Timestamp getTimestampFromResultSet(ResultSet rs, String columnLabel) throws SQLException {
+		return rs.getTimestamp(columnLabel);
 	}
 }

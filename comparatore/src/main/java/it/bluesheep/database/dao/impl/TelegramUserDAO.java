@@ -64,8 +64,10 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			Boolean active = returnSelect.getBoolean(ACTIVE);
 			Long id = returnSelect.getLong(ID);
 			Long lastMessageId = returnSelect.getLong(LASTMESSAGEID) == 0 ? null : returnSelect.getLong(LASTMESSAGEID);
+			Timestamp createTime = getTimestampFromResultSet(returnSelect, CREATETIME);
+			Timestamp updateTime = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			dataMapped.add(TelegramUser.getBlueSheepTelegramUserFromDatabaseInfo(firstName, lastName, chatId, active, registrationDate, id, lastMessageId));
+			dataMapped.add(TelegramUser.getBlueSheepTelegramUserFromDatabaseInfo(firstName, lastName, chatId, active, registrationDate, id, lastMessageId, createTime, updateTime));
 		}
 		
 		return dataMapped;
@@ -120,8 +122,9 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 					user.getChatId() + BlueSheepConstants.REGEX_COMMA + 
 					"'" + new Timestamp(user.getRegistrationDate()) + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					user.isActive() + BlueSheepConstants.REGEX_COMMA + 
-					user.getLastMessageId()
-				+ ")";
+					user.getLastMessageId() + BlueSheepConstants.REGEX_COMMA +
+					"?" + BlueSheepConstants.REGEX_COMMA +
+					"?" +")";
 	}
 
 	public TelegramUser getUserFromMessage(Message receivedMessage) throws AskToUsException {
@@ -146,10 +149,16 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 		return returnUser;
 	}
 
-	public void updateLastMessageSent(TelegramUser userDB) {
+	public void updateLastMessageSent(TelegramUser userDB) throws SQLException {
 		
-		String query = UPDATE + tableName + SET + LASTMESSAGEID + " = " + userDB.getLastMessageId() + WHERE + ID + " = " + userDB.getId();
+		String query = UPDATE + tableName 
+						+ SET + LASTMESSAGEID + " = " + userDB.getLastMessageId()
+							+ BlueSheepConstants.REGEX_COMMA + UPDATETIME + " = ?"
+						+ WHERE + ID + " = " + userDB.getId();
 		
-		BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(query, connection);
+		PreparedStatement ps = connection.prepareStatement(query);
+		ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+		
+		BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
 	}
 }

@@ -10,8 +10,8 @@ public class Event extends AbstractBlueSheepEntity {
 	private Timestamp dateEvent;
 	private boolean active;
 	
-	public Event(String event, String partecipant1, String partecipant2, Timestamp dateEvent, long id, boolean active) {
-		super(id);
+	public Event(String event, String partecipant1, String partecipant2, Timestamp dateEvent, long id, boolean active, Timestamp createTime, Timestamp updateTime) {
+		super(id, createTime, updateTime);
 		this.dateEvent = dateEvent;
 		this.event = event;
 		this.partecipant1 = partecipant1;
@@ -23,8 +23,8 @@ public class Event extends AbstractBlueSheepEntity {
 		return event;
 	}
 	
-	public static Event getEventFromDatabaseInfo(String event, String partecipant1, String partecipant2, Timestamp dateEvent, long id, boolean active) {
-		return new Event(event, partecipant1, partecipant2, dateEvent, id, active);
+	public static Event getEventFromDatabaseInfo(String event, String partecipant1, String partecipant2, Timestamp dateEvent, long id, boolean active, Timestamp createTime, Timestamp updateTime) {
+		return new Event(event, partecipant1, partecipant2, dateEvent, id, active, createTime, updateTime);
 	}
 	
 	public boolean isSameRecord(Event event) {

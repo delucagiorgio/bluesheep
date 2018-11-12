@@ -18,54 +18,12 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 	private BlueSheepDatabaseManager() {
 		logger = Logger.getLogger(BlueSheepDatabaseManager.class);
 	}
-	
-//	public Connection connectToDatabase() {
-//		status = false;
-//		try {
-//			if(connection == null) {
-//				connection = DriverManager
-//				        .getConnection("jdbc:mysql:"
-//				        		+ "//86.107.98.176:3306"
-//				        		+ "/bluesheepUsers?"
-//				        		+ "useSSL=false" 
-//				        		+ "&autoReconnect=true" 
-//				        		+ "&useUnicode=yes" 
-//				        		+ "&connectTimeout=0"
-//				        		+ "&socketTimeout=0"
-//				        		+ "&characterEncoding=UTF-8"
-//				                + "&user=" 
-//				        		+ BlueSheepConstants.DATABASE_USER
-//				        		+ "&password=" 
-//				        		+ BlueSheepConstants.DATABASE_PASSWORD);
-//				connection.createStatement().execute("USE bluesheepUsers");
-//				connection.setAutoCommit(false);
-//				connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-//				logger.info("Connected successfully to database of USERS");
-//				status = true;
-//			}
-//        }catch(Exception e) {
-//        	logger.error(e.getMessage(), e);
-//        }
-//		return connection;
-//	}
 
 	public static synchronized BlueSheepDatabaseManager getBlueSheepDatabaseManagerInstance() {
 		if(instance == null) {
 			instance = new BlueSheepDatabaseManager();
 		}
 		return instance;
-	}
-	
-	@Override
-	public void executeUpdate(String updateQuery, Connection connection) {
-		try {
-			Statement statement = connection.createStatement();
-			statement.executeUpdate(updateQuery);
-			logger.info("Updated count for query is " + statement.getUpdateCount());
-		} catch (SQLException e) {
-			logger.error(e.getMessage(), e);
-		}
-
 	}
 	
 	@Override
@@ -97,12 +55,10 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 	}
 	
 	@Override
-	public boolean executeInsert(String insertQuery, Connection connection) {
-		Statement stmt;
+	public boolean executeInsert(PreparedStatement ps, Connection connection) {
 		try {
-			stmt = connection.createStatement();
-			stmt.executeUpdate(insertQuery);
-			logger.info("Updated count for query is " + stmt.getUpdateCount());
+			int countInsert = ps.executeUpdate();		
+			logger.info("Insert count for query is " + countInsert);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 			return false;

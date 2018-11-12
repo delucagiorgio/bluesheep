@@ -3,6 +3,7 @@ package it.bluesheep.database.dao.impl;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +37,10 @@ public class ChampionshipDAO extends AbstractDAO<Championship> {
 			String championshipName = returnSelect.getString(CHAMPIONSHIPNAME);
 			boolean active = returnSelect.getBoolean(ACTIVE);
 			long id = returnSelect.getLong(ID);
+			Timestamp createTime = getTimestampFromResultSet(returnSelect, CREATETIME);
+			Timestamp updateTime = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			championshipList.add(Championship.getChampionshipFromDatabaseInfo(championshipName, id, active));
+			championshipList.add(Championship.getChampionshipFromDatabaseInfo(championshipName, id, active, createTime, updateTime));
 		}
 		
 		return championshipList;
@@ -47,7 +50,9 @@ public class ChampionshipDAO extends AbstractDAO<Championship> {
 	protected String getAllColumnValuesFromEntity(Championship entity) {
 		return "(" + 
 				CHAMPIONSHIPNAME + BlueSheepConstants.REGEX_COMMA + 
-				ACTIVE + ")";
+				ACTIVE  + BlueSheepConstants.REGEX_COMMA +
+				"?" + BlueSheepConstants.REGEX_COMMA +
+				"?" +")";
 	}
 
 }

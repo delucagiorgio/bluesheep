@@ -6,9 +6,7 @@ import java.sql.ResultSet;
 
 public interface IBlueSheepDatabaseManager {
 
-	public void executeUpdate(String updateQuery, Connection connection);
-	
-	public boolean executeInsert(String insertQuery, Connection connection);
+	public boolean executeInsert(PreparedStatement ps, Connection connection);
 	
 	public ResultSet executeSelect(String selectQuery, Connection connection);
 	
