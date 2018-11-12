@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -312,6 +313,16 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 				if(eventoMap != null) {
 					Set<String> eventoSet = new HashSet<String>(eventoMap.keySet());
 					for(String evento : eventoSet) {
+						
+						if(evento != null) {
+							String eventPartecipants = evento.split("\\|")[2];
+							Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
+							boolean find = patterMinorCategory.matcher(eventPartecipants).find();
+							if(eventPartecipants != null && find && !(new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF)))) {
+								continue;
+							}
+						}
+						
 						bookmakerSet = new HashSet<String>();
 						Map<Scommessa, Map<String, AbstractInputRecord>> scommessaMap = eventoMap.get(evento);
 						if(scommessaMap != null) {

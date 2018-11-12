@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.CosineSimilarityUtil;
@@ -29,6 +31,7 @@ public abstract class AbstractInputRecord {
 	protected long timeOfInsertionInSystem;
 	protected Service source;
 	protected double liquidita;
+	protected static Logger logger = Logger.getLogger(AbstractInputRecord.class);
 	
 	public AbstractInputRecord(Date dataOraEvento,Sport sport, String campionato, String partecipante1, String partecipante2, String filler) {	
 		if(dataOraEvento != null) {
@@ -267,7 +270,7 @@ public abstract class AbstractInputRecord {
 		Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
 		boolean allTest = patterMinorCategory.matcher(playerBook1).find() && patterMinorCategory.matcher(playerBook2).find();
 		boolean noTest = !patterMinorCategory.matcher(playerBook1).find() && !patterMinorCategory.matcher(playerBook2).find();
-
+		
 		return ((allTest && new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF))) || noTest) ;
 	}
 
@@ -293,6 +296,18 @@ public abstract class AbstractInputRecord {
 	}
 
 	public boolean isSameEventSecondaryMatch(Date date, String sport, String partecipante1, String partecipante2) {
+		
+		if(this.partecipante1 == null || this.partecipante1 == null || partecipante1 == null || partecipante2 == null) {
+			return false;
+		}
+		
+		boolean part1AllOrNoOneMinorCategory = allOrNoOneMinorCategory(this.partecipante1, partecipante1);
+		boolean part2AllOrNoOneMinorCategory = allOrNoOneMinorCategory(this.partecipante1, partecipante2);
+		
+		if(!part1AllOrNoOneMinorCategory || !part2AllOrNoOneMinorCategory) {
+			return false;
+		}
+		
 		if(partecipante1 != null && partecipante2 != null && 
 				this.partecipante1 != null && this.partecipante2 != null &&
 				this.sport.getCode().equals(sport) && compareDate(this.dataOraEvento, date)) {		

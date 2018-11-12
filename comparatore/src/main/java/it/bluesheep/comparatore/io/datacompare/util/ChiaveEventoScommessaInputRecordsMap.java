@@ -82,7 +82,7 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 		AbstractInputRecord recordOfBookmaker = bookmakerRecordMap.get(record.getBookmakerName());
 		
 		//se esiste il record, notifico la sovrascrittura con il nuovo aggiornamento
-		if(recordOfBookmaker != null) {
+		if(recordOfBookmaker != null && logger.isDebugEnabled()) {
 			logger.debug("Record with key Evento " + 
 					record.getKeyEvento() + " has been updated: " + 
 					sport + ("" + BlueSheepConstants.REGEX_SLASH) +
