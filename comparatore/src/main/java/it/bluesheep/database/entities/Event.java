@@ -2,7 +2,7 @@ package it.bluesheep.database.entities;
 
 import java.sql.Timestamp;
 
-public class Event extends AbstractBlueSheepEntity {
+public class Event extends AbstractBlueSheepFilterEntity {
 
 	private String event;
 	private String partecipant1;
@@ -11,7 +11,7 @@ public class Event extends AbstractBlueSheepEntity {
 	private boolean active;
 	
 	public Event(String event, String partecipant1, String partecipant2, Timestamp dateEvent, long id, boolean active, Timestamp createTime, Timestamp updateTime) {
-		super(id, createTime, updateTime);
+		super(id, createTime, updateTime, event);
 		this.dateEvent = dateEvent;
 		this.event = event;
 		this.partecipant1 = partecipant1;

@@ -10,7 +10,7 @@ public abstract class ChatBotCallback {
 	private ChatBotCommand rootCommand;
 	//Identifica la lista di filtri applicati alla sequenza di interazioni
 	private List<ChatBotCallbackFilter> filterCommandsList;
-	
+	//Identifica il comando di navigazione, se presente
 	private ChatBotCommand navigationCommand;
 	
 	protected ChatBotCallback(ChatBotCommand callback, List<ChatBotCallbackFilter> filterList, ChatBotCommand navigationCommand) {
@@ -19,7 +19,7 @@ public abstract class ChatBotCallback {
 		this.navigationCommand = navigationCommand;
 	}
 
-	public ChatBotCallback(ChatBotCommand callback, String callbackData, ChatBotCommand navigationCommand) {
+	protected ChatBotCallback(ChatBotCommand callback, String callbackData, ChatBotCommand navigationCommand) {
 		this.rootCommand = callback;
 		this.navigationCommand = navigationCommand;
 	}
@@ -66,6 +66,19 @@ public abstract class ChatBotCallback {
 				filterCommandsList = null;
 			}
 		}
+	}
+	
+	public ChatBotCallbackFilter getSameChatBotCallbackFilter(ChatBotCallbackFilter filter) {
+		if(filterCommandsList != null && !filterCommandsList.isEmpty()) {
+			for(ChatBotCallbackFilter ccf : filterCommandsList) {
+				if(ccf.getFilter().equals(filter.getFilter())) {
+					return ccf;
+				}
+			}
+		}
+		
+		return null;
+		
 	}
 	
 }

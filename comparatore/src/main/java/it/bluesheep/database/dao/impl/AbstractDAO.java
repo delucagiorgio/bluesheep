@@ -84,56 +84,67 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		return returnList;
 	}
 	
-	private ResultSet getResultSelectFromQuery(String query) {
+	private ResultSet getResultSelectFromQuery(String query) throws SQLException {
 		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query, connection);
 	}
 	
-	private ResultSet getResultSelectFromQuery(PreparedStatement query) {
+	private ResultSet getResultSelectFromQuery(PreparedStatement query) throws SQLException {
 		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query);
 	}
 	
+	/**
+	 * GD - 16/11/18
+	 * Mappa gli oggetti rispetto alle righe tornate dalla query
+	 * @param returnSelect le righe della query 
+	 * @return gli oggetti mappati
+	 * @throws SQLException
+	 */
 	protected abstract List<T> mapDataIntoObject(ResultSet returnSelect) throws SQLException;
 	
 	public List<T> getMappedObjectBySelect(String query){
 
 		List<T> returnList = null;
-
-		ResultSet returnSelect = getResultSelectFromQuery(query);
-		if(returnSelect != null) {
-			try {
+		try {
+			ResultSet returnSelect = getResultSelectFromQuery(query);
+			
+			if(returnSelect != null) {
 				returnList = mapDataIntoObject(returnSelect);
-			} catch (SQLException e) {
-				logger.error("Problem during mapping data into objects");
-				logger.error(e.getMessage(), e);
+			}else {
+				logger.warn("Select query " + query + " has returned no value");
 			}
-		}else {
-			logger.warn("Select query " + query + " has returned no value");
+		} catch (SQLException e) {
+			logger.error("Problem during mapping data into objects");
+			logger.error(e.getMessage(), e);
 		}
 		
 		return returnList;
 	}
 	
+	/**
+	 * GD - 16/11/18
+	 * Mappa gli oggetti rispetto alle righe tornate dalla query
+	 * @param query la query da eseguire
+	 * @return gli oggetti mappati
+	 */
 	public List<T> getMappedObjectBySelect(PreparedStatement query){
 
 		List<T> returnList = null;
 
-		ResultSet returnSelect = getResultSelectFromQuery(query);
-		if(returnSelect != null) {
-			returnList = new ArrayList<T>();
-			try {
+		try {
+			ResultSet returnSelect = getResultSelectFromQuery(query);
+			if(returnSelect != null) {
+				returnList = new ArrayList<T>();
 				returnList = mapDataIntoObject(returnSelect);
-			} catch (SQLException e) {
-				logger.error("Problem during mapping data into objects");
-				logger.error(e.getMessage(), e);
+			}else {
+				logger.warn("Select query " + query + " has returned no value");
 			}
-		}else {
-			logger.warn("Select query " + query + " has returned no value");
+		} catch (SQLException e) {
+			logger.error("Problem during mapping data into objects");
+			logger.error(e.getMessage(), e);
 		}
 		
 		return returnList;
 	}
-	
-	
 	
 	protected abstract String getAllColumnValuesFromEntity(T entity);
 	
@@ -163,7 +174,7 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		ps.setTimestamp(2, entity.getUpdateTime());
 		
 		logger.info("Executing insert query " + query);
-		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeInsert(ps, connection);
+		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeInsert(ps);
 	}
 	
 	protected String getinsertBaseTableNameQuery() {

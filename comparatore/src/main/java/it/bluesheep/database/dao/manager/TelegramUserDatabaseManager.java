@@ -2,6 +2,8 @@ package it.bluesheep.database.dao.manager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +32,7 @@ public class TelegramUserDatabaseManager {
 	 */
 	public static synchronized TelegramUser addUserArbsMap(TelegramUser userToSave, Connection connection) throws BluesheepChatBotException, SQLException, MoreThanOneResultException {
 		userToSave.setActive(Boolean.TRUE);
+		userToSave.setRegistrationDate(new Timestamp((new Date()).getTime()));
 		if(!TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).insertRow(userToSave)) {
 			throw new InsertBlueSheepEntityException(userToSave);
 		}

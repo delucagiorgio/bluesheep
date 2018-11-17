@@ -12,7 +12,7 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 	private String firstName;
 	private String lastName;
 	private Long chatId;
-	private Long registrationDate;
+	private Timestamp registrationDate;
 	private Boolean active;
 	private Long lastMessageId;
 	
@@ -21,11 +21,11 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		this.chatId = chatId;
 		this.firstName = firstName;
 		this.lastName = lastName;
-		registrationDate = System.currentTimeMillis();
+		registrationDate = null;
 		active = false;
 	}
 
-	private TelegramUser(String firstName, String lastName, Long chatId, Boolean active, Long date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
+	private TelegramUser(String firstName, String lastName, Long chatId, Boolean active, Timestamp date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
 		super(id, createTime, updateTime);
 		this.chatId = chatId;
 		this.firstName = firstName;
@@ -35,7 +35,7 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		this.lastMessageId = lastMessageId;
 	}
 	
-	public static TelegramUser getBlueSheepTelegramUserFromDatabaseInfo(String firstName, String lastName, Long chatId, Boolean active, Long date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
+	public static TelegramUser getBlueSheepTelegramUserFromDatabaseInfo(String firstName, String lastName, Long chatId, Boolean active, Timestamp date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
 		return new TelegramUser(firstName, lastName, chatId, active, date, id, lastMessageId, createTime, updateTime);
 	}
 	
@@ -55,7 +55,7 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		return chatId;
 	}
 
-	public Long getRegistrationDate() {
+	public Timestamp getRegistrationDate() {
 		return registrationDate;
 	}
 
@@ -100,5 +100,9 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 	@Override
 	public String getTelegramButtonText() {
 		return null;
+	}
+
+	public void setRegistrationDate(Timestamp registrationDate) {
+		this.registrationDate = registrationDate;
 	}
 }

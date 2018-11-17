@@ -3,7 +3,7 @@ package it.bluesheep.telegrambot.message.util;
 public enum TextButtonCommand {
     
 	SHOW_ACTIVE_PREF("Visualizza preferenze di notifica attive"),
-	ENABLE_DISABLE_PREF("Attiva/Disattiva preferenze di notifica"),
+//	ENABLE_DISABLE_PREF("Attiva/Disattiva preferenze di notifica"),
     ADD_PREF("Aggiungi preferenze di notifica"),
     DEL_PREF("Rimuovi preferenze di notifica"),
     MOD_PREF("Modifica preferenze di notifica"),
@@ -33,8 +33,8 @@ public enum TextButtonCommand {
 		case CONFIRM_CHANGE_BONUS_ABUSING:
 			return CONFIRM;
 			
-		case ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING:
-			return ENABLE_DISABLE_PREF;
+//		case ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING:
+//			return ENABLE_DISABLE_PREF;
 			
 		case DELETE_PREFERENCE_BONUS_ABUSING:
 			return DEL_PREF;

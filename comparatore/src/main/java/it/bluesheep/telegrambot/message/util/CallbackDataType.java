@@ -16,12 +16,14 @@ public enum CallbackDataType {
     RATING("rt"),
     RF("rf"),
     EVENT("ev"),
-    CHAMPIONSHIP("cs"),
+//    CHAMPIONSHIP("cs"),
+    RF_TYPE("rft"),
     SIZE("sz"),
     MINODDVALUE("mo"),
     NEXT_PAGE("8"),
     PREVIOUS_PAGE("9"),
-    BACK_TO_KEYBOARD("10");
+    BACK_TO_KEYBOARD("10"),
+    MENU("11");
 	
 	private String code;
 	
@@ -52,7 +54,7 @@ public enum CallbackDataType {
 	}
 	
 	private List<CallbackDataType> getCommandCallbackType(){
-		return Arrays.asList(SHOW_ACTIVE_PREF, ADD_PREF, ENABLE_DISABLE_PREF, MOD_PREF, DEL_PREF, BACK_TO_MENU, CONFIRM);
+		return Arrays.asList(SHOW_ACTIVE_PREF, ADD_PREF, ENABLE_DISABLE_PREF, MOD_PREF, DEL_PREF, BACK_TO_MENU, CONFIRM, MENU);
 	}
 	
 	public boolean isFilter() {
@@ -60,7 +62,7 @@ public enum CallbackDataType {
 	}
 	
 	private List<CallbackDataType> getFilterCallbackType(){
-		return Arrays.asList(BOOKMAKER, RF, RATING, EVENT, CHAMPIONSHIP, SIZE, MINODDVALUE);
+		return Arrays.asList(BOOKMAKER, RF, RATING, EVENT, SIZE, MINODDVALUE);
 	}
 
 }

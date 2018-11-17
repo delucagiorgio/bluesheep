@@ -20,7 +20,7 @@ public abstract class AbstractBlueSheepEntity {
 		return id;
 	}
 	
-	public boolean sameRecord(AbstractBlueSheepEntity entity) {
+	protected boolean sameRecord(AbstractBlueSheepEntity entity) {
 		return this.id.equals(entity.getId());
 	}
 	

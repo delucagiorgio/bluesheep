@@ -2,17 +2,19 @@ package it.bluesheep.telegrambot.message.util;
 
 public enum TextFilterCommand {
 	
-	RF("RF"),
-	RATING("Rating"),
-	EVENT("Evento"),
-	MINVALUEODD("Quota minima"), 
-	CHAMPIONSHIP("Campionato"),
-	SIZE("Liquidità");
+	RF("RF", "RF"),
+	RATING("Rating", "RATING"),
+	EVENT("Evento", "EVENT"),
+	MINVALUEODD("Quota minima", "MINVALUEODD"), 
+//	CHAMPIONSHIP("Campionato"),
+	SIZE("Liquidità", "SIZE");
 
 	private String code;
+	private String callbackCode;
 	
-	TextFilterCommand(String code){
+	TextFilterCommand(String code, String callbackCode){
 		this.code = code;
+		this.callbackCode = callbackCode;
 	}
 	
 	public String getCode() {
@@ -21,9 +23,9 @@ public enum TextFilterCommand {
 	
 	public static TextFilterCommand getTextFilterCommandByChatBotFilterCommand(ChatBotFilterCommand chatBotFilterList) {
 		switch(chatBotFilterList) {
-		case CHAMPIONSHIP_BONUS_ABUSING:
-			return TextFilterCommand.CHAMPIONSHIP;
-		
+//		case CHAMPIONSHIP_BONUS_ABUSING:
+//			return TextFilterCommand.CHAMPIONSHIP;
+//		
 		case EVENT_BONUS_ABUSING:
 			return EVENT;
 			
@@ -33,6 +35,8 @@ public enum TextFilterCommand {
 		case RATING_BONUS_ABUSING:
 			return RATING;
 			
+			//L'RF è un caso particolare in cui è previsto prima l'inserimento del rimborso, poi il valore del rating
+		case RF_TYPE_BONUS_ABUSING:	
 		case RF_BONUS_ABUSING:
 			return RF;
 			
@@ -42,5 +46,14 @@ public enum TextFilterCommand {
 		default:
 			return null;
 		}
+	}
+	
+	public static boolean isTextFilterCommand(String code) {
+		for(TextFilterCommand tfc : TextFilterCommand.values()) {
+			if(tfc.callbackCode.equals(code)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

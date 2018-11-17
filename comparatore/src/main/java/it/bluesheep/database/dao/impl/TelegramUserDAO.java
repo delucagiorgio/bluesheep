@@ -60,7 +60,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			String firstName = returnSelect.getString(FIRSTNAME);
 			String lastName = returnSelect.getString(LASTNAME);
 			Long chatId = returnSelect.getLong(CHATID);
-			Long registrationDate = returnSelect.getTimestamp(REGISTRATIONDATE).getTime();
+			Timestamp registrationDate = getTimestampFromResultSet(returnSelect, REGISTRATIONDATE);
 			Boolean active = returnSelect.getBoolean(ACTIVE);
 			Long id = returnSelect.getLong(ID);
 			Long lastMessageId = returnSelect.getLong(LASTMESSAGEID) == 0 ? null : returnSelect.getLong(LASTMESSAGEID);
@@ -120,7 +120,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 					"'" + user.getFirstName() + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					"'" + user.getLastName() + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					user.getChatId() + BlueSheepConstants.REGEX_COMMA + 
-					"'" + new Timestamp(user.getRegistrationDate()) + "'" +  BlueSheepConstants.REGEX_COMMA + 
+					"'" + user.getRegistrationDate() + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					user.isActive() + BlueSheepConstants.REGEX_COMMA + 
 					user.getLastMessageId() + BlueSheepConstants.REGEX_COMMA +
 					"?" + BlueSheepConstants.REGEX_COMMA +
@@ -153,12 +153,9 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 		
 		String query = UPDATE + tableName 
 						+ SET + LASTMESSAGEID + " = " + userDB.getLastMessageId()
-							+ BlueSheepConstants.REGEX_COMMA + UPDATETIME + " = ?"
 						+ WHERE + ID + " = " + userDB.getId();
 		
 		PreparedStatement ps = connection.prepareStatement(query);
-		ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
-		
 		BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
 	}
 }

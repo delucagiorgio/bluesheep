@@ -114,7 +114,7 @@ public final class BlueSheepServiceHandlerManager {
 				executor.submit(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance());
 			}
 			
-			executor.scheduleAtFixedRate(DatabasePollingServiceHandler.getDatabasePollingServiceHandlerInstance(), 0, 90, TimeUnit.SECONDS);
+			executor.scheduleAtFixedRate(DatabasePollingServiceHandler.getDatabasePollingServiceHandlerInstance(), 0, 10, TimeUnit.MINUTES);
 			
 			
 			WatchService ws = null;

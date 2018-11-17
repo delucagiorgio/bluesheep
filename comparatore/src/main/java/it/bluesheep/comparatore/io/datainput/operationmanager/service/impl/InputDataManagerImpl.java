@@ -47,7 +47,7 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 		
 	    if (bet != null) {
 		    scommessaJsonListMap.put(bet + "_" + sport, result);
-			logger.debug("Call API " + apiServiceInterface.getClass().getName() + " to retrieve data for service code bet = " + bet);
+			logger.debug("Call API " + apiServiceInterface.getClass().getName() + " to retrieve data for service codeDB bet = " + bet);
 	    	result.addAll(apiServiceInterface.getData(sport, scommessa));
 			logger.debug("Data retrivied successfully");
 	    }

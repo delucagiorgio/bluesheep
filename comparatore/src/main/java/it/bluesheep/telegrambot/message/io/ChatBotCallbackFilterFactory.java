@@ -10,7 +10,7 @@ public class ChatBotCallbackFilterFactory {
 		if(pagination) {
 			return new ChatBotCallbackFilterPaginated(filter, textValue, callbackInfo, pagination, isFilterId, pageIndex);
 		}else {
-			return new ChatBotCallbackFilterDefault(filter, textValue, callbackInfo, pageIndex);
+			return new ChatBotCallbackFilterDefault(filter, textValue, callbackInfo, pageIndex, isFilterId);
 		}
 	}
 

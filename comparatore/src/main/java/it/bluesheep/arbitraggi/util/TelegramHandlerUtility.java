@@ -132,7 +132,7 @@ public class TelegramHandlerUtility {
 		writer.close();
 
 		BufferedReader reader = null;
-		// checks server's status code first
+		// checks server's status codeDB first
 		reader = new BufferedReader(new InputStreamReader(
 			httpConn.getInputStream()));
 		String line = null;

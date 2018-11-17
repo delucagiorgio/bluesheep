@@ -18,6 +18,10 @@ public class Bookmaker extends AbstractBlueSheepEntity {
 		bookmakerName = name;
 		setActive(active);
 	}
+	
+	public boolean sameRecord(Bookmaker bookmaker) {
+		return super.sameRecord(bookmaker);
+	}
 
 	public String getBookmakerName() {
 		return bookmakerName;

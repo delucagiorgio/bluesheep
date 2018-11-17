@@ -13,7 +13,6 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 
 	private static BlueSheepDatabaseManager instance;
 	private static Logger logger;
-	private boolean status;
 	
 	private BlueSheepDatabaseManager() {
 		logger = Logger.getLogger(BlueSheepDatabaseManager.class);
@@ -27,7 +26,7 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 	}
 	
 	@Override
-	public ResultSet executeSelect(String selectQuery, Connection connection){
+	public ResultSet executeSelect(String selectQuery, Connection connection) throws SQLException{
 		ResultSet result = null;
 		Statement stmt;
 		try {
@@ -35,61 +34,55 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 			result = stmt.executeQuery(selectQuery);
 		} catch (SQLException e) {
 			logger.error("Error during select. Query is " + selectQuery);
-			logger.error(e.getMessage(), e);
+			throw e;
 		} 
 		
 		return result;
 	}
 	
 	@Override
-	public ResultSet executeSelect(PreparedStatement selectQuery){
+	public ResultSet executeSelect(PreparedStatement selectQuery) throws SQLException{
 		ResultSet result = null;
 		try {
+			logger.info("Executing query " + selectQuery);
 			result = selectQuery.executeQuery();
 		} catch (SQLException e) {
 			logger.error("Error during select. Query is " + selectQuery);
-			logger.error(e.getMessage(), e);
+			throw e;
 		} 
 		
 		return result;
 	}
-	
-	@Override
-	public boolean executeInsert(PreparedStatement ps, Connection connection) {
-		try {
-			int countInsert = ps.executeUpdate();		
-			logger.info("Insert count for query is " + countInsert);
-		} catch (SQLException e) {
-			logger.error(e.getMessage(), e);
-			return false;
-		}
-		return true;
-	}
-	
-	public boolean getStatus() {
-		return status ;
-	}
 
 	@Override
-	public void executeUpdate(PreparedStatement updateQuery) {
+	public void executeUpdate(PreparedStatement updateQuery) throws SQLException {
 		try {
+			logger.info("Executing query " + updateQuery);
 			updateQuery.executeUpdate();
 			logger.info("Updated count for query is " + updateQuery.getUpdateCount());
 		} catch (SQLException e) {
 			logger.warn("No update performed");
-			logger.error(e.getMessage(), e);
+			throw e;
 		}
 	}
 
 	@Override
-	public boolean executeInsert(PreparedStatement selectQuery) {
-		try {
-			selectQuery.executeUpdate();
-		} catch (SQLException e) {
-			logger.error(e.getMessage(), e);
-			return false;
-		}
+	public boolean executeInsert(PreparedStatement insertQuery) throws SQLException {
+		logger.info("Executing query " + insertQuery);
+		insertQuery.executeUpdate();
+		logger.info("Inserted count for query is " + insertQuery.getUpdateCount());
 		return true;
 	}
-	
+
+	@Override
+	public void executeDelete(PreparedStatement deleteQuery) throws SQLException {
+		try {
+			logger.info("Executing query " + deleteQuery);
+			deleteQuery.executeUpdate();
+			logger.info("Delete count for query is " + deleteQuery.getUpdateCount());
+		} catch (SQLException e) {
+			logger.warn("No update performed");
+			throw e;
+		}
+	}
 }

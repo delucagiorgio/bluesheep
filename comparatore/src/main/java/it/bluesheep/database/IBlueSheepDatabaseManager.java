@@ -3,16 +3,17 @@ package it.bluesheep.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public interface IBlueSheepDatabaseManager {
 
-	public boolean executeInsert(PreparedStatement ps, Connection connection);
+	public ResultSet executeSelect(String selectQuery, Connection connection) throws SQLException;
 	
-	public ResultSet executeSelect(String selectQuery, Connection connection);
-	
-	public ResultSet executeSelect(PreparedStatement selectQuery);
+	public ResultSet executeSelect(PreparedStatement selectQuery) throws SQLException;
 
-	public void executeUpdate(PreparedStatement updateQuery);
+	public void executeUpdate(PreparedStatement updateQuery) throws SQLException;
 	
-	public boolean executeInsert(PreparedStatement insertQuery);
+	public boolean executeInsert(PreparedStatement insertQuery) throws SQLException;
+	
+	public void executeDelete(PreparedStatement ps) throws SQLException;
 }

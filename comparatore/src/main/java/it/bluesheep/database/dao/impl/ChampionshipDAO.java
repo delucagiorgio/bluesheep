@@ -7,10 +7,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.bluesheep.database.dao.IFilterDAO;
 import it.bluesheep.database.entities.Championship;
+import it.bluesheep.database.exception.MoreThanOneResultException;
 import it.bluesheep.util.BlueSheepConstants;
 
-public class ChampionshipDAO extends AbstractDAO<Championship> {
+public class ChampionshipDAO extends AbstractDAO<Championship> implements IFilterDAO<Championship> {
 
 	private static ChampionshipDAO instance;
 	public static final String tableName = "CHAMPIONSHIP";
@@ -53,6 +55,18 @@ public class ChampionshipDAO extends AbstractDAO<Championship> {
 				ACTIVE  + BlueSheepConstants.REGEX_COMMA +
 				"?" + BlueSheepConstants.REGEX_COMMA +
 				"?" +")";
+	}
+
+	@Override
+	public List<Championship> getAllRowFromButtonText(String textButton) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Championship getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

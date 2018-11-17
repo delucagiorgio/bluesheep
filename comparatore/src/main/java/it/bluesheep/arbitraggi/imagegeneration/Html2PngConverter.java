@@ -27,7 +27,7 @@ public class Html2PngConverter {
 
 	public Html2PngConverter() {		
 
-//		System.setProperty("webdriver.gecko.driver", "/Users/giorgio/Downloads/geckodriver");	
+		System.setProperty("webdriver.gecko.driver", "/Users/giorgio/Downloads/geckodriver");	
 
 		System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE,"true");
 		System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, LOGGING_FILE_FAKE);
@@ -37,8 +37,8 @@ public class Html2PngConverter {
 		try {
 	        logger.info("Start taking a screenshot for input file : " + inputFile);
 	        long startTime = System.currentTimeMillis();
-//			String pathToHtmlLocation = "/Users/giorgio/git/bluesheep";
-			String pathToHtmlLocation = "/home/bluesheep/java";
+			String pathToHtmlLocation = "/Users/giorgio/git/bluesheep";
+//			String pathToHtmlLocation = "/home/bluesheep/java";
 	        String htmlLocation = "file://" + pathToHtmlLocation + inputFile.substring(2);
 
 			FirefoxBinary firefoxBinary = new FirefoxBinary();

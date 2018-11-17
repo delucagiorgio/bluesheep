@@ -72,7 +72,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	@Override
 	public List<String> getData(Sport sport, Scommessa scommessa) {
 
-		// Sport's code identification
+		// Sport's codeDB identification
 		String sportCode = identifyCorrectGameCode(sport);
 		// Obtaining the list of events for the chosen sport
 		
@@ -144,7 +144,7 @@ public class Bet365ApiImpl implements IApiInterface {
 	}
 
 	/**
-	 * It returns the sport's code
+	 * It returns the sport's codeDB
 	 */
 	@Override
 	public String identifyCorrectGameCode(Sport sport) {

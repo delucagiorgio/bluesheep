@@ -13,6 +13,12 @@ public class ChatBotCommandUtilManager {
 
 	private ChatBotCommandUtilManager() {}
 	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna i possibili comandi relativi alle preferenze dell'utente, in base alle regole
+	 * @param userPreferencesDB preferenze dell'utente
+	 * @return la lista di comandi
+	 */
 	public static Set<ChatBotCommand> getCommandAvailableFromUserPreferenceHistory(List<UserPreference> userPreferencesDB){
 		
 		Set<ChatBotCommand> commandToShow = new HashSet<ChatBotCommand>();
@@ -34,65 +40,69 @@ public class ChatBotCommandUtilManager {
 		
 		if(atLeastOneActive || atLeastOneInactive) {
 			commandToShow.add(ChatBotCommand.SHOW_PREFERENCES_BONUS_ABUSING);
-			commandToShow.add(ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING);
+//			commandToShow.add(ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING);
 			commandToShow.add(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING);
 			commandToShow.add(ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING);
 		}
 		
 		return commandToShow;
 	}
-
-//	public static List<Entry<CallbackDataType, String>> getCommandEntryListOrderedByExecution(ChatBotCallbackCommand callbackCommand) {
-//		
-//		List<Entry<CallbackDataType, String>> returnList = null;
-//		
-//		if(callbackCommand!= null) {
-//			String[] splittedCallbakcDataByResponseLevel = callbackData.split(BlueSheepConstants.KEY_SEPARATOR);
-//			if(splittedCallbakcDataByResponseLevel != null && splittedCallbakcDataByResponseLevel.length > 0) {
-//				returnList = new ArrayList<Entry<CallbackDataType, String>>();
-//				
-//				for(String callbackStep : splittedCallbakcDataByResponseLevel) {
-//					String callbackTypeString = callbackStep.split(BlueSheepConstants.REGEX_CSV)[0];
-//					CallbackDataType callbackType = CallbackDataType.getCallbackDataType(callbackTypeString);
-//					if(callbackType != null && callbackType.isCommand()) {
-//						Entry<CallbackDataType, String> entry = new AbstractMap.SimpleEntry<CallbackDataType, String>(callbackType, "");
-//						returnList.add(entry);
-//					}else if(callbackType != null && callbackType.isFilter()){
-//						String callbackTypeTextString = callbackStep.split(BlueSheepConstants.REGEX_CSV)[1];
-//						if(StringUtils.isEmpty(callbackTypeTextString)) {
-//							Entry<CallbackDataType, String> entry = new AbstractMap.SimpleEntry<CallbackDataType, String>(callbackType, callbackTypeTextString);
-//							returnList.add(entry);
-//						}
-//					}
-//				}
-//			}
-//		}
-//		
-//		return returnList;
-//	}
 	
-	public static List<ChatBotFilterCommand> getFilterCommandByChatBotCommand(ChatBotCommand command){
-		switch(command){
-		case ADD_PREFERENCE_BONUS_ABUSING:
-			return Arrays.asList(ChatBotFilterCommand.CHAMPIONSHIP_BONUS_ABUSING,
-								 ChatBotFilterCommand.EVENT_BONUS_ABUSING,
-								 ChatBotFilterCommand.MINVALUEODD_BONUS_ABUSING,
-								 ChatBotFilterCommand.RATING_BONUS_ABUSING,
-								 ChatBotFilterCommand.RF_BONUS_ABUSING,
-								 ChatBotFilterCommand.SIZE_BONUS_ABUSING);
-		default:
-			return null;
-		}
-	}
-	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna la lista di comandi di navigazione tra le funzionalità
+	 * @return la lista di comandi
+	 */
 	public static List<ChatBotCommand> getNavigationChatBotCommand(){
 			return Arrays.asList(ChatBotCommand.BACK_TO_KEYBOARD, ChatBotCommand.NEXT_PAGE, ChatBotCommand.PREVIOUS_PAGE, ChatBotCommand.CONFIRM_CHANGE_BONUS_ABUSING);
 	}
 	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna la lista di comandi di navigazione nelle pagine
+	 * @return la lista di comandi
+	 */
 	public static List<ChatBotCommand> getPageNavChatBotCommand(){
 		return Arrays.asList(ChatBotCommand.NEXT_PAGE, ChatBotCommand.PREVIOUS_PAGE);
-}
+	}
 	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna la lista di comandi che prevede una modifica ad una preferenza dello storico
+	 * @return la lista di comandi
+	 */
+	public static List<ChatBotCommand> getModificationCommand(){
+		return Arrays.asList(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING,
+//							 ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING,
+							 ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING);
+	}
+	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna la lista di comandi che prevede una modifica o la creazione di una preferenza
+	 * @return la lista di comandi
+	 */
+	public static List<ChatBotCommand> getNewOrModifyCommand(){
+		return Arrays.asList(ChatBotCommand.ADD_PREFERENCE_BONUS_ABUSING, ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING);
+	}
+	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna la lista di comandi che prevede una cancellazione o una attivazione/disattivazione di una preferenza
+	 * @return la lista di comandi
+	 */
+	public static List<ChatBotCommand> getDeleteOrActivactionCommand(){
+		return Arrays.asList(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING
+//				, ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING
+				);
+	}
+	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna il comando corretto rispetto al dato contenuto nel bottone Telegram
+	 * @param callbackDataType callbackType del bottone
+	 * @return la lista di comandi
+	 */
 	public static ChatBotCommand getCorrectChatBotCommandByCallbackDataType(CallbackDataType callbackDataType) {
 		if(callbackDataType != null) {
 			switch(callbackDataType) {
@@ -104,8 +114,8 @@ public class ChatBotCommandUtilManager {
 				return ChatBotCommand.CONFIRM_CHANGE_BONUS_ABUSING;
 			case DEL_PREF:
 				return ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING;
-			case ENABLE_DISABLE_PREF:
-				return ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING;
+//			case ENABLE_DISABLE_PREF:
+//				return ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING;
 			case MOD_PREF:
 				return ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING;
 			case SHOW_ACTIVE_PREF:
@@ -116,10 +126,40 @@ public class ChatBotCommandUtilManager {
 				return ChatBotCommand.NEXT_PAGE;
 			case PREVIOUS_PAGE:
 				return ChatBotCommand.PREVIOUS_PAGE;
+			case MENU:
+				return ChatBotCommand.MENU;
 				default:
 					break;
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * GD - 16/11/18
+	 * Ritorna il testo corretto da mostrare rispetto al comando di root
+	 * @param filter callbackType del bottone
+	 * @return il testo da mostrare
+	 */
+	public static String getCorrectTextFromChatBotCommand(ChatBotCommand filter) {
+		switch(filter) {
+		case ADD_PREFERENCE_BONUS_ABUSING:
+			return TextOptionBookmakerCommand.ADD_PREF.toString();
+			
+		case DELETE_PREFERENCE_BONUS_ABUSING:
+			return TextOptionBookmakerCommand.DEL_PREF.toString();
+			
+		case SHOW_PREFERENCES_BONUS_ABUSING:
+			return TextOptionBookmakerCommand.SHOW_ACTIVE_PREF.toString();
+			
+//		case ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING:
+//			return TextOptionBookmakerCommand.ENABLE_DISABLE_PREF.toString();
+			
+		case MOD_PREFERENCES_BONUS_ABUSING:
+			return TextOptionBookmakerCommand.MOD_PREF.toString();
+			
+		default:
+			return null;
+		}
 	}
 }

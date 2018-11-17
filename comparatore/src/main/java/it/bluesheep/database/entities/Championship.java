@@ -2,13 +2,13 @@ package it.bluesheep.database.entities;
 
 import java.sql.Timestamp;
 
-public class Championship extends AbstractBlueSheepEntity {
+public class Championship extends AbstractBlueSheepFilterEntity {
 
 	private String championshipName;
 	private boolean active;
 	
 	private Championship(String championshipName, long id, boolean active, Timestamp createTime, Timestamp updateTime) {
-		super(id, createTime, updateTime);
+		super(id, createTime, updateTime, championshipName);
 		this.championshipName = championshipName;
 		this.active = active;
 	}
