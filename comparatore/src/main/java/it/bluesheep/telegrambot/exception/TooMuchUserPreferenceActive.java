@@ -9,7 +9,7 @@ public class TooMuchUserPreferenceActive extends BluesheepChatBotException {
 	private static final long serialVersionUID = 1L;
 
 	public TooMuchUserPreferenceActive(TelegramUser user, UserPreference up) {
-		super("‼️ " + ArbsUtil.getTelegramBoldString("ATTENZIONE " + user.getFirstName()) 
+		super("‼️ " + ArbsUtil.getTelegramBoldString("ATTENZIONE " + user.getUserName()) 
 				+ System.lineSeparator() + System.lineSeparator()
 				+ "La preferenza sul bookmaker " + ArbsUtil.getTelegramBoldString(up.getBookmaker().getBookmakerName())
 				+ " non può essere attivata a causa del numero di preferenze già attive." + System.lineSeparator()

@@ -13,6 +13,7 @@ import it.bluesheep.database.dao.impl.MinOddValueDAO;
 import it.bluesheep.database.dao.impl.RFTypeDAO;
 import it.bluesheep.database.dao.impl.RFValueDAO;
 import it.bluesheep.database.dao.impl.RatingDAO;
+import it.bluesheep.database.dao.impl.SizeDAO;
 import it.bluesheep.database.entities.AbstractBlueSheepEntity;
 import it.bluesheep.database.entities.UserPreference;
 import it.bluesheep.telegrambot.message.io.ChatBotCallbackCommand;
@@ -97,6 +98,7 @@ public class ChatBotFilterCommandUtilManager {
 			return RatingDAO.getRatingDAOInstance(connection);
 		
 		case SIZE_BONUS_ABUSING:
+			return SizeDAO.getSizeDAOInstance(connection);
 			default:
 				return null;
 		}

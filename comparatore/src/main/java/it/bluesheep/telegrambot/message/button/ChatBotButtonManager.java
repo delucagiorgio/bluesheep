@@ -214,13 +214,6 @@ public class ChatBotButtonManager {
 			
 			copyRecord.getFilterCommandsList().add(filter);
 			InlineKeyboardButton showButton = new ChatBotButton(copyRecord).getButtonTelegram();
-			
-			
-			System.out.println(showButton.getText());
-			System.out.println(showButton.getCallbackData());
-			
-			System.out.println("-------------------------------------");
-			
 			if (showButton != null) {
 				showInline.add(showButton);
 				if (newColumn) {
@@ -329,8 +322,6 @@ public class ChatBotButtonManager {
 		
 		List<ChatBotFilterCommand> availableFilter = ChatBotFilterCommandUtilManager.getChatBotFilterCommandListFromUserPreference(upDB, toBeModified);
 		
-		//Controllo se almeno un filtro è settato (-1 per il bookmaker che risulta fuori dalla scelta,
-		//										   -1 per l'rfValue che è condizionato al rfType)
 		boolean pagination = availableFilter.size() > maxRow * columnNumber;
 		boolean partialResult = false;
 		boolean existsPreviousPage = command.getLastChatBotCallbackFilter() != null ? command.getLastChatBotCallbackFilter().getPageNumber() > 0 : false;
@@ -363,9 +354,11 @@ public class ChatBotButtonManager {
 		for (int i = 0 ; i < availableFilter.size(); i++) {
 			
 			copyRecord = new ChatBotCallbackCommand(command);
-			copyRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>(command.getFilterCommandsList()));
-			List<ChatBotCallbackFilter> listFilter = new ArrayList<ChatBotCallbackFilter>();
-			
+			copyRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>());
+
+			if(command.getFilterCommandsList() != null) {
+				copyRecord.getFilterCommandsList().addAll(command.getFilterCommandsList());
+			}
 			boolean newColumn = showInline.size() % columnNumber == 0;
 			showInline = newColumn ? new ArrayList<InlineKeyboardButton>() : table.get(table.size() - 1);
 			
@@ -382,16 +375,9 @@ public class ChatBotButtonManager {
 																		partialResult, 
 																		isId,
 																		pageIndex);
-			listFilter.add(filter);
 			copyRecord.getFilterCommandsList().add(filter);
 			
 			InlineKeyboardButton showButton = new ChatBotButton(copyRecord).getButtonTelegram();
-			System.out.println("-------------------------------------");
-			
-			System.out.println(showButton.getText());
-			System.out.println(showButton.getCallbackData());
-			
-			System.out.println("-------------------------------------");
 			if (showButton != null) {
 				showInline.add(showButton);
 				if (newColumn) {
@@ -404,43 +390,50 @@ public class ChatBotButtonManager {
 			}
 		}	
 		
-		lastLabelButton = new ChatBotCallbackCommand(copyRecord);
+		if(availableFilter != null && !availableFilter.isEmpty()) {
+			lastLabelButton = new ChatBotCallbackCommand(copyRecord);
 		
-		List<InlineKeyboardButton> pageButton = new ArrayList<InlineKeyboardButton>();
-		//Se il risultato è parziale e non è la prima pagina, mostro il pulsante <<
-		if(existsPreviousPage) {
-			ChatBotCallbackCommand previousRecord = new ChatBotCallbackCommand(firstLabelButton);
-			previousRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>(firstLabelButton.getFilterCommandsList()));
-			previousRecord.getLastChatBotCallbackFilter().setPageNumber(previousRecord.getLastChatBotCallbackFilter().getPageNumber() - 1);
-			previousRecord.setNavigationCommand(ChatBotCommand.PREVIOUS_PAGE);
+			List<InlineKeyboardButton> pageButton = new ArrayList<InlineKeyboardButton>();
+			//Se il risultato è parziale e non è la prima pagina, mostro il pulsante <<
+			if(existsPreviousPage) {
+				ChatBotCallbackCommand previousRecord = new ChatBotCallbackCommand(firstLabelButton);
+				previousRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>(firstLabelButton.getFilterCommandsList()));
+				previousRecord.getLastChatBotCallbackFilter().setPageNumber(previousRecord.getLastChatBotCallbackFilter().getPageNumber() - 1);
+				previousRecord.setNavigationCommand(ChatBotCommand.PREVIOUS_PAGE);
+				
+				InlineKeyboardButton previousPageButton = new ChatBotButton(previousRecord).getButtonTelegram();
+				pageButton.add(previousPageButton);
+			}
 			
-			InlineKeyboardButton previousPageButton = new ChatBotButton(previousRecord).getButtonTelegram();
-			pageButton.add(previousPageButton);
-		}
-		
-		//Se il risultato è parziale, mostro il pulsante >>
-		if(partialResult) {
+			//Se il risultato è parziale, mostro il pulsante >>
+			if(partialResult) {
+				
+				ChatBotCallbackCommand nextRecord = new ChatBotCallbackCommand(lastLabelButton);
+				nextRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>(lastLabelButton.getFilterCommandsList()));
+				nextRecord.getLastChatBotCallbackFilter().setPageNumber(nextRecord.getLastChatBotCallbackFilter().getPageNumber() + 1);
+				nextRecord.setNavigationCommand(ChatBotCommand.NEXT_PAGE);
+	
+				InlineKeyboardButton nextPageButton = new ChatBotButton(nextRecord).getButtonTelegram();
+				pageButton.add(nextPageButton);
+			}
 			
-			ChatBotCallbackCommand nextRecord = new ChatBotCallbackCommand(lastLabelButton);
-			nextRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>(lastLabelButton.getFilterCommandsList()));
-			nextRecord.getLastChatBotCallbackFilter().setPageNumber(nextRecord.getLastChatBotCallbackFilter().getPageNumber() + 1);
-			nextRecord.setNavigationCommand(ChatBotCommand.NEXT_PAGE);
-
-			InlineKeyboardButton nextPageButton = new ChatBotButton(nextRecord).getButtonTelegram();
-			pageButton.add(nextPageButton);
-		}
-		
-		if(pageButton.size() + showInline.size() > columnNumber) {
-			table.add(pageButton);
-			showInline = new ArrayList<InlineKeyboardButton>();
-		}else {
-			showInline.addAll(pageButton);
+			if(!pageButton.isEmpty()) {
+				if(pageButton.size() + showInline.size() > columnNumber) {
+					table.add(pageButton);
+					showInline = new ArrayList<InlineKeyboardButton>();
+				}else {
+					showInline.addAll(pageButton);
+				}
+			}
 		}
 		
 		List<InlineKeyboardButton> confirmButton = new ArrayList<InlineKeyboardButton>();
 		if(upDB.atLeastOneFilterSet() && !upDB.isActive()) {
-			ChatBotCallbackCommand confirmRecord = new ChatBotCallbackCommand(firstLabelButton);
-			confirmRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>(firstLabelButton.getFilterCommandsList()));
+			ChatBotCallbackCommand confirmRecord = new ChatBotCallbackCommand(command);
+			confirmRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>());
+			if(command.getFilterCommandsList() != null) {
+				confirmRecord.getFilterCommandsList().addAll(command.getFilterCommandsList());
+			}
 			confirmRecord.getLastChatBotCallbackFilter().setPageNumber(confirmRecord.getLastChatBotCallbackFilter().getPageNumber());
 			confirmRecord.setNavigationCommand(ChatBotCommand.CONFIRM_CHANGE_BONUS_ABUSING);
 			
@@ -450,7 +443,7 @@ public class ChatBotButtonManager {
 		}
 		
 		List<InlineKeyboardButton> backToMenuButton = new ArrayList<InlineKeyboardButton>();
-		ChatBotCallbackCommand backToMenuRecord = new ChatBotCallbackCommand(firstLabelButton);
+		ChatBotCallbackCommand backToMenuRecord = new ChatBotCallbackCommand(command);
 		backToMenuRecord.setRootCommand(ChatBotCommand.MENU);
 		backToMenuRecord.setFilterCommandsList(null);
 		backToMenuRecord.setNavigationCommand(ChatBotCommand.BACK_TO_MENU_BONUS_ABUSING);

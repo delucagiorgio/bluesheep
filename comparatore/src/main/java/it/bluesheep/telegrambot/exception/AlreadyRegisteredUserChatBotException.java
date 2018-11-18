@@ -13,7 +13,7 @@ public class AlreadyRegisteredUserChatBotException extends BluesheepChatBotExcep
 	private static final long serialVersionUID = 1L;
 
 	public AlreadyRegisteredUserChatBotException(TelegramUser user) {
-		super("🤨" + System.lineSeparator() + ArbsUtil.getTelegramBoldString("ATTENZIONE "+ user.getFirstName()) + 
+		super("🤨" + System.lineSeparator() + ArbsUtil.getTelegramBoldString("ATTENZIONE "+ user.getUserName()) + 
 				": sei già stato inserito nel nostro database con uno specifico ID come utente attivo. Utilizza il comando /menu per visualizzare le opzioni che hai."
 				+ System.lineSeparator()
 				+ "La registrazione ci risulta avvenuta in data " + new SimpleDateFormat("dd/MM/yyyy HH:mm").format(user.getRegistrationDate())

@@ -6,7 +6,7 @@ import it.bluesheep.database.entities.TelegramUser;
 public class InactiveUserPreferenceException extends BluesheepChatBotException {
 
 	public InactiveUserPreferenceException(TelegramUser user) {
-		super(ArbsUtil.getTelegramBoldString("ATTENZIONE " + user.getFirstName()) + ": la preferenza richiesta risulta inattiva!" 
+		super(ArbsUtil.getTelegramBoldString("ATTENZIONE " + user.getUserName()) + ": la preferenza richiesta risulta inattiva!" 
 				+ System.lineSeparator() + "Ricorda che non puoi avere più di due preferenze di segnalazione attive"
 				+ System.lineSeparator() + "Torna al /menu per visualizzare le azioni disponibili", user);
 	}

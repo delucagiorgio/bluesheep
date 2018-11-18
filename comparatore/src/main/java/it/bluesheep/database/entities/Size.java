@@ -15,6 +15,10 @@ public class Size extends AbstractBlueSheepFilterEntity {
 	
 	private Size(String sizeText, String sizeCode, Double sizeValue, boolean active, long id, Timestamp createTime, Timestamp updateTime) {
 		super(id, createTime, updateTime, "" + sizeValue);
+		this.sizeText = sizeText;
+		this.sizeCode = sizeCode;
+		this.sizeValue = sizeValue;
+		this.active = active;
 	}
 	
 	public static Size getSizeFromDatabaseInfo(String sizeText, String sizeCode, Double sizeValue, boolean active, long id, Timestamp createTime, Timestamp updateTime) {

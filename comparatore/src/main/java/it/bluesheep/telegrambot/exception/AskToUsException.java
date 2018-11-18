@@ -8,7 +8,7 @@ public class AskToUsException extends BluesheepChatBotException {
 	private static final long serialVersionUID = 1L;
 	
 	public AskToUsException(TelegramUser user) {
-		super("🚧 " + ArbsUtil.getTelegramBoldString("ATTENZIONE "+ user.getFirstName()) + 
+		super("🚧 " + ArbsUtil.getTelegramBoldString("ATTENZIONE "+ user.getUserName()) + 
 				" 🚧" + System.lineSeparator() + "C'è un problema. Scrivici in chat su " 
 				+ ArbsUtil.getTelegramInlineURLAlias("Facebook", "https://www.facebook.com/BlueSheepMatched/") 
 				+ " o sulla mail info@bluesheep.it. ", user);

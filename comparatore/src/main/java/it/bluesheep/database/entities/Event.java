@@ -16,6 +16,7 @@ public class Event extends AbstractBlueSheepFilterEntity {
 		this.event = event;
 		this.partecipant1 = partecipant1;
 		this.partecipant2 = partecipant2;
+		this.active = active;
 	}
 
 	@Override

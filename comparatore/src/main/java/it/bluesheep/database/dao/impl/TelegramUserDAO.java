@@ -21,8 +21,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 	
 	private static TelegramUserDAO instance;
 	public static String tableName = "USERS";
-	private static String FIRSTNAME = "firstName";
-	private static String LASTNAME = "lastName";
+	private static String USERNAME = "userName";
 	private static String CHATID = "chatId";
 	private static String REGISTRATIONDATE = "registrationDate";
 	private static String ACTIVE = "active";
@@ -57,8 +56,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 		List<TelegramUser> dataMapped = new ArrayList<TelegramUser>();
 		
 		while(returnSelect.next()) {
-			String firstName = returnSelect.getString(FIRSTNAME);
-			String lastName = returnSelect.getString(LASTNAME);
+			String userName = returnSelect.getString(USERNAME);
 			Long chatId = returnSelect.getLong(CHATID);
 			Timestamp registrationDate = getTimestampFromResultSet(returnSelect, REGISTRATIONDATE);
 			Boolean active = returnSelect.getBoolean(ACTIVE);
@@ -67,7 +65,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			Timestamp createTime = getTimestampFromResultSet(returnSelect, CREATETIME);
 			Timestamp updateTime = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			dataMapped.add(TelegramUser.getBlueSheepTelegramUserFromDatabaseInfo(firstName, lastName, chatId, active, registrationDate, id, lastMessageId, createTime, updateTime));
+			dataMapped.add(TelegramUser.getBlueSheepTelegramUserFromDatabaseInfo(userName, chatId, active, registrationDate, id, lastMessageId, createTime, updateTime));
 		}
 		
 		return dataMapped;
@@ -98,12 +96,10 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			String query = getBasicSelectQuery() + 
 						   WHERE + 
 						   CHATID + " =  ? " + AND +
-						   FIRSTNAME + " = ? " + AND + 
-						   LASTNAME + " = ? ";
+						   USERNAME + " = ? ";
 			PreparedStatement prepStatement = connection.prepareStatement(query);
 			prepStatement.setLong(1, user.getChatId());
-			prepStatement.setString(2, user.getFirstName());
-			prepStatement.setString(3, user.getLastName());
+			prepStatement.setString(2, user.getUserName());
 			if(prepStatement != null) {
 				returnUser = getSingleResult(getMappedObjectBySelect(prepStatement));
 			}
@@ -117,8 +113,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 	@Override
 	protected String getAllColumnValuesFromEntity(TelegramUser user) {
 		return "(" +
-					"'" + user.getFirstName() + "'" +  BlueSheepConstants.REGEX_COMMA + 
-					"'" + user.getLastName() + "'" +  BlueSheepConstants.REGEX_COMMA + 
+					"'" + user.getUserName() + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					user.getChatId() + BlueSheepConstants.REGEX_COMMA + 
 					"'" + user.getRegistrationDate() + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					user.isActive() + BlueSheepConstants.REGEX_COMMA + 
@@ -129,14 +124,13 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 
 	public TelegramUser getUserFromMessage(Message receivedMessage) throws AskToUsException {
 		TelegramUser returnUser = null;
-		String query = getBasicSelectQuery() + WHERE + CHATID + " = ? " + AND + FIRSTNAME + " =  ? " + AND + LASTNAME + " = ? ";
+		String query = getBasicSelectQuery() + WHERE + CHATID + " = ? " + AND + USERNAME + " =  ? ";
 		
 		PreparedStatement ps;
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setLong(1, receivedMessage.getChatId());
-			ps.setString(2, receivedMessage.getFrom().getFirstName());
-			ps.setString(3, receivedMessage.getFrom().getLastName());
+			ps.setString(2, receivedMessage.getFrom().getUserName());
 			
 			returnUser = getSingleResult(getMappedObjectBySelect(ps));
 			
