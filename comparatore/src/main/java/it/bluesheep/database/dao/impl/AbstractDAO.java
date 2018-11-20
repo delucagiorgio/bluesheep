@@ -78,7 +78,7 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	
 	public List<T> getAllActiveRows(){
 		
-		String queryStatement = SELECT_ALL + FROM  + tableName + WHERE + "active" + IS + true;
+		String queryStatement = getBasicSelectQuery() + WHERE + "active" + IS + true + ";";
 		List<T> returnList = getMappedObjectBySelect(queryStatement);
 		
 		return returnList;

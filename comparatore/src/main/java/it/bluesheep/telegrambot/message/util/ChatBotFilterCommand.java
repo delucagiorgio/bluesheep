@@ -2,14 +2,17 @@ package it.bluesheep.telegrambot.message.util;
 
 import java.util.Arrays;
 import java.util.List;
-
+/**
+ * I filtri "utente" 
+ * @author giorgio
+ *
+ */
 public enum ChatBotFilterCommand {
 	BOOKMAKER_BONUS_ABUSING("bk"),
 	RF_BONUS_ABUSING("rf"),
 	RATING_BONUS_ABUSING("rt"),
 	EVENT_BONUS_ABUSING("ev"),
 	MINVALUEODD_BONUS_ABUSING("mo"),
-//	CHAMPIONSHIP_BONUS_ABUSING("cs"),
 	SIZE_BONUS_ABUSING("sz"),
 	RF_TYPE_BONUS_ABUSING("rft");
 	

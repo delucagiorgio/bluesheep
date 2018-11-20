@@ -1,12 +1,15 @@
 package it.bluesheep.telegrambot.message.util;
-
+/**
+ * I testi relativi ai filtri da mostrare
+ * @author giorgio
+ *
+ */
 public enum TextFilterCommand {
 	
 	RF("RF", "RF"),
 	RATING("Rating", "RATING"),
 	EVENT("Evento", "EVENT"),
 	MINVALUEODD("Quota minima", "MINVALUEODD"), 
-//	CHAMPIONSHIP("Campionato"),
 	SIZE("Liquidità", "SIZE");
 
 	private String code;
@@ -23,9 +26,6 @@ public enum TextFilterCommand {
 	
 	public static TextFilterCommand getTextFilterCommandByChatBotFilterCommand(ChatBotFilterCommand chatBotFilterList) {
 		switch(chatBotFilterList) {
-//		case CHAMPIONSHIP_BONUS_ABUSING:
-//			return TextFilterCommand.CHAMPIONSHIP;
-//		
 		case EVENT_BONUS_ABUSING:
 			return EVENT;
 			

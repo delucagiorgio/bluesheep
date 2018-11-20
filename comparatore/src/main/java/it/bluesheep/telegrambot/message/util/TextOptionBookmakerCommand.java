@@ -1,7 +1,11 @@
 package it.bluesheep.telegrambot.message.util;
 
 import it.bluesheep.arbitraggi.util.ArbsUtil;
-
+/**
+ * I testi da mostrare relativamente alla scelta del menù effettuata
+ * @author giorgio
+ *
+ */
 public enum TextOptionBookmakerCommand {
 	
 	ADD_PREF("Scegli, tra i bookmaker disponibili, su quale desideri ricevere una notifica"),

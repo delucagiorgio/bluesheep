@@ -43,6 +43,14 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 		}
 		return instance;
 	} 
+	
+	@Override
+	public List<UserPreference> getAllActiveRows(){
+		String queryStatement = getBasicSelectQuery() + WHERE + ACTIVE + IS + true + ";";
+		List<UserPreference> returnList = getMappedObjectBySelect(queryStatement);
+		
+		return returnList;
+	}
 
 	@Override
 	protected List<UserPreference> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
@@ -227,5 +235,19 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			throw new AskToUsException(user);
 		}
 		
+	}
+
+	public void deactivateUserPreference(UserPreference up) {
+		String query = UPDATE + tableName + SET + ACTIVE + " = ?" + WHERE + ID + " = ?";
+		PreparedStatement ps;
+		try {
+			ps = connection.prepareStatement(query);
+			ps.setBoolean(1, false);
+			ps.setLong(2, up.getId());
+			
+			BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
+		} catch (SQLException e) {
+			logger.error(e.getMessage(), e);
+		}
 	}
 }

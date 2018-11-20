@@ -1,7 +1,11 @@
 package it.bluesheep.telegrambot.message.io;
 
 import it.bluesheep.telegrambot.message.util.ChatBotFilterCommand;
-
+/**
+ * Classe factory per creare un filtro di default con i valori specifici o un filtro paginato, contenente tutte le informazioni delle pagine
+ * @author giorgio
+ *
+ */
 public class ChatBotCallbackFilterFactory {
 	
 	private ChatBotCallbackFilterFactory() {}

@@ -26,12 +26,21 @@ import it.bluesheep.telegrambot.message.util.ChatBotFilterCommand;
 import it.bluesheep.telegrambot.message.util.ChatBotFilterCommandUtilManager;
 import it.bluesheep.telegrambot.message.util.TextButtonCommand;
 import it.bluesheep.telegrambot.message.util.TextFilterCommand;
-
+/**
+ * Classe di utilità per creare le tabelle di bottoni "utente".
+ * @author giorgio
+ *
+ */
 public class ChatBotButtonManager {
 	
 	private ChatBotButtonManager() {}
 
-	
+	/**
+	 * GD - 18/11/2018
+	 * Crea una tabella di una colonna con i comandi disponibili per l'utente
+	 * @param chatBotCommandToBeDisplayed Insieme di comandi disponibili per l'utente
+	 * @return la tabella di bottoni
+	 */
 	public static List<List<InlineKeyboardButton>> getOneColumnCommandsAvailable(Set<ChatBotCommand> chatBotCommandToBeDisplayed){
 		
 		List<List<InlineKeyboardButton>> listOfCommandButtonOneColumn = new ArrayList<List<InlineKeyboardButton>>();
@@ -48,6 +57,12 @@ public class ChatBotButtonManager {
         return listOfCommandButtonOneColumn;
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Ritorna il corretto bottono dato un certo comando
+	 * @param command il comando di cui si vuole il bottone
+	 * @return il bottone con le specifiche del comando
+	 */
 	private static ChatBotButton getCorrectChatBotButtonInfosOneColumn(ChatBotCommand command) {
 		switch(command) {
 		
@@ -56,9 +71,6 @@ public class ChatBotButtonManager {
 				
 			case DELETE_PREFERENCE_BONUS_ABUSING:
 				return new ChatBotButton(CallbackDataType.DEL_PREF, TextButtonCommand.DEL_PREF);
-
-//			case ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING:
-//				return new ChatBotButton(CallbackDataType.ENABLE_DISABLE_PREF, TextButtonCommand.ENABLE_DISABLE_PREF);
 
 			case SHOW_PREFERENCES_BONUS_ABUSING:
 				return new ChatBotButton(CallbackDataType.SHOW_ACTIVE_PREF, TextButtonCommand.SHOW_ACTIVE_PREF);
@@ -94,7 +106,7 @@ public class ChatBotButtonManager {
 	 * @param entityAvailable i bookmaker disponibili alla visualizzazione
 	 * @param columnNumber numero di colonne da mostrare
 	 * @param pageIndex l'indice della pagina
-	 * @param maxRow2 
+	 * @param maxRow il numero di righe massimo per i valori delle entità da mostrare
 	 * @return i pulsanti cliccabili dall'utente, ognuno con il preciso valore da mostrare e con il corrispettivo callback corretto.
 	 */
 	public static List<List<InlineKeyboardButton>> getBlueSheepEntityButtonListNColumns(ChatBotCallbackCommand commandList, List<? extends AbstractBlueSheepEntity> entityAvailable, int columnNumber, int pageIndex, int maxRow) {
@@ -111,6 +123,17 @@ public class ChatBotButtonManager {
 		return createTableMessage(entityAvailable, commandList, maxRow, columnNumber, pagination, pageIndex);
 	}
 	
+	/**
+	 * GD - 18/11/2018 
+	 * Crea una tabella di bottoni rispetto ai valori e alla configurazione passata tramite parametri
+	 * @param availableEntity le entità disponibili
+	 * @param commandList la lista di comandi disponibili
+	 * @param maxRow le righe massime di bottoni relativi alle entità
+	 * @param columnNumber le colonne da mostrare
+	 * @param pagination se paginata o meno 
+	 * @param pageIndex l'indice della pagina da mostrare
+	 * @return la tabella di bottoni
+	 */
 	private static List<List<InlineKeyboardButton>> createTableMessage(List<? extends AbstractBlueSheepEntity> availableEntity, ChatBotCallbackCommand commandList, int maxRow,
 			int columnNumber, boolean pagination, int pageIndex) {
 		
@@ -290,7 +313,13 @@ public class ChatBotButtonManager {
 		
 		return table;
 	}
-					
+		
+	/**
+	 * GD - 18/11/2018
+	 * Fornisce la lista di valori secondo il testo da mostrare sul bottone "utente"
+	 * @param availableEntity le entità disponibili
+	 * @return la lista di valori delle entità
+	 */
 	private static List<String> getListEntityValues(List<? extends AbstractBlueSheepEntity> availableEntity) {
 		List<String> entityValues = new ArrayList<String>();
 		
@@ -302,6 +331,12 @@ public class ChatBotButtonManager {
 	}
 
 
+	/**
+	 * GD - 18/11/2018
+	 * Crea una lista ordinata rispetto alle iniziali delle entità passate come parametro
+	 * @param availableEntity le  entità disponibili
+	 * @return l'insieme delle iniziali 
+	 */
 	private static List<String> getKeyboardFromInitialChar(List<? extends AbstractBlueSheepEntity> availableEntity) {
 		Set<String> entityValuesSet = new HashSet<String>();
 		
@@ -317,7 +352,20 @@ public class ChatBotButtonManager {
 		return listValuesSet;
 	}
 
-
+	/**
+	 * GD - 18/11/2018
+	 * Crea una tabella di bottoni rispetto ai valori del filtri e alla configurazione passata tramite parametri
+	 * @param upDB la preferenza utente 
+	 * @param command il comando generato dalla callback del messaggio ricevuto
+	 * @param maxRow il numero di righe massimo per i valori dei filtri
+	 * @param columnNumber il numero di colonne da mostrare
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param userMessage l'utente DB
+	 * @param pageIndex la pagina da mostrare
+	 * @param toBeModified se la visualizzazione è per la creazione o per la modifica
+	 * @return il messaggio da mostrare
+	 * @throws AskToUsException se nel flusso si verifica qualche errore
+	 */
 	public static EditMessageText getAvailableFilterListButton(UserPreference upDB, ChatBotCallbackCommand command, int maxRow, int columnNumber, Message receivedMessage, TelegramUser userMessage, int pageIndex, boolean toBeModified) throws AskToUsException {
 		
 		List<ChatBotFilterCommand> availableFilter = ChatBotFilterCommandUtilManager.getChatBotFilterCommandListFromUserPreference(upDB, toBeModified);
@@ -390,6 +438,7 @@ public class ChatBotButtonManager {
 			}
 		}	
 		
+		//Crea i pulsanti di navigazione
 		if(availableFilter != null && !availableFilter.isEmpty()) {
 			lastLabelButton = new ChatBotCallbackCommand(copyRecord);
 		
@@ -427,8 +476,9 @@ public class ChatBotButtonManager {
 			}
 		}
 		
-		List<InlineKeyboardButton> confirmButton = new ArrayList<InlineKeyboardButton>();
+		//Bottone di conferma per salvare i filtri
 		if(upDB.atLeastOneFilterSet() && !upDB.isActive()) {
+			List<InlineKeyboardButton> confirmButton = new ArrayList<InlineKeyboardButton>();
 			ChatBotCallbackCommand confirmRecord = new ChatBotCallbackCommand(command);
 			confirmRecord.setFilterCommandsList(new ArrayList<ChatBotCallbackFilter>());
 			if(command.getFilterCommandsList() != null) {
@@ -442,6 +492,7 @@ public class ChatBotButtonManager {
 			table.add(confirmButton);
 		}
 		
+		//Tasto per tornare al menu
 		List<InlineKeyboardButton> backToMenuButton = new ArrayList<InlineKeyboardButton>();
 		ChatBotCallbackCommand backToMenuRecord = new ChatBotCallbackCommand(command);
 		backToMenuRecord.setRootCommand(ChatBotCommand.MENU);
@@ -453,17 +504,18 @@ public class ChatBotButtonManager {
 		table.add(backToMenuButton);
 		
 		if (!table.isEmpty()) {
-			String text = "Hai selezionato " +  ArbsUtil.getTelegramBoldString(command.getLastChatBotCallbackFilter().getValue()) + "."
+			String text = "✅ Hai selezionato " +  ArbsUtil.getTelegramBoldString(command.getLastChatBotCallbackFilter().getValue()) + "."
 					+ System.lineSeparator()  
 					+ "Ora scegli quale altro filtro impostare oppure torna al menu principale: non perderai i dati finora salvati!";
 			if(!upDB.isActive()) {		
 				text = text + System.lineSeparator()
-					+ "Attualmente il tuo filtro è inattivo ma puoi sempre modificarlo dal menù iniziale, se vuoi completare l'operazione in un altro momento";
+					+ "⚠️" + ArbsUtil.getTelegramBoldString("Attualmente la tua preferenza è inattiva") 
+					+ " ma puoi sempre modificarla/attivarla dal menù iniziale in un altro momento";
 			}
 			
 			if(upDB.atLeastOneFilterSet()) {
 				text = text + System.lineSeparator() 
-					+ "I filtri attualmente impostati sono i seguenti: " + System.lineSeparator() +
+					+ "🔎I filtri attualmente impostati sono i seguenti: " + System.lineSeparator() +
 					upDB.toString();
 			}
 			

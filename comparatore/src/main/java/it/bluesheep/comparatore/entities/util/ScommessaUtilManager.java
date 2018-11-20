@@ -177,4 +177,44 @@ public class ScommessaUtilManager {
 		}
 		return opposite;
 	}
+
+	public static String getScommessaByCodeTelegramMessage(String scommessaBookmaker) {
+		Scommessa scommessa = Scommessa.getScommessaByCode(scommessaBookmaker);
+		String returnString = null;
+		String temp = null;
+		String doubleValueString = null;
+		if(scommessa != null) {
+			switch (scommessa) {
+			case NESSUNGOAL_U0X5:
+			case ALMENO1GOAL_O0X5:
+			case ALMENO2GOAL_O1X5:
+			case ALMENO3GOAL_O2X5:
+			case ALMENO4G0AL_O3X5:
+			case ALMENO5GOAL_O4X5:
+			case ALPIU1GOAL_U1X5:
+			case ALPIU2GOAL_U2X5:
+			case ALPIU3GOAL_U3X5:
+			case ALPIU4GOAL_U4X5:
+				scommessaBookmaker = scommessaBookmaker.replaceAll("_", " ");
+				doubleValueString = scommessaBookmaker.substring(0,1);
+				temp = scommessaBookmaker.substring(1, scommessaBookmaker.length());
+
+				if("U".equals(doubleValueString)) {
+					returnString = "Under" + temp;
+				}else if("O".equals(doubleValueString)) {
+					returnString = "Over" + temp;
+				}
+				break;
+			case ENTRAMBISEGNANO_GOAL:
+			case NESSUNOSEGNA_NOGOAL:
+				temp = scommessaBookmaker.substring(0, 1);
+				returnString = temp + scommessaBookmaker.substring(1, scommessaBookmaker.length()).toLowerCase();
+				break;
+			default:
+				returnString = scommessaBookmaker;
+				break;
+			}
+		}
+		return returnString;
+	}
 }

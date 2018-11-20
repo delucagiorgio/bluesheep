@@ -18,6 +18,11 @@ import it.bluesheep.database.entities.AbstractBlueSheepEntity;
 import it.bluesheep.database.entities.UserPreference;
 import it.bluesheep.telegrambot.message.io.ChatBotCallbackCommand;
 
+/**
+ * Classe di utilità per gestire e mappare i filtri "utente"
+ * @author giorgio
+ *
+ */
 public class ChatBotFilterCommandUtilManager {
 
 	private ChatBotFilterCommandUtilManager() {}
@@ -38,9 +43,6 @@ public class ChatBotFilterCommandUtilManager {
 			case BOOKMAKER:
 				returnEntry = new AbstractMap.SimpleEntry<ChatBotFilterCommand, String>(ChatBotFilterCommand.BOOKMAKER_BONUS_ABUSING, callbackData);
 				break;
-//			case CHAMPIONSHIP:
-//				returnEntry = new AbstractMap.SimpleEntry<ChatBotFilterCommand, String>(ChatBotFilterCommand.CHAMPIONSHIP_BONUS_ABUSING, callbackData);
-//				break;
 			case EVENT:
 				returnEntry = new AbstractMap.SimpleEntry<ChatBotFilterCommand, String>(ChatBotFilterCommand.EVENT_BONUS_ABUSING, callbackData);
 				break;
@@ -77,8 +79,6 @@ public class ChatBotFilterCommandUtilManager {
 	 */
 	public static AbstractDAO<? extends AbstractBlueSheepEntity> getCorrectDAOByChatBotCallackCommand(ChatBotCallbackCommand command, Connection connection) {
 		switch(command.getLastChatBotCallbackFilter().getFilter()) {
-//		case CHAMPIONSHIP_BONUS_ABUSING:
-//			return ChampionshipDAO.getChampionshipDAOInstance(connection);
 		case BOOKMAKER_BONUS_ABUSING:
 			return BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection);
 			
@@ -164,7 +164,7 @@ public class ChatBotFilterCommandUtilManager {
 			return TextOptionMenuFilterCommand.RF_TYPE.toString();
 			
 		case SIZE_BONUS_ABUSING:
-			return TextOptionMenuFilterCommand.RF_TYPE.toString();
+			return TextOptionMenuFilterCommand.SIZE.toString();
 			
 		default:
 			return null;

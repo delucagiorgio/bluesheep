@@ -12,7 +12,11 @@ import it.bluesheep.telegrambot.message.util.ChatBotCommandUtilManager;
 import it.bluesheep.telegrambot.message.util.ChatBotFilterCommand;
 import it.bluesheep.telegrambot.message.util.ChatBotFilterCommandUtilManager;
 import it.bluesheep.util.BlueSheepConstants;
-
+/**
+ * Classe che mappa un comando specifico da una callback
+ * @author giorgio
+ *
+ */
 public class ChatBotCallbackCommand extends ChatBotCallback {
 	
 	public ChatBotCallbackCommand(ChatBotCallbackCommand callbackCommand) {

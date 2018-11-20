@@ -142,7 +142,7 @@ public class UserPreference extends AbstractBlueSheepEntity {
 		DecimalFormat df = new DecimalFormat("#.##");
 		
 		return (event != null ? ArbsUtil.getTelegramBoldString("Evento") + ": " + event + System.lineSeparator() : "") + 
-			   (liquidita != null ? ArbsUtil.getTelegramBoldString("Liquidità") + ": " + df.format(liquidita) + System.lineSeparator(): "") +
+			   (liquidita != null ? ArbsUtil.getTelegramBoldString("Liquidità") + ": " + df.format(liquidita) + "€" + System.lineSeparator(): "") +
 			   (minOddValue != null ? ArbsUtil.getTelegramBoldString("Quota minima") + ": " + df.format(minOddValue) + System.lineSeparator() : "") +
 			   (ratingValue != null ? ArbsUtil.getTelegramBoldString("Rating") + ": " + df.format(ratingValue * 100) + "%" + System.lineSeparator() : "") +
 			   (rfType != null ? ArbsUtil.getTelegramBoldString("Percentuale rimborso") + ": " + df.format(rfType * 100) + "%" + System.lineSeparator() : "") +
@@ -157,7 +157,7 @@ public class UserPreference extends AbstractBlueSheepEntity {
 		return "Preferenza creata il " + sdf.format(getCreateTime()) + System.lineSeparator()
 			   + ArbsUtil.getTelegramBoldString("Bookmaker") + ": " + bookmaker.getBookmakerName() + System.lineSeparator()
 			   + (event != null ? ArbsUtil.getTelegramBoldString("Evento") + ": " + event + System.lineSeparator() : "") 
-			   + (liquidita != null ? ArbsUtil.getTelegramBoldString("Liquidità") + ": " + df.format(liquidita) + System.lineSeparator(): "")
+			   + (liquidita != null ? ArbsUtil.getTelegramBoldString("Liquidità") + ": " + df.format(liquidita) + "€" + System.lineSeparator(): "")
 			   + (minOddValue != null ? ArbsUtil.getTelegramBoldString("Quota minima") + ": " + df.format(minOddValue) + System.lineSeparator() : "")
 			   + (ratingValue != null ? ArbsUtil.getTelegramBoldString("Rating") + ": " + df.format(ratingValue * 100) + "%" + System.lineSeparator() : "")
 			   + (rfType != null ? ArbsUtil.getTelegramBoldString("Percentuale rimborso") + ": " + df.format(rfType * 100) + "%" + System.lineSeparator() : "")

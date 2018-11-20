@@ -8,7 +8,11 @@ import java.util.Set;
 import it.bluesheep.database.entities.UserPreference;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
-
+/**
+ * Classe di utilità per gestire, mappare e ottenere i corretti ChatBotCommand
+ * @author giorgio
+ *
+ */
 public class ChatBotCommandUtilManager {
 
 	private ChatBotCommandUtilManager() {}
@@ -38,9 +42,13 @@ public class ChatBotCommandUtilManager {
 			}
 		}
 		
-		if(atLeastOneActive || atLeastOneInactive) {
+		if(atLeastOneActive) {
 			commandToShow.add(ChatBotCommand.SHOW_PREFERENCES_BONUS_ABUSING);
-//			commandToShow.add(ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING);
+			commandToShow.add(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING);
+			commandToShow.add(ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING);
+		}
+		
+		if(atLeastOneInactive) {
 			commandToShow.add(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING);
 			commandToShow.add(ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING);
 		}
@@ -73,7 +81,6 @@ public class ChatBotCommandUtilManager {
 	 */
 	public static List<ChatBotCommand> getModificationCommand(){
 		return Arrays.asList(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING,
-//							 ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING,
 							 ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING);
 	}
 	
@@ -92,9 +99,7 @@ public class ChatBotCommandUtilManager {
 	 * @return la lista di comandi
 	 */
 	public static List<ChatBotCommand> getDeleteOrActivactionCommand(){
-		return Arrays.asList(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING
-//				, ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING
-				);
+		return Arrays.asList(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING);
 	}
 	
 	/**
@@ -114,8 +119,6 @@ public class ChatBotCommandUtilManager {
 				return ChatBotCommand.CONFIRM_CHANGE_BONUS_ABUSING;
 			case DEL_PREF:
 				return ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING;
-//			case ENABLE_DISABLE_PREF:
-//				return ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING;
 			case MOD_PREF:
 				return ChatBotCommand.MOD_PREFERENCES_BONUS_ABUSING;
 			case SHOW_ACTIVE_PREF:
@@ -151,9 +154,6 @@ public class ChatBotCommandUtilManager {
 			
 		case SHOW_PREFERENCES_BONUS_ABUSING:
 			return TextOptionBookmakerCommand.SHOW_ACTIVE_PREF.toString();
-			
-//		case ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING:
-//			return TextOptionBookmakerCommand.ENABLE_DISABLE_PREF.toString();
 			
 		case MOD_PREFERENCES_BONUS_ABUSING:
 			return TextOptionBookmakerCommand.MOD_PREF.toString();

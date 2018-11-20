@@ -3,6 +3,12 @@ package it.bluesheep.telegrambot.message.util;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 
+ * @author giorgio
+ *
+ * I comandi accettati dal sistema
+ */
 public enum AcceptedUserInput {
 
 	MENU("/menu"),

@@ -34,10 +34,6 @@ public class CompareProcessFactory {
 		serviceList.add(Service.TXODDS_SERVICENAME);
 		serviceList.add(Service.BETFAIR_SERVICENAME);
 		
-//		if(!(bluesheepService instanceof ArbitraggiServiceHandler)) {
-//			serviceList.add(Service.BETFAIR_SERVICENAME);
-//		}
-		
 		for(Service service : serviceList) {
 			
 			List<RecordOutput> tabellaOutputList = new ArrayList<RecordOutput>();

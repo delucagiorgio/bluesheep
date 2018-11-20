@@ -88,26 +88,30 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 		if(sportDateMap != null) {
 			List<Date> dateList = new ArrayList<Date>(sportDateMap.keySet());
 			for(Date date : dateList) {
-				List<String> eventoKeyList = new ArrayList<String>(sportDateMap.get(date).keySet());
-				for(String evento : eventoKeyList) {
-					//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
-					//quella in analisi
-					Map<Scommessa, Map<String, AbstractInputRecord>> inputRecordEventoScommessaMap = sportDateMap.get(date).get(evento);
-					Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
-					Scommessa oppositeScommessa = null;		
-					List<Scommessa> scommessaList = new ArrayList<Scommessa>(inputRecordEventoScommessaMap.keySet());
-					for(Scommessa scommessa : scommessaList) {
-						Map<String, AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
-						if((Sport.CALCIO.equals(sport) && 
-								!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
-								(Sport.TENNIS.equals(sport) && 
-										ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
-							
-							oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
-							if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-								List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa), bluesheepServiceType);
-								mappedOutputRecord.addAll(outputRecordsList);
-								processedScommessaTypes.put(scommessa, oppositeScommessa);
+				if(sportDateMap.get(date) != null) {
+					List<String> eventoKeyList = new ArrayList<String>(sportDateMap.get(date).keySet());
+					for(String evento : eventoKeyList) {
+						//per ogni tipo scommessa, cerco le scommesse opposte relative allo stesso evento e le comparo con 
+						//quella in analisi
+						Map<Scommessa, Map<String, AbstractInputRecord>> inputRecordEventoScommessaMap = sportDateMap.get(date).get(evento);
+						Map<Scommessa,Scommessa> processedScommessaTypes = new HashMap<Scommessa, Scommessa>();
+						Scommessa oppositeScommessa = null;	
+						if(inputRecordEventoScommessaMap != null) {
+							List<Scommessa> scommessaList = new ArrayList<Scommessa>(inputRecordEventoScommessaMap.keySet());
+							for(Scommessa scommessa : scommessaList) {
+								Map<String, AbstractInputRecord> temp = inputRecordEventoScommessaMap.get(scommessa);
+								if((Sport.CALCIO.equals(sport) && 
+										!ScommessaUtilManager.getScommessaListCalcio3WayOdds().contains(scommessa)) ||
+										(Sport.TENNIS.equals(sport) && 
+												ScommessaUtilManager.getScommessaListTennis2WayOdds().contains(scommessa))) {
+									
+									oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
+									if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
+										List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa), bluesheepServiceType);
+										mappedOutputRecord.addAll(outputRecordsList);
+										processedScommessaTypes.put(scommessa, oppositeScommessa);
+									}
+								}
 							}
 						}
 					}

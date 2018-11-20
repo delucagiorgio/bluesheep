@@ -11,7 +11,11 @@ import it.bluesheep.database.exception.MoreThanOneResultException;
 import it.bluesheep.telegrambot.exception.AskToUsException;
 import it.bluesheep.telegrambot.message.io.ChatBotCallbackCommand;
 import it.bluesheep.telegrambot.message.io.ChatBotCallbackFilter;
-
+/**
+ * Classe di utilità per aggiornare i valori di filtro sulle preferenze a partire dalla callback
+ * @author giorgio
+ *
+ */
 public class UserPreferenceFilterUtil {
 	
 	private UserPreferenceFilterUtil() {}

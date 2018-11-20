@@ -10,11 +10,13 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
@@ -40,7 +42,7 @@ public final class BlueSheepServiceHandlerManager {
 	private static BlueSheepServiceHandlerManager instance;
 	private static Logger logger;
 	private static Properties properties = new Properties(); 
-	private static ScheduledExecutorService executor;
+	public static ScheduledExecutorService executor;
 	
 	/**
 	 * Avvia le fasi iniziali e inizializza le informazioni provenienti dai file di proprietà
@@ -50,7 +52,6 @@ public final class BlueSheepServiceHandlerManager {
 		TranslatorUtil.initializeMapFromFile();
 		BookmakerLinkGenerator.initializeMap();
 		logger = Logger.getLogger(BlueSheepServiceHandlerManager.class);
-		logger.info(properties.toString());
 	}
 	
 	public static synchronized BlueSheepServiceHandlerManager getBlueSheepServiceHandlerInstance() {
@@ -79,25 +80,34 @@ public final class BlueSheepServiceHandlerManager {
 		boolean firstStartExecuted = false;
 		
 		do {
+			
+			if(firstStartExecuted) {
+	    		updateInformationFromProperties();
+	    		InputDataHelper.getInputDataHelperInstance().forceUpdateMapBlockedBookmakers();
+	    		logConfigurationFile();
+			}
+    		
 			BlueSheepSharedResources.initializeDataStructures();
 			
-			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 3);
+			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 2/*7*/);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
+//			executor.submit(new BlueSheepUserUpdateServiceHandler());
+			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
-				if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
+				if(Service.TXODDS_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
-				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
+				}else if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
 					initialDelay = 60;
 				}else {
-					initialDelay = 120;
+					initialDelay = 30;
 				}
 				if(BlueSheepSharedResources.getActiveServices().get(activeService) > 0) {
 					executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
 				}else if(BlueSheepSharedResources.getActiveServices().get(activeService) == SINGLE_EXECUTION) {
 					executor.submit(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService));
 				}
-				initialDelay = firstStartExecuted ? 0 : 120;
+				initialDelay = firstStartExecuted ? 0 : 30;
 			}
 			
 			long arbsFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_ARBS_SEC));
@@ -115,7 +125,6 @@ public final class BlueSheepServiceHandlerManager {
 			}
 			
 			executor.scheduleAtFixedRate(DatabasePollingServiceHandler.getDatabasePollingServiceHandlerInstance(), 0, 10, TimeUnit.MINUTES);
-			
 			
 			WatchService ws = null;
 			
@@ -152,10 +161,7 @@ public final class BlueSheepServiceHandlerManager {
 			                		break;
 			                	case BlueSheepConstants.PROPERTIES_FILENAME:
 			                		logger.info("File " + BlueSheepConstants.PROPERTIES_FILENAME + " has changed. Properties are going to be updated");
-			                		updateInformationFromProperties();
-			                		InputDataHelper.getInputDataHelperInstance().forceUpdateMapBlockedBookmakers();
 			                		propertiesConfigurationChanged = true;
-			                		logger.info(getProperties().toString());
 			                		break;
 			                	default:
 			                		logger.info("No particular actions are required for the changed file");
@@ -172,7 +178,7 @@ public final class BlueSheepServiceHandlerManager {
 				ws.close();
 				
 				boolean terminatedCorrectly = true;
-				if(stopApplication) {
+				if(stopApplication || propertiesConfigurationChanged) {
 					long timeout = 30;
 					TimeUnit timeUnitTimeout = TimeUnit.MINUTES;
 					String message = "all executors";
@@ -206,6 +212,12 @@ public final class BlueSheepServiceHandlerManager {
 
 	}
 
+	private void logConfigurationFile() {
+		for(Entry<Object, Object> keyEntry : properties.entrySet()) {
+			logger.info("Property " + keyEntry.getKey() + " = " + keyEntry.getValue());
+		}
+	}
+
 	public static Properties getProperties() {
 		return properties;
 	}
@@ -225,6 +237,8 @@ public final class BlueSheepServiceHandlerManager {
 				properties.load(in);
 			}
 			
+			Level loggerLevel = Level.toLevel(properties.getProperty("LOGGER_LEVEL"));
+			Logger.getRootLogger().setLevel(loggerLevel);
 			in.close();
 		} catch (IOException e) {
 			if(logger != null) {

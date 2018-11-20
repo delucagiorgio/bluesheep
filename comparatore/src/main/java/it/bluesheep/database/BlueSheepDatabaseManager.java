@@ -31,6 +31,7 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 		Statement stmt;
 		try {
 			stmt = connection.createStatement();
+			logger.info("Executing query" + selectQuery);
 			result = stmt.executeQuery(selectQuery);
 		} catch (SQLException e) {
 			logger.error("Error during select. Query is " + selectQuery);

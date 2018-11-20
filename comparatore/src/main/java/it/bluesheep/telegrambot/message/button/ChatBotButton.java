@@ -7,7 +7,11 @@ import it.bluesheep.telegrambot.message.io.ChatBotCallbackFilter;
 import it.bluesheep.telegrambot.message.util.CallbackDataType;
 import it.bluesheep.telegrambot.message.util.TextButtonCommand;
 import it.bluesheep.util.BlueSheepConstants;
-
+/**
+ * Classe per mappare un bottone utente corrispondente ad un comando o un filtro
+ * @author giorgio
+ *
+ */
 public class ChatBotButton {
 
 	private InlineKeyboardButton buttonTelegram;

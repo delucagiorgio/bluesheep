@@ -2,6 +2,8 @@ package it.bluesheep.servicehandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,8 @@ import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.CompareProcessFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
+import it.bluesheep.database.ConnectionPool;
+import it.bluesheep.database.dao.impl.SaveOddProcessHistoryDAO;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.DirectoryFileUtilManager;
 import it.bluesheep.util.json.AbstractBluesheepJsonConverter;
@@ -50,16 +54,20 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 			
 			long endTime = System.currentTimeMillis();
 			
-			TranslatorUtil.saveTranslationOnFile();
+			
 			
 			logger.info("Export data completed in " + (endTime - startTime) / 1000 + " seconds");
 		}catch(Exception e) {
 			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
+		
+		TranslatorUtil.saveTranslationOnFile();
+
 	}
 
 	/**
 	 * Avvia le comparazione delle quote e salva ne salva i risultati su file
+	 * @throws SQLException 
 	 */
 	private void startComparisonForBonusAbusingAndExportOnFiles() {
 		
@@ -68,9 +76,24 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 		for(Service service : comparisonResultMap.keySet()) {
 			List<RecordOutput> tabellaOutput = comparisonResultMap.get(service);
 			saveRecordsOnFile(service, tabellaOutput);
+			if(comparisonResultMap.get(service) != null && !comparisonResultMap.get(service).isEmpty()) {
+				try {
+					Connection connection = ConnectionPool.getConnection();
+					SaveOddProcessHistoryDAO processHistoryDao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance(connection);
+					if(!processHistoryDao.stillRunningProcess(service)) {
+						BlueSheepServiceHandlerManager.executor.submit(new OddsDatabaseSaveServiceHandler(comparisonResultMap.get(service), service));
+						logger.info("Saving odd process for service " + service + " started");
+					}else {
+						logger.warn("Not executing " + service + " for save odds because still running");
+					}
+					ConnectionPool.releaseConnection(connection);
+				}catch(SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
 		}
 	}
-	
+
 	/**
 	 * GD - 05/08/18
 	 * Avvia la procedura di salvataggio delle comparazioni in base al tipo richiesto

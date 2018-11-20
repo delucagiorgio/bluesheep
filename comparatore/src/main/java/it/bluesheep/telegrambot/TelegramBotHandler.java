@@ -3,6 +3,7 @@ package it.bluesheep.telegrambot;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +59,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	private static TelegramBotHandler instance;
 	private Connection connection;
 	private static final int maxRow = 3;
+	List<String> chatIdPermitted = Arrays.asList("51337759", "653706049", "600192016"); 
 	
 	private TelegramBotHandler() {
 		super();
@@ -84,49 +86,68 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
     	TelegramUser userDB = null;
     	TelegramUser tempUser = null;
     	Long lastSentMessageIdDB = null;
+    	
 		try {
 				connection = ConnectionPool.getConnection();
 			try {
 				
 				if(updateContainer.hasMessage() 
 						&& updateContainer.getMessage().getFrom() != null 
-						&& updateContainer.getMessage().getFrom().getUserName() == null) {
+						&& updateContainer.getMessage().getFrom().getUserName() == null
+						&& chatIdPermitted.contains(updateContainer.getMessage().getChatId().toString())) {
 					throw new NoUserNameSet(TelegramUser.getTelegramUserFromMessage(updateContainer.getMessage()));
 				}
 				
-		        if (updateContainer.hasMessage() && updateContainer.getMessage().hasText()) {
+				//si tratta di un messaggio testuale e 
+				//deve contenere uno dei messaggi accettati
+		        if (updateContainer.hasMessage() 
+		        		&& updateContainer.getMessage().hasText()) {
 
-		        	logger.info("Start user DB seach");
-		        	receivedMessage = updateContainer.getMessage();
-		        	userMessage = TelegramUser.getTelegramUserFromMessage(receivedMessage);
-		        	tempUser = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).getUserFromMessage(receivedMessage);
-		        	boolean registeredClient = tempUser != null && tempUser.isActive();
-		        	userDB = registeredClient ? tempUser : null;
-		        	
-		        	if(userDB != null && userDB.getLastMessageId() != null) {
-		        		lastSentMessageIdDB = new Long(userDB.getLastMessageId().longValue());
-		        	}
-		        	
-		        	logger.info("Received a message from " 
-		        				+ userMessage.getUserName() 
-		        				+ ", chat_id: " + userMessage.getChatId() 
-		        				+ "; Text = " + receivedMessage.getText() 
-		        				+ "; :::REGISTERED USER = " + registeredClient + ":::");
-		            
 		        	Set<String> possibleCommands = AcceptedUserInput.getAvailableUserInputs();
-		        	
-		        	if(possibleCommands.contains(receivedMessage.getText())) {
-			            manageUserInput(userMessage, receivedMessage, userDB);
+		        	if(possibleCommands.contains(updateContainer.getMessage().getText())) {
+
+			        	logger.info("Start user DB seach");
+			        	receivedMessage = updateContainer.getMessage();
+			        	userMessage = TelegramUser.getTelegramUserFromMessage(receivedMessage);
+			        	tempUser = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).getUserFromMessage(receivedMessage);
+			        	boolean registeredClient = tempUser != null && tempUser.isActive();
+			        	userDB = registeredClient ? tempUser : null;
+			        	
+			        	if(userDB != null && userDB.getLastMessageId() != null) {
+			        		lastSentMessageIdDB = new Long(userDB.getLastMessageId().longValue());
+			        	}
+			        	
+			        	logger.info("Received a message from " 
+			        				+ userMessage.getUserName() 
+			        				+ ", chat_id: " + userMessage.getChatId() 
+			        				+ "; Text = " + receivedMessage.getText() 
+			        				+ "; :::REGISTERED USER = " + registeredClient + ":::");
+			        	
+			        	//Controlla che il messaggio arrivi da un messaggio successivo come id
+			        	if(userDB == null || receivedMessage.getMessageId() >= lastSentMessageIdDB) {
+			        		manageUserInput(userMessage, receivedMessage, userDB);
+			        	}else {
+			        		SendMessage message = new SendMessage()
+			        				.setChatId(updateContainer.getMessage().getChatId())
+			        				.setText("Impossibile interagire con un messaggio troppo vecchio" + 
+			        						System.lineSeparator() + 
+			        						"Clicca qui su /menu per visualizzare le operazioni disponibili o su /registrazione per registrarti al servizio");
+			            	sendStandardMessage(message, userDB);
+			        	}
 		            } else {
-		            	SendMessage message = new SendMessage() // Create a message object object
-		                        .setChatId(userMessage.getChatId())
-		                        .setText("Impossibile interagire");
+		            	SendMessage message = new SendMessage()
+		            			.setChatId(updateContainer.getMessage().getChatId())
+		            			.setText("Impossibile interagire");
 		            	sendStandardMessage(message, userDB);
 		            }
 		    		
 		        	connection.commit();
+		    		ConnectionPool.releaseConnection(connection);
+
 		        	
-		        } else if (updateContainer.hasCallbackQuery() ) {
+		        	//Se c'è una callback, non è necessario controllare 
+		        	//l'utente perchè arriverà da utenti già registrati e i dati saranno quelli server
+		        } else if (updateContainer.hasCallbackQuery() && chatIdPermitted.contains(updateContainer.getCallbackQuery().getMessage().getChatId().toString())) {
 
 		        	receivedMessage = updateContainer.getCallbackQuery().getMessage();
 		        	tempUser = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection)
@@ -139,32 +160,42 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        		lastSentMessageIdDB = new Long(userDB.getLastMessageId().longValue());
 		        	}
 		        	
-		        	if(userDB != null) {
+		        	if(userDB != null && lastSentMessageIdDB <= receivedMessage.getMessageId()) {
 		        		logger.info("Received a message from " + userDB.getUserName() + ", chat_id: " + userDB.getChatId() + "; Text = " + updateContainer.getCallbackQuery().getData());
 		        	
 		        		manageResponse(receivedMessage, userDB, updateContainer.getCallbackQuery());
 		        	}else {
-		        		sendErrorMessage(new AskToUsException(TelegramUser.getTelegramUserFromMessage(receivedMessage)), userDB);
+		        		sendErrorMessage(new AskToUsException(TelegramUser.getTelegramUserFromMessage(userDB, receivedMessage)), userDB);
 		        	}
 		        	
 		    		connection.commit();
+		    		ConnectionPool.releaseConnection(connection);
 		        }
 			}catch (AlreadyRegisteredUserChatBotException e) {
 				logger.error("This exception should not exist!!!");
 				connection.rollback();
+	    		ConnectionPool.releaseConnection(connection);
+				
 			} catch (AskToUsException e) {
-        		sendErrorMessage(e, userDB);
 				logger.error(e.getMessage(), e);
         		connection.rollback();
+        		sendErrorMessage(e, userDB);
+				connection.commit();
+	    		ConnectionPool.releaseConnection(connection);
+
 			} catch (MoreThanOneResultException e) {
 				connection.rollback();
 				logger.error(e.getMessage(), e);
 				sendErrorMessage(new AskToUsException(TelegramUser
 						.getTelegramUserFromUserTelegram(updateContainer.getCallbackQuery().getFrom(), receivedMessage)), userDB);
+				connection.commit();
+	    		ConnectionPool.releaseConnection(connection);
 			} catch (NoUserNameSet e) {
-				sendErrorMessage(e, e.getUser());
 				logger.warn(e.getMessage(), e);
 				connection.rollback();
+				sendErrorMessage(e, e.getUser());
+				connection.commit();
+	    		ConnectionPool.releaseConnection(connection);
 			}
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
@@ -174,9 +205,15 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				&& tempUser.getLastMessageId().longValue() > lastSentMessageIdDB.longValue()) {
 			executeDeleteMessage(lastSentMessageIdDB, tempUser);
 		}
-		
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Gestisce la callback ricevuta dall'utente 
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param userMessage l'utente DB
+	 * @param callbackQuery la callbackQuery
+	 */
 	private void manageResponse(Message receivedMessage, TelegramUser userMessage, CallbackQuery callbackQuery) {
         String callbackData = callbackQuery.getData();
 		try { 
@@ -211,9 +248,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	        			}
 	        			
 	        			//Elimina preferenza e attiva/disattiva preferenza mostrano i bookmaker presenti nelle preferenze
-	        			else if(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING.equals(command.getRootCommand())
-//	        					|| ChatBotCommand.ENABLE_DISABLE_PREFERENCES_BONUS_ABUSING.equals(command.getRootCommand())
-	        					) {
+	        			else if(ChatBotCommand.DELETE_PREFERENCE_BONUS_ABUSING.equals(command.getRootCommand())) {
 		        			bookmakerAvailable = new ArrayList<Bookmaker>();
 		        			
 		        			for(UserPreference up : userPreferenceList) {
@@ -266,8 +301,8 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        					UserPreferenceDAO.getUserPreferenceDAOInstance(connection).activateUserPreference(up);
 		        					
 		        		        	//Se si tratta di una conferma di modifica
-	        		        		String text = "Le tue modifiche sono state salvate" + System.lineSeparator() 
-	        		        					  + "Scegli tra le operazioni disponibili quella che puoi eseguire";
+	        		        		String text = "💾 Le tue modifiche sono state salvate" + System.lineSeparator() 
+	        		        					  + "Scegli tra le operazioni disponibili quella che vuoi eseguire";
 	        		        		SendMessage message = getMenuMessageSendMessage(userMessage, receivedMessage, text);
 	        		        		sendStandardMessage(message, userMessage);
 	        					}
@@ -393,8 +428,8 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 			        					UserPreferenceDAO.getUserPreferenceDAOInstance(connection).activateUserPreference(up);
 			        					
 			        		        	//Se si tratta di una conferma di modifica
-		        		        		String text = "Le tue modifiche sono state salvate" + System.lineSeparator() 
-		        		        					  + "Scegli tra le operazioni disponibili quella che puoi eseguire";
+		        		        		String text = "💾 Le tue modifiche sono state salvate" + System.lineSeparator() 
+		        		        					  + "Scegli tra le operazioni disponibili quella che vuoi eseguire";
 		        		        		SendMessage message = getMenuMessageSendMessage(userMessage, receivedMessage, text);
 		        		        		sendStandardMessage(message, userMessage);
 			        					
@@ -467,9 +502,9 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	    		        	//Conferma di modifica
 			        		String text = "La tua preferenza relativa al bookmaker " 
 			        					  + ArbsUtil.getTelegramBoldString(bookmaker.getBookmakerName())
-			        					  + " è stata cancellata!"
+			        					  + " è stata cancellata! 🗑️"
 			        					  + System.lineSeparator() 
-			        					  + "Scegli tra le operazioni disponibili quella che puoi eseguire";
+			        					  + "Scegli tra le operazioni disponibili quella che vuoi eseguire";
 			        		SendMessage message = getMenuMessageSendMessage(userMessage, receivedMessage, text);
 			        		sendStandardMessage(message, userMessage);
 			        		
@@ -495,6 +530,14 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Mostra le attuali preferenze attive per l'utente 
+	 * @param userPreferenceList le preferenze disponibili attive
+	 * @param userMessage l'utente DB
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param command
+	 */
 	private void showActivePreferenceMessage(List<UserPreference> userPreferenceList, TelegramUser userMessage,
 			Message receivedMessage, ChatBotCallbackCommand command) {
 		
@@ -517,6 +560,15 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Mostra i valori dei filtri 
+	 * @param command il comando di callback generato dal messaggio ricevuto
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param userMessage l'utente DB
+	 * @param up la preferenza DB
+	 * @throws AskToUsException se il flow non prevede la casistica
+	 */
 	private void showAvailableFilterValues(ChatBotCallbackCommand command, Message receivedMessage, TelegramUser userMessage, UserPreference up) throws AskToUsException {
 		
 		AbstractDAO<? extends AbstractBlueSheepEntity> dao = ChatBotFilterCommandUtilManager.getCorrectDAOByChatBotCallackCommand(command, connection);
@@ -538,6 +590,16 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Mostra i pulsanti relativi ai bookmaker 
+	 * @param command il comando di callback generato dal messaggio ricevuto
+	 * @param userMessage l'utente DB
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param bookmakerAvailable i bookmaker disponibili
+	 * @param pageIndex la pagina da mostrare
+	 * @throws AskToUsException se il flow non prevede la casistica
+	 */
 	private void showBookmakerButtons(ChatBotCallbackCommand command, TelegramUser userMessage, Message receivedMessage, List<? extends AbstractBlueSheepEntity> bookmakerAvailable, int pageIndex) throws AskToUsException {
         
 		String textOfMessage = ChatBotCommandUtilManager.getCorrectTextFromChatBotCommand(command.getRootCommand());
@@ -545,6 +607,18 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Mostra le principali entità di selezione (filtro, bookmaker, ecc).
+	 * @param command il comando di callback generato dal messaggio ricevuto
+	 * @param entityAvailable le entità da mostrare
+	 * @param columnNumber il numero di colonne da mostrare
+	 * @param pageIndex la pagina da mostrare 
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param userMessage l'utente DB
+	 * @param textOfMessage il testo da mostrare
+	 * @throws AskToUsException se il flow non prevede la casistica
+	 */
 	private void collectResultAndSendMessage(ChatBotCallbackCommand command, List<? extends AbstractBlueSheepEntity> entityAvailable, int columnNumber, int pageIndex, Message receivedMessage, TelegramUser userMessage, String textOfMessage) throws AskToUsException {
 		EditMessageText new_message = null;
         
@@ -577,11 +651,25 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 
+	
 	private SendMessage getMenuMessageSendMessage(BluesheepChatBotException exception,
 			TelegramUser userMessage, Message message, String text) throws AlreadyRegisteredUserChatBotException, AskToUsException, SQLException {
 		return getMenuMessageSendMessage(userMessage, message, exception.getMessage() + System.lineSeparator() + text);
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Mostra i filtri disponibili per una determinata preferenza utenza
+	 * @param bookmaker il bookmaker della preferenza
+	 * @param userMessage l'utente DB
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param upDB la preferenza dell'utente sul bookmaker 
+	 * @param command il comando di callback generato dal messaggio
+	 * @param toBeModified true se da modifica, false se da creare
+	 * @throws AlreadyRegisteredUserChatBotException se l'utente già registrato
+	 * @throws AskToUsException se il flow non va come previsto
+	 * @throws SQLException se c'è un errore con il DB
+	 */
 	private void goToFilterPreferences(Bookmaker bookmaker, TelegramUser userMessage, 
 			Message receivedMessage, UserPreference upDB, ChatBotCallbackCommand command, boolean toBeModified) throws AlreadyRegisteredUserChatBotException, AskToUsException, SQLException {
 		
@@ -593,9 +681,17 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 
+	/**
+	 * GD - 18/11/2018
+	 * Gestisce l'input dell'utente ricevuto tramite il messaggio
+	 * @param userMessage l'utente del messaggio
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param userDB il riferimento dell'utente nel DB, null se non esiste
+	 */
 	private void manageUserInput(TelegramUser userMessage, Message receivedMessage, TelegramUser userDB) {
 		try {
-			if (userDB != null && AcceptedUserInput.MENU.getInputUser().equals(receivedMessage.getText())) {
+			if (userDB != null 
+					&& AcceptedUserInput.MENU.getInputUser().equals(receivedMessage.getText())) {
 	            
 				SendMessage message = getMenuMessageSendMessage(userDB, receivedMessage, null);
 				if(message != null) {
@@ -647,6 +743,12 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		return BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.TELEGRAMBOTKEY);
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Manda un messaggio con l'errore che è stato sollevato e aggiorna l'ultimo messaggio inviato
+	 * @param error l'errore 
+	 * @param userDB l'utente registrato
+	 */
 	public void sendErrorMessage(BluesheepChatBotException error, TelegramUser userDB) {
 		
 		Message returnMessage = null;
@@ -663,6 +765,12 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Manda un messaggio standard e aggiorna l'ultimo messaggio inviato
+	 * @param message il messaggio da inviare
+	 * @param userDB l'utente registrato
+	 */
 	public void sendStandardMessage(SendMessage message, TelegramUser userDB) {
 		Message returnMessage = null;
 		try {
@@ -678,6 +786,12 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Manda un messaggio standard sostituitendo il vecchio messaggio e aggiorna l'ultimo messaggio inviato
+	 * @param message il messaggio da inviare (EditMessage)
+	 * @param userDB l'utente registrato
+	 */
 	public void sendStandardMessage(EditMessageText message, TelegramUser userDB) {
 		try {
 			message.setParseMode("Markdown");
@@ -691,7 +805,19 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}	
 	
-	private EditMessageText getFilterMenuMessage(TelegramUser userMessage, Message receivedMessage, UserPreference upDB, ChatBotCallbackCommand command, boolean toBeModified) throws AlreadyRegisteredUserChatBotException, AskToUsException, SQLException {
+	/**
+	 * GD - 18/11/2018
+	 * Crea un messaggio in cui è presente la descrizione dei filtri
+	 * @param userMessage l'utente a cui inviare il messaggio
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param upDB la preferenza dell'utente salvata a DB
+	 * @param command il comando di callback ricevuto dal messaggio
+	 * @param toBeModified indica se la richiesta è di tipo Modifica o Creazione
+	 * @return Il messaggio con i filtri relativi alla preferenza
+	 * @throws AskToUsException se viene sollevata un'eccezione a causa di una inconsistenza di dati
+	 * @throws SQLException se avviene un errore con il DB
+	 */
+	private EditMessageText getFilterMenuMessage(TelegramUser userMessage, Message receivedMessage, UserPreference upDB, ChatBotCallbackCommand command, boolean toBeModified) throws AskToUsException, SQLException {
 		EditMessageText message = null;
 		if(command != null && command.getFilterCommandsList() != null) {
 			
@@ -702,6 +828,17 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		return message;
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Crea il messaggio di menu con un testo personalizzato
+	 * @param userMessage l'utente a cui mostrare il menu
+	 * @param receivedMessage il messaggio ricevuto
+	 * @param text il testo da mostrare sul menu
+	 * @return il messaggio contenente il menu
+	 * @throws AlreadyRegisteredUserChatBotException se l'utente è già registrato
+	 * @throws AskToUsException se si verifica un errore nel flow
+	 * @throws SQLException se si verifica un problema con il DB
+	 */
 	private SendMessage getMenuMessageSendMessage(TelegramUser userMessage, Message receivedMessage, String text) throws AlreadyRegisteredUserChatBotException, AskToUsException, SQLException {
 		SendMessage message = null;
 
@@ -718,7 +855,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				if(text == null) {
 					message.setText("Ciao "
 								+ userMessage.getUserName() 
-								+ ", benvenuto! Io sono Blue Sheep Bot." + System.lineSeparator()
+								+ ", benvenuto! Io sono Blue Sheep Bot 🐑" + System.lineSeparator()
 								+ "Clicca sull'operazione che ti interessa eseguire");
 				}else {
 					message.setText(text);
@@ -733,6 +870,13 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		return message;
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Aggiorna l'id dell'ultimo messaggio inviato, così da poterlo cancellare successivamente
+	 * @param lastMessageSent l'ultimo messaggio inviato 
+	 * @param userDB l'utente a cui è stato inviato il messaggio
+	 * @throws AskToUsException in caso di errore con il DB
+	 */
 	private void updateLastMessageIdUser(Message lastMessageSent, TelegramUser userDB) throws AskToUsException {
 		userDB.setLastMessageId(new Long(lastMessageSent.getMessageId()));
 		try {
@@ -742,6 +886,13 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Aggiorna l'id dell'ultimo messaggio inviato, così da poterlo cancellare successivamente
+	 * @param lastMessageSent l'ultimo messaggio inviato 
+	 * @param userDB l'utente a cui è stato inviato il messaggio
+	 * @throws AskToUsException in caso di errore con il DB
+	 */
 	private void updateLastMessageIdUser(EditMessageText lastMessageSent, TelegramUser userDB) throws AskToUsException {
 		userDB.setLastMessageId(new Long(lastMessageSent.getMessageId()));
 		try {
@@ -751,12 +902,29 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		}
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Controlla che l'operazione "padre" del messaggio è ancora consentita all'utente
+	 * @param user l'utente su cui effettuare il controllo
+	 * @param command il comando di callback generato dal messaggio
+	 * @return true, se permesso; false altrimenti
+	 * @throws AlreadyRegisteredUserChatBotException se più di un utente registrato con lo stesso utente
+	 * @throws AskToUsException se si verifica un problema nel flow
+	 * @throws SQLException se si verifica un errore con il DB
+	 */
 	private boolean controlRootCommandPermitted(TelegramUser user, ChatBotCallbackCommand command) throws AlreadyRegisteredUserChatBotException, AskToUsException, SQLException {
 		Set<ChatBotCommand> availableChatBotCommandForUser = TelegramUserDatabaseManager.getAvailableActionForUser(user, connection);
 		
 		return availableChatBotCommandForUser.contains(command.getRootCommand());
 	}
 	
+	/**
+	 * GD - 18/11/2018
+	 * Elimina il messaggio attualmente presente nella chat dell'utente, in modo da far rimanere un solo messaggio dopo l'invio del
+	 * nuovo messaggio
+	 * @param messageId l'id del messaggio da eliminare
+	 * @param userDB l'utente a cui eliminare il messaggio
+	 */
 	private void executeDeleteMessage(Long messageId, TelegramUser userDB) {
 		DeleteMessage deleteMessage = new DeleteMessage().setChatId(userDB.getChatId()).setMessageId(messageId.intValue());
 		try {

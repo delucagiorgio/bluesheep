@@ -2,7 +2,11 @@ package it.bluesheep.telegrambot.message.io;
 
 import it.bluesheep.telegrambot.message.util.ChatBotFilterCommand;
 import it.bluesheep.util.BlueSheepConstants;
-
+/**
+ * Classe che mappa un filtro utente
+ * @author giorgio
+ *
+ */
 public abstract class ChatBotCallbackFilter{
 
 	//Il filtro corrispondente

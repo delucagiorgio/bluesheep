@@ -77,10 +77,10 @@ public class RatingDAO extends AbstractDAO<Rating> implements IFilterDAO<Rating>
 	@Override
 	protected String getAllColumnValuesFromEntity(Rating entity) {
 		return "("
-				+ RATINGVALUE + BlueSheepConstants.REGEX_COMMA
-				+ RATINGTEXT + BlueSheepConstants.REGEX_COMMA
-				+ RATINGCODE + BlueSheepConstants.REGEX_COMMA
-				+ ACTIVE + BlueSheepConstants.REGEX_COMMA +
+				+ entity.getRatingValue() + BlueSheepConstants.REGEX_COMMA
+				+ entity.getRatingText() + BlueSheepConstants.REGEX_COMMA
+				+ entity.getRatingCode() + BlueSheepConstants.REGEX_COMMA
+				+ entity.isActive() + BlueSheepConstants.REGEX_COMMA +
 				"?" + BlueSheepConstants.REGEX_COMMA +
 				"?" +")";
 	}

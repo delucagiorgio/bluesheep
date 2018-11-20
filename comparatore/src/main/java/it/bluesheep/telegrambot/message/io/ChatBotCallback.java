@@ -3,7 +3,11 @@ package it.bluesheep.telegrambot.message.io;
 import java.util.List;
 
 import it.bluesheep.telegrambot.message.util.ChatBotCommand;
-
+/**
+ * Classe astratta per la creazione di un comando a partire da una callback
+ * @author giorgio
+ *
+ */
 public abstract class ChatBotCallback {
 
 	//Identifica l'azione di partenza

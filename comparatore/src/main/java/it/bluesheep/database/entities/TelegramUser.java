@@ -69,6 +69,10 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		this.active = active;
 	}
 	
+	public static TelegramUser getTelegramUserFromMessage(TelegramUser userDB, Message message) {
+		return TelegramUser.getBlueSheepTelegramUserFromNewInfo(userDB.getUserName(), message.getChatId());
+	}
+	
 	public static TelegramUser getTelegramUserFromMessage(Message message) {
 		return TelegramUser.getBlueSheepTelegramUserFromNewInfo(message.getFrom().getUserName(), message.getChatId());
 	}
