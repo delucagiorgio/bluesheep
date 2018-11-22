@@ -22,20 +22,19 @@ public class MinOddValueDAO extends AbstractDAO<MinOddValue> implements IFilterD
 	private static final String MINODDCODE = "minOddCode";
 	private static final String ACTIVE = "active";
 	
-	
-	protected MinOddValueDAO(Connection connection) {
-		super(tableName, connection);
+	private MinOddValueDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized MinOddValueDAO getMinOddValueDAOInstance(Connection connection) {
+	public static synchronized MinOddValueDAO getMinOddValueDAOInstance() {
 		if(instance == null) {
-			instance = new MinOddValueDAO(connection);
+			instance = new MinOddValueDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	public List<MinOddValue> getAllRowFromButtonText(String textButton) {
+	public List<MinOddValue> getAllRowFromButtonText(String textButton, Connection connection) {
 		
 		List<MinOddValue> returnList = null;
 		String query = getBasicSelectQuery() + WHERE + MINODDTEXT + " = ? " + AND + ACTIVE + IS + true;
@@ -44,7 +43,7 @@ public class MinOddValueDAO extends AbstractDAO<MinOddValue> implements IFilterD
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, textButton);
-			returnList = getMappedObjectBySelect(ps);
+			returnList = getMappedObjectBySelect(ps, connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -52,12 +51,12 @@ public class MinOddValueDAO extends AbstractDAO<MinOddValue> implements IFilterD
 	}
 
 	@Override
-	public MinOddValue getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
-		return getSingleResult(getAllRowFromButtonText(textButton));
+	public MinOddValue getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
+		return getSingleResult(getAllRowFromButtonText(textButton, connection));
 	}
 
 	@Override
-	protected List<MinOddValue> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<MinOddValue> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		List<MinOddValue> ratingList = new ArrayList<MinOddValue>();
 		
 		while(returnSelect.next()) {

@@ -22,19 +22,19 @@ public class SizeDAO extends AbstractDAO<Size> implements IFilterDAO<Size> {
 	private static final String SIZECODE = "sizeCode";
 	private static final String ACTIVE = "active";
 	
-	private SizeDAO(Connection connection) {
-		super(tableName, connection);
+	private SizeDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized SizeDAO getSizeDAOInstance(Connection connection) {
+	public static synchronized SizeDAO getSizeDAOInstance() {
 		if(instance == null) {
-			instance = new SizeDAO(connection);
+			instance = new SizeDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	public List<Size> getAllRowFromButtonText(String textButton) {
+	public List<Size> getAllRowFromButtonText(String textButton, Connection connection) {
 		
 		List<Size> returnList = null;
 		String query = getBasicSelectQuery() + WHERE + SIZETEXT + " = ? " + AND + ACTIVE + IS + true;
@@ -43,7 +43,7 @@ public class SizeDAO extends AbstractDAO<Size> implements IFilterDAO<Size> {
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, textButton);
-			returnList = getMappedObjectBySelect(ps);
+			returnList = getMappedObjectBySelect(ps, connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -51,12 +51,12 @@ public class SizeDAO extends AbstractDAO<Size> implements IFilterDAO<Size> {
 	}
 
 	@Override
-	public Size getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
-		return getSingleResult(getAllRowFromButtonText(textButton));
+	public Size getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
+		return getSingleResult(getAllRowFromButtonText(textButton, connection));
 	}
 
 	@Override
-	protected List<Size> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<Size> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		List<Size> sizeList = new ArrayList<Size>();
 		
 		while(returnSelect.next()) {

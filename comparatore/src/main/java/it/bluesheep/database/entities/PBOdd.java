@@ -6,8 +6,9 @@ import java.text.SimpleDateFormat;
 
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
+import it.bluesheep.database.dao.IRFCalculator;
 
-public class PBOdd extends AbstractOddEntity {
+public class PBOdd extends AbstractOddEntity implements IRFCalculator {
 
 	private Timestamp dataOraEvento;
 	private String sport;
@@ -124,23 +125,51 @@ public class PBOdd extends AbstractOddEntity {
 		return liquidita2;
 	}
 
-	@Override
-	public String getTelegramButtonText() {
+	public String getTelegramButtonText(UserPreference up, PBOdd odd, int progId, int maxNotificationPerUserPreference) {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 		Double rating1_100 = getRating1() * 100D;
 		DecimalFormat df = new DecimalFormat("#.##");
 		
-		return  ArbsUtil.getTelegramBoldString("Rating") + ": " + df.format(rating1_100) + "%" + System.lineSeparator()  + 
-				ArbsUtil.getTelegramBoldString("Data evento") + ": " + sdf.format(getDataOraEvento()) + System.lineSeparator() +
+		String specData = ArbsUtil.getTelegramBoldString("Data evento") + ": " + sdf.format(getDataOraEvento()) + System.lineSeparator() +
+				ArbsUtil.getTelegramBoldString("Campionato") + ": " + getCampionato() + System.lineSeparator() + 
+				ArbsUtil.getTelegramBoldString("Sport") + ": " + getSport() + System.lineSeparator() +
 				ArbsUtil.getTelegramBoldString("Evento") + ": " + getEvento() + System.lineSeparator() + 
 				ArbsUtil.getTelegramBoldString("Book1")  + ": " + getBookmakerName1() + System.lineSeparator() +
 				ArbsUtil.getTelegramBoldString("Book2") + ": " + getBookmakerName2() + System.lineSeparator() +
 				ArbsUtil.getTelegramBoldString("Scommessa1") + ": " + ScommessaUtilManager.getScommessaByCodeTelegramMessage(getScommessaBookmaker1()) + System.lineSeparator() +
 				ArbsUtil.getTelegramBoldString("Scommessa2") + ": " + ScommessaUtilManager.getScommessaByCodeTelegramMessage(getScommessaBookmaker2()) + System.lineSeparator() +
 				ArbsUtil.getTelegramBoldString("Quota1") + ": " + getQuotaScommessaBookmaker1() + System.lineSeparator() +
-				ArbsUtil.getTelegramBoldString("Quota2") + ": " + getQuotaScommessaBookmaker2() + System.lineSeparator() +
-				ArbsUtil.getTelegramBoldString("Campionato") + ": " + getCampionato() + System.lineSeparator() + 
-				ArbsUtil.getTelegramBoldString("Sport") + ": " + getSport();
+				ArbsUtil.getTelegramBoldString("Quota2") + ": " + getQuotaScommessaBookmaker2() + System.lineSeparator();
+		
+		
+		specData = specData 
+				+ (up.getLiquidita() != null ? ArbsUtil.getTelegramBoldString("Liquidità") + ": " + getLiquidita2() + "€" + System.lineSeparator() : "") 
+				+ (up.getRating() != null ? ArbsUtil.getTelegramBoldString("Rating") + ": " + df.format(rating1_100) + "%" + System.lineSeparator() : "")
+				+ (up.getRfType() != null && up.getRfValue() != null ? ArbsUtil.getTelegramBoldString("RF") + ": " + df.format(odd.getRfValue(up.getRfType())) + "%" + System.lineSeparator() : "");
+
+		return  specData + System.lineSeparator() + (progId == maxNotificationPerUserPreference ? System.lineSeparator() 
+										+ "Ti abbiamo segnalato il numero massimo di notifiche permesso su una singola preferenza di segnalazione. La preferenza sul bookmaker " 
+										+ ArbsUtil.getTelegramBoldString(up.getBookmaker().getBookmakerName()) 
+										+ " è stata disattivata ora!" + System.lineSeparator() + System.lineSeparator() : "")
+						 + "Ti sei perso? Clicca qui su /menu per visualizzare le azioni che puoi eseguire!";
+	}
+
+	@Override
+	public boolean minRfRespected(UserPreference up) {
+		
+		double p = up.getRfType();
+		
+		double rf = getRfValue(p);
+		
+		return rf >= up.getRfValue();
 	}	
+	
+	public double getRfValue(double refundPercentage) {
+		return (1 / refundPercentage) * (quotaScommessaBookmaker1 - 1) 
+				- 
+				(quotaScommessaBookmaker2 - 1) * 
+				((quotaScommessaBookmaker1 / (refundPercentage * (quotaScommessaBookmaker2 - 0.05)) - (1 / (quotaScommessaBookmaker2 - 0.05))));
+		
+	}
 
 }

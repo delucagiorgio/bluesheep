@@ -22,6 +22,7 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 	private static Logger logger = Logger.getLogger(OddsDatabaseSaveServiceHandler.class);
 	private List<RecordOutput> recordOutputList;
 	private Service service;
+	private Connection connection;
 	
 	public OddsDatabaseSaveServiceHandler(List<RecordOutput> recordOutputList, Service service) {
 		this.recordOutputList = recordOutputList;
@@ -30,26 +31,25 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 	
 	@Override
 	public void run() {
-
 			
-		Connection connection = null;
 		SaveOddProcessHistoryDAO dao = null;
 		try {			
+			
 			connection = ConnectionPool.getConnection();
-			dao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance(connection);
+			dao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance();
 
-			dao.insertRow(new SaveOddProcessHistory(service, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null));
-			connection.commit();
+			dao.insertRow(new SaveOddProcessHistory(service, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null), connection);
 			long startTime = System.currentTimeMillis();
-			saveRecordsOnDatabase(connection);
+			logger.info(service.getCode() + " is starting saving odds...");
+			saveRecordsOnDatabase();
 			
 			logger.info("Execution completed in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
 			
-			dao.updateLastRun(service , null);
+			dao.updateLastRun(service , null, connection);
 			connection.commit();
 			
 			
-			if(!dao.stillRunningProcess(Service.USERPREFNOTIFICATION_SERVICE)) {
+			if(!dao.stillRunningProcess(Service.USERPREFNOTIFICATION_SERVICE, connection)) {
 				BlueSheepServiceHandlerManager.executor.submit(new UserPreferenceNotificationServiceHandler());
 				logger.info("Scanning odds for service " + service + " started");
 			}else {
@@ -62,7 +62,7 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 			try {
 				if(connection != null) {
 					connection.rollback();
-					dao.updateLastRun(service , e);
+					dao.updateLastRun(service , e, connection);
 					connection.commit();
 					ConnectionPool.releaseConnection(connection);
 				}
@@ -70,26 +70,25 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 				logger.error(e1.getMessage(), e1);
 			}
 			logger.error(e.getMessage(), e);
-
 		}
 		
 	}
 	
-	private void saveRecordsOnDatabase(Connection connection) throws SQLException {
-		IOddDAO<? extends AbstractOddEntity> dao = OddDAOFactory.getCorrectDAOByService(service, connection);
-		if(!dao.checkEmptyTable()) {
-			dao.deleteTable();
+	private void saveRecordsOnDatabase() throws SQLException {
+		IOddDAO<? extends AbstractOddEntity> dao = OddDAOFactory.getCorrectDAOByService(service);
+		if(!dao.checkEmptyTable(connection)) {
+			dao.deleteTable(connection);
 		}
 		
 		if(recordOutputList.isEmpty()) {
 			logger.error("No insertion performed");
 			connection.rollback();
-			SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance(connection).updateLastRun(service, null);
+			SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance().updateLastRun(service, null, connection);
 			ConnectionPool.releaseConnection(connection);
 			return;
 		}
 
-		dao.insertMultipleRows(recordOutputList);
+		dao.insertMultipleRows(recordOutputList, connection);
 			
 		logger.info("Rows successfully inserted");
 	}

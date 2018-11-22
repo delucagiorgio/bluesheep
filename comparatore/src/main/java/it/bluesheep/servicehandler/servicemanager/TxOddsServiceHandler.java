@@ -147,33 +147,34 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 			Set<Date> dateSet = new HashSet<Date>(dateMap.keySet());
 			for(Date date : dateSet) {
 				Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> eventoMap = dateMap.get(date);
-				
+				if(eventoMap != null) {
 				Set<String> eventoSet = new HashSet<String>(eventoMap.keySet());
-				for(String evento : eventoSet) {
-					Map<Scommessa, Map<String, AbstractInputRecord>> scommessaMap = eventoMap.get(evento);
-					if(scommessaMap != null) {
-						Set<Scommessa> scommessaSet = new HashSet<Scommessa>(scommessaMap.keySet());
-						for(Scommessa scommessa : scommessaSet) {
-							Map<String, AbstractInputRecord> bookmakerMap = scommessaMap.get(scommessa);
-							
-							Set<String> bookmakerSet = new HashSet<String>(bookmakerMap.keySet());
-							for(String bookmaker : bookmakerSet) {
-								AbstractInputRecord record = bookmakerMap.get(bookmaker);
-								if(record != null && record.getSource() == null) {
-									record.toString();
-								}
-								if(record != null && record.getSource().equals(Service.TXODDS_SERVICENAME)) {
-									TxOddsInputRecord txOddsRecord = (TxOddsInputRecord) record;
-									int index = Collections.binarySearch(BlueSheepSharedResources.getBoidOTBList(), txOddsRecord.getBoid());
-									if(index >= 0) {
-										count++;
-										bookmakerMap.remove(bookmaker);
-										if(bookmakerMap.isEmpty()) {
-											scommessaMap.remove(scommessa);
-											if(eventoMap.isEmpty()) {
-												eventoMap.remove(evento);
-												if(dateMap.isEmpty()) {
-													dateMap.remove(date);
+					for(String evento : eventoSet) {
+						Map<Scommessa, Map<String, AbstractInputRecord>> scommessaMap = eventoMap.get(evento);
+						if(scommessaMap != null) {
+							Set<Scommessa> scommessaSet = new HashSet<Scommessa>(scommessaMap.keySet());
+							for(Scommessa scommessa : scommessaSet) {
+								Map<String, AbstractInputRecord> bookmakerMap = scommessaMap.get(scommessa);
+								
+								Set<String> bookmakerSet = new HashSet<String>(bookmakerMap.keySet());
+								for(String bookmaker : bookmakerSet) {
+									AbstractInputRecord record = bookmakerMap.get(bookmaker);
+									if(record != null && record.getSource() == null) {
+										record.toString();
+									}
+									if(record != null && record.getSource().equals(Service.TXODDS_SERVICENAME)) {
+										TxOddsInputRecord txOddsRecord = (TxOddsInputRecord) record;
+										int index = Collections.binarySearch(BlueSheepSharedResources.getBoidOTBList(), txOddsRecord.getBoid());
+										if(index >= 0) {
+											count++;
+											bookmakerMap.remove(bookmaker);
+											if(bookmakerMap.isEmpty()) {
+												scommessaMap.remove(scommessa);
+												if(eventoMap.isEmpty()) {
+													eventoMap.remove(evento);
+													if(dateMap.isEmpty()) {
+														dateMap.remove(date);
+													}
 												}
 											}
 										}

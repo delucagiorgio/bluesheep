@@ -12,7 +12,6 @@ import java.util.Set;
 public enum AcceptedUserInput {
 
 	MENU("/menu"),
-	REGISTRATION("/registrazione"),
 	START("/start");
 	
 	private String inputUser;

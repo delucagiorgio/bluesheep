@@ -23,19 +23,19 @@ public class EventDAO extends AbstractDAO<Event> implements IFilterDAO<Event> {
 	private static final String DATEEVENT = "dateEvent";
 	private static final String ACTIVE = "active";
 	
-	protected EventDAO(Connection connection) {
-		super(tableName, connection);
+	protected EventDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized EventDAO getEventDAOInstance(Connection connection) {
+	public static synchronized EventDAO getEventDAOInstance() {
 		if(instance == null) {
-			instance = new EventDAO(connection);
+			instance = new EventDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	protected List<Event> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<Event> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<Event> eventList = new ArrayList<Event>();
 		
@@ -67,7 +67,7 @@ public class EventDAO extends AbstractDAO<Event> implements IFilterDAO<Event> {
 	}
 
 	@Override
-	public List<Event> getAllRowFromButtonText(String textButton) {
+	public List<Event> getAllRowFromButtonText(String textButton, Connection connection) {
 		
 		List<Event> events = null;
 		String query = getBasicSelectQuery() + WHERE + EVENTNAME + " = ? " + AND + ACTIVE + IS + true;
@@ -76,7 +76,7 @@ public class EventDAO extends AbstractDAO<Event> implements IFilterDAO<Event> {
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, textButton);
-			events = getMappedObjectBySelect(ps);
+			events = getMappedObjectBySelect(ps, connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -85,8 +85,8 @@ public class EventDAO extends AbstractDAO<Event> implements IFilterDAO<Event> {
 	}
 
 	@Override
-	public Event getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
-		return getSingleResult(getAllRowFromButtonText(textButton));
+	public Event getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
+		return getSingleResult(getAllRowFromButtonText(textButton, connection));
 	}
 
 }

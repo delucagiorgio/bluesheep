@@ -6,8 +6,9 @@ import java.text.SimpleDateFormat;
 
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
+import it.bluesheep.database.dao.IRFCalculator;
 
-public class PPOdd extends AbstractOddEntity {
+public class PPOdd extends AbstractOddEntity implements IRFCalculator {
 
 	private Timestamp dataOraEvento;
 	private String sport;
@@ -156,6 +157,27 @@ public class PPOdd extends AbstractOddEntity {
 
 	public Double getLiquidita2() {
 		return liquidita2;
+	}
+
+	@Override
+	public boolean minRfRespected(UserPreference up) {
+		
+		double p = up.getRfType();
+		
+		double y_approx = Math.round((100.0 * quotaScommessaBookmaker1 - (100.0 * p)) / quotaScommessaBookmaker2);
+		
+		double rf1 = getRfValue(p); 
+		double rf2 = -(1 / p) + ((y_approx * quotaScommessaBookmaker2) / (100.0 * p)) + 1; 
+
+		
+		return rf1 >= up.getRfValue() && rf2 >= up.getRfValue();
+	}
+	
+	public double getRfValue(double refundPercentage) {
+		double y_approx = Math.round((100.0 * quotaScommessaBookmaker1 - (100.0 * refundPercentage)) / quotaScommessaBookmaker2);
+
+		return (1 / refundPercentage) * (quotaScommessaBookmaker1 - 1) - (y_approx / (100.0 * refundPercentage)); 
+
 	}
 	
 }

@@ -16,6 +16,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -38,22 +41,32 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 	private static Logger logger = Logger.getLogger(UserPreferenceNotificationServiceHandler.class);
 	private Connection connection;
 	private long startTime;
+	private ExecutorService executor;
+	private int maxNotificationPerUserPreference;
+	
+	public UserPreferenceNotificationServiceHandler() {
+		super();
+		executor = Executors.newFixedThreadPool(1);
+		maxNotificationPerUserPreference = Integer.parseInt(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MAX_NOTIFICATION_USER_PREF));
+	}
 	
 	@Override
 	public void run() {
+		
 		SaveOddProcessHistoryDAO dao = null;
 		try {
 			connection = ConnectionPool.getConnection();
 			startTime = System.currentTimeMillis();
 			logger.info("Starting check notification user preference");
-			dao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance(connection);
+			dao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance();
 			
-			dao.insertRow(new SaveOddProcessHistory(Service.USERPREFNOTIFICATION_SERVICE, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null));
+			dao.insertRow(new SaveOddProcessHistory(Service.USERPREFNOTIFICATION_SERVICE, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null), connection);
 			connection.commit();
-			List<UserPreference> userPreferenceList = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getAllActiveRows();
+			List<UserPreference> userPreferenceList = UserPreferenceDAO.getUserPreferenceDAOInstance().getAllActiveRows(connection);
 			
 			Map<String, List<UserPreference>> bookmakerUserPreferenceMap = new TreeMap<String, List<UserPreference>>();
 			
+			//Se ci sono preferenze attive, raggruppa per bookmakerName le liste di preferenze
 			if(userPreferenceList != null && userPreferenceList.size() > 0) {
 				for(UserPreference up : userPreferenceList) {
 					List<UserPreference> upBookmaker = bookmakerUserPreferenceMap.get(up.getBookmaker().getBookmakerName());
@@ -65,9 +78,11 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 				}
 				
 				
-				List<PBOdd> ppOddsList = PBOddDAO.getPBOddDAOInstance(connection)
-								.getPPOddListFromBookmakerList(new ArrayList<String>(bookmakerUserPreferenceMap.keySet()));
+				//Prende le quote del comparatore
+				List<PBOdd> ppOddsList = PBOddDAO.getPBOddDAOInstance()
+								.getPPOddListFromBookmakerList(new ArrayList<String>(bookmakerUserPreferenceMap.keySet()), connection);
 				
+				//Le ordina in maniera decrescente per rating
 				Collections.sort(ppOddsList, new Comparator<PBOdd>() {
 
 					@Override
@@ -76,39 +91,32 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 					}
 				});
 				
+				//Se ci sono quote
 				if(!ppOddsList.isEmpty()) {
+					
 					for(PBOdd odd : ppOddsList) {
+						//Lista corrispondente del primo book della quota del comparatore
 						List<UserPreference> preferenceBook1 = bookmakerUserPreferenceMap.get(odd.getBookmakerName1());
+						//Lista corrispondente del secondo book della quota del comparatore
 						List<UserPreference> preferenceBook2 = bookmakerUserPreferenceMap.get(odd.getBookmakerName2());
 						
+						//Se esistono preferenze per il bookmaker nella lista 1
 						if(preferenceBook1 != null) {
 							for(UserPreference up : preferenceBook1) {
-								if(up.getRating() <= odd.getRating1() && up.isActive()) {
+								//Se attiva
+								if(up.isActive()) {
 									List<UserPreferenceNotification> preferenceSent = 
-											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance(connection)
-											.getNotificationsSentByUserPreference(up);
+											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance()
+											.getNotificationsSentByUserPreference(up, connection);
 									
-									int nextProdId = preferenceSent.size() + 1;
-									if(preferenceSent.size() < 5) {
+									if(preferenceSent.size() < maxNotificationPerUserPreference) {
+										//Se non è stata già inviata
 										if(!alreadySent(preferenceSent, odd)) {
-											
-											String text = odd.getTelegramButtonText();		
-											logger.info("Sending notification #" + nextProdId + " to user " + up.getUser().getUserName());
-											
-											UserPreferenceNotification upn = new UserPreferenceNotification(up, up.getUser(), 0, nextProdId, null, null, odd.getNotificationKey());
-											
-											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance(connection).insertRow(upn);
-
-											(new MessageSender("" + up.getUser().getChatId(), 
-													ArbsUtil.getTelegramBoldString("Notifica #" + nextProdId) 
-													+ " per il bookmaker " 
-															+ ArbsUtil.getTelegramBoldString(up.getBookmaker().getBookmakerName()) 
-															+ System.lineSeparator() + text)).run();
-											connection.commit();
+											processOperationAndRequirementsOfNotification(preferenceSent, odd, up);
 										}
 									}else {
-										UserPreferenceDAO.getUserPreferenceDAOInstance(connection).deactivateUserPreference(up);
-										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance(connection).deleteUserPrefNotificationFromUP(up);
+										UserPreferenceDAO.getUserPreferenceDAOInstance().deactivateUserPreference(up, connection);
+										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().deleteUserPrefNotificationFromUP(up, connection);
 										up.setActive(false);
 										connection.commit();
 										break;
@@ -119,32 +127,20 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 						
 						if(preferenceBook2 != null) {
 							for(UserPreference up : preferenceBook2) {
-								if(up.getRating() <= odd.getRating1() && up.isActive()) {
+								//Se attiva
+								if(up.isActive()) {
 									List<UserPreferenceNotification> preferenceSent = 
-											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance(connection)
-											.getNotificationsSentByUserPreference(up);
+											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance()
+											.getNotificationsSentByUserPreference(up, connection);
 									
-									int nextProdId = preferenceSent.size() + 1;
-									if(preferenceSent.size() < 5) {
+									if(preferenceSent.size() < maxNotificationPerUserPreference) {
+										//Se non è stata già inviata
 										if(!alreadySent(preferenceSent, odd)) {
-											(new MessageSender("" + up.getUser().getChatId(), odd.getTelegramButtonText())).run();
-											String text = odd.getTelegramButtonText();		
-											logger.info("Sending notification #" + nextProdId + " to user " + up.getUser().getUserName());
-											
-											UserPreferenceNotification upn = new UserPreferenceNotification(up, up.getUser(), 0, nextProdId, null, null, odd.getNotificationKey());
-											
-											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance(connection).insertRow(upn);
-
-											(new MessageSender("" + up.getUser().getChatId(), 
-													ArbsUtil.getTelegramBoldString("Notifica #" + nextProdId) 
-													+ " per il bookmaker " 
-															+ ArbsUtil.getTelegramBoldString(up.getBookmaker().getBookmakerName()) 
-															+ System.lineSeparator() + text)).run();
-											connection.commit();
+											processOperationAndRequirementsOfNotification(preferenceSent, odd, up);
 										}
 									}else {
-										UserPreferenceDAO.getUserPreferenceDAOInstance(connection).deactivateUserPreference(up);
-										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance(connection).deleteUserPrefNotificationFromUP(up);
+										UserPreferenceDAO.getUserPreferenceDAOInstance().deactivateUserPreference(up, connection);
+										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().deleteUserPrefNotificationFromUP(up, connection);
 										up.setActive(false);
 										connection.commit();
 										break;
@@ -160,22 +156,81 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 				logger.info("No userPreference active at the moment");
 			}
 			
-			dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, null);
+			dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, null, connection);
 			connection.commit();
 			ConnectionPool.releaseConnection(connection);
 			logger.info("Excecution completed in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+			
+			executor.shutdown();
+			
+			logger.info("UserPreferenceNotification executor terminated: " + executor.awaitTermination(30, TimeUnit.SECONDS));
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			try {
 				connection.rollback();
 				
-				dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, e);
+				dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, e, connection);
 				connection.commit();
 				ConnectionPool.releaseConnection(connection);
-			} catch (SQLException e1) {
+				
+				executor.shutdown();
+				
+				logger.info("UserPreferenceNotification executor terminated: " + executor.awaitTermination(30, TimeUnit.SECONDS));
+			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e);
 			}
 		}
+	}
+
+	private void processOperationAndRequirementsOfNotification(List<UserPreferenceNotification> preferenceSent, PBOdd odd, UserPreference up) throws SQLException {
+
+		boolean ratingOK = true && up.getRating() == null;
+		boolean rfOK = true && up.getRfType() == null && up.getRfValue() == null;
+		boolean eventOK = true && up.getEvent() == null;
+		boolean sizeOK = true && up.getLiquidita() == null;
+		boolean minOddOK = true && up.getMinOddValue() == null;
+		
+		//Se il rating è rispettato
+		if(!ratingOK && up.getRating() <= odd.getRating1()) {
+			ratingOK = true;
+		}
+		
+		if(!eventOK && up.getEvent().equalsIgnoreCase(odd.getEvento())) {
+			eventOK = true;
+		}
+		
+		if(!minOddOK && up.getMinOddValue() <= odd.getQuotaScommessaBookmaker1()) {
+			minOddOK = true;
+		}
+		
+		if(!rfOK && odd.minRfRespected(up)) {
+			rfOK = true;
+		}
+		
+		if(!sizeOK && up.getLiquidita() <= odd.getLiquidita2()) {
+			sizeOK = true;
+		}
+			
+			
+		if(ratingOK && eventOK && minOddOK && rfOK && sizeOK) {
+			int nextProdId = preferenceSent.size() + 1;
+			String text = odd.getTelegramButtonText(up, odd, nextProdId, maxNotificationPerUserPreference);		
+			logger.info("Sending notification #" + nextProdId + " to user " + up.getUser().getUserName());
+			
+			UserPreferenceNotification upn = new UserPreferenceNotification(up, up.getUser(), 0, nextProdId, null, null, odd.getNotificationKey());
+			
+			UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().insertRow(upn, connection);
+
+			executor.submit(new MessageSender("" + up.getUser().getChatId(), 
+												ArbsUtil.getTelegramBoldString("Notifica #" + nextProdId) 
+												+ " per il bookmaker " 
+												+ ArbsUtil.getTelegramBoldString(up.getBookmaker().getBookmakerName()) 
+												+ System.lineSeparator() + text));
+			connection.commit();
+		}else {
+			logger.info("Rating: " + ratingOK + "; RF: " + rfOK + "; MinOdd: " + minOddOK + "; Size: " + sizeOK + "; Event: " + eventOK);
+		}
+		
 	}
 
 	private boolean alreadySent(List<UserPreferenceNotification> preferenceSent, PBOdd odd) {

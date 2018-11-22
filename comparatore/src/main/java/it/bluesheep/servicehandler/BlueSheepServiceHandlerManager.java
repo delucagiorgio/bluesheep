@@ -1,4 +1,4 @@
-package it.bluesheep.servicehandler;
+	package it.bluesheep.servicehandler;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -89,10 +89,10 @@ public final class BlueSheepServiceHandlerManager {
     		
 			BlueSheepSharedResources.initializeDataStructures();
 			
-			executor = Executors.newScheduledThreadPool(BlueSheepSharedResources.getActiveServices().size() + 2/*7*/);
+			executor = Executors.newScheduledThreadPool(4);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
-//			executor.submit(new BlueSheepUserUpdateServiceHandler());
+			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 15, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
 				if(Service.TXODDS_SERVICENAME.equals(activeService)) {

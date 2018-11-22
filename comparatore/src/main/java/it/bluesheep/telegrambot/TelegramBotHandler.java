@@ -38,8 +38,10 @@ import it.bluesheep.telegrambot.exception.AlreadyRegisteredUserChatBotException;
 import it.bluesheep.telegrambot.exception.AskToUsException;
 import it.bluesheep.telegrambot.exception.BluesheepChatBotException;
 import it.bluesheep.telegrambot.exception.InactiveBookmakerRequestException;
+import it.bluesheep.telegrambot.exception.InactiveUserException;
 import it.bluesheep.telegrambot.exception.NoUserNameSet;
 import it.bluesheep.telegrambot.exception.NotPermittedOperationException;
+import it.bluesheep.telegrambot.exception.TooOldMessageUsedException;
 import it.bluesheep.telegrambot.message.button.ChatBotButtonManager;
 import it.bluesheep.telegrambot.message.io.ChatBotCallbackCommand;
 import it.bluesheep.telegrambot.message.io.ChatBotCallbackFilter;
@@ -84,7 +86,6 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
     	Message receivedMessage = null;
     	TelegramUser userMessage = null; 
     	TelegramUser userDB = null;
-    	TelegramUser tempUser = null;
     	Long lastSentMessageIdDB = null;
     	
 		try {
@@ -109,9 +110,8 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 			        	logger.info("Start user DB seach");
 			        	receivedMessage = updateContainer.getMessage();
 			        	userMessage = TelegramUser.getTelegramUserFromMessage(receivedMessage);
-			        	tempUser = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).getUserFromMessage(receivedMessage);
-			        	boolean registeredClient = tempUser != null && tempUser.isActive();
-			        	userDB = registeredClient ? tempUser : null;
+			        	userDB = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance().getUserFromMessage(receivedMessage, connection);
+			        	boolean registeredClient = userDB != null && userDB.isActive();
 			        	
 			        	if(userDB != null && userDB.getLastMessageId() != null) {
 			        		lastSentMessageIdDB = new Long(userDB.getLastMessageId().longValue());
@@ -124,15 +124,19 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 			        				+ "; :::REGISTERED USER = " + registeredClient + ":::");
 			        	
 			        	//Controlla che il messaggio arrivi da un messaggio successivo come id
-			        	if(userDB == null || receivedMessage.getMessageId() >= lastSentMessageIdDB) {
-			        		manageUserInput(userMessage, receivedMessage, userDB);
-			        	}else {
-			        		SendMessage message = new SendMessage()
+			        	if((userDB != null && userDB.isActive())) {
+			        		if(lastSentMessageIdDB == null || receivedMessage.getMessageId() >= lastSentMessageIdDB) {
+			        			manageUserInput(userMessage, receivedMessage, userDB);
+			        		}else {
+			        			SendMessage message = new SendMessage()
 			        				.setChatId(updateContainer.getMessage().getChatId())
 			        				.setText("Impossibile interagire con un messaggio troppo vecchio" + 
 			        						System.lineSeparator() + 
-			        						"Clicca qui su /menu per visualizzare le operazioni disponibili o su /registrazione per registrarti al servizio");
-			            	sendStandardMessage(message, userDB);
+			        						"Clicca qui su /menu per visualizzare le operazioni disponibili o su /start per registrarti al servizio");
+			        			sendStandardMessage(message, userDB);
+			        		}
+			        	}else {
+			        			sendErrorMessage(new InactiveUserException(userMessage), userDB);
 			        	}
 		            } else {
 		            	SendMessage message = new SendMessage()
@@ -140,6 +144,11 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		            			.setText("Impossibile interagire");
 		            	sendStandardMessage(message, userDB);
 		            }
+		        	
+		    		if(userDB != null && userDB.getLastMessageId() != null && lastSentMessageIdDB != null
+		    				&& userDB.getLastMessageId().longValue() > lastSentMessageIdDB.longValue()) {
+		    			executeDeleteMessage(lastSentMessageIdDB, userDB);
+		    		}
 		    		
 		        	connection.commit();
 		    		ConnectionPool.releaseConnection(connection);
@@ -147,26 +156,36 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        	
 		        	//Se c'è una callback, non è necessario controllare 
 		        	//l'utente perchè arriverà da utenti già registrati e i dati saranno quelli server
-		        } else if (updateContainer.hasCallbackQuery() && chatIdPermitted.contains(updateContainer.getCallbackQuery().getMessage().getChatId().toString())) {
+		        } else if (updateContainer.hasCallbackQuery() 
+		        		&& chatIdPermitted.contains(updateContainer.getCallbackQuery().getMessage().getChatId().toString())) {
 
 		        	receivedMessage = updateContainer.getCallbackQuery().getMessage();
-		        	tempUser = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection)
+		        	userDB = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance()
 							.getUserFromUser(TelegramUser
-									.getTelegramUserFromUserTelegram(updateContainer.getCallbackQuery().getFrom(), receivedMessage));
-		        	boolean registeredClient = tempUser != null && tempUser.isActive();
-		        	userDB = registeredClient ? tempUser : null;
+									.getTelegramUserFromUserTelegram(updateContainer.getCallbackQuery().getFrom(), receivedMessage), connection);
 		        	
 		        	if(userDB != null && userDB.getLastMessageId() != null) {
 		        		lastSentMessageIdDB = new Long(userDB.getLastMessageId().longValue());
 		        	}
 		        	
-		        	if(userDB != null && lastSentMessageIdDB <= receivedMessage.getMessageId()) {
+		        	if(userDB != null) {
+		        		if(lastSentMessageIdDB <= receivedMessage.getMessageId()) {
 		        		logger.info("Received a message from " + userDB.getUserName() + ", chat_id: " + userDB.getChatId() + "; Text = " + updateContainer.getCallbackQuery().getData());
 		        	
 		        		manageResponse(receivedMessage, userDB, updateContainer.getCallbackQuery());
+			        	}else {
+			        		sendErrorMessage(new TooOldMessageUsedException(TelegramUser.getTelegramUserFromMessage(userDB, receivedMessage)), userDB);
+			        		executeDeleteMessage(new Long(receivedMessage.getMessageId()), userDB);
+			        	}
 		        	}else {
-		        		sendErrorMessage(new AskToUsException(TelegramUser.getTelegramUserFromMessage(userDB, receivedMessage)), userDB);
+		        		sendErrorMessage(new InactiveUserException(TelegramUser.getTelegramUserFromMessage(userDB, receivedMessage)), userDB);
+		        		executeDeleteMessage(new Long(receivedMessage.getMessageId()), userDB);
 		        	}
+		        	
+		    		if(userDB != null && userDB.getLastMessageId() != null && lastSentMessageIdDB != null
+		    				&& userDB.getLastMessageId().longValue() > lastSentMessageIdDB.longValue()) {
+		    			executeDeleteMessage(lastSentMessageIdDB, userDB);
+		    		}
 		        	
 		    		connection.commit();
 		    		ConnectionPool.releaseConnection(connection);
@@ -197,13 +216,14 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				connection.commit();
 	    		ConnectionPool.releaseConnection(connection);
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-		}
-		
-		if(tempUser != null && tempUser.getLastMessageId() != null && lastSentMessageIdDB != null
-				&& tempUser.getLastMessageId().longValue() > lastSentMessageIdDB.longValue()) {
-			executeDeleteMessage(lastSentMessageIdDB, tempUser);
+			try {
+				connection.rollback();
+	    		ConnectionPool.releaseConnection(connection);
+			} catch (SQLException e1) {
+				logger.error(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -230,10 +250,10 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	        		
 	        		else{
 	        			List<Bookmaker> bookmakerAvailable = null;
-	        			List<UserPreference> userPreferenceList = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getRelatedUserPreferenceFromUser(userMessage);
+	        			List<UserPreference> userPreferenceList = UserPreferenceDAO.getUserPreferenceDAOInstance().getRelatedUserPreferenceFromUser(userMessage, connection);
 	        			//Aggiungi preferenza mostra tutti i possibili bookmaker attivi su cui impostare una notifica
 	        			if(ChatBotCommand.ADD_PREFERENCE_BONUS_ABUSING.equals(command.getRootCommand())) {
-		        			bookmakerAvailable = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getAllActiveBookmakerOrderedByName();
+		        			bookmakerAvailable = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getAllActiveBookmakerOrderedByName(connection);
 	        			}
 	        			
 	        			//Modifica preferenza mostra tutti i bookmaker presenti nelle preferenze attive
@@ -285,7 +305,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				        	if(ChatBotCommand.BACK_TO_KEYBOARD.equals(command.getNavigationCommand())) {
 				        		command.setNavigationCommand(null);
 				        		command.removeLastChatBotCallbackFilter();
-				        		List<Bookmaker> bookmakerAvailable = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getAllActiveBookmakerOrderedByName();
+				        		List<Bookmaker> bookmakerAvailable = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getAllActiveBookmakerOrderedByName(connection);
 				        		showBookmakerButtons(command, userMessage, receivedMessage, bookmakerAvailable, 0);
 				        	}
 				        	
@@ -293,12 +313,12 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				        		
 				        		String bookmakerName = command.getLastChatBotCallbackFilter().getValue();
 		        				
-		        				Bookmaker bookmaker = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getBookmakerFromBookmakerName(bookmakerName);
+		        				Bookmaker bookmaker = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getBookmakerFromBookmakerName(bookmakerName, connection);
 				        		
-	        					UserPreference up = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getUserPreferenceFromUserAndBookmaker(userMessage, bookmaker);
+	        					UserPreference up = UserPreferenceDAO.getUserPreferenceDAOInstance().getUserPreferenceFromUserAndBookmaker(userMessage, bookmaker, connection);
 	        					if(up.atLeastOneFilterSet()) {
 					        		up.setActive(true);
-		        					UserPreferenceDAO.getUserPreferenceDAOInstance(connection).activateUserPreference(up);
+		        					UserPreferenceDAO.getUserPreferenceDAOInstance().activateUserPreference(up, connection);
 		        					
 		        		        	//Se si tratta di una conferma di modifica
 	        		        		String text = "💾 Le tue modifiche sono state salvate" + System.lineSeparator() 
@@ -315,7 +335,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        				if(filter.isIdFilter()) {
 		        					initialChar = filter.getValue().substring(0, 1);
 		        				}
-			        			List<Bookmaker> bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getLikeBookmakerNameByInitalChar(initialChar);
+			        			List<Bookmaker> bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getLikeBookmakerNameByInitalChar(initialChar, connection);
 				        		showBookmakerButtons(command, userMessage, receivedMessage, bookmakerPage, filter.getPageNumber() - 1);
 				        	}
 				        	
@@ -326,7 +346,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        				if(filter.isIdFilter()) {
 		        					initialChar = filter.getValue().substring(0, 1);
 		        				}
-			        			List<Bookmaker> bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getLikeBookmakerNameByInitalChar(initialChar);
+			        			List<Bookmaker> bookmakerPage = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getLikeBookmakerNameByInitalChar(initialChar, connection);
 				        		showBookmakerButtons(command, userMessage, receivedMessage, bookmakerPage, filter.getPageNumber() + 1);
 				        	}
 				    		//Se il comando iniziale è ancora disponibile per l'utente
@@ -334,7 +354,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 					            String bookmakerName = command.getLastChatBotCallbackFilter().getValue();
 					            
 					            //Controllo congiunto bookmaker e utente-preferenza
-					            List<Bookmaker> bookmakerList = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getLikeBookmakerNameByInitalChar(bookmakerName);
+					            List<Bookmaker> bookmakerList = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getLikeBookmakerNameByInitalChar(bookmakerName, connection);
 					            
 					            //Se l'insieme dei bookmaker è una lista e contiene un solo elemento e il filtro è impostato su ID
 					            if(bookmakerList != null && 
@@ -343,7 +363,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 					            	Bookmaker bookmaker = bookmakerList.get(0);
 						            //Prendo tutte le preferenze dell'utente per assicurarmi che il limite sia rispettato 
 						            //e che non stia cercando di aggiungere preferenze oltre il limite concesso
-						            List<UserPreference> userPreferenceBookmaker = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getUserPreferenceFromUser(userMessage);
+						            List<UserPreference> userPreferenceBookmaker = UserPreferenceDAO.getUserPreferenceDAOInstance().getUserPreferenceFromUser(userMessage, connection);
 						            
 					            	//Controllo se esiste già una preferenza su quel bookmaker
 					            	if(userPreferenceBookmaker != null) {
@@ -356,10 +376,10 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 					            			UserPreference upDB =  null;
 					            			if(!toBeModified) {
 					            				//Insert della nuova preferenza
-					            				UserPreferenceDAO.getUserPreferenceDAOInstance(connection).insertRow(UserPreference.getBlueSheepUserPreferenceFromUserInfo(bookmaker, userMessage, null, null, null, null, null, false, null));
+					            				UserPreferenceDAO.getUserPreferenceDAOInstance().insertRow(UserPreference.getBlueSheepUserPreferenceFromUserInfo(bookmaker, userMessage, null, null, null, null, null, false, null), connection);
 					            			}
 					            			//Mostro i filtri impostabili
-					            			upDB = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getUserPreferenceFromUserAndBookmaker(userMessage, bookmaker);
+					            			upDB = UserPreferenceDAO.getUserPreferenceDAOInstance().getUserPreferenceFromUserAndBookmaker(userMessage, bookmaker, connection);
 					            			goToFilterPreferences(bookmaker, userMessage, receivedMessage, upDB, command, toBeModified);
 					            		}
 					            		//Il bookmaker selezionato è stato già selezionato
@@ -408,10 +428,10 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	        				ChatBotCallbackFilter filter = command.getFilterCommandsList().get(0);
 	        				String bookmakerName = filter.getValue();
 	        				
-	        				Bookmaker bookmaker = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getBookmakerFromBookmakerName(bookmakerName);
+	        				Bookmaker bookmaker = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getBookmakerFromBookmakerName(bookmakerName, connection);
 	
 	        				if(bookmaker != null) {
-	        					UserPreference up = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getUserPreferenceFromUserAndBookmaker(userMessage, bookmaker);
+	        					UserPreference up = UserPreferenceDAO.getUserPreferenceDAOInstance().getUserPreferenceFromUserAndBookmaker(userMessage, bookmaker, connection);
 	
 	        					if(up != null) {
 	        					//La prima callback è per forza da bookmaker, quindi non sarà disponibile alcun ramo del if else.
@@ -425,7 +445,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 			        						&& ChatBotCommand.CONFIRM_CHANGE_BONUS_ABUSING.equals(command.getNavigationCommand())) {
 			        					
 			        					up.setActive(true);
-			        					UserPreferenceDAO.getUserPreferenceDAOInstance(connection).activateUserPreference(up);
+			        					UserPreferenceDAO.getUserPreferenceDAOInstance().activateUserPreference(up, connection);
 			        					
 			        		        	//Se si tratta di una conferma di modifica
 		        		        		String text = "💾 Le tue modifiche sono state salvate" + System.lineSeparator() 
@@ -436,7 +456,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 			        				}else{
 			        					
 			        					UserPreference updatedUP = UserPreferenceFilterUtil.updateUserPreferenceWithFilterInformationFromCallback(up, command, userMessage, connection);
-			        					UserPreferenceDAO.getUserPreferenceDAOInstance(connection).updateUserPreferenceFilters(updatedUP);
+			        					UserPreferenceDAO.getUserPreferenceDAOInstance().updateUserPreferenceFilters(updatedUP, connection);
 			        					
 			        					//Se il record non è oggetto di modifica ed 
 				        				//è di tipo RF_TYPE allora deve essere successivamente mostrato per forza il valore di RF richiesto
@@ -495,9 +515,9 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				        		
 			        		String bookmakerName = command.getLastChatBotCallbackFilter().getValue();
 			        		
-			        		Bookmaker bookmaker = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getBookmakerFromBookmakerName(bookmakerName);
+			        		Bookmaker bookmaker = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getBookmakerFromBookmakerName(bookmakerName, connection);
 			        		
-			        		UserPreferenceDAO.getUserPreferenceDAOInstance(connection).removeUserPreferenceByBookmakerAndUser(bookmaker, userMessage);
+			        		UserPreferenceDAO.getUserPreferenceDAOInstance().removeUserPreferenceByBookmakerAndUser(bookmaker, userMessage, connection);
 			        		
 	    		        	//Conferma di modifica
 			        		String text = "La tua preferenza relativa al bookmaker " 
@@ -543,13 +563,17 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		
 		String text = "";
 		int i = 0;
-		for(UserPreference up : userPreferenceList){
-			if(up.isActive()) {
-				i++;
-				text = text + "#" + i + System.lineSeparator() + System.lineSeparator();
-				text = text + up.getUserPreferenceManifest() + System.lineSeparator();
-				
+		if(userPreferenceList != null && !userPreferenceList.isEmpty()) {
+			for(UserPreference up : userPreferenceList){
+				if(up.isActive()) {
+					i++;
+					text = text + "#" + i + System.lineSeparator() + System.lineSeparator();
+					text = text + up.getUserPreferenceManifest() + System.lineSeparator();
+					
+				}
 			}
+		}else {
+			text = "Al momento non hai preferenze attive da visualizzare!" + System.lineSeparator() + System.lineSeparator();
 		}
 		
 		text = text + "Ricorda che il numero massimo di preferenze attive consentito è " + BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CHAT_BOT_MAX_PREF) + "."
@@ -568,12 +592,13 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	 * @param userMessage l'utente DB
 	 * @param up la preferenza DB
 	 * @throws AskToUsException se il flow non prevede la casistica
+	 * @throws SQLException 
 	 */
-	private void showAvailableFilterValues(ChatBotCallbackCommand command, Message receivedMessage, TelegramUser userMessage, UserPreference up) throws AskToUsException {
+	private void showAvailableFilterValues(ChatBotCallbackCommand command, Message receivedMessage, TelegramUser userMessage, UserPreference up) throws AskToUsException, SQLException {
 		
 		AbstractDAO<? extends AbstractBlueSheepEntity> dao = ChatBotFilterCommandUtilManager.getCorrectDAOByChatBotCallackCommand(command, connection);
 		
-		List<? extends AbstractBlueSheepEntity> returnFilterRow = dao.getAllActiveRows();
+		List<? extends AbstractBlueSheepEntity> returnFilterRow = dao.getAllActiveRows(connection);
 		
 		if(returnFilterRow != null && !returnFilterRow.isEmpty()) {
 			int columnNumber = 2;
@@ -701,36 +726,35 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	            }
 	        } 
 			
-			else if((AcceptedUserInput.REGISTRATION.getInputUser().equals(receivedMessage.getText()) || 
-					AcceptedUserInput.START.getInputUser().equals(receivedMessage.getText())) && 
+			else if(AcceptedUserInput.START.getInputUser().equals(receivedMessage.getText()) && 
 					!isBlockedUser(userMessage)){
-				if(userDB == null) {
+				if(userDB != null) {
 		    		try {
-		    			userDB = TelegramUserDatabaseManager.addUserArbsMap(userMessage, connection);
+		    			userDB = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance().updateChatIdFirstLogin(userDB, receivedMessage, connection);
 					} catch (SQLException | MoreThanOneResultException e) {
 						throw new AskToUsException(userMessage);
 					}
 		
-		    		logger.info("Registration completed for user " + userMessage.getUserName() + ", CHAT_ID=" + userMessage.getChatId());
+		    		logger.info("Registration completed for user " + userDB.getUserName() + ", CHAT_ID=" + userMessage.getChatId());
 		    		
-		    		SendMessage message = getMenuMessageSendMessage(userMessage, receivedMessage, null);
+		    		SendMessage message = getMenuMessageSendMessage(userDB, receivedMessage, null);
 		            if(message != null) {
 		            	sendStandardMessage(message, userDB);
 		            }else {
 		            	logger.warn("No command available to reply. No message is sent");
 		            }
 				}else {
-					throw new AlreadyRegisteredUserChatBotException(userDB);
+					throw new NotPermittedOperationException(userMessage, receivedMessage);
 				}
 			}else {
 				throw new NotPermittedOperationException(userMessage, receivedMessage);
 			}
     	}catch(BluesheepChatBotException e) {
-    		sendErrorMessage(e, userDB);
+    		sendErrorMessage(e, userMessage);
     		logger.info("Sending error message to user " + e.getUser().toString(), e);
     	} catch (SQLException e) {
     		logger.error(e.getMessage(), e);
-    		sendErrorMessage(new AskToUsException(userMessage), userDB);
+    		sendErrorMessage(new AskToUsException(userDB), userDB);
     	}
 	}
 
@@ -880,7 +904,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	private void updateLastMessageIdUser(Message lastMessageSent, TelegramUser userDB) throws AskToUsException {
 		userDB.setLastMessageId(new Long(lastMessageSent.getMessageId()));
 		try {
-			TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).updateLastMessageSent(userDB);
+			TelegramUserDAO.getBlueSheepTelegramUserDAOInstance().updateLastMessageSent(userDB, connection);
 		} catch (SQLException e) {
 			throw new AskToUsException(userDB);
 		}
@@ -896,7 +920,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 	private void updateLastMessageIdUser(EditMessageText lastMessageSent, TelegramUser userDB) throws AskToUsException {
 		userDB.setLastMessageId(new Long(lastMessageSent.getMessageId()));
 		try {
-			TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).updateLastMessageSent(userDB);
+			TelegramUserDAO.getBlueSheepTelegramUserDAOInstance().updateLastMessageSent(userDB, connection);
 		} catch (SQLException e) {
 			throw new AskToUsException(userDB);
 		}

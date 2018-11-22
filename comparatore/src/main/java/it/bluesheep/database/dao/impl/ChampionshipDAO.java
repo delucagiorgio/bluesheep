@@ -19,19 +19,19 @@ public class ChampionshipDAO extends AbstractDAO<Championship> implements IFilte
 	private static final String CHAMPIONSHIPNAME = "championshipName";
 	private static final String ACTIVE = "active";
 	
-	protected ChampionshipDAO(Connection connection) {
-		super(tableName, connection);
+	protected ChampionshipDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized ChampionshipDAO getChampionshipDAOInstance(Connection connection) {
+	public static synchronized ChampionshipDAO getChampionshipDAOInstance() {
 		if(instance == null) {
-			instance = new ChampionshipDAO(connection);
+			instance = new ChampionshipDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	protected List<Championship> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<Championship> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<Championship> championshipList = new ArrayList<Championship>();
 		
@@ -58,13 +58,13 @@ public class ChampionshipDAO extends AbstractDAO<Championship> implements IFilte
 	}
 
 	@Override
-	public List<Championship> getAllRowFromButtonText(String textButton) {
+	public List<Championship> getAllRowFromButtonText(String textButton, Connection connection) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Championship getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
+	public Championship getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
 		// TODO Auto-generated method stub
 		return null;
 	}

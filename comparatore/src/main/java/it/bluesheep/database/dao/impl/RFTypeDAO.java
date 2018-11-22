@@ -21,19 +21,19 @@ public class RFTypeDAO extends AbstractDAO<RFType> implements IFilterDAO<RFType>
 	private static final String REFUNDTEXT = "refundText";
 	private static final String ACTIVE = "active";
 	
-	private RFTypeDAO(Connection connection) {
-		super(tableName, connection);
+	private RFTypeDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized RFTypeDAO getRFTypeDAOInstance(Connection connection) {
+	public static synchronized RFTypeDAO getRFTypeDAOInstance() {
 		if(instance == null) {
-			instance = new RFTypeDAO(connection);
+			instance = new RFTypeDAO();
 		}
 		return instance;
 	} 
 
 	@Override
-	protected List<RFType> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<RFType> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<RFType> dataMapped = new ArrayList<RFType>();
 		
@@ -62,7 +62,7 @@ public class RFTypeDAO extends AbstractDAO<RFType> implements IFilterDAO<RFType>
 	}
 
 	@Override
-	public List<RFType> getAllRowFromButtonText(String textButton) {
+	public List<RFType> getAllRowFromButtonText(String textButton, Connection connection) {
 		
 		List<RFType> rfTypeList = null;
 		
@@ -70,7 +70,7 @@ public class RFTypeDAO extends AbstractDAO<RFType> implements IFilterDAO<RFType>
 		try {
 			PreparedStatement ps = connection.prepareStatement(query);
 			ps.setString(1, textButton);
-			rfTypeList = getMappedObjectBySelect(ps);
+			rfTypeList = getMappedObjectBySelect(ps, connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -79,8 +79,8 @@ public class RFTypeDAO extends AbstractDAO<RFType> implements IFilterDAO<RFType>
 	}
 
 	@Override
-	public RFType getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
-		return getSingleResult(getAllRowFromButtonText(textButton));
+	public RFType getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
+		return getSingleResult(getAllRowFromButtonText(textButton, connection));
 	}
 	
 	

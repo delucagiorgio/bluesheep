@@ -80,25 +80,25 @@ public class ChatBotFilterCommandUtilManager {
 	public static AbstractDAO<? extends AbstractBlueSheepEntity> getCorrectDAOByChatBotCallackCommand(ChatBotCallbackCommand command, Connection connection) {
 		switch(command.getLastChatBotCallbackFilter().getFilter()) {
 		case BOOKMAKER_BONUS_ABUSING:
-			return BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection);
+			return BookmakerDAO.getBlueSheepBookmakerDAOInstance();
 			
 		case EVENT_BONUS_ABUSING:
-			return EventDAO.getEventDAOInstance(connection);
+			return EventDAO.getEventDAOInstance();
 		
 		case RF_TYPE_BONUS_ABUSING:
-			return RFTypeDAO.getRFTypeDAOInstance(connection);
+			return RFTypeDAO.getRFTypeDAOInstance();
 			
 		case RF_BONUS_ABUSING:
-			return RFValueDAO.getRFDAOInstance(connection);
+			return RFValueDAO.getRFDAOInstance();
 
 		case MINVALUEODD_BONUS_ABUSING:
-			return MinOddValueDAO.getMinOddValueDAOInstance(connection);
+			return MinOddValueDAO.getMinOddValueDAOInstance();
 		
 		case RATING_BONUS_ABUSING:
-			return RatingDAO.getRatingDAOInstance(connection);
+			return RatingDAO.getRatingDAOInstance();
 		
 		case SIZE_BONUS_ABUSING:
-			return SizeDAO.getSizeDAOInstance(connection);
+			return SizeDAO.getSizeDAOInstance();
 			default:
 				return null;
 		}

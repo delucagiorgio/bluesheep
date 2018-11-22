@@ -35,8 +35,8 @@ public class ConnectionPool {
 		
 		Connection connection = null;
 		if(!connectionVector.isEmpty()) {
-			connection = connectionVector.remove(0);
-			
+			connection = connectionVector.lastElement();
+			connectionVector.remove(connection);
 			if(connection.isClosed()) {
 				connection = dataSource.getConnection();
 				logger.info("New connection to DB established");
@@ -46,7 +46,7 @@ public class ConnectionPool {
 			logger.info("New connection to DB established");
 		}
 		connection.setAutoCommit(false);
-		connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+		connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		return connection;
 	}
 	

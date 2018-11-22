@@ -77,18 +77,25 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 			List<RecordOutput> tabellaOutput = comparisonResultMap.get(service);
 			saveRecordsOnFile(service, tabellaOutput);
 			if(comparisonResultMap.get(service) != null && !comparisonResultMap.get(service).isEmpty()) {
+				Connection connection = null;
 				try {
-					Connection connection = ConnectionPool.getConnection();
-					SaveOddProcessHistoryDAO processHistoryDao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance(connection);
-					if(!processHistoryDao.stillRunningProcess(service)) {
+					connection = ConnectionPool.getConnection();
+					SaveOddProcessHistoryDAO processHistoryDao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance();
+					if(!processHistoryDao.stillRunningProcess(service, connection)) {
 						BlueSheepServiceHandlerManager.executor.submit(new OddsDatabaseSaveServiceHandler(comparisonResultMap.get(service), service));
 						logger.info("Saving odd process for service " + service + " started");
 					}else {
 						logger.warn("Not executing " + service + " for save odds because still running");
 					}
 					ConnectionPool.releaseConnection(connection);
-				}catch(SQLException e) {
+				}catch(Exception e) {
 					logger.error(e.getMessage(), e);
+					try {
+						ConnectionPool.releaseConnection(connection);
+					} catch (SQLException e1) {
+						logger.error(e.getMessage(), e);
+					}
+
 				}
 			}
 		}

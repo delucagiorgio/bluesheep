@@ -23,19 +23,19 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 	private static final String PRODID = "progId";
 	private static final String NOTIFICATIONKEY = "notificationKey";
 	
-	private UserPreferenceNotificationDAO(Connection connection) {
-		super(tableName, connection);
+	private UserPreferenceNotificationDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized UserPreferenceNotificationDAO getUserPreferenceNotificationDAOInstance(Connection connection) {
+	public static synchronized UserPreferenceNotificationDAO getUserPreferenceNotificationDAOInstance() {
 		if(instance == null) {
-			instance = new UserPreferenceNotificationDAO(connection);
+			instance = new UserPreferenceNotificationDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	protected List<UserPreferenceNotification> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<UserPreferenceNotification> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<UserPreferenceNotification> userPrefNotitication = new ArrayList<UserPreferenceNotification>(returnSelect.getFetchSize());
 		
@@ -43,8 +43,8 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 			Long userPreferenceId = returnSelect.getLong(USERPREFERENCEID);
 			Long userId = returnSelect.getLong(USERID);
 			
-			UserPreference userPreference = UserPreferenceDAO.getUserPreferenceDAOInstance(connection).getEntityById(userPreferenceId);
-			TelegramUser user = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).getEntityById(userId);
+			UserPreference userPreference = UserPreferenceDAO.getUserPreferenceDAOInstance().getEntityById(userPreferenceId,connection);
+			TelegramUser user = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance().getEntityById(userId, connection);
 			int prodId = returnSelect.getInt(PRODID);
 			long id = returnSelect.getLong(ID);
 			String notificationKey = returnSelect.getString(NOTIFICATIONKEY);
@@ -68,13 +68,13 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 				+ "?)";
 	}
 	
-	public List<UserPreferenceNotification> getNotificationsSentByUserPreference(UserPreference up) {
+	public List<UserPreferenceNotification> getNotificationsSentByUserPreference(UserPreference up, Connection connection) throws SQLException {
 		String query = getBasicSelectQuery() + WHERE + USERPREFERENCEID + " = " + up.getId();
 		
-		return getMappedObjectBySelect(query);
+		return getMappedObjectBySelect(query, connection);
 	}
 
-	public void deleteUserPrefNotificationFromUP(UserPreference up) throws SQLException {
+	public void deleteUserPrefNotificationFromUP(UserPreference up, Connection connection) throws SQLException {
 		
 		String query = DELETE + tableName + WHERE + USERPREFERENCEID + " = ?";
 		

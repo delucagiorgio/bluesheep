@@ -38,20 +38,20 @@ public class PPOddDAO extends AbstractOddDAO<PPOdd> implements IOddDAO<PPOdd> {
 	private static final String LIQUIDITA1 = "liquidita1";
 	private static final String LIQUIDITA2 = "liquidita2";
 	
-	protected PPOddDAO(Connection connection) {
-		super(tableName, connection);
+	private PPOddDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized PPOddDAO getPPOddDAOInstance(Connection connection) {
+	public static synchronized PPOddDAO getPPOddDAOInstance() {
 		if(instance == null) {
-			instance = new PPOddDAO(connection);
+			instance = new PPOddDAO();
 		}
 		
 		return instance;
 	}
 
 	@Override
-	protected List<PPOdd> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<PPOdd> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<PPOdd> ppOddList = new ArrayList<PPOdd>(returnSelect.getFetchSize());
 		
@@ -137,7 +137,7 @@ public class PPOddDAO extends AbstractOddDAO<PPOdd> implements IOddDAO<PPOdd> {
 	}
 
 	@Override
-	public boolean checkEmptyTable() throws SQLException {
+	public boolean checkEmptyTable(Connection connection) throws SQLException {
 		String query = "select NOT EXISTS (select id from " + tableName + " ) as emptyTable";
 
 		Statement ps = connection.createStatement();
@@ -152,7 +152,7 @@ public class PPOddDAO extends AbstractOddDAO<PPOdd> implements IOddDAO<PPOdd> {
 	}
 
 	@Override
-	public void deleteTable() throws SQLException {
+	public void deleteTable(Connection connection) throws SQLException {
 		String query = DELETE + tableName;
 
 		Statement ps = connection.createStatement();
@@ -161,7 +161,7 @@ public class PPOddDAO extends AbstractOddDAO<PPOdd> implements IOddDAO<PPOdd> {
 	}
 
 	@Override
-	public void insertMultipleRows(List<RecordOutput> recordOutput) throws SQLException {
+	public void insertMultipleRows(List<RecordOutput> recordOutput, Connection connection) throws SQLException {
 		
 		int countEntity = recordOutput.size();
 		
@@ -203,10 +203,9 @@ public class PPOddDAO extends AbstractOddDAO<PPOdd> implements IOddDAO<PPOdd> {
 			ps.executeBatch();
 			i++;
 		}while(i * page < countEntity);
-		connection.commit();
 	}
 	
-	public List<PPOdd> getPPOddListFromBookmakerList(List<String> bookmakerList) throws SQLException{
+	public List<PPOdd> getPPOddListFromBookmakerList(List<String> bookmakerList, Connection connection) throws SQLException{
 		
 		String query = getBasicSelectQuery() + WHERE + BOOKMAKERNAME1 + " in (";
 		String[] parameter = new String[bookmakerList.size()];
@@ -222,7 +221,7 @@ public class PPOddDAO extends AbstractOddDAO<PPOdd> implements IOddDAO<PPOdd> {
 		temp += ")";
 		query = query + temp + OR +  BOOKMAKERNAME2 + " in (" + temp;
 		PreparedStatement ps = connection.prepareStatement(query);
-		List<PPOdd> ppOddsList = getMappedObjectBySelect(ps);
+		List<PPOdd> ppOddsList = getMappedObjectBySelect(ps, connection);
 		
 		return ppOddsList;
 	}

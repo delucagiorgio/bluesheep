@@ -31,7 +31,7 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 		Statement stmt;
 		try {
 			stmt = connection.createStatement();
-			logger.info("Executing query" + selectQuery);
+			logger.debug("Executing query" + selectQuery);
 			result = stmt.executeQuery(selectQuery);
 		} catch (SQLException e) {
 			logger.error("Error during select. Query is " + selectQuery);
@@ -42,10 +42,10 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 	}
 	
 	@Override
-	public ResultSet executeSelect(PreparedStatement selectQuery) throws SQLException{
+	public ResultSet executeSelect(PreparedStatement selectQuery, Connection connection) throws SQLException{
 		ResultSet result = null;
 		try {
-			logger.info("Executing query " + selectQuery);
+			logger.debug("Executing query " + selectQuery);
 			result = selectQuery.executeQuery();
 		} catch (SQLException e) {
 			logger.error("Error during select. Query is " + selectQuery);
@@ -58,9 +58,9 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 	@Override
 	public void executeUpdate(PreparedStatement updateQuery) throws SQLException {
 		try {
-			logger.info("Executing query " + updateQuery);
+			logger.debug("Executing query " + updateQuery);
 			updateQuery.executeUpdate();
-			logger.info("Updated count for query is " + updateQuery.getUpdateCount());
+			logger.debug("Updated count for query is " + updateQuery.getUpdateCount());
 		} catch (SQLException e) {
 			logger.warn("No update performed");
 			throw e;
@@ -69,7 +69,7 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 
 	@Override
 	public boolean executeInsert(PreparedStatement insertQuery) throws SQLException {
-		logger.info("Executing query " + insertQuery);
+		logger.debug("Executing query " + insertQuery);
 		insertQuery.executeUpdate();
 		logger.info("Inserted count for query is " + insertQuery.getUpdateCount());
 		return true;
@@ -78,9 +78,9 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 	@Override
 	public void executeDelete(PreparedStatement deleteQuery) throws SQLException {
 		try {
-			logger.info("Executing query " + deleteQuery);
+			logger.debug("Executing query " + deleteQuery);
 			deleteQuery.executeUpdate();
-			logger.info("Delete count for query is " + deleteQuery.getUpdateCount());
+			logger.debug("Delete count for query is " + deleteQuery.getUpdateCount());
 		} catch (SQLException e) {
 			logger.warn("No update performed");
 			throw e;

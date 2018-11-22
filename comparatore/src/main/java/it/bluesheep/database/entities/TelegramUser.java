@@ -14,6 +14,7 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 	private Timestamp registrationDate;
 	private Boolean active;
 	private Long lastMessageId;
+	private String bluesheepUsername;
 	
 	private TelegramUser(String userName, Long chatId) {
 		super();
@@ -23,17 +24,30 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 		active = false;
 	}
 
-	private TelegramUser(String userName, Long chatId, Boolean active, Timestamp date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
+	private TelegramUser(String userName, String bluesheepUsername, Long chatId, Boolean active, Timestamp date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
 		super(id, createTime, updateTime);
 		this.chatId = chatId;
+		this.bluesheepUsername = bluesheepUsername;
 		this.userName = userName;
 		registrationDate = date;
 		this.active = active;
 		this.lastMessageId = lastMessageId;
 	}
 	
-	public static TelegramUser getBlueSheepTelegramUserFromDatabaseInfo(String userName, Long chatId, Boolean active, Timestamp date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
-		return new TelegramUser(userName, chatId, active, date, id, lastMessageId, createTime, updateTime);
+	public static TelegramUser getBlueSheepTelegramUserFromBlueSheepInfo(BlueSheepUserInfo bs, boolean active) {
+		return new TelegramUser(bs.getTelegramUsername(), 
+								bs.getBluesheepUsername(), 
+								null, 
+								active, 
+								new Timestamp(System.currentTimeMillis()),
+								1L, 
+								null,
+								new Timestamp(System.currentTimeMillis()),
+								null);
+	}
+	
+	public static TelegramUser getBlueSheepTelegramUserFromDatabaseInfo(String userName, String bluesheepUsername, Long chatId, Boolean active, Timestamp date, Long id, Long lastMessageId, Timestamp createTime, Timestamp updateTime) {
+		return new TelegramUser(userName, bluesheepUsername, chatId, active, date, id, lastMessageId, createTime, updateTime);
 	}
 	
 	public static TelegramUser getBlueSheepTelegramUserFromNewInfo(String userName, Long chatId) {
@@ -100,5 +114,9 @@ public class TelegramUser extends AbstractBlueSheepEntity {
 
 	public void setRegistrationDate(Timestamp registrationDate) {
 		this.registrationDate = registrationDate;
+	}
+
+	public String getBluesheepUsername() {
+		return bluesheepUsername;
 	}
 }

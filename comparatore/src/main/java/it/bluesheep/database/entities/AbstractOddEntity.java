@@ -10,7 +10,6 @@ public abstract class AbstractOddEntity extends AbstractBlueSheepEntity {
 
 	@Override
 	public String getTelegramButtonText() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

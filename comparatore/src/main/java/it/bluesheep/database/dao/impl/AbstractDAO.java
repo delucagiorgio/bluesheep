@@ -30,6 +30,7 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	protected static final String JOIN = " JOIN ";
 	protected static final String ON = " ON ";
 	protected static final String IS = " IS ";
+	protected static final String NOT = " NOT ";
 	protected static final String INSERT = " INSERT INTO ";
 	protected static final String VALUES = " VALUES ";
 	protected static final String DELETE = " DELETE FROM ";
@@ -46,13 +47,11 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	protected static final String GREAT_EQ = " => ";
 	protected static final String LESS_EQ = " <= ";
 	protected static Logger logger = Logger.getLogger(AbstractDAO.class);
-	protected Connection connection;
 	private Class<T> type;
 
 	
 	@SuppressWarnings("unchecked")
-	protected AbstractDAO(String tableName, Connection connection) {
-		this.connection = connection;
+	protected AbstractDAO(String tableName) {
 		this.tableName = tableName;
 		this.type = (Class<T>) ((ParameterizedType) getClass()
 	                .getGenericSuperclass()).getActualTypeArguments()[0];
@@ -68,28 +67,28 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 				FROM + tableName;
 	}
 	
-	public List<T> getAllRows(){
+	public List<T> getAllRows(Connection connection) throws SQLException{
 		
 		String queryStatement = SELECT_ALL + FROM  + tableName + ";";
-		List<T> returnList = getMappedObjectBySelect(queryStatement);
+		List<T> returnList = getMappedObjectBySelect(queryStatement, connection);
 		
 		return returnList;
 	}
 	
-	public List<T> getAllActiveRows(){
+	public List<T> getAllActiveRows(Connection connection) throws SQLException{
 		
 		String queryStatement = getBasicSelectQuery() + WHERE + "active" + IS + true + ";";
-		List<T> returnList = getMappedObjectBySelect(queryStatement);
+		List<T> returnList = getMappedObjectBySelect(queryStatement, connection);
 		
 		return returnList;
 	}
 	
-	private ResultSet getResultSelectFromQuery(String query) throws SQLException {
+	private ResultSet getResultSelectFromQuery(String query, Connection connection) throws SQLException {
 		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query, connection);
 	}
 	
-	private ResultSet getResultSelectFromQuery(PreparedStatement query) throws SQLException {
-		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query);
+	private ResultSet getResultSelectFromQuery(PreparedStatement query, Connection connection) throws SQLException {
+		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query, connection);
 	}
 	
 	/**
@@ -99,22 +98,17 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	 * @return gli oggetti mappati
 	 * @throws SQLException
 	 */
-	protected abstract List<T> mapDataIntoObject(ResultSet returnSelect) throws SQLException;
+	protected abstract List<T> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException;
 	
-	public List<T> getMappedObjectBySelect(String query){
+	public List<T> getMappedObjectBySelect(String query, Connection connection) throws SQLException{
 
 		List<T> returnList = null;
-		try {
-			ResultSet returnSelect = getResultSelectFromQuery(query);
-			
-			if(returnSelect != null) {
-				returnList = mapDataIntoObject(returnSelect);
-			}else {
-				logger.warn("Select query " + query + " has returned no value");
-			}
-		} catch (SQLException e) {
-			logger.error("Problem during mapping data into objects");
-			logger.error(e.getMessage(), e);
+		ResultSet returnSelect = getResultSelectFromQuery(query, connection);
+		
+		if(returnSelect != null) {
+			returnList = mapDataIntoObject(returnSelect, connection);
+		}else {
+			logger.warn("Select query " + query + " has returned no value");
 		}
 		
 		return returnList;
@@ -125,22 +119,18 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	 * Mappa gli oggetti rispetto alle righe tornate dalla query
 	 * @param query la query da eseguire
 	 * @return gli oggetti mappati
+	 * @throws SQLException 
 	 */
-	public List<T> getMappedObjectBySelect(PreparedStatement query){
+	public List<T> getMappedObjectBySelect(PreparedStatement query, Connection connection) throws SQLException{
 
 		List<T> returnList = null;
 
-		try {
-			ResultSet returnSelect = getResultSelectFromQuery(query);
-			if(returnSelect != null) {
-				returnList = new ArrayList<T>();
-				returnList = mapDataIntoObject(returnSelect);
-			}else {
-				logger.warn("Select query " + query + " has returned no value");
-			}
-		} catch (SQLException e) {
-			logger.error("Problem during mapping data into objects");
-			logger.error(e.getMessage(), e);
+		ResultSet returnSelect = getResultSelectFromQuery(query, connection);
+		if(returnSelect != null) {
+			returnList = new ArrayList<T>();
+			returnList = mapDataIntoObject(returnSelect, connection);
+		}else {
+			logger.warn("Select query " + query + " has returned no value");
 		}
 		
 		return returnList;
@@ -165,7 +155,7 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		return str;
 	}
 	
-	public boolean insertRow(T entity) throws SQLException {
+	public boolean insertRow(T entity, Connection connection) throws SQLException {
 		
 		String query = getinsertBaseTableNameQuery() + getAllColumnValuesFromEntity(entity);
 		
@@ -181,11 +171,11 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		return INSERT + tableName + getAllColumnLabels() + VALUES;
 	}
 	
-	public T getEntityById(Long entityId) {
+	public T getEntityById(Long entityId, Connection connection) throws SQLException {
 		
 		T returnEntity = null;
 		String query = getBasicSelectQuery() + WHERE + ID + " = " + entityId.longValue();
-		List<T> returnSet = getMappedObjectBySelect(query);
+		List<T> returnSet = getMappedObjectBySelect(query, connection);
 		
 		if(returnSet != null && returnSet.size() == 1) {
 			returnEntity = returnSet.get(0);

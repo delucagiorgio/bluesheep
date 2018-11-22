@@ -23,19 +23,19 @@ public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory>
 	private static final String STATUS = "status";
 	private static final String ERRORMESSAGE = "errorMessage";
 	
-	protected SaveOddProcessHistoryDAO(Connection connection) {
-		super(tableName, connection);
+	private SaveOddProcessHistoryDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized SaveOddProcessHistoryDAO getSaveOddProcessHistoryDAOInstance(Connection connection) {
+	public static synchronized SaveOddProcessHistoryDAO getSaveOddProcessHistoryDAOInstance() {
 		if(instance == null) {
-			instance = new SaveOddProcessHistoryDAO(connection);
+			instance = new SaveOddProcessHistoryDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	protected List<SaveOddProcessHistory> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<SaveOddProcessHistory> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		List<SaveOddProcessHistory> processList = new ArrayList<SaveOddProcessHistory>(returnSelect.getFetchSize());
 		
 		while(returnSelect.next()) {
@@ -66,7 +66,7 @@ public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory>
 				+ "?)";
 	}
 
-	public boolean stillRunningProcess(Service service) throws SQLException {
+	public boolean stillRunningProcess(Service service, Connection connection) throws SQLException {
 		String query  = "SELECT EXISTS (" + getBasicSelectQuery() 
 				+ WHERE + SERVICETYPE + " = '" 
 				+ service.getCode() + "'" + AND 
@@ -83,37 +83,42 @@ public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory>
 		return false;
 	}
 
-	public void updateLastRun(Service service, Exception e) {
+	public void updateLastRun(Service service, Exception e, Connection connection) {
 		String query = getBasicSelectQuery() 
 				+ WHERE + SERVICETYPE + " = '" + service.getCode() + "'"
 				+ AND + STATUS + " = '" + ProcessStatus.RUNNING.getCode() + "'";
 		
 		try {
-			SaveOddProcessHistory lastRunInError = getSingleResult(getMappedObjectBySelect(query));
-
-			if(e == null) {
-				lastRunInError.setStatus(ProcessStatus.COMPLETED.getCode());
-			}else{
-				lastRunInError.setStatus(ProcessStatus.ERROR.getCode());
-				lastRunInError.setErrorMessage(e.getMessage());
+			SaveOddProcessHistory lastRun = getSingleResult(getMappedObjectBySelect(query, connection));
+			if(lastRun != null) {
+				if(e == null) {
+					lastRun.setStatus(ProcessStatus.COMPLETED.getCode());
+				}else{
+					lastRun.setStatus(ProcessStatus.ERROR.getCode());
+					lastRun.setErrorMessage(e.getMessage());
+				}
+				String updateQuery = UPDATE + tableName 
+						+ SET + ERRORMESSAGE + " = ?, " 
+						+ STATUS + " = ? " + WHERE + ID + " = " 
+						+ lastRun.getId();
+				
+				PreparedStatement ps = connection.prepareStatement(updateQuery);
+				ps.setString(1, lastRun.getErrorMessage());
+				ps.setString(2, lastRun.getStatus());
+				
+				int updatedCount = ps.executeUpdate();
+				
+				logger.info("Updated process for service " + service + " with status " + lastRun.getStatus() + ": update count " + updatedCount);
 			}
-			String updateQuery = UPDATE + tableName 
-					+ SET + ERRORMESSAGE + " = ?, " 
-					+ STATUS + " = ? " + WHERE + ID + " = " 
-					+ lastRunInError.getId();
-			
-			PreparedStatement ps = connection.prepareStatement(updateQuery);
-			ps.setString(1, lastRunInError.getErrorMessage());
-			ps.setString(2, lastRunInError.getStatus());
-			
-			int updatedCount = ps.executeUpdate();
-			
-			logger.info("Updated process count for service " + service + " is " + updatedCount);
-			
 		} catch (MoreThanOneResultException | SQLException e1) {
 			logger.error(e1.getMessage(), e1);
 		}
-		
+	}
+	
+	@Override
+	public boolean insertRow(SaveOddProcessHistory entity, Connection connection) throws SQLException {
+		logger.info("Starting process " + entity.getServiceType());
+		return super.insertRow(entity, connection);
 	}
 
 }

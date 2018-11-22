@@ -33,7 +33,7 @@ public class UserPreferenceFilterUtil {
 			
 			IFilterDAO<? extends AbstractBlueSheepFilterEntity> filterDao = IFilterDAOFactory.getCorrectIFilterDAOFromChatBotFilterCommand(filter.getFilter(), connection);
 			
-			AbstractBlueSheepFilterEntity filterEntity = filterDao.getSingleRowFromButtonText(textFilter);
+			AbstractBlueSheepFilterEntity filterEntity = filterDao.getSingleRowFromButtonText(textFilter, connection);
 			
 			textFilter = filterEntity.getCodeDB();
 			

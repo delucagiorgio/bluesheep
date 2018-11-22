@@ -22,19 +22,19 @@ public class RatingDAO extends AbstractDAO<Rating> implements IFilterDAO<Rating>
 	private static final String RATINGCODE = "ratingCode";
 	private static final String ACTIVE = "active";
 	
-	protected RatingDAO(Connection connection) {
-		super(tableName, connection);
+	private RatingDAO() {
+		super(tableName);
 	}
 
-	public static synchronized RatingDAO getRatingDAOInstance(Connection connection) {
+	public static synchronized RatingDAO getRatingDAOInstance() {
 		if(instance == null) {
-			instance = new RatingDAO(connection);
+			instance = new RatingDAO();
 		}
 		return instance;
 	}
 	
 	@Override
-	public List<Rating> getAllRowFromButtonText(String textButton) {
+	public List<Rating> getAllRowFromButtonText(String textButton, Connection connection) {
 		
 		List<Rating> returnList = null;
 		String query = getBasicSelectQuery() + WHERE + RATINGTEXT + " = ? " + AND + ACTIVE + IS + true;
@@ -43,7 +43,7 @@ public class RatingDAO extends AbstractDAO<Rating> implements IFilterDAO<Rating>
 		try {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, textButton);
-			returnList = getMappedObjectBySelect(ps);
+			returnList = getMappedObjectBySelect(ps, connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -51,12 +51,12 @@ public class RatingDAO extends AbstractDAO<Rating> implements IFilterDAO<Rating>
 	}
 
 	@Override
-	public Rating getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
-		return getSingleResult(getAllRowFromButtonText(textButton));
+	public Rating getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
+		return getSingleResult(getAllRowFromButtonText(textButton, connection));
 	}
 
 	@Override
-	protected List<Rating> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<Rating> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		List<Rating> ratingList = new ArrayList<Rating>();
 		
 		while(returnSelect.next()) {

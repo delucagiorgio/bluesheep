@@ -22,19 +22,19 @@ public class RFValueDAO extends AbstractDAO<RFValue> implements IFilterDAO<RFVal
 	private static final String ACTIVE = "active";
 	private static final String RFVALUE = "rfValue";
 	
-	protected RFValueDAO(Connection connection) {
-		super(tableName, connection);
+	private RFValueDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized RFValueDAO getRFDAOInstance(Connection connection) {
+	public static synchronized RFValueDAO getRFDAOInstance() {
 		if(instance == null) {
-			instance = new RFValueDAO(connection);
+			instance = new RFValueDAO();
 		}
 		return instance;
 	}
 
 	@Override
-	protected List<RFValue> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<RFValue> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<RFValue> rfList = new ArrayList<RFValue>();
 		
@@ -66,14 +66,14 @@ public class RFValueDAO extends AbstractDAO<RFValue> implements IFilterDAO<RFVal
 	}
 
 	@Override
-	public List<RFValue> getAllRowFromButtonText(String textButton) {
+	public List<RFValue> getAllRowFromButtonText(String textButton, Connection connection) {
 		List<RFValue> rfValueList = null;
 		
 		String query = getBasicSelectQuery() + WHERE + RFTEXT + " = ?";
 		try {
 			PreparedStatement ps = connection.prepareStatement(query);
 			ps.setString(1, textButton);
-			rfValueList = getMappedObjectBySelect(ps);
+			rfValueList = getMappedObjectBySelect(ps, connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -82,7 +82,7 @@ public class RFValueDAO extends AbstractDAO<RFValue> implements IFilterDAO<RFVal
 	}
 
 	@Override
-	public RFValue getSingleRowFromButtonText(String textButton) throws MoreThanOneResultException {
-		return getSingleResult(getAllRowFromButtonText(textButton));
+	public RFValue getSingleRowFromButtonText(String textButton, Connection connection) throws MoreThanOneResultException {
+		return getSingleResult(getAllRowFromButtonText(textButton, connection));
 	}
 }

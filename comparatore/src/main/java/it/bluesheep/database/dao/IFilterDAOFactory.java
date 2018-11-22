@@ -18,22 +18,22 @@ public class IFilterDAOFactory {
 	public static IFilterDAO<? extends AbstractBlueSheepEntity> getCorrectIFilterDAOFromChatBotFilterCommand(ChatBotFilterCommand filterCommand, Connection connection){
 		switch(filterCommand) {
 		case EVENT_BONUS_ABUSING:
-			return EventDAO.getEventDAOInstance(connection);
+			return EventDAO.getEventDAOInstance();
 			
 		case MINVALUEODD_BONUS_ABUSING:
-			return MinOddValueDAO.getMinOddValueDAOInstance(connection);
+			return MinOddValueDAO.getMinOddValueDAOInstance();
 
 		case RATING_BONUS_ABUSING:
-			return RatingDAO.getRatingDAOInstance(connection);
+			return RatingDAO.getRatingDAOInstance();
 			
 		case RF_BONUS_ABUSING:
-			return RFValueDAO.getRFDAOInstance(connection);
+			return RFValueDAO.getRFDAOInstance();
 			
 		case RF_TYPE_BONUS_ABUSING:
-			return RFTypeDAO.getRFTypeDAOInstance(connection);
+			return RFTypeDAO.getRFTypeDAOInstance();
 			
 		case SIZE_BONUS_ABUSING:
-			return SizeDAO.getSizeDAOInstance(connection);
+			return SizeDAO.getSizeDAOInstance();
 			
 			default:
 				return null;

@@ -129,6 +129,7 @@ public class BlueSheepConstants {
 	public static final String TELEGRAM_USER_CHATID_REGEX = "CHAT_ID=";
 	public static final String REGEX_TELEGRAMBOTACTION = " - ";
 	public static final String WS_USERS_PWD = "blu3S433p-w5-|?o";
+	public static final String MAX_NOTIFICATION_USER_PREF = "MAX_NOTIFICATION_USER_PREF";
 	
 	private BlueSheepConstants() {}
 }

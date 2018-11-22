@@ -19,18 +19,18 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 		private static final String BOOKMAKERNAME = "bookmakerName";
 		private static final String ACTIVE = "active";
 	
-	private BookmakerDAO(Connection connection) {
-		super(tableName, connection);
+	private BookmakerDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized BookmakerDAO getBlueSheepBookmakerDAOInstance(Connection connection) {
+	public static synchronized BookmakerDAO getBlueSheepBookmakerDAOInstance() {
 		if(instance == null) {
-			instance = new BookmakerDAO(connection);
+			instance = new BookmakerDAO();
 		}
 		return instance;
 	}
 	@Override
-	protected List<Bookmaker> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<Bookmaker> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		List<Bookmaker> dataMapped = new ArrayList<Bookmaker>();
 		
 		while(returnSelect.next()) {
@@ -52,7 +52,7 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 				"?" +")";
 	}
 	
-	public Bookmaker getBookmakerFromBookmakerName(String bookmakerName) throws MoreThanOneResultException {
+	public Bookmaker getBookmakerFromBookmakerName(String bookmakerName, Connection connection) throws MoreThanOneResultException {
 		
 		Bookmaker returnBookmaker = null;
 		
@@ -64,7 +64,7 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 			ps = connection.prepareStatement(query);
 			ps.setString(1, bookmakerName);
 			if(ps != null) {
-				returnBookmaker = getSingleResult(getMappedObjectBySelect(ps));
+				returnBookmaker = getSingleResult(getMappedObjectBySelect(ps, connection));
 			}
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
@@ -72,27 +72,27 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 		return returnBookmaker;
 	}
 	
-	public Bookmaker getActiveBookmakerFromBookmakerName(String bookmakerName) throws MoreThanOneResultException {
-		Bookmaker bookmaker = getBookmakerFromBookmakerName(bookmakerName);
+	public Bookmaker getActiveBookmakerFromBookmakerName(String bookmakerName, Connection connection) throws MoreThanOneResultException {
+		Bookmaker bookmaker = getBookmakerFromBookmakerName(bookmakerName, connection);
 		return bookmaker != null && bookmaker.isActive() ? bookmaker : null;
 	}
 
-	public List<Bookmaker> getAllActiveBookmakerOrderedByName() {
+	public List<Bookmaker> getAllActiveBookmakerOrderedByName(Connection connection) throws SQLException {
 		return getMappedObjectBySelect(getBasicSelectQuery() + WHERE + ACTIVE + IS + true + 
-																ORDERBY + BOOKMAKERNAME + ASC);
+																ORDERBY + BOOKMAKERNAME + ASC , connection);
 	}
 
-	public List<Bookmaker> getLikeBookmakerNameByInitalChar(String initialChar) {
+	public List<Bookmaker> getLikeBookmakerNameByInitalChar(String initialChar, Connection connection) throws SQLException {
 		if(initialChar == null) {
-			return getAllActiveBookmakerOrderedByName();
+			return getAllActiveBookmakerOrderedByName(connection);
 		}else {
 			return getMappedObjectBySelect(getBasicSelectQuery() + WHERE + BOOKMAKERNAME + LIKE + "'" + initialChar + "%'" 
 															+ AND + ACTIVE + IS + true 
-															+ ORDERBY + BOOKMAKERNAME + ASC);
+															+ ORDERBY + BOOKMAKERNAME + ASC, connection);
 		}
 	}
 
-	public List<Bookmaker> getBookmakerPageByInitialChar(String initialChar, boolean isGreater) {
+	public List<Bookmaker> getBookmakerPageByInitialChar(String initialChar, boolean isGreater, Connection connection) throws SQLException {
 		
 		PreparedStatement ps = null;
 		try {
@@ -107,7 +107,7 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 			logger.error(e.getMessage(), e);
 		}
 		
-		return ps != null ? getMappedObjectBySelect(ps) : null;
+		return ps != null ? getMappedObjectBySelect(ps, connection) : null;
 	}
 	
 }

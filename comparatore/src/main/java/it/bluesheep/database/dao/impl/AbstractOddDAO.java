@@ -9,12 +9,12 @@ import it.bluesheep.database.entities.AbstractOddEntity;
 
 public abstract class AbstractOddDAO<T extends AbstractOddEntity> extends AbstractDAO<T> {
 
-	protected AbstractOddDAO(String tableName, Connection connection) {
-		super(tableName, connection);
+	protected AbstractOddDAO(String tableName) {
+		super(tableName);
 	}
 
 	@Override
-	protected abstract List<T> mapDataIntoObject(ResultSet returnSelect) throws SQLException;
+	protected abstract List<T> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException;
 
 	@Override
 	protected abstract String getAllColumnValuesFromEntity(T entity);

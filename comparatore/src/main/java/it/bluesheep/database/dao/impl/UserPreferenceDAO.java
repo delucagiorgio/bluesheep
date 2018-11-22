@@ -33,27 +33,27 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 	private static final String ACTIVE = "active";
 	private static final String RFTYPE = "rfType";
 	
-	private UserPreferenceDAO(Connection connection) {
-		super(tableName, connection);
+	private UserPreferenceDAO() {
+		super(tableName);
 	}
 	
-	public static synchronized UserPreferenceDAO getUserPreferenceDAOInstance(Connection connection) {
+	public static synchronized UserPreferenceDAO getUserPreferenceDAOInstance() {
 		if(instance == null) {
-			instance = new UserPreferenceDAO(connection);
+			instance = new UserPreferenceDAO();
 		}
 		return instance;
 	} 
 	
 	@Override
-	public List<UserPreference> getAllActiveRows(){
+	public List<UserPreference> getAllActiveRows(Connection connection) throws SQLException{
 		String queryStatement = getBasicSelectQuery() + WHERE + ACTIVE + IS + true + ";";
-		List<UserPreference> returnList = getMappedObjectBySelect(queryStatement);
+		List<UserPreference> returnList = getMappedObjectBySelect(queryStatement, connection);
 		
 		return returnList;
 	}
 
 	@Override
-	protected List<UserPreference> mapDataIntoObject(ResultSet returnSelect) throws SQLException {
+	protected List<UserPreference> mapDataIntoObject(ResultSet returnSelect, Connection connection) throws SQLException {
 		
 		List<UserPreference> dataMapped = new ArrayList<UserPreference>();
 		
@@ -62,8 +62,8 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			Long user = returnSelect.getLong(USER);
 
 			
-			TelegramUser userDB = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance(connection).getEntityById(user);
-			Bookmaker bookmakerDB = BookmakerDAO.getBlueSheepBookmakerDAOInstance(connection).getEntityById(bookmaker);
+			TelegramUser userDB = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance().getEntityById(user, connection);
+			Bookmaker bookmakerDB = BookmakerDAO.getBlueSheepBookmakerDAOInstance().getEntityById(bookmaker, connection);
 			
 			if(userDB != null && bookmakerDB != null) {
 				Double rating = returnSelect.getDouble(RATING) == 0 ? null : returnSelect.getDouble(RATING);
@@ -101,18 +101,18 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 				"?" +")";
 	}
 
-	public List<UserPreference> getRelatedUserPreferenceFromUser(TelegramUser userMessage) {
+	public List<UserPreference> getRelatedUserPreferenceFromUser(TelegramUser userMessage, Connection connection) throws SQLException {
 		
 		String query = getBasicSelectQuery() + WHERE + USER + " = " + userMessage.getId();
 	
-		return getMappedObjectBySelect(query);
+		return getMappedObjectBySelect(query, connection);
 	}
 	
-	public List<UserPreference> getUserPreferenceFromUser(TelegramUser userMessage) throws AskToUsException {
+	public List<UserPreference> getUserPreferenceFromUser(TelegramUser userMessage, Connection connection) throws AskToUsException, SQLException {
 		String query = getBasicSelectQuery() + 
 						WHERE + USER + " = " + userMessage.getId();
 		
-		List<UserPreference> resultList = getMappedObjectBySelect(query);
+		List<UserPreference> resultList = getMappedObjectBySelect(query, connection);
 		
 		if(resultList == null || resultList.size() > Integer.parseInt(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CHAT_BOT_MAX_PREF))) {
 			throw new AskToUsException(userMessage);
@@ -121,17 +121,17 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 		return resultList;
 	}
 
-	public UserPreference getUserPreferenceFromUserAndBookmaker(TelegramUser userMessage, Bookmaker bookmaker) throws MoreThanOneResultException {
+	public UserPreference getUserPreferenceFromUserAndBookmaker(TelegramUser userMessage, Bookmaker bookmaker, Connection connection) throws MoreThanOneResultException, SQLException {
 		String query = getBasicSelectQuery() 
 						+ WHERE + USER + " = " + userMessage.getId() 
 						+ AND + BOOKMAKER + " = " + bookmaker.getId();
 		
-		UserPreference userPreference = getSingleResult(getMappedObjectBySelect(query));
+		UserPreference userPreference = getSingleResult(getMappedObjectBySelect(query, connection));
 		
 		return userPreference;
 	}
 
-	public void updateUserPreferenceFilters(UserPreference updatedUP) {
+	public void updateUserPreferenceFilters(UserPreference updatedUP, Connection connection) {
 		String query = "UPDATE " + 
 				tableName + " SET " + EVENT + " = ?, "
 				+ LIQUIDITA + " = ?, "
@@ -189,10 +189,10 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 		}
 	}
 
-	public void activateUserPreference(UserPreference up) throws AskToUsException, TooMuchUserPreferenceActive {
+	public void activateUserPreference(UserPreference up, Connection connection) throws AskToUsException, TooMuchUserPreferenceActive, SQLException {
 		
 		if(!up.isActive()) {
-			List<UserPreference> userPreferencesForUser = getRelatedUserPreferenceFromUser(up.getUser());
+			List<UserPreference> userPreferencesForUser = getRelatedUserPreferenceFromUser(up.getUser(), connection);
 			
 			int activeUP = 1;
 			for(UserPreference upDB : userPreferencesForUser) {
@@ -221,7 +221,7 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 
 	}
 
-	public void removeUserPreferenceByBookmakerAndUser(Bookmaker bookmaker, TelegramUser user) throws AskToUsException {
+	public void removeUserPreferenceByBookmakerAndUser(Bookmaker bookmaker, TelegramUser user, Connection connection) throws AskToUsException {
 		String query = DELETE + tableName + WHERE + USER + " = ? " + AND + BOOKMAKER + " = ?";
 		
 		PreparedStatement ps;
@@ -237,7 +237,7 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 		
 	}
 
-	public void deactivateUserPreference(UserPreference up) {
+	public void deactivateUserPreference(UserPreference up, Connection connection) {
 		String query = UPDATE + tableName + SET + ACTIVE + " = ?" + WHERE + ID + " = ?";
 		PreparedStatement ps;
 		try {
