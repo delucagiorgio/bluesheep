@@ -39,6 +39,8 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 			dao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance();
 
 			dao.insertRow(new SaveOddProcessHistory(service, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null), connection);
+			connection.commit();
+
 			long startTime = System.currentTimeMillis();
 			logger.info(service.getCode() + " is starting saving odds...");
 			saveRecordsOnDatabase();
