@@ -13,5 +13,4 @@ public class InactiveUserException extends BluesheepChatBotException {
 				+ "Scrivici in chat su " + ArbsUtil.getTelegramInlineURLAlias("Facebook", "https://www.facebook.com/BlueSheepMatched/") 
 				+ " o sulla mail info@bluesheep.it se hai dubbi a riguardo!", user);
 	}
-
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
@@ -84,6 +85,14 @@ public class InputDataHelper {
 	
 	public void forceUpdateMapBlockedBookmakers() {
 		excludedBookmakersByService = getListBlockedBookmakers();
+	}
+	
+	public static boolean allOrNoOneMinorCategory(String playerBook1, String playerBook2) {
+		Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
+		boolean allTest = patterMinorCategory.matcher(playerBook1).find() && patterMinorCategory.matcher(playerBook2).find();
+		boolean noTest = !patterMinorCategory.matcher(playerBook1).find() && !patterMinorCategory.matcher(playerBook2).find();
+		
+		return ((allTest && new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF)) || noTest) );
 	}
 	
 }

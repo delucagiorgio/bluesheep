@@ -54,7 +54,8 @@ public class BlueSheepUserUpdateServiceHandler extends AbstractBlueSheepService 
 			dao = SaveOddProcessHistoryDAO.getSaveOddProcessHistoryDAOInstance();
 			
 			dao.insertRow(new SaveOddProcessHistory(Service.UPDATE_DB_BLUESHEEP_USER, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null), connection);
-			
+			connection.commit();
+
 			//AGGIORNO I DATI DA BLUESHEEP
 			updateDabataseInformation();
 			
@@ -62,6 +63,7 @@ public class BlueSheepUserUpdateServiceHandler extends AbstractBlueSheepService 
 			connection.commit();
 			
 			dao.insertRow(new SaveOddProcessHistory(Service.UPDATE_DB_NOTIFICATION_USER, ProcessStatus.RUNNING, null, 0, new Timestamp(System.currentTimeMillis()), null), connection);
+			connection.commit();
 
 			//AGGIORNO LE TABELLE DELLE NOTIFICHE DEL BOT
 			try {

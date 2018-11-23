@@ -5,13 +5,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.CosineSimilarityUtil;
 import it.bluesheep.comparatore.serviceapi.Service;
-import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
 
 public abstract class AbstractInputRecord {
@@ -193,13 +191,6 @@ public abstract class AbstractInputRecord {
 			return false;
 		}
 		
-		boolean part1AllOrNoOneMinorCategory = allOrNoOneMinorCategory(exPartecipante1, bmPartecipante1);
-		boolean part2AllOrNoOneMinorCategory = allOrNoOneMinorCategory(exPartecipante2, bmPartecipante2);
-		
-		if(!part1AllOrNoOneMinorCategory || !part2AllOrNoOneMinorCategory) {
-			return false;
-		}
-		
 		String participant11 = exPartecipante1.toLowerCase();
 		String participant12 = exPartecipante2.toLowerCase();
 		String participant21 = bmPartecipante1.toLowerCase();
@@ -263,14 +254,6 @@ public abstract class AbstractInputRecord {
 		}
 	}
 	
-	private static boolean allOrNoOneMinorCategory(String playerBook1, String playerBook2) {
-		Pattern patterMinorCategory = Pattern.compile("[uU][0-9][0-9]");
-		boolean allTest = patterMinorCategory.matcher(playerBook1).find() && patterMinorCategory.matcher(playerBook2).find();
-		boolean noTest = !patterMinorCategory.matcher(playerBook1).find() && !patterMinorCategory.matcher(playerBook2).find();
-
-		return ((allTest && new Boolean(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINOR_CATEGORY_ONOFF)) || noTest) );
-	}
-
 	private static boolean equalLists(List<String> one, List<String> two){     
 	    if (one == null && two == null){
 	        return true;

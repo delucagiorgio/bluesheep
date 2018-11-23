@@ -37,7 +37,7 @@ public class Bet365RequestHandler extends AbstractRequestHandler {
 					if(timeoutReached) {
 						executor.shutdownNow();
 					}
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					if(!executor.isShutdown()) {
 						executor.shutdownNow();

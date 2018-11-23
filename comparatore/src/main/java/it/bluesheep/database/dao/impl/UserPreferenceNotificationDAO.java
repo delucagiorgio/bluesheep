@@ -22,6 +22,7 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 	private static final String USERID = "userId";
 	private static final String PRODID = "progId";
 	private static final String NOTIFICATIONKEY = "notificationKey";
+	private static final String CURRNOTGROUP = "currentNotificationGroup";
 	
 	private UserPreferenceNotificationDAO() {
 		super(tableName);
@@ -48,10 +49,11 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 			int prodId = returnSelect.getInt(PRODID);
 			long id = returnSelect.getLong(ID);
 			String notificationKey = returnSelect.getString(NOTIFICATIONKEY);
+			boolean currentNotificationGroup = returnSelect.getBoolean(CURRNOTGROUP);
 			Timestamp createTimestamp = getTimestampFromResultSet(returnSelect, CREATETIME);
 			Timestamp updateTimestamp = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			userPrefNotitication.add(new UserPreferenceNotification(userPreference, user, id, prodId, createTimestamp, updateTimestamp, notificationKey));
+			userPrefNotitication.add(new UserPreferenceNotification(userPreference, user, id, prodId, createTimestamp, updateTimestamp, notificationKey, currentNotificationGroup));
 		}
 		
 		return userPrefNotitication;
@@ -64,6 +66,7 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 				+ "'" + entity.getUser().getId() + "'" + BlueSheepConstants.REGEX_COMMA
 				+ entity.getProdId() + BlueSheepConstants.REGEX_COMMA 
 				+ "'" + entity.getNotificationKey() + "'" + BlueSheepConstants.REGEX_COMMA 
+				+ entity.isCurrentNotificationGroup() + BlueSheepConstants.REGEX_COMMA
 				+ "?" + BlueSheepConstants.REGEX_COMMA
 				+ "?)";
 	}
@@ -74,9 +77,9 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 		return getMappedObjectBySelect(query, connection);
 	}
 
-	public void deleteUserPrefNotificationFromUP(UserPreference up, Connection connection) throws SQLException {
+	public void setCurrentNotificationGroupOff(UserPreference up, Connection connection) throws SQLException {
 		
-		String query = DELETE + tableName + WHERE + USERPREFERENCEID + " = ?";
+		String query = UPDATE + tableName + SET + CURRNOTGROUP + " = " + false + WHERE + USERPREFERENCEID + " = ?" + AND + CURRNOTGROUP + IS + true;
 		
 		PreparedStatement ps = connection.prepareStatement(query);
 		ps.setLong(1, up.getId());

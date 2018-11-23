@@ -130,6 +130,7 @@ public class BlueSheepConstants {
 	public static final String REGEX_TELEGRAMBOTACTION = " - ";
 	public static final String WS_USERS_PWD = "blu3S433p-w5-|?o";
 	public static final String MAX_NOTIFICATION_USER_PREF = "MAX_NOTIFICATION_USER_PREF";
+	public static final String ADMITTED_CHATID = "ADMITTED_CHATID";
 	
 	private BlueSheepConstants() {}
 }

@@ -74,9 +74,6 @@ public final class BlueSheepServiceHandlerManager {
 		boolean stopApplication = false;
 		boolean propertiesConfigurationChanged = false;
 		
-		//Avvio il bot handler
-		TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance().run();
-		
 		boolean firstStartExecuted = false;
 		
 		do {
@@ -84,23 +81,24 @@ public final class BlueSheepServiceHandlerManager {
 			if(firstStartExecuted) {
 	    		updateInformationFromProperties();
 	    		InputDataHelper.getInputDataHelperInstance().forceUpdateMapBlockedBookmakers();
-	    		logConfigurationFile();
 			}
     		
+    		logConfigurationFile();
 			BlueSheepSharedResources.initializeDataStructures();
 			
 			executor = Executors.newScheduledThreadPool(4);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
-			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 15, TimeUnit.MINUTES);
+			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
+			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
-				if(Service.TXODDS_SERVICENAME.equals(activeService)) {
+				if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
-				}else if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
+				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
 					initialDelay = 60;
 				}else {
-					initialDelay = 30;
+					initialDelay = 120;
 				}
 				if(BlueSheepSharedResources.getActiveServices().get(activeService) > 0) {
 					executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);
@@ -185,12 +183,14 @@ public final class BlueSheepServiceHandlerManager {
 					
 					if(stopApplication) {
 						message = "Start shutting down " + message;
+						
 					}else if(propertiesConfigurationChanged) {
 						message = "Restarting " + message;
 					}
 					
 					logger.info(message + ". Timeout to force shutdown is " + timeout + " " + timeUnitTimeout);
 					
+					TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
 					executor.shutdown();
 					terminatedCorrectly = executor.awaitTermination(timeout, timeUnitTimeout);
 					if(!terminatedCorrectly) {
@@ -200,7 +200,7 @@ public final class BlueSheepServiceHandlerManager {
 				
 				logger.info("Application completes the executions correctly = " + terminatedCorrectly);
 				
-			} catch (IOException | InterruptedException e) {
+			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				if(!executor.isShutdown()) {
 					executor.shutdownNow();
@@ -208,7 +208,7 @@ public final class BlueSheepServiceHandlerManager {
 			}
 		}while(!stopApplication || propertiesConfigurationChanged);
 		
-		TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+		logger.info("Shutdown execution complete");
 
 	}
 

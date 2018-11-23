@@ -109,14 +109,22 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance()
 											.getNotificationsSentByUserPreference(up, connection);
 									
-									if(preferenceSent.size() < maxNotificationPerUserPreference) {
+									int currentNotificationGroupSize = 0;
+									
+									for(UserPreferenceNotification upn : preferenceSent) {
+										if(upn.isCurrentNotificationGroup()) {
+											currentNotificationGroupSize++;
+										}
+									}
+									
+									if(currentNotificationGroupSize < maxNotificationPerUserPreference) {
 										//Se non è stata già inviata
 										if(!alreadySent(preferenceSent, odd)) {
-											processOperationAndRequirementsOfNotification(preferenceSent, odd, up);
+											processOperationAndRequirementsOfNotification(odd, up, currentNotificationGroupSize);
 										}
 									}else {
 										UserPreferenceDAO.getUserPreferenceDAOInstance().deactivateUserPreference(up, connection);
-										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().deleteUserPrefNotificationFromUP(up, connection);
+										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().setCurrentNotificationGroupOff(up, connection);
 										up.setActive(false);
 										connection.commit();
 										break;
@@ -133,14 +141,22 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 											UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance()
 											.getNotificationsSentByUserPreference(up, connection);
 									
-									if(preferenceSent.size() < maxNotificationPerUserPreference) {
+									
+									int currentNotificationGroupSize = 0;
+									
+									for(UserPreferenceNotification upn : preferenceSent) {
+										if(upn.isCurrentNotificationGroup()) {
+											currentNotificationGroupSize++;
+										}
+									}
+									if(currentNotificationGroupSize < maxNotificationPerUserPreference) {
 										//Se non è stata già inviata
 										if(!alreadySent(preferenceSent, odd)) {
-											processOperationAndRequirementsOfNotification(preferenceSent, odd, up);
+											processOperationAndRequirementsOfNotification(odd, up, currentNotificationGroupSize);
 										}
 									}else {
 										UserPreferenceDAO.getUserPreferenceDAOInstance().deactivateUserPreference(up, connection);
-										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().deleteUserPrefNotificationFromUP(up, connection);
+										UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().setCurrentNotificationGroupOff(up, connection);
 										up.setActive(false);
 										connection.commit();
 										break;
@@ -182,7 +198,7 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 		}
 	}
 
-	private void processOperationAndRequirementsOfNotification(List<UserPreferenceNotification> preferenceSent, PBOdd odd, UserPreference up) throws SQLException {
+	private void processOperationAndRequirementsOfNotification(PBOdd odd, UserPreference up, int currentNotificationGroupSize) throws SQLException {
 
 		boolean ratingOK = true && up.getRating() == null;
 		boolean rfOK = true && up.getRfType() == null && up.getRfValue() == null;
@@ -213,11 +229,11 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 			
 			
 		if(ratingOK && eventOK && minOddOK && rfOK && sizeOK) {
-			int nextProdId = preferenceSent.size() + 1;
+			int nextProdId = currentNotificationGroupSize + 1;
 			String text = odd.getTelegramButtonText(up, odd, nextProdId, maxNotificationPerUserPreference);		
 			logger.info("Sending notification #" + nextProdId + " to user " + up.getUser().getUserName());
 			
-			UserPreferenceNotification upn = new UserPreferenceNotification(up, up.getUser(), 0, nextProdId, null, null, odd.getNotificationKey());
+			UserPreferenceNotification upn = new UserPreferenceNotification(up, up.getUser(), 0, nextProdId, null, null, odd.getNotificationKey(), true);
 			
 			UserPreferenceNotificationDAO.getUserPreferenceNotificationDAOInstance().insertRow(upn, connection);
 
@@ -228,7 +244,11 @@ public class UserPreferenceNotificationServiceHandler extends AbstractBlueSheepS
 												+ System.lineSeparator() + text));
 			connection.commit();
 		}else {
-			logger.info("Rating: " + ratingOK + "; RF: " + rfOK + "; MinOdd: " + minOddOK + "; Size: " + sizeOK + "; Event: " + eventOK);
+			if(logger.isDebugEnabled()) {
+				logger.debug(up.getUserPreferenceManifest());
+				logger.info("Rating: " + ratingOK + "; RF: " + rfOK + "; MinOdd: " + minOddOK + "; Size: " + sizeOK + "; Event: " + eventOK);
+			}
+				
 		}
 		
 	}

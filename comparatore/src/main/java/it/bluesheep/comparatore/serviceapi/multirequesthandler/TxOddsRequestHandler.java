@@ -64,10 +64,10 @@ public class TxOddsRequestHandler extends AbstractRequestHandler {
 		
 		try {
 			executor.shutdown();
-		    if (timeoutReached = !executor.awaitTermination(5, TimeUnit.MINUTES)) {
+		    if (timeoutReached = !executor.awaitTermination(2, TimeUnit.MINUTES)) {
 		    	executor.shutdownNow();
 		    } 
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			if(!executor.isShutdown()) {
 				executor.shutdownNow();

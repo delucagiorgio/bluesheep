@@ -22,38 +22,59 @@ public class ConnectionPool {
 	
 	// Costruttore della classe ConnectionPool
 	private ConnectionPool() {
-        dataSource.setUrl("jdbc:mysql://86.107.98.176:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
+//        dataSource.setUrl("jdbc:mysql://86.107.98.176:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
+        dataSource.setUrl("jdbc:mysql://localhost:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
         dataSource.setUsername(BlueSheepConstants.DATABASE_USER);
         dataSource.setPassword(BlueSheepConstants.DATABASE_PASSWORD);
 		connectionVector = new Vector<Connection>();
 	}
 	
-	public static synchronized Connection getConnection() throws SQLException {
+	public static Connection getConnection() throws SQLException {
+		return executeOperationOnConnectionVector("GET", null);
+	}
+	
+	private static synchronized Connection executeOperationOnConnectionVector(String string, Connection conn) throws SQLException {
 		if(instance == null) {
 			instance = new ConnectionPool();
 		}
 		
-		Connection connection = null;
-		if(!connectionVector.isEmpty()) {
-			connection = connectionVector.lastElement();
-			connectionVector.remove(connection);
-			if(connection.isClosed()) {
+		if("GET".equals(string)) {
+			Connection connection = null;
+			if(!connectionVector.isEmpty()) {
+				connection = connectionVector.lastElement();
+				connectionVector.remove(connection);
+				if(connection.isClosed()) {
+					connection = dataSource.getConnection();
+					logger.info("New connection to DB established");
+				}
+			}else {
 				connection = dataSource.getConnection();
 				logger.info("New connection to DB established");
 			}
-		}else {
-			connection = dataSource.getConnection();
-			logger.info("New connection to DB established");
+			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			return connection;
+			
+		}else if("RELEASE".equals(string)) {
+			if(!conn.isClosed()) {
+				logger.info("Connection relased : " + connectionVector.add(conn));
+			}
+		}else if("CLOSE".equals(string)) {
+			for(Connection relConn : connectionVector) {
+				relConn.close();
+			}
+			connectionVector = null;
 		}
-		connection.setAutoCommit(false);
-		connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-		return connection;
+		
+		return null;
 	}
-	
-	public static synchronized void releaseConnection(Connection connection) throws SQLException {
-		if(!connection.isClosed()) {
-			logger.info("Connection relased : " + connectionVector.add(connection));
-		}
+
+	public static void releaseConnection(Connection connection) throws SQLException {
+		executeOperationOnConnectionVector("RELEASE", connection);
+	}
+
+	public static void closeAllConnection() throws SQLException {
+		executeOperationOnConnectionVector("CLOSE", null);
 	}
 
 }

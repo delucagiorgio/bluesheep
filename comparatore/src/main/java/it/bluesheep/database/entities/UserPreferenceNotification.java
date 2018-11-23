@@ -8,13 +8,15 @@ public class UserPreferenceNotification extends AbstractBlueSheepEntity {
 	private TelegramUser userId;
 	private int progId;
 	private String notificationKey;
+	private boolean currentNotificationGroup;
 	
-	public UserPreferenceNotification(UserPreference userPreference, TelegramUser user, long id, int prodId, Timestamp createTimestamp, Timestamp updateTimestamp, String notificationKey) {
+	public UserPreferenceNotification(UserPreference userPreference, TelegramUser user, long id, int prodId, Timestamp createTimestamp, Timestamp updateTimestamp, String notificationKey, boolean currentNotificationGroup) {
 		super(id, createTimestamp, updateTimestamp);
 		this.progId = prodId;
 		this.userId = user;
 		this.userPreferenceId = userPreference;
 		this.notificationKey = notificationKey;
+		this.currentNotificationGroup = currentNotificationGroup;
 	}
 	
 	@Override
@@ -36,6 +38,10 @@ public class UserPreferenceNotification extends AbstractBlueSheepEntity {
 
 	public String getNotificationKey() {
 		return notificationKey;
+	}
+
+	public boolean isCurrentNotificationGroup() {
+		return currentNotificationGroup;
 	}
 
 }

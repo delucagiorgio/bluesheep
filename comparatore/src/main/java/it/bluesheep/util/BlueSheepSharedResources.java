@@ -117,10 +117,16 @@ public class BlueSheepSharedResources {
 			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = inputRecordMap.get(sport);
 			if(sportMap != null) {
 				List<Date> dateList = new ArrayList<Date>(sportMap.keySet());
-				for(Date date : dateList) {
-					if(date.getTime() - startTime < updateFrequencyDiff) {
-						sportMap.remove(date);
+				if(dateList != null) {
+					for(Date date : dateList) {
+						if(date.getTime() - startTime < updateFrequencyDiff) {
+							sportMap.remove(date);
+						}
 					}
+				}
+				
+				if(sportMap.keySet() != null && sportMap.keySet().isEmpty()) {
+					inputRecordMap.remove(sport);
 				}
 			}
 		}

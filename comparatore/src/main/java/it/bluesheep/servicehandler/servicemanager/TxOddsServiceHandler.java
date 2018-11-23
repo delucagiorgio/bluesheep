@@ -19,8 +19,6 @@ import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRe
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.comparatore.serviceapi.impl.TxOddsApiImpl;
 import it.bluesheep.comparatore.serviceapi.util.BoidStatesParser;
-import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
-import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler {
@@ -42,16 +40,14 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 				BlueSheepSharedResources.getUpdateCallCount() == 0 && 
 				!inputRecordList.isEmpty() && 
 				!BlueSheepSharedResources.getEventoScommessaRecordMap().isEmpty()) {
-			int minutesOfValidity = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY));
 
-			logger.info("Removing all TxOdds events: " + minutesOfValidity + " minute(s) are passed since last initial call");
+			logger.info("Removing all TxOdds events");
 			resetAllTxOddsEvents();
 			BookmakerLinkGenerator.initializeMap();
 			logger.info("Starting GC...");
 			long startGc = System.currentTimeMillis();
-			System.gc();
 			long endGc = System.currentTimeMillis();
-			
+			System.gc();
 			logger.info("GC completed execution: " + (endGc - startGc) + " ms.");
 		}
 		super.startProcessingDataTransformation(inputRecordList);
@@ -64,28 +60,34 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 	private void resetAllTxOddsEvents() {
 		
 		ChiaveEventoScommessaInputRecordsMap dataMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
-		Set<Sport> sportSet = new HashSet<Sport>(dataMap.keySet());
-		for(Sport sport : sportSet) {
-			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = dataMap.get(sport);
-			
-			Set<Date> dateSet =  new HashSet<Date>(sportMap.keySet());
-			for(Date date : dateSet) {
-				Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportMap.get(date);
-			
-				Set<String> eventSet = new HashSet<String>(dateMap.keySet());
-				for(String eventoKey : eventSet) {
-					Map<Scommessa, Map<String, AbstractInputRecord>> eventoKeyMap = dateMap.get(eventoKey);
-				
-					Set<Scommessa> scommessaSet = new HashSet<Scommessa>(eventoKeyMap.keySet());
-					for(Scommessa scommessa : scommessaSet) {
-						Map<String, AbstractInputRecord> scommessaMap = eventoKeyMap.get(scommessa);
-						
-						Set<String> bookmakerList = new HashSet<String>(scommessaMap.keySet());
-						for(String bookmaker : bookmakerList) {
-							AbstractInputRecord recordOfBookmaker = scommessaMap.get(bookmaker);
-						
-							if(serviceName.equals(recordOfBookmaker.getSource())) {
-								scommessaMap.remove(bookmaker);
+		if(dataMap != null) {
+			Set<Sport> sportSet = new HashSet<Sport>(dataMap.keySet());
+			for(Sport sport : sportSet) {
+				Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = dataMap.get(sport);
+				if(sportMap != null) {
+					Set<Date> dateSet =  new HashSet<Date>(sportMap.keySet());
+					for(Date date : dateSet) {
+						Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportMap.get(date);
+						if(dateMap != null) {
+							Set<String> eventSet = new HashSet<String>(dateMap.keySet());
+							for(String eventoKey : eventSet) {
+								Map<Scommessa, Map<String, AbstractInputRecord>> eventoKeyMap = dateMap.get(eventoKey);
+								if(eventoKeyMap != null) {
+									Set<Scommessa> scommessaSet = new HashSet<Scommessa>(eventoKeyMap.keySet());
+									for(Scommessa scommessa : scommessaSet) {
+										Map<String, AbstractInputRecord> scommessaMap = eventoKeyMap.get(scommessa);
+										if(scommessaMap != null) {
+											Set<String> bookmakerList = new HashSet<String>(scommessaMap.keySet());
+											for(String bookmaker : bookmakerList) {
+												AbstractInputRecord recordOfBookmaker = scommessaMap.get(bookmaker);
+											
+												if(serviceName.equals(recordOfBookmaker.getSource())) {
+													scommessaMap.remove(bookmaker);
+												}
+											}
+										}
+									}
+								}
 							}
 						}
 					}
@@ -104,10 +106,10 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 			deleteNotAvailableMarkets(timestampLastRequest);
 		}
 		
-		int secondFrequencyTxOdds = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_TXODDS_SEC));
-		int minutesOfValidity = new Integer(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60;
 		
-		boolean overMinutesOfValidityByCountCall = BlueSheepSharedResources.getUpdateCallCount() > (minutesOfValidity / secondFrequencyTxOdds);
+		logger.info("Update count call for " + serviceName + " = " + BlueSheepSharedResources.getUpdateCallCount());
+		
+		boolean overMinutesOfValidityByCountCall = BlueSheepSharedResources.getUpdateCallCount() > 1500;
 		
 		//Reset the update call count and the timestamp to perform "an initial call"
 		if(overMinutesOfValidityByCountCall) {

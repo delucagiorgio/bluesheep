@@ -5,12 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.util.BlueSheepConstants;
 
 /**
@@ -27,7 +29,7 @@ import it.bluesheep.util.BlueSheepConstants;
  * @author Giorgio De Luca
  *
  */
-public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Map<Date,Map<String,Map<Scommessa, Map<String, AbstractInputRecord>>>>>{
+public final class ChiaveEventoScommessaInputRecordsMap extends ConcurrentHashMap<Sport,Map<Date,Map<String,Map<Scommessa, Map<String, AbstractInputRecord>>>>>{
 	
 	private static final long serialVersionUID = 1L;
 	private static Logger logger;
@@ -39,64 +41,77 @@ public final class ChiaveEventoScommessaInputRecordsMap extends TreeMap<Sport,Ma
 
 	public void addToMapEventoScommessaRecord(AbstractInputRecord record) {
 		
-		//prendo lo sport del record
-		Sport sport = record.getSport();
-		
-		//controllo che esista la chiave per lo sport del record in analisi
-		Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = get(sport);
-
-		//se non esiste aggiungo la mappa relativa a tale sport
-		if(sportMap == null) {
-			sportMap = new TreeMap<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>>();
-			this.put(sport, sportMap);
+		if(InputDataHelper.allOrNoOneMinorCategory(record.getPartecipante1(), record.getPartecipante2())) {
+			
+			//prendo lo sport del record
+			Sport sport = record.getSport();
+			
+			//controllo che esista la chiave per lo sport del record in analisi
+			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = get(sport);
+	
+			//se non esiste aggiungo la mappa relativa a tale sport
+			if(sportMap == null) {
+				sportMap = new ConcurrentHashMap<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>>();
+				this.put(sport, sportMap);
+			}
+			
+			//controllo che esista la chiave per la data del record in analisi
+			Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportMap.get(record.getDataOraEvento());
+			
+			//se non esiste aggiungo la mappa relativa a tale data
+			if(dateMap == null) {
+				dateMap = new ConcurrentHashMap<String, Map<Scommessa, Map<String, AbstractInputRecord>>>();
+				sportMap.put(record.getDataOraEvento(), dateMap);
+			}
+			
+			//controllo che esista la chiave per l'evento del record in analisi
+			Map<Scommessa, Map<String, AbstractInputRecord>> eventoScommessaRecordsMap = dateMap.get(record.getKeyEvento());
+			
+			//se non esiste aggiungo la mappa relativa a tale evento
+			if(eventoScommessaRecordsMap == null) {
+				eventoScommessaRecordsMap = new ConcurrentHashMap<Scommessa, Map<String, AbstractInputRecord>>();
+				dateMap.put(record.getKeyEvento(), eventoScommessaRecordsMap);
+			}
+			
+			//controllo che esista la chiave per la scommessa del record in analisi
+			Map<String, AbstractInputRecord> bookmakerRecordMap = eventoScommessaRecordsMap.get(record.getTipoScommessa());
+			
+			//se non esiste aggiungo la mappa relativa a tale scommessa
+			if(bookmakerRecordMap == null) {
+				bookmakerRecordMap = new TreeMap<String, AbstractInputRecord>();
+				eventoScommessaRecordsMap.put(record.getTipoScommessa(), bookmakerRecordMap);
+			}
+			
+			//controllo che esista la chiave per il bookmaker del record in analisi
+			AbstractInputRecord recordOfBookmaker = bookmakerRecordMap.get(record.getBookmakerName());
+			
+			//se esiste il record, notifico la sovrascrittura con il nuovo aggiornamento
+			if(recordOfBookmaker != null) {
+				recordOfBookmaker.setCampionato(record.getCampionato());
+				recordOfBookmaker.setDataOraEvento(record.getDataOraEvento());
+				recordOfBookmaker.setLiquidita(record.getLiquidita());
+				recordOfBookmaker.setKeyEvento(record.getKeyEvento());
+				recordOfBookmaker.setPartecipante1(record.getPartecipante1());
+				recordOfBookmaker.setPartecipante2(record.getPartecipante2());
+				recordOfBookmaker.setQuota(record.getQuota());
+				recordOfBookmaker.setTimeInsertionInSystem(System.currentTimeMillis());
+				if(logger.isDebugEnabled()) {
+					logger.debug("Record with key Evento " + 
+							record.getKeyEvento() + " has been updated: " + 
+							sport + ("" + BlueSheepConstants.REGEX_SLASH) +
+							record.getDataOraEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							record.getKeyEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							record.getTipoScommessa() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							record.getBookmakerName() + ("" + BlueSheepConstants.REGEX_SLASH) + ("" + BlueSheepConstants.REGEX_SLASH) +
+							recordOfBookmaker.getSport() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							recordOfBookmaker.getDataOraEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							recordOfBookmaker.getKeyEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							recordOfBookmaker.getTipoScommessa() + ("" + BlueSheepConstants.REGEX_SLASH) +
+							recordOfBookmaker.getBookmakerName());
+				}
+			}
+			bookmakerRecordMap.put(record.getBookmakerName(), record);
 		}
-		
-		//controllo che esista la chiave per la data del record in analisi
-		Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportMap.get(record.getDataOraEvento());
-		
-		//se non esiste aggiungo la mappa relativa a tale data
-		if(dateMap == null) {
-			dateMap = new TreeMap<String, Map<Scommessa, Map<String, AbstractInputRecord>>>();
-			sportMap.put(record.getDataOraEvento(), dateMap);
-		}
-		
-		//controllo che esista la chiave per l'evento del record in analisi
-		Map<Scommessa, Map<String, AbstractInputRecord>> eventoScommessaRecordsMap = dateMap.get(record.getKeyEvento());
-		
-		//se non esiste aggiungo la mappa relativa a tale evento
-		if(eventoScommessaRecordsMap == null) {
-			eventoScommessaRecordsMap = new TreeMap<Scommessa, Map<String, AbstractInputRecord>>();
-			dateMap.put(record.getKeyEvento(), eventoScommessaRecordsMap);
-		}
-		
-		//controllo che esista la chiave per la scommessa del record in analisi
-		Map<String, AbstractInputRecord> bookmakerRecordMap = eventoScommessaRecordsMap.get(record.getTipoScommessa());
-		
-		//se non esiste aggiungo la mappa relativa a tale scommessa
-		if(bookmakerRecordMap == null) {
-			bookmakerRecordMap = new TreeMap<String, AbstractInputRecord>();
-			eventoScommessaRecordsMap.put(record.getTipoScommessa(), bookmakerRecordMap);
-		}
-		
-		//controllo che esista la chiave per il bookmaker del record in analisi
-		AbstractInputRecord recordOfBookmaker = bookmakerRecordMap.get(record.getBookmakerName());
-		
-		//se esiste il record, notifico la sovrascrittura con il nuovo aggiornamento
-		if(recordOfBookmaker != null) {
-			logger.debug("Record with key Evento " + 
-					record.getKeyEvento() + " has been updated: " + 
-					sport + ("" + BlueSheepConstants.REGEX_SLASH) +
-					record.getDataOraEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					record.getKeyEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					record.getTipoScommessa() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					record.getBookmakerName() + ("" + BlueSheepConstants.REGEX_SLASH) + ("" + BlueSheepConstants.REGEX_SLASH) +
-					recordOfBookmaker.getSport() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					recordOfBookmaker.getDataOraEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					recordOfBookmaker.getKeyEvento() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					recordOfBookmaker.getTipoScommessa() + ("" + BlueSheepConstants.REGEX_SLASH) +
-					recordOfBookmaker.getBookmakerName());
-		}
-		bookmakerRecordMap.put(record.getBookmakerName(), record);
 	}
 
 	public List<AbstractInputRecord> findDeleteAbstractInputRecordInMap(List<AbstractInputRecord> recordList) {

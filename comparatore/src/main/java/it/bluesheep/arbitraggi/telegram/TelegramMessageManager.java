@@ -61,6 +61,13 @@ public class TelegramMessageManager {
 	    });
 	    
 		String text = "🐑🐑 " + ArbsUtil.getTelegramBoldString("LE SHEEPPATE") + " 🐑🐑";
+		
+		text = text + System.lineSeparator() + System.lineSeparator() + "Link ai nostri calcolatori" 
+					+ System.lineSeparator() 
+					+ "-" + ArbsUtil.getTelegramInlineURLAlias("Punta - Punta: 3 selezioni", "https://bluesheep.it/calcolatore-punta-punta-3-selezioni.html") + System.lineSeparator() 
+					+ "-" + ArbsUtil.getTelegramInlineURLAlias("Punta - Punta: 2 selezioni", "https://bluesheep.it/calcolatore-punta-punta.html") + System.lineSeparator() 
+					+ "-" + ArbsUtil.getTelegramInlineURLAlias("Punta - Banca: 2 selezioni", "https://bluesheep.it/calcolatore-punta-banca.html");
+					
 		telegramHandler.sendMessage(text, chat_ids);
 	    
 	    for (String idFile : idFileOrderedList) {

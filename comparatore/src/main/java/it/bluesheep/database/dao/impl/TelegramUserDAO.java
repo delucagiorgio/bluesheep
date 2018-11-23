@@ -264,7 +264,6 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			throw new AlreadyRegisteredUserChatBotException(userMessage);
 		}
 		
-		
 		return userMessage;
 		
 	}
