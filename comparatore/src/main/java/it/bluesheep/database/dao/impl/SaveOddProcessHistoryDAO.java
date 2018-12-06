@@ -73,14 +73,18 @@ public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory>
 				+ STATUS + " = '" + ProcessStatus.RUNNING.getCode() + "') as emptyTable";
 		
 		Statement st = connection.createStatement();
+		boolean returnValue = false;
 		
 		ResultSet rs = st.executeQuery(query);
 		
 		while(rs.next()) {
-			return rs.getBoolean("emptyTable");
+			returnValue = rs.getBoolean("emptyTable");
 		}
 		
-		return false;
+		rs.close();
+		st.close();
+		
+		return returnValue;
 	}
 
 	public void updateLastRun(Service service, Exception e, Connection connection) {
@@ -108,6 +112,7 @@ public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory>
 				
 				int updatedCount = ps.executeUpdate();
 				
+				ps.close();
 				logger.info("Updated process for service " + service + " with status " + lastRun.getStatus() + ": update count " + updatedCount);
 			}
 		} catch (MoreThanOneResultException | SQLException e1) {

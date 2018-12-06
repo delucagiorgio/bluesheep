@@ -9,6 +9,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -107,9 +111,14 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 									
 									oppositeScommessa = ScommessaUtilManager.getOppositeScommessaByScommessa(scommessa, sport);
 									if(oppositeScommessa != null && !isAlreadyProcessedScommessaTypes(scommessa,oppositeScommessa,processedScommessaTypes)) {
-										List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa), bluesheepServiceType);
-										mappedOutputRecord.addAll(outputRecordsList);
-										processedScommessaTypes.put(scommessa, oppositeScommessa);
+										try {
+											List<RecordOutput> outputRecordsList = verifyRequirementsAndMapOddsComparison(temp,inputRecordEventoScommessaMap.get(oppositeScommessa), bluesheepServiceType);
+											mappedOutputRecord.addAll(outputRecordsList);
+											processedScommessaTypes.put(scommessa, oppositeScommessa);
+										}catch(Exception e) {
+											logger.error(e.getMessage(), e);
+											logger.warn("Skipping " + evento + " for scommessa " + scommessa);
+										}
 									}
 								}
 							}
@@ -284,19 +293,41 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
+		
+		int threadNumber = 4;
+		ExecutorService executor = Executors.newFixedThreadPool(threadNumber);
+		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>();
 		if(bookmakerList != null && !bookmakerList.isEmpty() && Sport.CALCIO.equals(bookmakerList.get(0).getSport())) {
+			
+			Map<Long, List<AbstractInputRecord>> resultMap = new ConcurrentHashMap<Long, List<AbstractInputRecord>>();
 			List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
-			for(AbstractInputRecord txOddsRecord : bookmakerList) {
-				AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(txOddsRecord, listExchangeRecordListCopy);
-				if(exchangeRecord != null) {
-					txOddsRecord.setDataOraEvento(exchangeRecord.getDataOraEvento());
-					txOddsRecord.setKeyEvento("" + txOddsRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-							txOddsRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
-							txOddsRecord.getPartecipante1()+ BlueSheepConstants.REGEX_VERSUS + 
-							txOddsRecord.getPartecipante2());
+			int bookmakerListSize = bookmakerList.size();
+			int page = bookmakerListSize / threadNumber + bookmakerListSize % threadNumber;
+
+			for(int i = 0; i < threadNumber; i++) {
+				
+				if(i * page < bookmakerListSize) {
+					List<AbstractInputRecord> splittedList = bookmakerList.subList(i * page, Math.min((i + 1) * page, bookmakerListSize));
 					
+					CompareThreadHelper thread = new CompareThreadHelper(splittedList, listExchangeRecordListCopy, resultMap);
+					executor.submit(thread);
 				}
 			}
+			try {
+				executor.shutdown();
+				if(!executor.awaitTermination(5, TimeUnit.MINUTES)) {
+					executor.shutdownNow();
+				}
+			}catch(Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+			for(Long threadId : resultMap.keySet()) {
+				if(resultMap.get(threadId) != null && !resultMap.get(threadId).isEmpty()) {
+					returnList.addAll(resultMap.get(threadId));
+				}
+			}
+			
 		}
 		
 		return bookmakerList;

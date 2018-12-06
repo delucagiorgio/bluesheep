@@ -130,16 +130,19 @@ public class PBOddDAO extends AbstractOddDAO<PBOdd> implements IOddDAO<PBOdd>{
 	@Override
 	public boolean checkEmptyTable(Connection connection) throws SQLException {
 		String query = "select NOT EXISTS (select id from " + tableName + " ) as emptyTable";
-
+		boolean returnValue = false;
 		Statement ps = connection.createStatement();
 		
 		ResultSet rs = ps.executeQuery(query);
 		
 		if(rs.next()) {
-			return rs.getBoolean("emptyTable");
+			returnValue =  rs.getBoolean("emptyTable");
 		}
 		
-		return false;
+		rs.close();
+		ps.close();
+		
+		return returnValue;
 	}
 
 	@Override
@@ -149,6 +152,8 @@ public class PBOddDAO extends AbstractOddDAO<PBOdd> implements IOddDAO<PBOdd>{
 		Statement ps = connection.createStatement();
 		
 		ps.executeUpdate(query);
+		
+		ps.close();
 	}
 
 	@Override
@@ -190,6 +195,8 @@ public class PBOddDAO extends AbstractOddDAO<PBOdd> implements IOddDAO<PBOdd>{
 			}
 		
 			ps.executeBatch();
+			
+			ps.close();
 			i++;
 		}while(i * page < countEntity);
 	}

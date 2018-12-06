@@ -55,6 +55,8 @@ public class HttpClientNonInteractiveLoginSSO {
             ClientConnectionManager manager = httpClient.getConnectionManager();
             manager.getSchemeRegistry().register(new Scheme("https", port, factory));
             HttpPost httpPost = new HttpPost("https://identitysso.betfair.it/api/certlogin");
+//          HttpPost httpPost = new HttpPost("https://identitysso-cert.betfair.it/api/certlogin");
+
             
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
             nvps.add(new BasicNameValuePair("username", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_USERNAME)));

@@ -3,8 +3,10 @@ package it.bluesheep.servicehandler;
 import org.apache.log4j.Logger;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.generics.BotSession;
 
 import it.bluesheep.telegrambot.TelegramBotHandler;
+import it.bluesheep.util.BlueSheepSharedResources;
 
 public final class TelegramBotServiceHandler extends AbstractBlueSheepService {
 
@@ -30,8 +32,9 @@ public final class TelegramBotServiceHandler extends AbstractBlueSheepService {
         TelegramBotsApi botApi = new TelegramBotsApi();
         
         try {
-            botApi.registerBot(TelegramBotHandler.getTelegramBotHandlerInstance());
-    		logger.info("TelegramBotChat handler started");
+            BotSession session = botApi.registerBot(TelegramBotHandler.getTelegramBotHandlerInstance());
+    		BlueSheepSharedResources.setBotSession(session);
+            logger.info("TelegramBotChat handler started");
         } catch (Exception e) {
         	logger.error(e.getMessage(), e);
         	instance = null;

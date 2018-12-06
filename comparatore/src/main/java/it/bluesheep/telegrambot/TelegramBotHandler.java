@@ -3,7 +3,6 @@ package it.bluesheep.telegrambot;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -56,13 +55,12 @@ import it.bluesheep.telegrambot.message.util.TextFilterCommand;
 import it.bluesheep.telegrambot.message.util.UserPreferenceFilterUtil;
 import it.bluesheep.util.BlueSheepConstants;
 
-public class TelegramBotHandler extends TelegramLongPollingBot {
+public class TelegramBotHandler extends TelegramLongPollingBot  {
 	
 	private static Logger logger = Logger.getLogger(TelegramBotHandler.class);
 	private static TelegramBotHandler instance;
 	private Connection connection;
 	private static final int maxRow = 3;
-	private List<String> chatIdPermitted = Arrays.asList("51337759", "653706049", "600192016"); 
 	
 	private TelegramBotHandler() {
 		super();
@@ -94,15 +92,14 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				
 				if(updateContainer.hasMessage() 
 						&& updateContainer.getMessage().getFrom() != null 
-						&& updateContainer.getMessage().getFrom().getUserName() == null
-						&& controlAccessType(updateContainer.getMessage().getChatId().toString())) {
+						&& updateContainer.getMessage().getFrom().getUserName() == null) {
 					throw new NoUserNameSet(TelegramUser.getTelegramUserFromMessage(updateContainer.getMessage()));
 				}
 				
 				//si tratta di un messaggio testuale e 
 				//deve contenere uno dei messaggi accettati
 		        if (updateContainer.hasMessage() 
-		        		&& updateContainer.getMessage().hasText() && controlAccessType(updateContainer.getMessage().getChatId().toString())) {
+		        		&& updateContainer.getMessage().hasText()) {
 
 		        	Set<String> possibleCommands = AcceptedUserInput.getAvailableUserInputs();
 		        	if(possibleCommands.contains(updateContainer.getMessage().getText())) {
@@ -124,7 +121,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 			        				+ "; :::REGISTERED USER = " + registeredClient + ":::");
 			        	
 			        	//Controlla che il messaggio arrivi da un messaggio successivo come id
-			        	if((userDB != null && userDB.isActive())) {
+			        	if((userDB != null && (userDB.isActive() || userDB.isBypassedControlAccount()))) {
 			        		if(lastSentMessageIdDB == null || receivedMessage.getMessageId() >= lastSentMessageIdDB) {
 			        			manageUserInput(userMessage, receivedMessage, userDB);
 			        		}else {
@@ -156,8 +153,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        	
 		        	//Se c'è una callback, non è necessario controllare 
 		        	//l'utente perchè arriverà da utenti già registrati e i dati saranno quelli server
-		        } else if (updateContainer.hasCallbackQuery() 
-		        		&& controlAccessType(updateContainer.getCallbackQuery().getMessage().getChatId().toString())) {
+		        } else if (updateContainer.hasCallbackQuery()) {
 
 		        	receivedMessage = updateContainer.getCallbackQuery().getMessage();
 		        	userDB = TelegramUserDAO.getBlueSheepTelegramUserDAOInstance()
@@ -168,7 +164,7 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 		        		lastSentMessageIdDB = new Long(userDB.getLastMessageId().longValue());
 		        	}
 		        	
-		        	if(userDB != null && userDB.isActive()) {
+		        	if(userDB != null && (userDB.isBypassedControlAccount() || userDB.isActive())) {
 		        		if(userDB.getChatId() != null) {
 			        		if(lastSentMessageIdDB <= receivedMessage.getMessageId()) {
 			        		logger.info("Received a message from " + userDB.getUserName() + ", chat_id: " + userDB.getChatId() + "; Text = " + updateContainer.getCallbackQuery().getData());
@@ -236,12 +232,6 @@ public class TelegramBotHandler extends TelegramLongPollingBot {
 				logger.error(e.getMessage(), e);
 			}
 		}
-	}
-
-	private boolean controlAccessType(String string) {
-		boolean splittedChatAccepted = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ADMITTED_CHATID).equals("1");
-		
-		return !splittedChatAccepted || (chatIdPermitted != null && chatIdPermitted.contains(string));
 	}
 
 	/**

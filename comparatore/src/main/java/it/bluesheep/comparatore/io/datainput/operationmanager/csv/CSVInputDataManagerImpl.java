@@ -50,7 +50,8 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 		super(sport);
 		this.logger = Logger.getLogger(CSVInputDataManagerImpl.class);
 		idLineMapKeyValues = new HashMap<Integer, Map<Integer, String>>();
-		csvFilenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CSV_ODDS_PATH_INPUT_FILE);
+		csvFilenamePath = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.PATH_INPUT_FILE) + 
+				BlueSheepConstants.CSV_FILENAME;
 		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 		this.serviceName = Service.CSV_SERVICENAME;
 	}

@@ -7,8 +7,6 @@ import java.sql.SQLException;
 
 public interface IBlueSheepDatabaseManager {
 
-	public ResultSet executeSelect(String selectQuery, Connection connection) throws SQLException;
-	
 	public ResultSet executeSelect(PreparedStatement selectQuery, Connection connection) throws SQLException;
 
 	public void executeUpdate(PreparedStatement updateQuery) throws SQLException;

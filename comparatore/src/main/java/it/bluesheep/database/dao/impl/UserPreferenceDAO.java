@@ -184,6 +184,8 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			
 			
 			BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
+			
+			ps.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -214,6 +216,7 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			ps.setLong(2, up.getId());
 			
 			BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
+			ps.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 			throw new AskToUsException(up.getUser());
@@ -230,6 +233,7 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			ps.setLong(1, user.getId());
 			ps.setLong(2, bookmaker.getId());
 			BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeDelete(ps);
+			ps.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 			throw new AskToUsException(user);
@@ -246,6 +250,7 @@ public class UserPreferenceDAO extends AbstractDAO<UserPreference> {
 			ps.setLong(2, up.getId());
 			
 			BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
+			ps.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}

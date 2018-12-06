@@ -10,6 +10,7 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.sql.SQLException;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -23,6 +24,7 @@ import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
+import it.bluesheep.database.ConnectionPool;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
 import it.bluesheep.telegrambot.TelegramBotHandler;
 import it.bluesheep.util.BlueSheepConstants;
@@ -86,7 +88,13 @@ public final class BlueSheepServiceHandlerManager {
     		logConfigurationFile();
 			BlueSheepSharedResources.initializeDataStructures();
 			
-			executor = Executors.newScheduledThreadPool(4);
+			try {
+				ConnectionPool.init();
+			} catch (SQLException e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+			executor = Executors.newScheduledThreadPool(8);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
 			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
@@ -132,8 +140,9 @@ public final class BlueSheepServiceHandlerManager {
 				ws = FileSystems.getDefault().newWatchService();
 				
 				Path pathToResources = Paths.get(BlueSheepConstants.PATH_TO_RESOURCES);
-				
+				Path pathToInputCSV = Paths.get(properties.getProperty(BlueSheepConstants.PATH_INPUT_FILE));
 				pathToResources.register(ws, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
+				pathToInputCSV.register(ws, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 				WatchKey key;
 				propertiesConfigurationChanged = false;
 				while(!stopApplication && !propertiesConfigurationChanged && (key = ws.take()) != null) {
@@ -191,6 +200,7 @@ public final class BlueSheepServiceHandlerManager {
 					logger.info(message + ". Timeout to force shutdown is " + timeout + " " + timeUnitTimeout);
 					
 					TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+					BlueSheepSharedResources.getBotSession().stop();
 					executor.shutdown();
 					terminatedCorrectly = executor.awaitTermination(timeout, timeUnitTimeout);
 					if(!terminatedCorrectly) {

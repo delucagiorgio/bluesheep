@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
@@ -23,22 +22,6 @@ public class BlueSheepDatabaseManager implements IBlueSheepDatabaseManager{
 			instance = new BlueSheepDatabaseManager();
 		}
 		return instance;
-	}
-	
-	@Override
-	public ResultSet executeSelect(String selectQuery, Connection connection) throws SQLException{
-		ResultSet result = null;
-		Statement stmt;
-		try {
-			stmt = connection.createStatement();
-			logger.debug("Executing query" + selectQuery);
-			result = stmt.executeQuery(selectQuery);
-		} catch (SQLException e) {
-			logger.error("Error during select. Query is " + selectQuery);
-			throw e;
-		} 
-		
-		return result;
 	}
 	
 	@Override

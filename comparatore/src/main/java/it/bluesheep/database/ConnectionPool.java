@@ -13,7 +13,7 @@ import it.bluesheep.util.BlueSheepConstants;
 public class ConnectionPool {
 
 	
-    private static BasicDataSource dataSource = new BasicDataSource();
+    private static BasicDataSource dataSource;
 
 	// La variabile che gestisce l'unica istanza di ConnectionPool
 	private static ConnectionPool instance;
@@ -22,6 +22,7 @@ public class ConnectionPool {
 	
 	// Costruttore della classe ConnectionPool
 	private ConnectionPool() {
+		dataSource = new BasicDataSource();
 //        dataSource.setUrl("jdbc:mysql://86.107.98.176:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
         dataSource.setUrl("jdbc:mysql://localhost:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
         dataSource.setUsername(BlueSheepConstants.DATABASE_USER);
@@ -29,16 +30,21 @@ public class ConnectionPool {
 		connectionVector = new Vector<Connection>();
 	}
 	
+	public static void init() throws SQLException {
+		executeOperationOnConnectionVector("INIT", null);
+	}
+	
 	public static Connection getConnection() throws SQLException {
 		return executeOperationOnConnectionVector("GET", null);
 	}
 	
 	private static synchronized Connection executeOperationOnConnectionVector(String string, Connection conn) throws SQLException {
-		if(instance == null) {
-			instance = new ConnectionPool();
-		}
-		
-		if("GET".equals(string)) {
+
+		if("INIT".equals(string)) {
+			if(instance == null || connectionVector == null) {
+				instance = new ConnectionPool();
+			}
+		}else if("GET".equals(string)) {
 			Connection connection = null;
 			if(!connectionVector.isEmpty()) {
 				connection = connectionVector.lastElement();

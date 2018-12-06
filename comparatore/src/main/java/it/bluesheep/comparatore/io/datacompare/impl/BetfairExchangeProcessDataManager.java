@@ -147,9 +147,15 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 						AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
 						//Se trovato
 						if(exchangeRecord != null) {
-							List<RecordOutput> outputRecordsList = 
-									verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa), exchangeRecord, bluesheepServiceType);
-							mappedOutputRecord.addAll(outputRecordsList);	
+							try {
+								List<RecordOutput> outputRecordsList = 
+										verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa), exchangeRecord, bluesheepServiceType);
+								mappedOutputRecord.addAll(outputRecordsList);
+							}catch(Exception e) {
+								logger.error(e.getMessage(), e);
+								logger.warn("Skipping " + evento + " for scommessa " + scommessa);
+
+							}
 						}
 					}
 				}

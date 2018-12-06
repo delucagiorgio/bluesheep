@@ -12,11 +12,10 @@ import it.bluesheep.comparatore.serviceapi.Service;
 
 public class CSVInputRecord extends AbstractInputRecord implements IKeyEventoComparator {
 
-	private static Logger logger;
+	private static Logger logger = Logger.getLogger(CSVInputRecord.class);;
 	
 	public CSVInputRecord(AbstractInputRecord record) {
 		super(record);
-		logger = Logger.getLogger(CSVInputRecord.class);
 		this.liquidita = -1;
 		this.source = Service.CSV_SERVICENAME;
 	}

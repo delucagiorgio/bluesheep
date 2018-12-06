@@ -116,6 +116,7 @@ public final class ChiaveEventoScommessaInputRecordsMap extends ConcurrentHashMa
 
 	public List<AbstractInputRecord> findDeleteAbstractInputRecordInMap(List<AbstractInputRecord> recordList) {
 		List<AbstractInputRecord> returnRecord = new ArrayList<AbstractInputRecord>();
+		
 		for(AbstractInputRecord record : recordList) {
 			if(record != null) {
 				Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dateMap = get(record.getSport());

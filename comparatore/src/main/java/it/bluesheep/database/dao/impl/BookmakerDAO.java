@@ -66,6 +66,7 @@ public class BookmakerDAO extends AbstractDAO<Bookmaker> {
 			if(ps != null) {
 				returnBookmaker = getSingleResult(getMappedObjectBySelect(ps, connection));
 			}
+			ps.close();
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);
 		}

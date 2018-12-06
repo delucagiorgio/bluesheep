@@ -67,6 +67,8 @@ public class BlueSheepUserInfoDAO extends AbstractDAO<BlueSheepUserInfo> {
 		
 		Statement st = connection.createStatement();
 		st.executeUpdate(query);
+		
+		st.close();
 	}
 	
 	public void insertMultipleRows(List<BlueSheepUserInfo> bluesheepUserList, Connection connection) throws SQLException {
@@ -99,6 +101,7 @@ public class BlueSheepUserInfoDAO extends AbstractDAO<BlueSheepUserInfo> {
 			}
 		
 			ps.executeBatch();
+			ps.close();
 			i++;
 		}while(i * page < countEntity);
 	}

@@ -83,10 +83,6 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		return returnList;
 	}
 	
-	private ResultSet getResultSelectFromQuery(String query, Connection connection) throws SQLException {
-		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query, connection);
-	}
-	
 	private ResultSet getResultSelectFromQuery(PreparedStatement query, Connection connection) throws SQLException {
 		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeSelect(query, connection);
 	}
@@ -103,13 +99,17 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 	public List<T> getMappedObjectBySelect(String query, Connection connection) throws SQLException{
 
 		List<T> returnList = null;
-		ResultSet returnSelect = getResultSelectFromQuery(query, connection);
+		PreparedStatement ps = connection.prepareStatement(query);
+		ResultSet returnSelect = getResultSelectFromQuery(ps, connection);
 		
 		if(returnSelect != null) {
 			returnList = mapDataIntoObject(returnSelect, connection);
 		}else {
 			logger.warn("Select query " + query + " has returned no value");
 		}
+		
+		returnSelect.close();
+		ps.close();
 		
 		return returnList;
 	}
@@ -132,6 +132,9 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		}else {
 			logger.warn("Select query " + query + " has returned no value");
 		}
+		
+		returnSelect.close();
+		query.close();
 		
 		return returnList;
 	}
@@ -164,7 +167,11 @@ public abstract class AbstractDAO<T extends AbstractBlueSheepEntity> {
 		ps.setTimestamp(2, entity.getUpdateTime());
 		
 		logger.info("Executing insert query " + query);
-		return BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeInsert(ps);
+		boolean executed = BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeInsert(ps);
+		
+		ps.close();
+		
+		return executed;
 	}
 	
 	protected String getinsertBaseTableNameQuery() {

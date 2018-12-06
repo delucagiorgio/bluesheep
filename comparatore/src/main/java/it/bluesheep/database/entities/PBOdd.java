@@ -145,7 +145,7 @@ public class PBOdd extends AbstractOddEntity implements IRFCalculator {
 		specData = specData 
 				+ (up.getLiquidita() != null ? ArbsUtil.getTelegramBoldString("Liquidità") + ": " + getLiquidita2() + "€" + System.lineSeparator() : "") 
 				+ (up.getRating() != null ? ArbsUtil.getTelegramBoldString("Rating") + ": " + df.format(rating1_100) + "%" + System.lineSeparator() : "")
-				+ (up.getRfType() != null && up.getRfValue() != null ? ArbsUtil.getTelegramBoldString("RF") + ": " + df.format(odd.getRfValue(up.getRfType())) + "%" + System.lineSeparator() : "");
+				+ (up.getRfType() != null && up.getRfValue() != null ? ArbsUtil.getTelegramBoldString("RF") + ": " + df.format(odd.getRfValue(up.getRfType()) * 100D) + "%" + System.lineSeparator() : "");
 
 		return  specData + System.lineSeparator() + (progId == maxNotificationPerUserPreference ? System.lineSeparator() 
 										+ "Ti abbiamo segnalato il numero massimo di notifiche permesso su una singola preferenza di segnalazione. La preferenza sul bookmaker " 

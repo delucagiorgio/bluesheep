@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.telegram.telegrambots.meta.generics.BotSession;
+
 import it.bluesheep.arbitraggi.entities.ArbsType;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
@@ -42,6 +44,7 @@ public class BlueSheepSharedResources {
 	private static Map<ArbsType, Map<String, Double>> arbsNetProfitHistoryMap = new HashMap<ArbsType, Map<String, Double>>();
 	private static long timeReferenceOfToday = System.currentTimeMillis();
 	private static int arbsIdOfToday = 0;
+	private static BotSession botSession;
 	
 	private BlueSheepSharedResources() {}
 
@@ -251,6 +254,14 @@ public class BlueSheepSharedResources {
 		}
 		
 		return arbsIdOfToday;
+	}
+
+	public static void setBotSession(BotSession session) {
+		botSession = session;
+	}
+	
+	public static BotSession getBotSession() {
+		return botSession;
 	}
 
 }

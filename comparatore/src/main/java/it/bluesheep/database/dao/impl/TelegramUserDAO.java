@@ -28,6 +28,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 	private static String ACTIVE = "active";
 	private static String LASTMESSAGEID = "lastMessageId";
 	private static String BLUESHEEP_USERNAME = "bluesheepUsername";
+	private static String BYPASSEDCONTROLACCOUNT = "bypassedControlAccount";
 
 	private TelegramUserDAO() {
 		super(tableName);
@@ -63,12 +64,13 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			Long chatId = returnSelect.getLong(CHATID) == 0 ? null : returnSelect.getLong(CHATID);
 			Timestamp registrationDate = getTimestampFromResultSet(returnSelect, REGISTRATIONDATE);
 			Boolean active = returnSelect.getBoolean(ACTIVE);
+			boolean bypassedControlAccount = returnSelect.getBoolean(BYPASSEDCONTROLACCOUNT);
 			Long id = returnSelect.getLong(ID);
 			Long lastMessageId = returnSelect.getLong(LASTMESSAGEID) == 0 ? null : returnSelect.getLong(LASTMESSAGEID);
 			Timestamp createTime = getTimestampFromResultSet(returnSelect, CREATETIME);
 			Timestamp updateTime = getTimestampFromResultSet(returnSelect, UPDATETIME);
 			
-			dataMapped.add(TelegramUser.getBlueSheepTelegramUserFromDatabaseInfo(userName, bsUsername, chatId, active, registrationDate, id, lastMessageId, createTime, updateTime));
+			dataMapped.add(TelegramUser.getBlueSheepTelegramUserFromDatabaseInfo(userName, bsUsername, chatId, active, bypassedControlAccount, registrationDate, id, lastMessageId, createTime, updateTime));
 		}
 		
 		return dataMapped;
@@ -102,7 +104,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 						   + AND + 
 						   "(" + CHATID + IS + "NULL" + OR + CHATID + "= ?)" 
 						   + AND  + 
-						   ACTIVE + IS + true;
+						   "(" + ACTIVE + IS + true + OR + BYPASSEDCONTROLACCOUNT + IS + true + ")";
 			PreparedStatement prepStatement = connection.prepareStatement(query);
 			prepStatement.setString(1, user.getUserName());
 			prepStatement.setLong(2, user.getChatId());
@@ -123,6 +125,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 					user.getChatId() + BlueSheepConstants.REGEX_COMMA + 
 					"'" + user.getRegistrationDate() + "'" +  BlueSheepConstants.REGEX_COMMA + 
 					user.isActive() + BlueSheepConstants.REGEX_COMMA + 
+					user.isBypassedControlAccount() + BlueSheepConstants.REGEX_COMMA + 
 					user.getLastMessageId() + BlueSheepConstants.REGEX_COMMA +
 					"'" + user.getBluesheepUsername() + "'" +  BlueSheepConstants.REGEX_COMMA +
 					"?" + BlueSheepConstants.REGEX_COMMA +
@@ -136,7 +139,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 				+ AND 
 				+ USERNAME + " =  ? " 
 				+ AND 
-				+ ACTIVE + IS + true;
+				+ "(" + ACTIVE + IS + true + OR + BYPASSEDCONTROLACCOUNT + IS + true + ")";
 		
 		PreparedStatement ps;
 		try {
@@ -163,6 +166,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 		
 		PreparedStatement ps = connection.prepareStatement(query);
 		BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
+		ps.close();
 	}
 	
 	public TelegramUser findByBlueSheepUsername(TelegramUser userDB, Connection connection) throws SQLException, MoreThanOneResultException {
@@ -196,6 +200,8 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 			}
 		
 			ps.executeBatch();
+			ps.close();
+			
 			i++;
 		}while(i * page < countEntity);
 	}
@@ -228,13 +234,16 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 				ps.setBoolean(4, active);
 				ps.setNull(5, Types.BIGINT);
 				ps.setString(6, entity.getBluesheepUsername());
-				ps.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
-				ps.setTimestamp(8, null);
+				ps.setBoolean(7, false);
+				ps.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+				ps.setTimestamp(9, null);
 				
 				ps.addBatch();
 			}
 		
 			ps.executeBatch();
+			ps.close();
+			
 			i++;
 		}while(i * page < countEntity);
 		
@@ -242,6 +251,7 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 	
 	protected String getAllColumnValuesFromEntityMultipleInsert() {
 		return 	"("
+				+ "?" + BlueSheepConstants.REGEX_COMMA
 				+ "?" + BlueSheepConstants.REGEX_COMMA
 				+ "?" + BlueSheepConstants.REGEX_COMMA
 				+ "?" + BlueSheepConstants.REGEX_COMMA
@@ -263,6 +273,8 @@ public class TelegramUserDAO extends AbstractDAO<TelegramUser>{
 		if(updated != 1) {
 			throw new AlreadyRegisteredUserChatBotException(userMessage);
 		}
+		
+		ps.close();
 		
 		return userMessage;
 		

@@ -82,7 +82,7 @@ public class BlueSheepConstants {
 	public static final String LINK_BOOKMAKER_FILE_PATH = "LINK_BOOKMAKER_FILENAME";
 	
 	//csv
-	public static final String CSV_ODDS_PATH_INPUT_FILE = "PATH_INPUT_FILE";
+	public static final String PATH_INPUT_FILE = "PATH_INPUT_FILE";
 	public static final String FREQ_CSV_SEC = "FREQ_CSV_SEC";
 	
 	//arbitraggi

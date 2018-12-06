@@ -24,6 +24,10 @@ public class DatabasePollingServiceHandler extends AbstractBlueSheepService {
 			if(rs != null) {
 				logger.info("DB connection OK");
 			}
+			
+			rs.close();
+			st.close();
+			
 			ConnectionPool.releaseConnection(connection);
 		} catch (SQLException e) {
 			logger.error(e.getMessage(), e);

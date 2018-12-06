@@ -85,6 +85,7 @@ public class UserPreferenceNotificationDAO extends AbstractDAO<UserPreferenceNot
 		ps.setLong(1, up.getId());
 		
 		BlueSheepDatabaseManager.getBlueSheepDatabaseManagerInstance().executeUpdate(ps);
+		ps.close();
 		
 	}
 
