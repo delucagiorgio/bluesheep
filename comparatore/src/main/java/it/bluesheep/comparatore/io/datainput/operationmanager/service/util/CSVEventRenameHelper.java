@@ -25,9 +25,10 @@ public class CSVEventRenameHelper {
 	}
 	
 	public void initializeMap() {
+		
 		FileReader in = null;
+		
 		try {
-			
 			in = new FileReader(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.CSV_PLAYER_RENAME_FILE));
 			BufferedReader br = new BufferedReader(in);
 			String inLineString;
@@ -43,6 +44,7 @@ public class CSVEventRenameHelper {
 			}
 			br.close();
 			in.close();
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

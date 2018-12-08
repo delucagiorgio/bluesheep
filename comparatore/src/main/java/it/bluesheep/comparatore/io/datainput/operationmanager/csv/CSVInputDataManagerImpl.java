@@ -19,6 +19,7 @@ import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.IInputDataManager;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.impl.InputDataManagerImpl;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.CSVEventRenameHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 import it.bluesheep.util.BlueSheepConstants;
@@ -80,6 +81,8 @@ public class CSVInputDataManagerImpl extends InputDataManagerImpl implements IIn
 			for(Integer idLine : idLineMapKeyValues.keySet()) {
 				AbstractInputRecord record = mapSplittedInfoIntoAbstractInputRecord(idLineMapKeyValues.get(idLine), idLine);
 				if(record != null) {
+					record.setPartecipante1(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante1()));
+					record.setPartecipante2(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante2()));
 					returnList.add(record);
 				}
 			}

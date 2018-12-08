@@ -11,6 +11,7 @@ import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.IInputDataManager;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.CSVEventRenameHelper;
 import it.bluesheep.comparatore.serviceapi.IApiInterface;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.util.BlueSheepSharedResources;
@@ -89,8 +90,12 @@ public abstract class InputDataManagerImpl implements IInputDataManager {
 			if (resultJSONList != null && !resultJSONList.isEmpty()) {
 				for(String resultJSON : resultJSONList) {
 					//salvo i risultati in un unico oggetto da ritornare poi per le successive analisi
-					recordToBeReturned.addAll(mapJsonToAbstractInputRecord(resultJSON, scommessa, sport));
-				}	
+					List<AbstractInputRecord> mappedRecords = mapJsonToAbstractInputRecord(resultJSON, scommessa, sport);
+					for(AbstractInputRecord record : mappedRecords) {
+						record.setPartecipante1(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante1()));
+						record.setPartecipante2(CSVEventRenameHelper.getTranslationPlayerNameIfAvailable(record.getPartecipante2()));
+					}
+					recordToBeReturned.addAll(mappedRecords);				}	
 			}
 			
 		}

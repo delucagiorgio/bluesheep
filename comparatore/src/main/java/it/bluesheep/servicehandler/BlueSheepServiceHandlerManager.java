@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
 import it.bluesheep.comparatore.io.datacompare.util.BookmakerLinkGenerator;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.CSVEventRenameHelper;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.InputDataHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.database.ConnectionPool;
@@ -169,6 +170,10 @@ public final class BlueSheepServiceHandlerManager {
 			                	case BlueSheepConstants.PROPERTIES_FILENAME:
 			                		logger.info("File " + BlueSheepConstants.PROPERTIES_FILENAME + " has changed. Properties are going to be updated");
 			                		propertiesConfigurationChanged = true;
+			                		break;
+			                	case BlueSheepConstants.RENAME_PLAYER_FILENAME:
+			                		logger.info("File " + BlueSheepConstants.RENAME_PLAYER_FILENAME + " has changed. Rename player map is going to be updated");
+			                		CSVEventRenameHelper.getCSVEventRenameHelperInstance().initializeMap();
 			                		break;
 			                	default:
 			                		logger.info("No particular actions are required for the changed file");

@@ -24,6 +24,7 @@ public class BlueSheepConstants {
 	public static final String PATH_TO_RESOURCES = "../RISORSE_BLUESHEEP/";
 	public static final String BLUESHEEP_APP_STATUS = "bluesheepStatusOn.txt";
 	public static final String TRADUZIONI_API_FILENAME = "translationCsv.csv";
+	public static final String RENAME_PLAYER_FILENAME = "renamePlayer.csv";
 	public static final String FILE_USER_TELEGRAM = "telegramUsersInfo.csv";
 	public static final String STATUS1_ARBS_RECORD = "1";
 	public static final String STATUS0_ARBS_RECORD = "0";

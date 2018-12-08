@@ -16,6 +16,7 @@ import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.CSVEventRenameHelper;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.BlueSheepServiceHandlerManager;
 
@@ -146,6 +147,8 @@ public class BlueSheepSharedResources {
 		BlueSheepSharedResources.setTxOddsUpdateTimestamp(BlueSheepSharedResources.getTxOddsNowMinimumUpdateTimestamp());
 		updateFrequencyDiff = Long.valueOf(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.UPDATE_FREQUENCY)) * 1000L * 60L;
 		populateServiceSportMap();
+		CSVEventRenameHelper csvEventRenameHelper = CSVEventRenameHelper.getCSVEventRenameHelperInstance();
+		csvEventRenameHelper.initializeMap();
 	}
 
 	private static Map<Service, Long> getActiveServiceApiFromProperties() {

@@ -21,7 +21,6 @@ public class BlueSheepComparatoreMain {
 	}
 	
 	private static void initializeServiceHandler(){
-		
 		BlueSheepServiceHandlerManager serviceHandler = BlueSheepServiceHandlerManager.getBlueSheepServiceHandlerInstance();
 		serviceHandler.start();
 	}
