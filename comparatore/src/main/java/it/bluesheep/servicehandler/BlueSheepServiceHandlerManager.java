@@ -126,8 +126,8 @@ public final class BlueSheepServiceHandlerManager {
 			long jsonFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_JSON_SEC));
 			if(jsonFrequencySeconds > 0) {
 				executor.scheduleAtFixedRate(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance(), initialDelay, jsonFrequencySeconds, TimeUnit.SECONDS);
-			}else if(arbsFrequencySeconds == SINGLE_EXECUTION){
-				executor.submit(ArbitraggiServiceHandler.getArbitraggiServiceHandlerInstance());
+			}else if(jsonFrequencySeconds == SINGLE_EXECUTION){
+				executor.submit(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance());
 			}
 			
 			executor.scheduleAtFixedRate(DatabasePollingServiceHandler.getDatabasePollingServiceHandlerInstance(), 0, 10, TimeUnit.MINUTES);

@@ -209,7 +209,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 						}
 						
 						double compareValue1 = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepService).getCompareValue(maxOdd, minOdd);
-						double rating2 = RatingCalculatorBookmakersOdds.calculateRatingApprox(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota());
+						double rating2 = RatingCalculatorBookmakersOdds.calculateRatingApprox(maxOdd, minOdd);
 						
 						//se le due quote in analisi raggiungono i termini di accettabilità, vengono mappate nel record di output
 						if(compareValue1 >= minThreshold 
@@ -229,8 +229,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 									) 
 							) {
 							RecordOutput outputRecord = mapRecordOutput(orderedListByQuota.get(0), orderedListByQuota.get(1), 
-									RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(orderedListByQuota.get(0).getQuota(), 
-																										 orderedListByQuota.get(1).getQuota()));
+									RatingCalculatorFactory.getRatingCalculator(service).getCompareValue(maxOdd, 
+																										 minOdd));
 							((RecordBookmakerVsBookmakerOdds) outputRecord).setRating2(rating2 * 100);
 							outputRecordList.add(outputRecord);
 						}
