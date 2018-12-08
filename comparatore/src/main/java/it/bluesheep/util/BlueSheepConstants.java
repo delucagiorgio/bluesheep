@@ -84,6 +84,7 @@ public class BlueSheepConstants {
 	//csv
 	public static final String PATH_INPUT_FILE = "PATH_INPUT_FILE";
 	public static final String FREQ_CSV_SEC = "FREQ_CSV_SEC";
+	public static String CSV_PLAYER_RENAME_FILE = "CSV_PLAYER_RENAME_FILE";
 	
 	//arbitraggi
 	public static final String RATING1 = "R1";
