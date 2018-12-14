@@ -144,18 +144,15 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 					Map<Scommessa,Map<String, AbstractInputRecord>> inputRecordEventoScommessaMap = dateMap.get(evento);
 					Set<Scommessa> scommessaSet = new HashSet<Scommessa>(inputRecordEventoScommessaMap.keySet());
 					for(Scommessa scommessa : scommessaSet) {
-						AbstractInputRecord exchangeRecord = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
-						//Se trovato
-						if(exchangeRecord != null) {
-							try {
-								List<RecordOutput> outputRecordsList = 
-										verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa), exchangeRecord, bluesheepServiceType);
-								mappedOutputRecord.addAll(outputRecordsList);
-							}catch(Exception e) {
-								logger.error(e.getMessage(), e);
-								logger.warn("Skipping " + evento + " for scommessa " + scommessa);
+						List<AbstractInputRecord> exchangeRecordList = findExchangeRecord(inputRecordEventoScommessaMap.get(scommessa));
+						try {
+							List<RecordOutput> outputRecordsList = 
+									verifyRequirementsAndMapOddsComparison(inputRecordEventoScommessaMap.get(scommessa), exchangeRecordList, bluesheepServiceType);
+							mappedOutputRecord.addAll(outputRecordsList);
+						}catch(Exception e) {
+							logger.error(e.getMessage(), e);
+							logger.warn("Skipping " + evento + " for scommessa " + scommessa);
 
-							}
 						}
 					}
 				}
@@ -192,8 +189,11 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	 * @param scommessaRecordList lista di offerte quote
 	 * @return il record relativo alle quote offerte da Betfair Exchange, null se non trovato
 	 */
-	private BetfairExchangeInputRecord findExchangeRecord(Map<String, AbstractInputRecord>  scommessaRecordList) {
-		return (BetfairExchangeInputRecord) scommessaRecordList.get(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY);
+	private List<AbstractInputRecord> findExchangeRecord(Map<String, AbstractInputRecord>  scommessaRecordList) {
+		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>(2);
+		returnList.add(0, scommessaRecordList.get(BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY));
+		returnList.add(1, scommessaRecordList.get(BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME));
+		return returnList;
 	}
 	
 	/**
@@ -201,10 +201,10 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	 * Metodo che verifica i requisiti minimi affinchè la comparazione tra la lista di eventi-bookmaker e l'evento-Betfair 
 	 * siano mappati in OUTPUT
 	 * @param eventoScommessaRecordList la lista di quote offerte dai bookmaker relativi ad uno specifico evento-scommessa
-	 * @param exchangeRecord la quota offerta da Betfair Exchange relativa all'evento-scommessa in analisi 
+	 * @param exchangeRecordList la quota offerta da Betfair Exchange relativa all'evento-scommessa in analisi 
 	 * @return la lista di comparazioni mappate in base ai requisiti minimi
 	 */
-	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> eventoScommessaRecordList, AbstractInputRecord exchangeRecord, AbstractBlueSheepService bluesheepServiceType) {
+	private List<RecordOutput> verifyRequirementsAndMapOddsComparison(Map<String, AbstractInputRecord> eventoScommessaRecordList, List<AbstractInputRecord> exchangeRecordList, AbstractBlueSheepService bluesheepServiceType) {
 		String blockedBookmakerListServiceType = BlueSheepConstants.BLOCKED_BOOKMAKER_BONUS_ABUSING;
 		if(bluesheepServiceType instanceof ArbitraggiServiceHandler) {
 			blockedBookmakerListServiceType = BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET;
@@ -212,27 +212,34 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		
 		List<RecordOutput> outputRecordList = new ArrayList<RecordOutput>();
 		Set<String> bookmakerSet = new HashSet<String>(eventoScommessaRecordList.keySet());
-		for(String bookmaker : bookmakerSet) {
-			AbstractInputRecord record = eventoScommessaRecordList.get(bookmaker);
-			//Confronto solo il record exchange con tutti quelli dei bookmaker
-			if(record != exchangeRecord 
-					&& !helper.isBlockedBookmaker(record.getBookmakerName(), blockedBookmakerListServiceType)
-					&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(record.getBookmakerName()) 
-					&& record.getQuota() >= minimumOddValue) {
-				double compareValue = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepServiceType).getCompareValue(record.getQuota(), exchangeRecord.getQuota());
-				//se il rating1 è sufficientemente alto
-				if(compareValue >= minThreshold 
-						&& ((controlValidityOdds 
-								&& ArbsUtil.validOddsRatio(record.getQuota(), exchangeRecord.getQuota(), service))
-								&& !record.getSource().equals(Service.CSV_SERVICENAME) 
-								&& hasBeenRecentlyUpdated(record) 
-								&& hasBeenRecentlyUpdated(exchangeRecord)
-								&& exchangeRecord.getLiquidita() >= minSizeRequiredArbsValue
-						||
-						(!controlValidityOdds && compareValue <= maxThreshold))
-					) {
-					RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, getRatingByScommessaPair(record, exchangeRecord));
-					outputRecordList.add(recordOutput);
+		for(AbstractInputRecord exchangeRecord : exchangeRecordList) {
+			if(exchangeRecord != null) {
+				for(String bookmaker : bookmakerSet) {
+					AbstractInputRecord record = eventoScommessaRecordList.get(bookmaker);
+					//Confronto solo il record exchange con tutti quelli dei bookmaker
+					if(record != exchangeRecord 
+							&& (!BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(exchangeRecord.getBookmakerName()) || !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(record.getBookmakerName()))
+							&& !helper.isBlockedBookmaker(record.getBookmakerName(), blockedBookmakerListServiceType)
+							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK.equalsIgnoreCase(record.getBookmakerName())
+							&& !BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(record.getBookmakerName())
+							&& record.getQuota() >= minimumOddValue) {
+						double compareValue = CompareValueFactory.getCompareValueInterfaceByComparisonTypeAndService(service, bluesheepServiceType).getCompareValue(record.getQuota(), exchangeRecord.getQuota());
+						//se il rating1 è sufficientemente alto
+						if(compareValue >= minThreshold 
+								&& ((controlValidityOdds 
+										&& ArbsUtil.validOddsRatio(record.getQuota(), exchangeRecord.getQuota(), service))
+										&& !record.getSource().equals(Service.CSV_SERVICENAME) 
+										&& !Service.isScrapingService(record.getSource())
+										&& hasBeenRecentlyUpdated(record) 
+										&& hasBeenRecentlyUpdated(exchangeRecord)
+										&& exchangeRecord.getLiquidita() >= minSizeRequiredArbsValue
+								||
+								(!controlValidityOdds && compareValue <= maxThreshold))
+							) {
+							RecordOutput recordOutput = mapRecordOutput(record, exchangeRecord, getRatingByScommessaPair(record, exchangeRecord));
+							outputRecordList.add(recordOutput);
+						}
+					}
 				}
 			}
 		}

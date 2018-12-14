@@ -23,7 +23,6 @@ public class ConnectionPool {
 	// Costruttore della classe ConnectionPool
 	private ConnectionPool() {
 		dataSource = new BasicDataSource();
-//        dataSource.setUrl("jdbc:mysql://86.107.98.176:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
         dataSource.setUrl("jdbc:mysql://localhost:3306/bluesheepUsers?autoReconnect=true&useUnicode=true&characterEncoding=utf8");
         dataSource.setUsername(BlueSheepConstants.DATABASE_USER);
         dataSource.setPassword(BlueSheepConstants.DATABASE_PASSWORD);

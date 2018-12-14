@@ -14,6 +14,7 @@ public final class TelegramBotServiceHandler extends AbstractBlueSheepService {
 	private static TelegramBotServiceHandler instance;
 
 	private TelegramBotServiceHandler() {
+		super();
 		logger = Logger.getLogger(TelegramBotServiceHandler.class);
 	}
 	

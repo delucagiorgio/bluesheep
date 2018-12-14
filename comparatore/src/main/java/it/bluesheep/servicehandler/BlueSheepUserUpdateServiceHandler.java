@@ -42,6 +42,10 @@ public class BlueSheepUserUpdateServiceHandler extends AbstractBlueSheepService 
 	private static final String TELEGRAM_LAB = "telegram";
 	private static final String BS_USERNAME_LAB = "username";
 	
+	public BlueSheepUserUpdateServiceHandler() {
+		super();
+	}
+	
 	@Override
 	public void run() {
 		SaveOddProcessHistoryDAO dao = null;

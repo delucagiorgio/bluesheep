@@ -14,6 +14,10 @@ public class DatabasePollingServiceHandler extends AbstractBlueSheepService {
 	private static Logger logger = Logger.getLogger(DatabasePollingServiceHandler.class);
 	private static DatabasePollingServiceHandler instance;
 	
+	private DatabasePollingServiceHandler() {
+		super();
+	}
+	
 	@Override
 	public void run() {
 		Connection connection = null;

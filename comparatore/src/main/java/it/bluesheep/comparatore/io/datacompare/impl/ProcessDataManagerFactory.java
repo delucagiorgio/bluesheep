@@ -31,6 +31,11 @@ public class ProcessDataManagerFactory {
 			return new Bet365ProcessDataManager();
 		case CSV_SERVICENAME:
 			return new CSVProcessDataManager();
+		case BETFLAG_SERVICENAME:
+			return new BetflagProcessDataManager();
+		case GOLDBET_SERVICENAME:
+		case STARVEGAS_SERVICENAME:
+		case PINTERBET_SERVICENAME:
 		case TXODDS_SERVICENAME:
 			return new TxOddsProcessDataManager();
 		default:

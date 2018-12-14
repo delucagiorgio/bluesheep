@@ -98,7 +98,7 @@ public final class BlueSheepServiceHandlerManager {
 			executor = Executors.newScheduledThreadPool(8);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
-			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
+//			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
 			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {

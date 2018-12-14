@@ -25,6 +25,7 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 	private Connection connection;
 	
 	public OddsDatabaseSaveServiceHandler(List<RecordOutput> recordOutputList, Service service) {
+		super();
 		this.recordOutputList = recordOutputList;
 		this.service = service;
 	}

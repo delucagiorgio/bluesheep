@@ -16,7 +16,14 @@ public class BlueSheepServiceHandlerFactory {
 			return new TxOddsServiceHandler();
 		case CSV_SERVICENAME:
 			return new CSVServiceHandler();
-//		case EVERY_MATRIX:
+		case STARVEGAS_SERVICENAME:
+			return new StarVegasServiceHandler();
+		case BETFLAG_SERVICENAME:
+			return new BetflagServiceHandler();
+		case GOLDBET_SERVICENAME:
+			return new GoldBetServiceHandler();
+		case PINTERBET_SERVICENAME:
+			return new PinterBetServiceHandler();
 		default:
 			return null;
 		}

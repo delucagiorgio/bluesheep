@@ -173,7 +173,9 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 							&& !helper.isBlockedBookmaker(bookmakerScommessa, blockedBookmakerListServiceType) 
 							&& !helper.isBlockedBookmaker(bookmakerScommessaOpposite, blockedBookmakerListServiceType)
 							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmakerScommessaOpposite) 
-							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmakerScommessa)) { 
+							&& !BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(bookmakerScommessa) 
+							&& !BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(bookmakerScommessaOpposite)
+							&& !BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(bookmakerScommessa)) { 
 						
 						AbstractInputRecord scommessaInputRecord = bookmakerRecord1Map.get(bookmakerScommessa);
 						boolean isScommessaInputRecordExchangeRecord = scommessaInputRecord instanceof BetfairExchangeInputRecord;
@@ -218,6 +220,8 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 											&& ArbsUtil.validOddsRatio(orderedListByQuota.get(0).getQuota(), orderedListByQuota.get(1).getQuota(), service)
 											&& !scommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) 
 											&& !oppositeScommessaInputRecord.getSource().equals(Service.CSV_SERVICENAME) 
+											&& !Service.isScrapingService(scommessaInputRecord.getSource())
+											&& !Service.isScrapingService(oppositeScommessaInputRecord.getSource())
 											&& hasBeenRecentlyUpdated(scommessaInputRecord) 
 											&& hasBeenRecentlyUpdated(oppositeScommessaInputRecord)
 											&& validSizeBiggerOdd
@@ -369,17 +373,26 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 								for(int i = 0; i < homeWinRecordList.size() && bookmakerSet.size() <= 8; i++) {
 									AbstractInputRecord homeWinRecord = homeWinRecordList.get(i);
 									if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(homeWinRecord.getBookmakerName()) && 
-											!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && hasBeenRecentlyUpdated(homeWinRecord) &&
+											!BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(homeWinRecord.getBookmakerName()) &&
+											!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && 
+											!Service.isScrapingService(homeWinRecord.getSource()) &&
+											hasBeenRecentlyUpdated(homeWinRecord) &&
 											!helper.isBlockedBookmaker(homeWinRecord.getBookmakerName(), BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET)) {
 										for(int j = 0; j < awayWinRecordList.size() && bookmakerSet.size() <= 8; j++) {
 											AbstractInputRecord awayWinRecord = awayWinRecordList.get(j);
 											if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(awayWinRecord.getBookmakerName()) && 
-													!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && hasBeenRecentlyUpdated(awayWinRecord) &&
+													!BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(awayWinRecord.getBookmakerName()) &&
+													!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && 
+													!Service.isScrapingService(awayWinRecord.getSource()) &&
+													hasBeenRecentlyUpdated(awayWinRecord) &&
 													!helper.isBlockedBookmaker(awayWinRecord.getBookmakerName(), BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET)) {
 												for(int k = 0; k < drawRecordList.size() && bookmakerSet.size() <= 8; k++) {
 													AbstractInputRecord drawRecord = drawRecordList.get(k);
-													if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(drawRecord.getBookmakerName()) && 
-															!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && hasBeenRecentlyUpdated(drawRecord) &&
+													if(!BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY.equalsIgnoreCase(drawRecord.getBookmakerName()) &&
+															!BlueSheepConstants.BETFLAG_EXCHANGE_BOOKMAKER_NAME.equalsIgnoreCase(drawRecord.getBookmakerName()) &&
+															!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && 
+															!Service.isScrapingService(drawRecord.getSource()) &&
+															hasBeenRecentlyUpdated(drawRecord) &&
 															!helper.isBlockedBookmaker(drawRecord.getBookmakerName(), BlueSheepConstants.BLOCKED_BOOKMAKER_SUREBET)) {
 														double netProfitCombination = ArbsUtil.getThreeWayNetProfit(homeWinRecord, awayWinRecord, drawRecord);
 														
@@ -477,8 +490,11 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 												awayWinRecord != null && 
 												drawRecord != null && 
 												!Service.CSV_SERVICENAME.equals(homeWinRecord.getSource()) && 
-												!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) && 
+												!Service.isScrapingService(homeWinRecord.getSource()) && 
+												!Service.CSV_SERVICENAME.equals(awayWinRecord.getSource()) &&
+												!Service.isScrapingService(awayWinRecord.getSource()) &&
 												!Service.CSV_SERVICENAME.equals(drawRecord.getSource()) && 
+												!Service.isScrapingService(drawRecord.getSource()) &&
 												BlueSheepSharedResources.getArbsNetProfitHistoryMap().get(ArbsType.THREE_WAY).containsKey(ArbsUtil.getKeyArbsThreeWayFromInputRecord(homeWinRecord))) {
 											
 											BetReference[] referenceArray = ArbsUtil.findReferenceFromBookmakerMap(homeWinRecordMap, awayWinRecordMap, drawRecordMap);

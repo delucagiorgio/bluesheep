@@ -97,8 +97,13 @@ public class BlueSheepSharedResources {
 						case BETFAIR_SERVICENAME:
 						case BET365_SERVICENAME:
 						case CSV_SERVICENAME:
-						case EVERY_MATRIX:
 							sportList = Arrays.asList(Sport.CALCIO, Sport.TENNIS);
+							break;
+						case BETFLAG_SERVICENAME:
+						case GOLDBET_SERVICENAME:
+						case PINTERBET_SERVICENAME:
+						case STARVEGAS_SERVICENAME:
+							sportList = Arrays.asList(Sport.CALCIO);
 							break;
 						default:
 							//La mappa non viene inizializzata, nessun processo prende luogo.
@@ -169,8 +174,18 @@ public class BlueSheepSharedResources {
 				case "TXODDS":
 					activeServicesList.put(Service.TXODDS_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_TXODDS_SEC)));
 					break;
-				case "EVERYMATRIX":
-					activeServicesList.put(Service.EVERY_MATRIX, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_EVERYMATRIX_SEC)));
+				case "GOLDBET":
+					activeServicesList.put(Service.GOLDBET_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_GOLDBET_SEC)));
+					break;
+				case "BETFLAG":
+					activeServicesList.put(Service.BETFLAG_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_BETFLAG_SEC)));
+					break;
+				case "PINTERBET":
+					activeServicesList.put(Service.PINTERBET_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_PINTERBET_SEC)));
+					break;
+				case "STARVEGAS":
+					activeServicesList.put(Service.STARVEGAS_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_STARVEGAS_SEC)));
+					break;
 				default:
 						break;
 				}

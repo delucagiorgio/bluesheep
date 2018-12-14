@@ -61,6 +61,7 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 		ICompareInformationEvents processDataManager = ProcessDataManagerFactory.getICompareInformationEventsByString(serviceName);
 		Map<Sport,List<AbstractInputRecord>> serviceNameInputData = BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName);
 		List<AbstractInputRecord> transformedRecords;
+		//Esecuzione per servizi da API
 		if(serviceNameInputData != null) {
 			for(Sport sport : serviceNameInputData.keySet()) {
 				try {
@@ -76,6 +77,21 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
+			}
+			//Esecuzione per servizi di scraping
+		}else if(Service.isScrapingService(serviceName)) {
+			try {
+				List<AbstractInputRecord> recordDeleted = BlueSheepSharedResources.getEventoScommessaRecordMap().findDeleteAbstractInputRecordInMap(inputRecordList);
+				logger.info("Deleted record for update count = " + recordDeleted.size());
+				
+				logger.info("Starting data transformation for " + serviceName + " on sport " + Sport.CALCIO);
+				transformedRecords = processDataManager.compareAndCollectSameEventsFromBookmakerAndTxOdds(inputRecordList);
+				logger.info("Data transformation for " + serviceName + " on sport " + Sport.CALCIO + " completed");
+				if(transformedRecords != null) {
+					addToChiaveEventoScommessaMap(transformedRecords);
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -139,15 +155,18 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 	@Override
 	public void run() {
 		try {
+			logger.info("Starting data retrivial  for service " + serviceName);
+			
 			startTime = System.currentTimeMillis();
 			
 			startProcess();		
 			
 			long endTime = System.currentTimeMillis();
 			
-			//Svuota la mappa dei risultati
-			BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName).clear();
-			
+			if(!Service.isScrapingService(serviceName)) {
+				//Svuota la mappa dei risultati
+				BlueSheepSharedResources.getAllServiceApiMapResult().get(serviceName).clear();
+			}
 			logger.info("Data retrivial  for service " + serviceName + " completed in " + (endTime - startTime)/1000 + " seconds");
 		}catch(Exception e) {
 			logger.error("ERRORE THREAD :: " + e.getMessage(), e);

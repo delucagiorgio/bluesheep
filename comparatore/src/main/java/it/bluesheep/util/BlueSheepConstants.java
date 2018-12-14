@@ -6,6 +6,7 @@ public class BlueSheepConstants {
 	public static final String BET365_BOOKMAKER_NAME = "Bet365";
 	public static final String BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY = "Betfair Exchange Banco";
 	public static final String BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK = "Betfair Exchange Punta";
+	public static final String BETFLAG_EXCHANGE_BOOKMAKER_NAME = "Betflag Exchange";
 	public static final String REGEX_COMMERCIAL_E = "&";
 	public static final String REGEX_SLASH = "/";
 	public static final String REGEX_PIPE = "|";
@@ -74,6 +75,10 @@ public class BlueSheepConstants {
 	public static final String TXODDS_PASSWORD = "TXODDS_PASSWORD";
 	public static final String FREQ_TXODDS_SEC = "FREQ_TXODDS_SEC";
 	public static final String FREQ_EVERYMATRIX_SEC = "FREQ_EVERYMATRIX_SEC";
+	public static final String FREQ_GOLDBET_SEC = "FREQ_GOLDBET_SEC";
+	public static final String FREQ_BETFLAG_SEC = "FREQ_BETFLAG_SEC";
+	public static final String FREQ_STARVEGAS_SEC = "FREQ_STARVEGAS_SEC";
+	public static final String FREQ_PINTERBET_SEC = "FREQ_PINTERBET_SEC";
 	
 	//translation
 	public static final String NATION_PATH_INPUTFILE = "PATH_NAZIONI_TRADUZIONE_CSV";
@@ -85,7 +90,9 @@ public class BlueSheepConstants {
 	//csv
 	public static final String PATH_INPUT_FILE = "PATH_INPUT_FILE";
 	public static final String FREQ_CSV_SEC = "FREQ_CSV_SEC";
-	public static String CSV_PLAYER_RENAME_FILE = "CSV_PLAYER_RENAME_FILE";
+	public static final String CSV_PLAYER_RENAME_FILE = "CSV_PLAYER_RENAME_FILE";
+	public static final String SCRAPED_JSON_PATH = "SCRAPED_JSON_PATH";
+	public static final String SCRAPED_JSON_FILENAME = "SCRAPED_JSON_FILENAME";
 	
 	//arbitraggi
 	public static final String RATING1 = "R1";
@@ -125,6 +132,9 @@ public class BlueSheepConstants {
 	//DATABASE
 	public static final String DATABASE_USER = "java.application";
 	public static final String DATABASE_PASSWORD = "bluesheep2018";
+//	//DATABASE
+//	public static final String DATABASE_USER = "root";
+//	public static final String DATABASE_PASSWORD = "Desaparecido44";
 
 	//CHAT_BOT
 	public static final String CHAT_BOT_MAX_PREF = "CHAT_BOT_MAX_PREF";
