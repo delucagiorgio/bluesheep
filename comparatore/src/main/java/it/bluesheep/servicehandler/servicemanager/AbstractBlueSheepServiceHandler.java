@@ -1,8 +1,11 @@
 package it.bluesheep.servicehandler.servicemanager;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
+import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.impl.ProcessDataManagerFactory;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
@@ -172,5 +176,39 @@ public abstract class AbstractBlueSheepServiceHandler extends AbstractBlueSheepS
 			logger.error("ERRORE THREAD :: " + e.getMessage(), e);
 		}
 	}
+	
+	
+	protected void deleteAllSourceEvents() {
+        ChiaveEventoScommessaInputRecordsMap dataMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
+        if (dataMap != null) {
+            Set<Sport> sportSet = new TreeSet<Sport>(dataMap.keySet());
+            for (Sport sport : sportSet) {
+                Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = dataMap.get(sport);
+                if (sportMap == null) continue;
+                Set<Date> dateSet = new TreeSet<Date>(sportMap.keySet());
+                for (Date date : dateSet) {
+                	Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportMap.get(date);
+                    if (dateMap == null) continue;
+                    Set<String> eventSet = new TreeSet<String>(dateMap.keySet());
+                    for (String eventoKey : eventSet) {
+                    	Map<Scommessa, Map<String, AbstractInputRecord>> eventoKeyMap = dateMap.get(eventoKey);
+                        if (eventoKeyMap == null) continue;
+                        Set<Scommessa> scommessaSet = new TreeSet<Scommessa>(eventoKeyMap.keySet());
+                        for (Scommessa scommessa : scommessaSet) {
+                        	Map<String, AbstractInputRecord> scommessaMap = eventoKeyMap.get(scommessa);
+                            if (scommessaMap == null) continue;
+                            Set<String> bookmakerList = new TreeSet<String>(scommessaMap.keySet());
+                            for (String bookmaker : bookmakerList) {
+                                AbstractInputRecord recordOfBookmaker = (AbstractInputRecord)scommessaMap.get(bookmaker);
+                                if (!this.serviceName.equals((Object)recordOfBookmaker.getSource())) continue;
+                                
+                                scommessaMap.remove(bookmaker);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 	
 }

@@ -36,13 +36,17 @@ public class BlueSheepConstants {
 	//json
 	public static final String JSON_PP_RESULT_PATH = "PATH_OUTPUT_TABLE2";
 	public static final String JSON_PB_RESULT_PATH = "PATH_OUTPUT_TABLE1";
+	public static final String JSON_PP_CUSTOM_RESULT_PATH = "PATH_OUTPUT_TABLE3";
 	public static final String FREQ_JSON_SEC = "FREQ_JSON_SEC";
+	public static final String FREQ_JSON_CUSTOM_SEC = "FREQ_JSON_CUSTOM_SEC";
 	
 	//comparison
 	public static final String BONUS_ABUSING_PB_MIN_THRESHOLD = "BONUS_ABUSING_BETFAIR_MIN_THRESHOLD";
 	public static final String BONUS_ABUSING_PB_MAX_THRESHOLD = "BONUS_ABUSING_BETFAIR_MAX_THRESHOLD";
 	public static final String BONUS_ABUSING_PP_MIN_THRESHOLD = "BONUS_ABUSING_TXODDS_MIN_THRESHOLD";
 	public static final String BONUS_ABUSING_PP_MAX_THRESHOLD = "BONUS_ABUSING_TXODDS_MAX_THRESHOLD";
+	public static final String CUSTOM_PP_MIN_THRESHOLD = "CUSTOM_TXODDS_MIN_THRESHOLD";
+	public static final String CUSTOM_PP_MAX_THRESHOLD = "CUSTOM_TXODDS_MAX_THRESHOLD";
 	public static final String UPDATE_FREQUENCY = "UPDATE_FREQUENCY";
 	public static final String MINIMUM_ODD_VALUE = "MINIMUM_ODD_VALUE";
 	public static final String PP_MIN = "PP_MIN";

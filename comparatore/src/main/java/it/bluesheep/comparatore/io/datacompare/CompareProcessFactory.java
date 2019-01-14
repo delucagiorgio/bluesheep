@@ -12,6 +12,8 @@ import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.impl.ProcessDataManagerFactory;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
+import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
+import it.bluesheep.servicehandler.JsonGeneratorServiceHandler;
 import it.bluesheep.util.BlueSheepSharedResources;
 
 public class CompareProcessFactory {
@@ -32,7 +34,9 @@ public class CompareProcessFactory {
 		IProcessDataManager processDataManager;
 		List<Service> serviceList = new ArrayList<Service>();
 		serviceList.add(Service.TXODDS_SERVICENAME);
-		serviceList.add(Service.BETFAIR_SERVICENAME);
+		if(bluesheepService instanceof JsonGeneratorServiceHandler || bluesheepService instanceof ArbitraggiServiceHandler) {
+			serviceList.add(Service.BETFAIR_SERVICENAME);
+		}
 		
 		for(Service service : serviceList) {
 			

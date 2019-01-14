@@ -131,6 +131,13 @@ public final class BlueSheepServiceHandlerManager {
 				executor.submit(JsonGeneratorServiceHandler.getJsonGeneratorServiceHandlerInstance());
 			}
 			
+			long jsonCustomFrequencySeconds = new Long(properties.getProperty(BlueSheepConstants.FREQ_JSON_CUSTOM_SEC));
+			if(jsonCustomFrequencySeconds > 0) {
+				executor.scheduleAtFixedRate(CustomFileTableServiceHandler.getCustomFileTableServiceHandlerInstance(), initialDelay, jsonCustomFrequencySeconds, TimeUnit.SECONDS);
+			}else if(jsonCustomFrequencySeconds == SINGLE_EXECUTION){
+				executor.submit(CustomFileTableServiceHandler.getCustomFileTableServiceHandlerInstance());
+			}
+			
 			executor.scheduleAtFixedRate(DatabasePollingServiceHandler.getDatabasePollingServiceHandlerInstance(), 0, 10, TimeUnit.MINUTES);
 			
 			WatchService ws = null;

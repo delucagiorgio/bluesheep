@@ -42,7 +42,7 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 				!BlueSheepSharedResources.getEventoScommessaRecordMap().isEmpty()) {
 
 			logger.info("Removing all TxOdds events");
-			resetAllTxOddsEvents();
+            this.deleteAllSourceEvents();
 			BookmakerLinkGenerator.initializeMap();
 			logger.info("Starting GC...");
 			long startGc = System.currentTimeMillis();
@@ -51,49 +51,6 @@ public final class TxOddsServiceHandler extends AbstractBlueSheepServiceHandler 
 			logger.info("GC completed execution: " + (endGc - startGc) + " ms.");
 		}
 		super.startProcessingDataTransformation(inputRecordList);
-	}
-	
-	/**
-	 * GD - 12/08/2018
-	 * Rimuove tutti gli elementi nella mappa dei dati di input condivisa che hanno origine da TxOdds.
-	 */
-	private void resetAllTxOddsEvents() {
-		
-		ChiaveEventoScommessaInputRecordsMap dataMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
-		if(dataMap != null) {
-			Set<Sport> sportSet = new HashSet<Sport>(dataMap.keySet());
-			for(Sport sport : sportSet) {
-				Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> sportMap = dataMap.get(sport);
-				if(sportMap != null) {
-					Set<Date> dateSet =  new HashSet<Date>(sportMap.keySet());
-					for(Date date : dateSet) {
-						Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>> dateMap = sportMap.get(date);
-						if(dateMap != null) {
-							Set<String> eventSet = new HashSet<String>(dateMap.keySet());
-							for(String eventoKey : eventSet) {
-								Map<Scommessa, Map<String, AbstractInputRecord>> eventoKeyMap = dateMap.get(eventoKey);
-								if(eventoKeyMap != null) {
-									Set<Scommessa> scommessaSet = new HashSet<Scommessa>(eventoKeyMap.keySet());
-									for(Scommessa scommessa : scommessaSet) {
-										Map<String, AbstractInputRecord> scommessaMap = eventoKeyMap.get(scommessa);
-										if(scommessaMap != null) {
-											Set<String> bookmakerList = new HashSet<String>(scommessaMap.keySet());
-											for(String bookmaker : bookmakerList) {
-												AbstractInputRecord recordOfBookmaker = scommessaMap.get(bookmaker);
-											
-												if(serviceName.equals(recordOfBookmaker.getSource())) {
-													scommessaMap.remove(bookmaker);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 
 	@Override

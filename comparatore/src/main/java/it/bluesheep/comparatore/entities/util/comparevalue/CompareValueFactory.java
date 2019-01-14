@@ -5,6 +5,7 @@ import it.bluesheep.comparatore.entities.util.comparevalue.rating.RatingCalculat
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
 import it.bluesheep.servicehandler.ArbitraggiServiceHandler;
+import it.bluesheep.servicehandler.CustomFileTableServiceHandler;
 import it.bluesheep.servicehandler.JsonGeneratorServiceHandler;
 
 public class CompareValueFactory {
@@ -14,7 +15,7 @@ public class CompareValueFactory {
 	public static ICompareValue getCompareValueInterfaceByComparisonTypeAndService(Service comparisonType, AbstractBlueSheepService service) {
 		if(service instanceof ArbitraggiServiceHandler) {
 			return NetProfitFactory.getNetProfitCalculator(comparisonType);
-		}else if(service instanceof JsonGeneratorServiceHandler) {
+		}else if(service instanceof JsonGeneratorServiceHandler || service instanceof CustomFileTableServiceHandler) {
 			return RatingCalculatorFactory.getRatingCalculator(comparisonType);
 		}
 		return null;

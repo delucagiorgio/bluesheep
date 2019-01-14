@@ -23,9 +23,9 @@ public class BetfairServiceHandler extends AbstractBlueSheepServiceHandler {
 	
 		List<AbstractInputRecord> inputRecordList = populateMapWithInputRecord();
 		
-		startProcessingDataTransformation(inputRecordList);
-		
 		if(inputRecordList != null && !inputRecordList.isEmpty()) {
+			super.deleteAllSourceEvents();
+			startProcessingDataTransformation(inputRecordList);
 			BlueSheepSharedResources.setExchangeRecordsList(inputRecordList, startTime);
 		}
 		
