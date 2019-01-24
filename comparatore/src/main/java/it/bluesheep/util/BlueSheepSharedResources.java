@@ -103,6 +103,7 @@ public class BlueSheepSharedResources {
 						case GOLDBET_SERVICENAME:
 						case PINTERBET_SERVICENAME:
 						case STARVEGAS_SERVICENAME:
+						case STANLEYBET_SERVICENAME:
 							sportList = Arrays.asList(Sport.CALCIO);
 							break;
 						default:
@@ -185,6 +186,9 @@ public class BlueSheepSharedResources {
 					break;
 				case "STARVEGAS":
 					activeServicesList.put(Service.STARVEGAS_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_STARVEGAS_SEC)));
+					break;
+				case "STANLEYBET":
+					activeServicesList.put(Service.STANLEYBET_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_STANLEYBET_SEC)));
 					break;
 				default:
 						break;

@@ -36,6 +36,7 @@ public class ProcessDataManagerFactory {
 		case GOLDBET_SERVICENAME:
 		case STARVEGAS_SERVICENAME:
 		case PINTERBET_SERVICENAME:
+		case STANLEYBET_SERVICENAME:
 		case TXODDS_SERVICENAME:
 			return new TxOddsProcessDataManager();
 		default:

@@ -78,11 +78,11 @@ public class BlueSheepConstants {
 	public static final String TXODDS_USER = "TXODDS_USER";
 	public static final String TXODDS_PASSWORD = "TXODDS_PASSWORD";
 	public static final String FREQ_TXODDS_SEC = "FREQ_TXODDS_SEC";
-	public static final String FREQ_EVERYMATRIX_SEC = "FREQ_EVERYMATRIX_SEC";
 	public static final String FREQ_GOLDBET_SEC = "FREQ_GOLDBET_SEC";
 	public static final String FREQ_BETFLAG_SEC = "FREQ_BETFLAG_SEC";
 	public static final String FREQ_STARVEGAS_SEC = "FREQ_STARVEGAS_SEC";
 	public static final String FREQ_PINTERBET_SEC = "FREQ_PINTERBET_SEC";
+	public static final String FREQ_STANLEYBET_SEC = "FREQ_STANLEYBET_SEC";
 	
 	//translation
 	public static final String NATION_PATH_INPUTFILE = "PATH_NAZIONI_TRADUZIONE_CSV";

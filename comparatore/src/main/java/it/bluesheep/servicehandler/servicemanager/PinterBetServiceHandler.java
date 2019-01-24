@@ -32,7 +32,7 @@ public class PinterBetServiceHandler extends ScrapedOddsServiceHandler {
 	private final String GOAL = "OddsGoal";
 	private final String NOGOAL = "OddsNoGoal";
 	
-	public PinterBetServiceHandler() {
+	protected PinterBetServiceHandler() {
 		super(FILENAME);
 		this.serviceName = Service.PINTERBET_SERVICENAME;
 		logger = Logger.getLogger(PinterBetServiceHandler.class);

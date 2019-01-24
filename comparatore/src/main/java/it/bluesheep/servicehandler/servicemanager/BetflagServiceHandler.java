@@ -51,7 +51,7 @@ public class BetflagServiceHandler extends ScrapedOddsServiceHandler {
 	private final String ODD_U45 = "Under45";
 	private final String L_U45 = "liquidityUnder45";
 	
-	public BetflagServiceHandler() {
+	protected BetflagServiceHandler() {
 		super(FILENAME);
 		this.serviceName = Service.BETFLAG_SERVICENAME;
 		logger = Logger.getLogger(BetflagServiceHandler.class);

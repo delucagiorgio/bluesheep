@@ -24,6 +24,8 @@ public class BlueSheepServiceHandlerFactory {
 			return new GoldBetServiceHandler();
 		case PINTERBET_SERVICENAME:
 			return new PinterBetServiceHandler();
+		case STANLEYBET_SERVICENAME:
+			return new StanleyBetServiceHandler();
 		default:
 			return null;
 		}

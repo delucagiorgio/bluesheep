@@ -12,14 +12,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
-import it.bluesheep.comparatore.entities.input.record.GoldBetInputRecord;
+import it.bluesheep.comparatore.entities.input.record.StanleyBetInputRecord;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.serviceapi.Service;
 
-public class GoldBetServiceHandler extends ScrapedOddsServiceHandler {
+public class StanleyBetServiceHandler extends ScrapedOddsServiceHandler {
 
-	private static final String FILENAME = "goldbet";
+	private static final String FILENAME = "stanleybet";
 	private final String LEAGUE = "league";
 	private final String DATE = "date";
 	private final String HOME = "home";
@@ -32,21 +32,20 @@ public class GoldBetServiceHandler extends ScrapedOddsServiceHandler {
 	private final String GOAL = "OddsGoal";
 	private final String NOGOAL = "OddsNoGoal";
 	
-	protected GoldBetServiceHandler() {
+	protected StanleyBetServiceHandler() {
 		super(FILENAME);
-		this.serviceName = Service.GOLDBET_SERVICENAME;
-		logger = Logger.getLogger(GoldBetServiceHandler.class);
+		this.serviceName = Service.STANLEYBET_SERVICENAME;
+		logger = Logger.getLogger(StanleyBetServiceHandler.class);
 	}
-
+	
 	@Override
 	protected List<AbstractInputRecord> mapInformationFromFileJSON(String outputLine) {
-		
 		List<AbstractInputRecord> returnList = null;
 
 		if(outputLine != null && !StringUtils.isEmpty(outputLine)) {
 			JSONArray jsonArray = new JSONArray(outputLine);
 			returnList = new ArrayList<AbstractInputRecord>();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			for(int i = 0; i < jsonArray.length(); i++) {
 				JSONObject jsonObj = jsonArray.getJSONObject(i);
 				
@@ -62,7 +61,7 @@ public class GoldBetServiceHandler extends ScrapedOddsServiceHandler {
 				
 				String home = jsonObj.getString(HOME);
 				String away = jsonObj.getString(AWAY);
-				AbstractInputRecord goldBetRecord = new GoldBetInputRecord(dateParsed, Sport.CALCIO, league, home, away, null);
+				AbstractInputRecord stanleyBetRecord = new StanleyBetInputRecord(dateParsed, Sport.CALCIO, league, home, away, null);
 				Double odd1 = jsonObj.optDouble(ODD1);
 				Double oddX = jsonObj.optDouble(ODDX);
 				Double odd2 = jsonObj.optDouble(ODD2);
@@ -72,58 +71,57 @@ public class GoldBetServiceHandler extends ScrapedOddsServiceHandler {
 				Double oddNoGoal = jsonObj.optDouble(NOGOAL);
 				
 				if(odd1 != null && odd1.compareTo(0D) != 0 && !odd1.isNaN()) {
-					AbstractInputRecord goldBetOdd1 = new GoldBetInputRecord(goldBetRecord);
-					goldBetOdd1.setQuota(odd1);
-					goldBetOdd1.setTipoScommessa(Scommessa.SFIDANTE1VINCENTE_1);
-					returnList.add(goldBetOdd1);
+					AbstractInputRecord stanleyBetOdd1 = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOdd1.setQuota(odd1);
+					stanleyBetOdd1.setTipoScommessa(Scommessa.SFIDANTE1VINCENTE_1);
+					returnList.add(stanleyBetOdd1);
 				}
 				
 				if(odd2 != null && odd2.compareTo(0D) != 0 && !odd2.isNaN()) {
-					AbstractInputRecord goldBetOdd2 = new GoldBetInputRecord(goldBetRecord);
-					goldBetOdd2.setQuota(odd2);
-					goldBetOdd2.setTipoScommessa(Scommessa.SFIDANTE2VINCENTE_2);
-					returnList.add(goldBetOdd2);
+					AbstractInputRecord stanleyBetOdd2 = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOdd2.setQuota(odd2);
+					stanleyBetOdd2.setTipoScommessa(Scommessa.SFIDANTE2VINCENTE_2);
+					returnList.add(stanleyBetOdd2);
 				}
 				
 				if(oddX != null && oddX.compareTo(0D) != 0 && !oddX.isNaN()) {
-					AbstractInputRecord goldBetOddX = new GoldBetInputRecord(goldBetRecord);
-					goldBetOddX.setQuota(oddX);
-					goldBetOddX.setTipoScommessa(Scommessa.PAREGGIO_X);
-					returnList.add(goldBetOddX);
+					AbstractInputRecord stanleyBetOddX = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOddX.setQuota(oddX);
+					stanleyBetOddX.setTipoScommessa(Scommessa.PAREGGIO_X);
+					returnList.add(stanleyBetOddX);
 				}
 				
 				if(oddO25 != null && oddO25.compareTo(0D) != 0 && !oddO25.isNaN()) {
-					AbstractInputRecord goldBetOddO25 = new GoldBetInputRecord(goldBetRecord);
-					goldBetOddO25.setQuota(oddO25);
-					goldBetOddO25.setTipoScommessa(Scommessa.ALMENO3GOAL_O2X5);
-					returnList.add(goldBetOddO25);
+					AbstractInputRecord stanleyBetOddO25 = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOddO25.setQuota(oddO25);
+					stanleyBetOddO25.setTipoScommessa(Scommessa.ALMENO3GOAL_O2X5);
+					returnList.add(stanleyBetOddO25);
 				}
 				
 				if(oddGoal != null && oddGoal.compareTo(0D) != 0 && !oddGoal.isNaN()) {
-					AbstractInputRecord goldBetOddGoal = new GoldBetInputRecord(goldBetRecord);
-					goldBetOddGoal.setQuota(oddGoal);
-					goldBetOddGoal.setTipoScommessa(Scommessa.ENTRAMBISEGNANO_GOAL);
-					returnList.add(goldBetOddGoal);
+					AbstractInputRecord stanleyBetOddGoal = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOddGoal.setQuota(oddGoal);
+					stanleyBetOddGoal.setTipoScommessa(Scommessa.ENTRAMBISEGNANO_GOAL);
+					returnList.add(stanleyBetOddGoal);
 				}
 				
 				if(oddNoGoal != null && oddNoGoal.compareTo(0D) != 0 && !oddNoGoal.isNaN()) {
-					AbstractInputRecord goldBetOddNoGoal = new GoldBetInputRecord(goldBetRecord);
-					goldBetOddNoGoal.setQuota(oddNoGoal);
-					goldBetOddNoGoal.setTipoScommessa(Scommessa.NESSUNOSEGNA_NOGOAL);
-					returnList.add(goldBetOddNoGoal);
+					AbstractInputRecord stanleyBetOddNoGoal = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOddNoGoal.setQuota(oddNoGoal);
+					stanleyBetOddNoGoal.setTipoScommessa(Scommessa.NESSUNOSEGNA_NOGOAL);
+					returnList.add(stanleyBetOddNoGoal);
 				}
 				
 				if(oddU25 != null && oddU25.compareTo(0D) != 0 && !oddU25.isNaN()) {
-					AbstractInputRecord goldBetOddU25 = new GoldBetInputRecord(goldBetRecord);
-					goldBetOddU25.setQuota(oddU25);
-					goldBetOddU25.setTipoScommessa(Scommessa.ALPIU2GOAL_U2X5);
-					returnList.add(goldBetOddU25);
+					AbstractInputRecord stanleyBetOddU25 = new StanleyBetInputRecord(stanleyBetRecord);
+					stanleyBetOddU25.setQuota(oddU25);
+					stanleyBetOddU25.setTipoScommessa(Scommessa.ALPIU2GOAL_U2X5);
+					returnList.add(stanleyBetOddU25);
 				}
 			}
 		}
 		
 		return returnList;
-		
 	}
 
 }

@@ -34,7 +34,7 @@ public class StarVegasServiceHandler extends ScrapedOddsServiceHandler {
 	private final String ODD_O35 = "OddsOv35";
 	private final String ODD_U35 = "OddsUn35";
 	
-	public StarVegasServiceHandler() {
+	protected StarVegasServiceHandler() {
 		super(FILENAME);
 		logger = Logger.getLogger(StarVegasServiceHandler.class);
 		this.serviceName = Service.STARVEGAS_SERVICENAME;
