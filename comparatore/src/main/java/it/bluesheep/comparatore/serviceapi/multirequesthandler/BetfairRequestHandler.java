@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import com.betfair.entities.MarketFilter;
+import com.betfair.enums.types.PriceData;
 
 import it.bluesheep.comparatore.serviceapi.util.BetfairRequestThreadHelper;
 
@@ -15,11 +16,13 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 	
 	private static final int QUERY_SIZE_MARKET = 40;
 	private MarketFilter filter;
+	private PriceData priceType;
 	
-	public BetfairRequestHandler(int maxThreadPoolSize, MarketFilter filter, String sessionToken) {
+	public BetfairRequestHandler(int maxThreadPoolSize, MarketFilter filter, String sessionToken, PriceData priceType) {
 		super(maxThreadPoolSize / QUERY_SIZE_MARKET  + 1, sessionToken);
 		this.filter = filter;
 		this.logger = Logger.getLogger(BetfairRequestHandler.class);
+		this.priceType = priceType;
 	}
 
 	@Override
@@ -37,7 +40,7 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 			
 			marketFilter.setEventIds(new HashSet<String>(idsSublist));
 			
-			executor.submit(new BetfairRequestThreadHelper(new HashSet<String>(idsSublist), idsSublist, marketFilter, mapThreadResponse, token));
+			executor.submit(new BetfairRequestThreadHelper(new HashSet<String>(idsSublist), idsSublist, marketFilter, mapThreadResponse, token, priceType));
 			
 			cyclesQuery++;
 		} while(cyclesQuery * QUERY_SIZE_MARKET < marketIdsList.size());

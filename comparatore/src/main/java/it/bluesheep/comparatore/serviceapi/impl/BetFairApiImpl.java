@@ -2,6 +2,7 @@ package it.bluesheep.comparatore.serviceapi.impl;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import com.betfair.entities.MarketFilter;
 import com.betfair.enums.dao.MarketBettingTypeEnumDao;
 import com.betfair.enums.types.MarketProjection;
 import com.betfair.enums.types.MarketSort;
+import com.betfair.enums.types.PriceData;
 import com.betfair.exceptions.BetFairAPIException;
 import com.betfair.util.ISO8601DateTypeAdapter;
 
@@ -118,11 +120,12 @@ public class BetFairApiImpl implements IApiInterface {
 		int sizePoolRequests = marketIdsList.size() / 30;
 		
 		List<String> returnJsonResponseList = new ArrayList<String>();
-		
-		betfairRequestHandler = new BetfairRequestHandler(sizePoolRequests, filter, sessionToken);
-
-		returnJsonResponseList.addAll(betfairRequestHandler.startMultithreadMarketRequests(marketIdsList));
-		
+		List<PriceData> priceTypeList = Arrays.asList(PriceData.EX_BEST_OFFERS, PriceData.SP_AVAILABLE);
+		for(PriceData pt : priceTypeList) {
+			betfairRequestHandler = new BetfairRequestHandler(sizePoolRequests, filter, sessionToken, pt);
+	
+			returnJsonResponseList.addAll(betfairRequestHandler.startMultithreadMarketRequests(marketIdsList));
+		}
 		return returnJsonResponseList;
 	}
 

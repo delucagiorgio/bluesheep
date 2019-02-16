@@ -25,15 +25,17 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 	private List<String> idsSublist;
 	private MarketFilter filter;
 	private IBetfairExchangeOperationsManager beom;
+	private PriceData priceType;
 
 	
-	public BetfairRequestThreadHelper(HashSet<String> eventsIds, List<String> idsSublist, MarketFilter marketFilter, Map<String, String> resultThreadRequest, String sessionToken) {
+	public BetfairRequestThreadHelper(HashSet<String> eventsIds, List<String> idsSublist, MarketFilter marketFilter, Map<String, String> resultThreadRequest, String sessionToken, PriceData priceType) {
 		this.resultThreadRequest = resultThreadRequest;
 		this.filter = marketFilter;
 		this.filter.setEventIds(eventsIds);	
 		this.token = sessionToken;
 		this.idsSublist = idsSublist;
 		logger = Logger.getLogger(BetfairRequestThreadHelper.class);
+		this.priceType = priceType;
 	}
 	
 	@Override
@@ -43,7 +45,7 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 			PriceProjection priceProjection = new PriceProjection();
 			
 			Set<PriceData> priceDataSet = new HashSet<PriceData>();
-			priceDataSet.add(PriceData.EX_BEST_OFFERS);
+			priceDataSet.add(priceType);
 			priceProjection.setPriceData(priceDataSet);
 			
 			beom = BetfairExchangeOperationsManagerImpl.getInstance();

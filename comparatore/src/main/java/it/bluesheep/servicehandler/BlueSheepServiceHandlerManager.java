@@ -44,7 +44,7 @@ public final class BlueSheepServiceHandlerManager {
 	private static final long SINGLE_EXECUTION = -129;
 	private static BlueSheepServiceHandlerManager instance;
 	private static Logger logger;
-	private static Properties properties = new Properties(); 
+	private static Properties properties = new Properties();
 	public static ScheduledExecutorService executor;
 	
 	/**
@@ -98,7 +98,7 @@ public final class BlueSheepServiceHandlerManager {
 			executor = Executors.newScheduledThreadPool(8);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
-			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
+//			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
 			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
@@ -211,8 +211,8 @@ public final class BlueSheepServiceHandlerManager {
 					
 					logger.info(message + ". Timeout to force shutdown is " + timeout + " " + timeUnitTimeout);
 					
-					TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
-					BlueSheepSharedResources.getBotSession().stop();
+//					TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+//					BlueSheepSharedResources.getBotSession().stop();
 					executor.shutdown();
 					terminatedCorrectly = executor.awaitTermination(timeout, timeUnitTimeout);
 					if(!terminatedCorrectly) {
