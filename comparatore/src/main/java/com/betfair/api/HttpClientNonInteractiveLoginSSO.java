@@ -41,7 +41,7 @@ public class HttpClientNonInteractiveLoginSSO {
     	logger = Logger.getLogger(HttpClientNonInteractiveLoginSSO.class);
     }
     
-    public String login() throws Exception {
+    public String login(String appKey) throws Exception {
  
         HttpClient httpClient = new DefaultHttpClient();
         String responseString = null;
@@ -54,8 +54,7 @@ public class HttpClientNonInteractiveLoginSSO {
  
             ClientConnectionManager manager = httpClient.getConnectionManager();
             manager.getSchemeRegistry().register(new Scheme("https", port, factory));
-//            HttpPost httpPost = new HttpPost("https://identitysso.betfair.it/api/certlogin");
-          HttpPost httpPost = new HttpPost("https://identitysso-cert.betfair.it/api/certlogin");
+            HttpPost httpPost = new HttpPost("https://identitysso-cert.betfair.it/api/certlogin");
 
             
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -63,7 +62,7 @@ public class HttpClientNonInteractiveLoginSSO {
             nvps.add(new BasicNameValuePair("password", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_PASSWORD)));
             httpPost.setEntity(new UrlEncodedFormEntity(nvps));
  
-            httpPost.setHeader("X-Application", BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_APPKEY));
+            httpPost.setHeader("X-Application", appKey);
             httpPost.setHeader("Accept","application/json");
             httpPost.setHeader("Connection", "keep-alive");
             

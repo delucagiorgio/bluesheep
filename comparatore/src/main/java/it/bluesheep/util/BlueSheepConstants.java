@@ -56,17 +56,22 @@ public class BlueSheepConstants {
 	public static final String MINOR_CATEGORY_ONOFF = "MINOR_CATEGORY_ONOFF";
 	
 	//betfair
-	public static final String BETFAIR_ENDPOINT = "SPORTS_APING_V1_0";
+	public static final String BETFAIR_EX_ENDPOINT = "SPORTS_APING_V1_0";
+	public static final String BETFAIR_SB_ENDPOINT = "FIXED_ODDS_API";
 	public static final String BETFAIR_CERTIFICATE_PATH = "BETFAIR_CERTIFICATE_PATH";
 	public static final String BETFAIR_PASSWORD = "BETFAIR_PASSWORD";
 	public static final String BETFAIR_USERNAME = "BETFAIR_USER";
-	public static final String BETFAIR_APPKEY = "APPKEY";
+	public static final String BETFAIR_APPKEY_EX = "APPKEY";
+	public static final String BETFAIR_APPKEY_SB = "APPKEY_SB";
 	public static final String BETFAIR_APPLICATION_JSON = "APPLICATION_JSON";
 	public static final String BETFAIR_SESSION_TOKEN_STRING = "sessionToken";
 	public static final String BETFAIR_TIMEOUT = "TIMEOUT";
-	public static final String BETFAIR_BASE_URL = "BETFAIR_URL";
-	public static final String BETFAIR_RESCRIPT_SUFFIX = "RESCRIPT_SUFFIX";
-	public static final String FREQ_BETFAIR_SEC = "FREQ_BETFAIR_SEC";
+	public static final String BETFAIR_BASE_URL_EX = "BETFAIR_URL";
+	public static final String BETFAIR_BASE_URL_SB = "BETFAIR_URL_SB";
+	public static final String BETFAIR_RESCRIPT_SUFFIX_EX = "RESCRIPT_SUFFIX";
+	public static final String BETFAIR_RESCRIPT_SUFFIX_SB = "RESCRIPT_SUFFIX_SB";
+	public static final String FREQ_BETFAIR_EX_SEC = "FREQ_BETFAIR_SEC";
+	public static final String FREQ_BETFAIR_SB_SEC = "FREQ_BETFAIR_SB_SEC";
 	
 	//bet365
 	public static final String BET365_TOKEN = "BET365_TOKEN";

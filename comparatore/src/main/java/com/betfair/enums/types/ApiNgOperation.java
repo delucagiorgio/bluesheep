@@ -10,6 +10,7 @@ public enum ApiNgOperation {
 	LISTVENUES("listVenues"),
 	LISTMARKETCATALOGUE("listMarketCatalogue"),
 	LISTMARKETBOOK("listMarketBook"),
+    LIST_MARKET_PRICES("listMarketPrices"),
 	PLACORDERS("placeOrders");
 	
 	private String operationName;

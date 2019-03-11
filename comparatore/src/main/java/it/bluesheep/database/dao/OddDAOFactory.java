@@ -10,7 +10,7 @@ public class OddDAOFactory {
 	private OddDAOFactory() {}
 	
 	public static IOddDAO<? extends AbstractOddEntity> getCorrectDAOByService(Service service){
-		if(Service.BETFAIR_SERVICENAME.equals(service)) {
+		if(Service.BETFAIR_EX_SERVICENAME.equals(service)) {
 			return PBOddDAO.getPBOddDAOInstance();
 		}else if(Service.TXODDS_SERVICENAME.equals(service)) {
 			return PPOddDAO.getPPOddDAOInstance();

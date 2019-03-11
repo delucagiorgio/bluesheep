@@ -17,12 +17,22 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 	private static final int QUERY_SIZE_MARKET = 40;
 	private MarketFilter filter;
 	private PriceData priceType;
+	private String urlBase;
+	private String suffixUrl;
+	private String appKey;
+	private String endpoint;
+	private boolean methodParamName;
 	
-	public BetfairRequestHandler(int maxThreadPoolSize, MarketFilter filter, String sessionToken, PriceData priceType) {
+	public BetfairRequestHandler(int maxThreadPoolSize, MarketFilter filter, String sessionToken, PriceData priceType, String urlBase, String suffixUrl, String appKey, String endpoint, boolean methodParamName) {
 		super(maxThreadPoolSize / QUERY_SIZE_MARKET  + 1, sessionToken);
 		this.filter = filter;
 		this.logger = Logger.getLogger(BetfairRequestHandler.class);
 		this.priceType = priceType;
+		this.urlBase = urlBase;
+		this.suffixUrl = suffixUrl;
+		this.appKey = appKey;
+		this.endpoint = endpoint;
+		this.methodParamName = methodParamName;
 	}
 
 	@Override
@@ -40,7 +50,7 @@ public class BetfairRequestHandler extends AbstractRequestHandler {
 			
 			marketFilter.setEventIds(new HashSet<String>(idsSublist));
 			
-			executor.submit(new BetfairRequestThreadHelper(new HashSet<String>(idsSublist), idsSublist, marketFilter, mapThreadResponse, token, priceType));
+			executor.submit(new BetfairRequestThreadHelper(new HashSet<String>(idsSublist), idsSublist, marketFilter, mapThreadResponse, token, priceType, urlBase, suffixUrl, appKey, endpoint, methodParamName));
 			
 			cyclesQuery++;
 		} while(cyclesQuery * QUERY_SIZE_MARKET < marketIdsList.size());

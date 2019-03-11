@@ -21,7 +21,7 @@ public class BetfairExchangeInputRecord extends AbstractInputRecord implements I
 		}else {
 			this.bookmakerName = BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK;
 		}
-		this.source = Service.BETFAIR_SERVICENAME;
+		this.source = Service.BETFAIR_EX_SERVICENAME;
 	}
 
 	public BetfairExchangeInputRecord(BetfairExchangeInputRecord recordToBeMapped, boolean isLayRecord) {
@@ -32,7 +32,7 @@ public class BetfairExchangeInputRecord extends AbstractInputRecord implements I
 		}else {
 			this.bookmakerName = BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_BACK;
 		}	
-		this.source = Service.BETFAIR_SERVICENAME;
+		this.source = Service.BETFAIR_EX_SERVICENAME;
 	}
 
 	@Override

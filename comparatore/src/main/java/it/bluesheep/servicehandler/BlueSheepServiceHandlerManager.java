@@ -27,7 +27,6 @@ import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.Input
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.database.ConnectionPool;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
-import it.bluesheep.telegrambot.TelegramBotHandler;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
@@ -99,10 +98,10 @@ public final class BlueSheepServiceHandlerManager {
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
 //			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
-			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
+//			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
-				if(Service.BETFAIR_SERVICENAME.equals(activeService)) {
+				if(Service.BETFAIR_EX_SERVICENAME.equals(activeService) || Service.BETFAIR_SB_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
 				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
 					initialDelay = 60;

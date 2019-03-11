@@ -51,7 +51,7 @@ public class ThresholdRatingFactory {
 			puntaBancaMap.put(BlueSheepConstants.PB_MAX, new Double(puntaBancaMaxRating));
 		}
 		
-		returnMap.put(Service.BETFAIR_SERVICENAME, puntaBancaMap);
+		returnMap.put(Service.BETFAIR_EX_SERVICENAME, puntaBancaMap);
 		returnMap.put(Service.TXODDS_SERVICENAME, puntaPuntaMap);
 		
 		return returnMap;

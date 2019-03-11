@@ -373,7 +373,7 @@ public class ArbsUtil {
 	
 	public static boolean validOddsRatio(double odd1, double odd2, Service service) {
 		
-		if(Service.BETFAIR_SERVICENAME.equals(service)) {
+		if(Service.BETFAIR_EX_SERVICENAME.equals(service)) {
 			odd2 = 1 / (1 - (1 / ((odd2 - 1) * 0.95 + 1)));
 		}
 		

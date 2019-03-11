@@ -48,7 +48,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 		startComparisonTime = System.currentTimeMillis();
 		minimumOddValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINIMUM_ODD_VALUE));
 		minutesOfOddValidity = new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.MINUTES_ODD_VALIDITY)) * 60 * 1000L;
-		service = Service.BETFAIR_SERVICENAME;
+		service = Service.BETFAIR_EX_SERVICENAME;
 		helper = InputDataHelper.getInputDataHelperInstance();
 		minSizeRequiredArbsValue = new Double(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.ARBS_SIZE_MIN_VALUE));
 	}
@@ -123,8 +123,8 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	public List<RecordOutput> compareTwoWayOdds(ChiaveEventoScommessaInputRecordsMap sportMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) {
 
 		Map<Service, Map<String, Double>> mapThresholdMap = ThresholdRatingFactory.getThresholdMapByAbstractBlueSheepService(bluesheepServiceType);
-		this.minThreshold = mapThresholdMap.get(Service.BETFAIR_SERVICENAME).get(BlueSheepConstants.PB_MIN);
-		this.maxThreshold = mapThresholdMap.get(Service.BETFAIR_SERVICENAME).get(BlueSheepConstants.PB_MAX);
+		this.minThreshold = mapThresholdMap.get(Service.BETFAIR_EX_SERVICENAME).get(BlueSheepConstants.PB_MIN);
+		this.maxThreshold = mapThresholdMap.get(Service.BETFAIR_EX_SERVICENAME).get(BlueSheepConstants.PB_MAX);
 		
 		if(bluesheepServiceType instanceof ArbitraggiServiceHandler) {
 			controlValidityOdds = true;

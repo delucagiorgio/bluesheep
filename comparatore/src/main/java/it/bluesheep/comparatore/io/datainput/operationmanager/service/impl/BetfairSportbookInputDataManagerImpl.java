@@ -16,26 +16,26 @@ import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.Abs
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.BetfairInputMappingProcessor;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.comparatore.serviceapi.impl.BetFairExchangeApiImpl;
+import it.bluesheep.comparatore.serviceapi.impl.BetFairSportbookApiImpl;
 import it.bluesheep.util.BlueSheepConstants;
 
-public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerImpl {
-	
+public class BetfairSportbookInputDataManagerImpl extends InputDataManagerImpl {
+
 	private AbstractInputMappingProcessor processor;
 	private Map<String, Map<String, EventoBetfair>> scommessaMapMarketIdEventoMap;
-
-
-	protected BetfairExchangeInputDataManagerImpl(Sport sport) {
+	
+	protected BetfairSportbookInputDataManagerImpl(Sport sport) {
 		super(sport);
 		processor = new BetfairInputMappingProcessor();
-		apiServiceInterface = new BetFairExchangeApiImpl();
+		apiServiceInterface = new BetFairSportbookApiImpl();
 		scommessaMapMarketIdEventoMap = new HashMap<String, Map<String,EventoBetfair>>();
-		this.serviceName = Service.BETFAIR_EX_SERVICENAME;
-		this.logger = Logger.getLogger(BetfairExchangeInputDataManagerImpl.class);
+		this.serviceName = Service.BETFAIR_SB_SERVICENAME;
+		this.logger = Logger.getLogger(BetfairSportbookInputDataManagerImpl.class);
 	}
 
-
 	@Override
-	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa, Sport sport) {
+	public List<AbstractInputRecord> mapJsonToAbstractInputRecord(String jsonString, Scommessa tipoScommessa,
+			Sport sport) {
 		
 		List<AbstractInputRecord> returnItemsList = new ArrayList<AbstractInputRecord>();
 		if(jsonString != null && !jsonString.isEmpty()) {
@@ -50,7 +50,7 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 		}
 		return returnItemsList;
 	}
-
+	
 	/**
 	 * GD - 25/04/18
 	 * Merge delle informazioni relative all'evento e alle sue quote in un unico record 
@@ -85,4 +85,5 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 		
 		return scommessaList;
 	}
+
 }

@@ -94,10 +94,11 @@ public class BlueSheepSharedResources {
 				if(serviceName != null) {
 					switch(serviceName) {
 						case TXODDS_SERVICENAME:
-						case BETFAIR_SERVICENAME:
+						case BETFAIR_EX_SERVICENAME:
 						case BET365_SERVICENAME:
 						case CSV_SERVICENAME:
-							sportList = Arrays.asList(Sport.CALCIO, Sport.TENNIS);
+						case BETFAIR_SB_SERVICENAME:
+							sportList = Arrays.asList(Sport.CALCIO);
 							break;
 						case BETFLAG_SERVICENAME:
 						case GOLDBET_SERVICENAME:
@@ -170,7 +171,7 @@ public class BlueSheepSharedResources {
 					activeServicesList.put(Service.CSV_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_CSV_SEC)));
 					break;
 				case "BETFAIR":
-					activeServicesList.put(Service.BETFAIR_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_BETFAIR_SEC)));
+					activeServicesList.put(Service.BETFAIR_EX_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_BETFAIR_EX_SEC)));
 					break;
 				case "TXODDS":
 					activeServicesList.put(Service.TXODDS_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_TXODDS_SEC)));
@@ -189,6 +190,9 @@ public class BlueSheepSharedResources {
 					break;
 				case "STANLEYBET":
 					activeServicesList.put(Service.STANLEYBET_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_STANLEYBET_SEC)));
+					break;
+				case "BETFAIR_SB":
+					activeServicesList.put(Service.BETFAIR_SB_SERVICENAME, new Long(BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.FREQ_BETFAIR_SB_SEC)));
 					break;
 				default:
 						break;

@@ -110,7 +110,7 @@ public final class JsonGeneratorServiceHandler extends AbstractBlueSheepService{
 	private void saveRecordsOnFile(Service serviceName, List<RecordOutput> tabellaOutputList) {
 		if(tabellaOutputList != null && !tabellaOutputList.isEmpty()) {
 			String pathOutputTable = "";
-			if(Service.BETFAIR_SERVICENAME.equals(serviceName)) {
+			if(Service.BETFAIR_EX_SERVICENAME.equals(serviceName)) {
 				pathOutputTable = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.JSON_PB_RESULT_PATH);
 			}else if(Service.TXODDS_SERVICENAME.equals(serviceName)) {
 				pathOutputTable = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.JSON_PP_RESULT_PATH);

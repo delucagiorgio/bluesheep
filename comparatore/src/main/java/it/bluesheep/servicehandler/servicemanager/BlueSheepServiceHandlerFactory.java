@@ -10,8 +10,8 @@ public class BlueSheepServiceHandlerFactory {
 		switch(service) {
 		case BET365_SERVICENAME:
 			return new Bet365ServiceHandler();
-		case BETFAIR_SERVICENAME:
-			return new BetfairServiceHandler();
+		case BETFAIR_EX_SERVICENAME:
+			return new BetfairExchangeServiceHandler();
 		case TXODDS_SERVICENAME:
 			return new TxOddsServiceHandler();
 		case CSV_SERVICENAME:
@@ -26,6 +26,8 @@ public class BlueSheepServiceHandlerFactory {
 			return new PinterBetServiceHandler();
 		case STANLEYBET_SERVICENAME:
 			return new StanleyBetServiceHandler();
+		case BETFAIR_SB_SERVICENAME:
+			return new BetfairSportbookServiceHandler();
 		default:
 			return null;
 		}

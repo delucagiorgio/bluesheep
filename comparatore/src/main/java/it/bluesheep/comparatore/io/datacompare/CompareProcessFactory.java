@@ -35,7 +35,7 @@ public class CompareProcessFactory {
 		List<Service> serviceList = new ArrayList<Service>();
 		serviceList.add(Service.TXODDS_SERVICENAME);
 		if(bluesheepService instanceof JsonGeneratorServiceHandler || bluesheepService instanceof ArbitraggiServiceHandler) {
-			serviceList.add(Service.BETFAIR_SERVICENAME);
+			serviceList.add(Service.BETFAIR_EX_SERVICENAME);
 		}
 		
 		for(Service service : serviceList) {

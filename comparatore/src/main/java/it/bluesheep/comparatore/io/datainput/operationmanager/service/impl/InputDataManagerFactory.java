@@ -13,8 +13,10 @@ public class InputDataManagerFactory {
 		switch(serviceApiName){
 			case TXODDS_SERVICENAME:
 				return new TxOddsInputDataManagerImpl(sport);
-			case BETFAIR_SERVICENAME:
+			case BETFAIR_EX_SERVICENAME:
 				return new BetfairExchangeInputDataManagerImpl(sport);
+			case BETFAIR_SB_SERVICENAME:
+				return new BetfairSportbookInputDataManagerImpl(sport);
 			case BET365_SERVICENAME:
 				return new Bet365InputDataManagerImpl(sport);
 			case CSV_SERVICENAME:

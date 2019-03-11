@@ -55,9 +55,8 @@ public class HttpUtil {
         return resp;
     }
 
-    public String sendPostRequestRescript(String param, String operation, String appKey, String ssoToken) {
-        String apiNgURL = BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_BASE_URL) + 
-        		BlueSheepServiceHandlerManager.getProperties().getProperty(BlueSheepConstants.BETFAIR_RESCRIPT_SUFFIX) + operation;
+    public String sendPostRequestRescript(String param, String operation, String appKey, String ssoToken, String urlBase, String suffixUrl) {
+        String apiNgURL = urlBase + suffixUrl + operation + "/" ;
         return sendPostRequest(param, appKey, ssoToken, apiNgURL, new RescriptResponseHandler());
     }
 }

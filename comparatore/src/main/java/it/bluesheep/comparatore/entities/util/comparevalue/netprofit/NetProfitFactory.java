@@ -9,7 +9,7 @@ public class NetProfitFactory {
 	public static NetProfitCalculator getNetProfitCalculator(Service comparisonType) {
 		if(Service.TXODDS_SERVICENAME.equals(comparisonType)) {
 			return new NetProfitCalculatorBookmakerVsBookmaker();
-		}else if(Service.BETFAIR_SERVICENAME.equals(comparisonType)) {
+		}else if(Service.BETFAIR_EX_SERVICENAME.equals(comparisonType)) {
 			return new NetProfitCalculatorExchangeVsBookmaker();
 		}
 		return null;
