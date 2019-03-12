@@ -103,9 +103,9 @@ public abstract class AbstractBetfairApi implements IApiInterface{
 			idEventoMap.put(evento.getId(), evento);
 		}
 
-		List<String> marketIdsList = getMarkets(idEventoMap);
+		List<String> marketIdsList = getMarkets(idEventoMap, oddsType);
 
-		return getMarketsInfo(marketIdsList);	
+		return getMarketsInfo(marketIdsList, idEventoMap);	
 	}
 	
 	public MercatoEventoBetfairMap getMercatoEventoBetfairMap() {
@@ -269,9 +269,10 @@ public abstract class AbstractBetfairApi implements IApiInterface{
 	/**
 	 * Ottiene i mercati relativi ad una lista di eventi
 	 * @param idEventoMap mappa relativa agli eventi di cui si vogliono ottenere determinati mercati
+	 * @param oddsType 
 	 * @return gli ids dei mercati relativi agli eventi passati come parametro
 	 */
-	protected List<String> getMarkets(Map<String, EventoBetfair> idEventoMap) {
+	protected List<String> getMarkets(Map<String, EventoBetfair> idEventoMap, String oddsType) {
 
 		//Preparazione del filtro per la chiamata sul marketCatalogue
 		// che info voglio in aggiunta alla risposta
@@ -294,7 +295,7 @@ public abstract class AbstractBetfairApi implements IApiInterface{
 			
 			//chiamata sul marketCatalogue su un set di ids pari a querySize
 			try {
-				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", appKey, sessionToken, urlBase, suffixUrl, endpoint, methodParamName);
+				resultMarketIdJSON = beom.listMarketCatalogue(filter, marketProjection, MarketSort.FIRST_TO_START, "200", appKey, sessionToken, urlBase, suffixUrl, endpoint, methodParamName, null);
 			} catch (BetFairAPIException e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -349,7 +350,7 @@ public abstract class AbstractBetfairApi implements IApiInterface{
 		return marketIds;
 	}
 	
-	protected List<String> getMarketsInfo(List<String> marketIdsList) {
+	protected List<String> getMarketsInfo(List<String> marketIdsList, Map<String, EventoBetfair> idEventoMap) {
 
 		int sizePoolRequests = marketIdsList.size() / 30;
 		

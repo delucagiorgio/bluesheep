@@ -98,7 +98,7 @@ public class BlueSheepSharedResources {
 						case BET365_SERVICENAME:
 						case CSV_SERVICENAME:
 						case BETFAIR_SB_SERVICENAME:
-							sportList = Arrays.asList(Sport.CALCIO);
+							sportList = Arrays.asList(Sport.CALCIO, Sport.TENNIS);
 							break;
 						case BETFLAG_SERVICENAME:
 						case GOLDBET_SERVICENAME:

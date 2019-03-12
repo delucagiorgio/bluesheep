@@ -101,12 +101,12 @@ public final class BlueSheepServiceHandlerManager {
 //			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
-				if(Service.BETFAIR_EX_SERVICENAME.equals(activeService) || Service.BETFAIR_SB_SERVICENAME.equals(activeService)) {
+				if(Service.BETFAIR_EX_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
 				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
 					initialDelay = 60;
 				}else {
-					initialDelay = 120;
+					initialDelay = 240;
 				}
 				if(BlueSheepSharedResources.getActiveServices().get(activeService) > 0) {
 					executor.scheduleWithFixedDelay(BlueSheepServiceHandlerFactory.getCorrectServiceHandlerByService(activeService), initialDelay, BlueSheepSharedResources.getActiveServices().get(activeService), TimeUnit.SECONDS);

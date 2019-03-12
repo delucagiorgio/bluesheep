@@ -12,7 +12,6 @@ import java.util.List;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.database.ProcessStatus;
 import it.bluesheep.database.entities.SaveOddProcessHistory;
-import it.bluesheep.database.exception.MoreThanOneResultException;
 import it.bluesheep.util.BlueSheepConstants;
 
 public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory> {
@@ -93,29 +92,31 @@ public class SaveOddProcessHistoryDAO extends AbstractDAO<SaveOddProcessHistory>
 				+ AND + STATUS + " = '" + ProcessStatus.RUNNING.getCode() + "'";
 		
 		try {
-			SaveOddProcessHistory lastRun = getSingleResult(getMappedObjectBySelect(query, connection));
-			if(lastRun != null) {
-				if(e == null) {
-					lastRun.setStatus(ProcessStatus.COMPLETED.getCode());
-				}else{
-					lastRun.setStatus(ProcessStatus.ERROR.getCode());
-					lastRun.setErrorMessage(e.getMessage());
+			List<SaveOddProcessHistory> lastRunList = getMappedObjectBySelect(query, connection);
+			for(SaveOddProcessHistory lastRun : lastRunList) {
+				if(lastRun != null) {
+					if(e == null) {
+						lastRun.setStatus(ProcessStatus.COMPLETED.getCode());
+					}else{
+						lastRun.setStatus(ProcessStatus.ERROR.getCode());
+						lastRun.setErrorMessage(e.getMessage());
+					}
+					String updateQuery = UPDATE + tableName 
+							+ SET + ERRORMESSAGE + " = ?, " 
+							+ STATUS + " = ? " + WHERE + ID + " = " 
+							+ lastRun.getId();
+					
+					PreparedStatement ps = connection.prepareStatement(updateQuery);
+					ps.setString(1, lastRun.getErrorMessage());
+					ps.setString(2, lastRun.getStatus());
+					
+					int updatedCount = ps.executeUpdate();
+					
+					ps.close();
+					logger.info("Updated process for service " + service + " with status " + lastRun.getStatus() + ": update count " + updatedCount);
 				}
-				String updateQuery = UPDATE + tableName 
-						+ SET + ERRORMESSAGE + " = ?, " 
-						+ STATUS + " = ? " + WHERE + ID + " = " 
-						+ lastRun.getId();
-				
-				PreparedStatement ps = connection.prepareStatement(updateQuery);
-				ps.setString(1, lastRun.getErrorMessage());
-				ps.setString(2, lastRun.getStatus());
-				
-				int updatedCount = ps.executeUpdate();
-				
-				ps.close();
-				logger.info("Updated process for service " + service + " with status " + lastRun.getStatus() + ": update count " + updatedCount);
 			}
-		} catch (MoreThanOneResultException | SQLException e1) {
+		} catch (SQLException e1) {
 			logger.error(e1.getMessage(), e1);
 		}
 	}

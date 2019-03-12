@@ -1,25 +1,24 @@
 package it.bluesheep.comparatore.io.datacompare.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
 import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
-import it.bluesheep.comparatore.entities.input.record.Bet365InputRecord;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
-import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.AbstractProcessDataManager;
 import it.bluesheep.comparatore.io.datacompare.util.ChiaveEventoScommessaInputRecordsMap;
 import it.bluesheep.comparatore.io.datacompare.util.ICompareInformationEvents;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.servicehandler.AbstractBlueSheepService;
-import it.bluesheep.util.BlueSheepConstants;
-import it.bluesheep.util.BlueSheepSharedResources;
 
 public class Bet365ProcessDataManager extends AbstractProcessDataManager implements ICompareInformationEvents {
 	
@@ -38,66 +37,44 @@ public class Bet365ProcessDataManager extends AbstractProcessDataManager impleme
 	@Override
 	public List<AbstractInputRecord> compareAndCollectSameEventsFromBookmakerAndTxOdds(List<AbstractInputRecord> bookmakerList) throws Exception {
 		
-		ChiaveEventoScommessaInputRecordsMap sportMap = BlueSheepSharedResources.getEventoScommessaRecordMap();
-		List<AbstractInputRecord> listExchangeRecordListCopy = new ArrayList<AbstractInputRecord>(BlueSheepSharedResources.getExchangeRecordsList());
-		logger.info("Start matching informartion for Bet365 on TxOdds events : "
-				+ "input size Bet365 events is " + bookmakerList.size());
-		int matchedCountEvents = 0;
-		for(AbstractInputRecord record : bookmakerList) {
-			String[] splittedEventoKeyRecord = record.getKeyEvento().split("\\|");
-			String key = splittedEventoKeyRecord[1];
-			Map<Date, Map<String, Map<Scommessa, Map<String, AbstractInputRecord>>>> dataMap = sportMap.get(Sport.valueOf(key));
-			List<Date> dateList = new ArrayList<Date>(dataMap.keySet());
-			for(Date date : dateList) {
-				if((Sport.TENNIS.equals(record.getSport()) && AbstractInputRecord.compareDate(date, record.getDataOraEvento())) || 
-						(Sport.CALCIO.equals(record.getSport()) && date.equals(record.getDataOraEvento()))) {
-					List<String> eventoKeyList = new ArrayList<String>(dataMap.get(date).keySet());
-					for(String eventoTxOdds : eventoKeyList) {
-						String[] splittedEventoKey = eventoTxOdds.split("\\|");
-						String sport = splittedEventoKey[1];
-						String[] partecipantiSplitted = splittedEventoKey[2].split(BlueSheepConstants.REGEX_VERSUS);
-						String partecipante1 = partecipantiSplitted[0];
-						String partecipante2 = partecipantiSplitted[1];
-						
-						Bet365InputRecord bet365Record = (Bet365InputRecord) record;
-						AbstractInputRecord exchangeRecord = BlueSheepSharedResources.findExchangeRecord(record, listExchangeRecordListCopy);
-						
-						if(bet365Record.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) ||
-								bet365Record.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
-							Map<Scommessa, Map<String, AbstractInputRecord>> mapScommessaRecord = dataMap.get(date).get(eventoTxOdds);
-							if(mapScommessaRecord != null && !mapScommessaRecord.isEmpty()) {
-								List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
-								if(scommessaSet != null && !scommessaSet.isEmpty()) {
-									Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
-									List<String> bookmakerSet = new ArrayList<String>(bookmakerRecordMap.keySet());
-									if(!bookmakerSet.isEmpty()) {
-										AbstractInputRecord bookmakerRecord = bookmakerRecordMap.get(bookmakerSet.get(0)); 
-										bet365Record.setCampionato(bookmakerRecord.getCampionato());
-										if(exchangeRecord != null) {
-											bet365Record.setDataOraEvento(exchangeRecord.getDataOraEvento());
-										}else {
-											bet365Record.setDataOraEvento(bookmakerRecord.getDataOraEvento());
-										}
-										bet365Record.setPartecipante1(bookmakerRecord.getPartecipante1());
-										bet365Record.setPartecipante2(bookmakerRecord.getPartecipante2());
-										bet365Record.setKeyEvento("" + bet365Record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-												bet365Record.getSport() + BlueSheepConstants.REGEX_PIPE + 
-												bet365Record.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
-												bet365Record.getPartecipante2());
-										matchedCountEvents++;
-									}
-								}
-							}
-							break;
-						}
-					}
+		int threadNumber = bookmakerList != null ? (bookmakerList.size() / 2000) + 1 : 0;
+		ExecutorService executor = Executors.newFixedThreadPool(threadNumber);
+		List<AbstractInputRecord> returnList = new ArrayList<AbstractInputRecord>();
+		if(bookmakerList != null && !bookmakerList.isEmpty()) {
+			
+			Map<Long, List<AbstractInputRecord>> resultMap = new ConcurrentHashMap<Long, List<AbstractInputRecord>>();
+			int bookmakerListSize = bookmakerList.size();
+			int page = bookmakerListSize / threadNumber + bookmakerListSize % threadNumber;
+
+			for(int i = 0; i < threadNumber; i++) {
+				
+				if(i * page < bookmakerListSize) {
+					List<AbstractInputRecord> splittedList = bookmakerList.subList(i * page, Math.min((i + 1) * page, bookmakerListSize));
+					
+					Bet365CompareThreadHelper thread = new Bet365CompareThreadHelper(splittedList, resultMap);
+					executor.submit(thread);
 				}
 			}
+			try {
+				executor.shutdown();
+				if(!executor.awaitTermination(2, TimeUnit.MINUTES)) {
+					executor.shutdownNow();
+				}
+			}catch(Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+			for(Long threadId : resultMap.keySet()) {
+				if(resultMap.get(threadId) != null && !resultMap.get(threadId).isEmpty()) {
+					returnList.addAll(resultMap.get(threadId));
+				}
+			}
+			
 		}
 		
-		logger.info("Matching process completed. Matched events are " + matchedCountEvents + ": events Bet365 = " + bookmakerList.size());
+		logger.info("Matching process completed. Matched events are " + returnList.size() + ": events Bet365 = " + bookmakerList.size());
 		
-		return bookmakerList;
+		return returnList;
 	}
 
 	@Override

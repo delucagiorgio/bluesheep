@@ -26,6 +26,7 @@ public class ProcessDataManagerFactory {
 	public static synchronized ICompareInformationEvents getICompareInformationEventsByString(Service service) {
 		switch(service) {
 		case BETFAIR_EX_SERVICENAME:
+		case BETFAIR_SB_SERVICENAME:
 			return new BetfairExchangeProcessDataManager();
 		case BET365_SERVICENAME:
 			return new Bet365ProcessDataManager();

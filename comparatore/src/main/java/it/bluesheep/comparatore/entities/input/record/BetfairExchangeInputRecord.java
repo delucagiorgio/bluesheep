@@ -24,8 +24,8 @@ public class BetfairExchangeInputRecord extends AbstractInputRecord implements I
 		this.source = Service.BETFAIR_EX_SERVICENAME;
 	}
 
-	public BetfairExchangeInputRecord(BetfairExchangeInputRecord recordToBeMapped, boolean isLayRecord) {
-		super(recordToBeMapped);
+	public BetfairExchangeInputRecord(AbstractInputRecord tempRecord, boolean isLayRecord) {
+		super(tempRecord);
 		this.isLayRecord = isLayRecord;
 		if(isLayRecord) {
 			this.bookmakerName = BlueSheepConstants.BETFAIR_EXCHANGE_BOOKMAKER_NAME_LAY;

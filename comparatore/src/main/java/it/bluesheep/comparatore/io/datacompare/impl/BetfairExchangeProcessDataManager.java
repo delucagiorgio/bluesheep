@@ -10,7 +10,7 @@ import java.util.Set;
 import it.bluesheep.arbitraggi.entities.ArbsRecord;
 import it.bluesheep.arbitraggi.util.ArbsUtil;
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
-import it.bluesheep.comparatore.entities.input.record.BetfairExchangeInputRecord;
+import it.bluesheep.comparatore.entities.input.util.IKeyEventoComparator;
 import it.bluesheep.comparatore.entities.output.RecordOutput;
 import it.bluesheep.comparatore.entities.output.subtype.RecordBookmakerVsExchangeOdds;
 import it.bluesheep.comparatore.entities.util.TranslatorUtil;
@@ -41,6 +41,7 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	private long minutesOfOddValidity;
 	private InputDataHelper helper;
 	private static double minSizeRequiredArbsValue;
+	private boolean isExchange;
 	
 	protected BetfairExchangeProcessDataManager() {
 		super();
@@ -74,10 +75,10 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 							String partecipante1 = partecipantiSplitted[0];
 							String partecipante2 = partecipantiSplitted[1];
 							
-							BetfairExchangeInputRecord exchangeRecord = (BetfairExchangeInputRecord) record;
+							IKeyEventoComparator exchangeRecord = (IKeyEventoComparator) record;
 							
 							if(exchangeRecord.isSameEventAbstractInputRecord(date, sport, partecipante1, partecipante2) || 
-														exchangeRecord.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
+									record.isSameEventSecondaryMatch(date, sport, partecipante1, partecipante2)) {
 								Map<Scommessa, Map<String, AbstractInputRecord>> mapScommessaRecord = dateMap.get(date).get(eventoTxOdds);
 								List<Scommessa> scommessaSet = new ArrayList<Scommessa>(mapScommessaRecord.keySet());
 								Map<String, AbstractInputRecord> bookmakerRecordMap = mapScommessaRecord.get(scommessaSet.get(0));
@@ -85,13 +86,13 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 								if(!bookmakerSet.isEmpty()) {
 									AbstractInputRecord txOddsReference = findTxOddsRecord(bookmakerSet, bookmakerRecordMap);
 									if(txOddsReference != null) {
-										exchangeRecord.setCampionato(txOddsReference.getCampionato());
-										exchangeRecord.setPartecipante1(txOddsReference.getPartecipante1());
-										exchangeRecord.setPartecipante2(txOddsReference.getPartecipante2());
-										exchangeRecord.setKeyEvento("" + exchangeRecord.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
-													exchangeRecord.getSport() + BlueSheepConstants.REGEX_PIPE + 
-													exchangeRecord.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
-													exchangeRecord.getPartecipante2());
+										record.setCampionato(txOddsReference.getCampionato());
+										record.setPartecipante1(txOddsReference.getPartecipante1());
+										record.setPartecipante2(txOddsReference.getPartecipante2());
+										record.setKeyEvento("" + record.getDataOraEvento() + BlueSheepConstants.REGEX_PIPE + 
+												record.getSport() + BlueSheepConstants.REGEX_PIPE + 
+												record.getPartecipante1() + BlueSheepConstants.REGEX_VERSUS +
+												record.getPartecipante2());
 									}
 								}
 								break;
@@ -257,6 +258,14 @@ public class BetfairExchangeProcessDataManager extends AbstractProcessDataManage
 	@Override
 	public List<ArbsRecord> compareThreeWayOdds(ChiaveEventoScommessaInputRecordsMap dataMap, Sport sport, AbstractBlueSheepService bluesheepServiceType) throws Exception {
 		throw new Exception("Incorrect implementation of compareThreeWayOdds");
+	}
+
+	public boolean isExchange() {
+		return isExchange;
+	}
+
+	public void setExchange(boolean isExchange) {
+		this.isExchange = isExchange;
 	}
 
 }

@@ -313,7 +313,7 @@ public class TxOddsProcessDataManager extends AbstractProcessDataManager impleme
 				if(i * page < bookmakerListSize) {
 					List<AbstractInputRecord> splittedList = bookmakerList.subList(i * page, Math.min((i + 1) * page, bookmakerListSize));
 					
-					CompareThreadHelper thread = new CompareThreadHelper(splittedList, listExchangeRecordListCopy, resultMap);
+					TxOddsCompareThreadHelper thread = new TxOddsCompareThreadHelper(splittedList, listExchangeRecordListCopy, resultMap);
 					executor.submit(thread);
 				}
 			}

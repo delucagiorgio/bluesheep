@@ -13,9 +13,8 @@ import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
-import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.BetfairInputMappingProcessor;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.BetfairSportbookInputMappingProcessor;
 import it.bluesheep.comparatore.serviceapi.Service;
-import it.bluesheep.comparatore.serviceapi.impl.BetFairExchangeApiImpl;
 import it.bluesheep.comparatore.serviceapi.impl.BetFairSportbookApiImpl;
 import it.bluesheep.util.BlueSheepConstants;
 
@@ -26,7 +25,7 @@ public class BetfairSportbookInputDataManagerImpl extends InputDataManagerImpl {
 	
 	protected BetfairSportbookInputDataManagerImpl(Sport sport) {
 		super(sport);
-		processor = new BetfairInputMappingProcessor();
+		processor = new BetfairSportbookInputMappingProcessor();
 		apiServiceInterface = new BetFairSportbookApiImpl();
 		scommessaMapMarketIdEventoMap = new HashMap<String, Map<String,EventoBetfair>>();
 		this.serviceName = Service.BETFAIR_SB_SERVICENAME;
@@ -43,7 +42,7 @@ public class BetfairSportbookInputDataManagerImpl extends InputDataManagerImpl {
 			String oddsType = apiServiceInterface.identifyCorrectBetCode(tipoScommessa, sport);
 			Map<String, EventoBetfair> mercatoEventoBetfairMap = scommessaMapMarketIdEventoMap.get(oddsType + "_" + sport);
 		    if(mercatoEventoBetfairMap == null) {
-		    	mercatoEventoBetfairMap = ((BetFairExchangeApiImpl) apiServiceInterface).getMercatoEventoBetfairMap();
+		    	mercatoEventoBetfairMap = ((BetFairSportbookApiImpl) apiServiceInterface).getMercatoEventoBetfairMap();
 		    	scommessaMapMarketIdEventoMap.put(oddsType + "_" + sport, mercatoEventoBetfairMap);
 		    }
 		    returnItemsList = mergeInfoEventoBetfairWithInfoOdds(returnItemsList, mercatoEventoBetfairMap);

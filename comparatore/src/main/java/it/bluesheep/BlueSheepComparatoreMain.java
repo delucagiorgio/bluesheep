@@ -12,7 +12,7 @@ public class BlueSheepComparatoreMain {
         LogManager.getLogManager().reset();
 		
         File bluesheepStatusOnFile = new File(BlueSheepConstants.PATH_TO_RESOURCES + "bluesheepStatusOn.txt");
-        if(true || !bluesheepStatusOnFile.exists()) {
+        if(!bluesheepStatusOnFile.exists()) {
         	bluesheepStatusOnFile.createNewFile();
         	initializeServiceHandler();
 		}else {

@@ -138,12 +138,12 @@ public class BlueSheepConstants {
 	// TELEGRAM TERMINAL USERS IDS FILE
 	public static final String TERMINALUSERSFILE = "TERMINALUSERSFILE";
 
-//	//DATABASE
-//	public static final String DATABASE_USER = "java.application";
-//	public static final String DATABASE_PASSWORD = "bluesheep2018";
 	//DATABASE
-	public static final String DATABASE_USER = "root";
-	public static final String DATABASE_PASSWORD = "Desaparecido44";
+	public static final String DATABASE_USER = "java.application";
+	public static final String DATABASE_PASSWORD = "bluesheep2018";
+//	//DATABASE
+//	public static final String DATABASE_USER = "root";
+//	public static final String DATABASE_PASSWORD = "Desaparecido44";
 
 	//CHAT_BOT
 	public static final String CHAT_BOT_MAX_PREF = "CHAT_BOT_MAX_PREF";

@@ -20,6 +20,7 @@ public class MarketFilter {
     private Set<MarketBettingType> marketBettingTypes;
     private Set<String> marketCountries;
     private Set<String> marketTypeCodes;
+    private Set<String> marketTypes;
 
     public String getTextQuery() {
         return textQuery;
@@ -32,7 +33,7 @@ public class MarketFilter {
     public Set<String> getEventTypeIds() {
         return eventTypeIds;
     }
-
+    
     public void setEventTypeIds(Set<String> eventTypeIds) {
         this.eventTypeIds = eventTypeIds;
     }
@@ -129,5 +130,13 @@ public class MarketFilter {
                 + getMarketCountries() + "," + "marketTypeCodes="
                 + getMarketTypeCodes() + "," + "}";
     }
+
+	public Set<String> getMarketTypes() {
+		return marketTypes;
+	}
+
+	public void setMarketTypes(Set<String> marketTypes) {
+		this.marketTypes = marketTypes;
+	}
 
 }

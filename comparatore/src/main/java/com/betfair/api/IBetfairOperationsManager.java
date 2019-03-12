@@ -17,14 +17,13 @@ public interface IBetfairOperationsManager {
 										  MatchProjection matchProjection, String currencyCode, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException;
 
     public String listMarketCatalogue(MarketFilter filter, Set<MarketProjection> marketProjection, 
-    										   MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException;
+    										   MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName, Set<String> marketTypes) throws BetFairAPIException;
     
     public String listEvents(MarketFilter filter, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException;
     
-//    public String listEventsSportbook(MarketFilter filter, String appKey, String ssoId, String urlBase, String suffixUrl) throws BetFairAPIException;
-//    
-//    public String listMarketCatalogueSportbook(MarketFilter filter, Set<MarketProjection> marketProjection, MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl) throws BetFairAPIException;
-//
-//    public String listMarketPrices(ListMarketPricesRequestParams params, String appKey, String ssoId, String urlBase, String suffixUrl) throws BetFairAPIException;
+    public String listMarketPrice(List<String> marketIds, PriceProjection priceProjection, OrderProjection orderProjection,
+			MatchProjection matchProjection, String currencyCode, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint) throws BetFairAPIException;
 
+	public String listCompetitions(MarketFilter filter, String appKey, String sessionToken, String urlBase, String endpoint, String suffixUrl) throws BetFairAPIException;
+    
 }

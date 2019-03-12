@@ -13,7 +13,7 @@ import it.bluesheep.comparatore.entities.util.ScommessaUtilManager;
 import it.bluesheep.comparatore.entities.util.scommessa.Scommessa;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.AbstractInputMappingProcessor;
-import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.BetfairInputMappingProcessor;
+import it.bluesheep.comparatore.io.datainput.operationmanager.service.mapper.BetfairExchangeInputMappingProcessor;
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.comparatore.serviceapi.impl.BetFairExchangeApiImpl;
 import it.bluesheep.util.BlueSheepConstants;
@@ -26,7 +26,7 @@ public final class BetfairExchangeInputDataManagerImpl extends InputDataManagerI
 
 	protected BetfairExchangeInputDataManagerImpl(Sport sport) {
 		super(sport);
-		processor = new BetfairInputMappingProcessor();
+		processor = new BetfairExchangeInputMappingProcessor();
 		apiServiceInterface = new BetFairExchangeApiImpl();
 		scommessaMapMarketIdEventoMap = new HashMap<String, Map<String,EventoBetfair>>();
 		this.serviceName = Service.BETFAIR_EX_SERVICENAME;

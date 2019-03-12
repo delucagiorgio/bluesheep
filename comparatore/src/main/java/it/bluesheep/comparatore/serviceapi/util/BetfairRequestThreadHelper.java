@@ -59,8 +59,12 @@ public class BetfairRequestThreadHelper extends AbstractRequestThreadHelper {
 			
 			String responseJson = null;
 			//chiamata sul marketBook 
-			try {				
-				responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, appKey, token, urlBase, suffixUrl, endpoint, methodParamName);
+			try {
+				if(methodParamName) {
+					responseJson = beom.listMarketPrice(idsSublist, null, null, null, null, appKey, token, urlBase, suffixUrl, endpoint);
+				}else {
+					responseJson = beom.listMarketBook(idsSublist, priceProjection, null, MatchProjection.ROLLED_UP_BY_PRICE, null, appKey, token, urlBase, suffixUrl, endpoint, methodParamName);
+				}
 			} catch (BetFairAPIException e) {
 				logger.error(e.getMessage(), e);
 			}

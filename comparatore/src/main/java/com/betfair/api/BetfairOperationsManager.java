@@ -28,15 +28,20 @@ public abstract class BetfairOperationsManager implements IBetfairOperationsMana
     protected final String ORDER_PROJECTION = "orderProjection";
     protected final String LIST_EVENTS_PARAMS = "listEventsRequestParams";
     protected final String LIST_MARKET_CATALOGUE_PARAMS = "listMarketCatalogueRequestParams";
+    protected final String LIST_MARKET_PRICES_PARAMS = "listMarketPricesRequestParams";
+    protected final String LIST_COMPETITIONS_PARAMS = "listCompetitionsRequestParams";
 
 
     protected final String locale = Locale.ENGLISH.toString();
+    
+    public abstract String listMarketPrice(List<String> marketIds, PriceProjection priceProjection, OrderProjection orderProjection,
+			MatchProjection matchProjection, String currencyCode, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint) throws BetFairAPIException;
 
 	public abstract String listMarketBook(List<String> marketIds, PriceProjection priceProjection, OrderProjection orderProjection,
 						MatchProjection matchProjection, String currencyCode, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException;
 
     public abstract String listMarketCatalogue(MarketFilter filter, Set<MarketProjection> marketProjection,
-        MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException;
+        MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName, Set<String> marketTypes) throws BetFairAPIException;
     
     public abstract String listEvents(MarketFilter filter, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException;
     

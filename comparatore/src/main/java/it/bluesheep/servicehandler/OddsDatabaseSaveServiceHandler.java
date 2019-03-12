@@ -16,6 +16,7 @@ import it.bluesheep.database.dao.OddDAOFactory;
 import it.bluesheep.database.dao.impl.SaveOddProcessHistoryDAO;
 import it.bluesheep.database.entities.AbstractOddEntity;
 import it.bluesheep.database.entities.SaveOddProcessHistory;
+import it.bluesheep.database.exception.PendingExecutionException;
 
 public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 
@@ -55,8 +56,10 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 			if(!dao.stillRunningProcess(Service.USERPREFNOTIFICATION_SERVICE, connection)) {
 				BlueSheepServiceHandlerManager.executor.submit(new UserPreferenceNotificationServiceHandler());
 				logger.info("Scanning odds for service " + service + " started");
-			}else {
+			}else{
 				logger.warn("Not executing " + service + " because previous one is still running");
+				dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, new PendingExecutionException(), connection);
+				connection.commit();
 			}
 
 			ConnectionPool.releaseConnection(connection);

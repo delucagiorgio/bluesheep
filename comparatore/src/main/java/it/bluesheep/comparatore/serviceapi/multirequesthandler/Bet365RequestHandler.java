@@ -33,7 +33,7 @@ public class Bet365RequestHandler extends AbstractRequestHandler {
 				try {
 					executor.shutdown();
 
-					timeoutReached = !executor.awaitTermination(120, TimeUnit.SECONDS);
+					timeoutReached = !executor.awaitTermination(40, TimeUnit.SECONDS);
 					if(timeoutReached) {
 						executor.shutdownNow();
 					}

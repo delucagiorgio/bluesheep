@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.betfair.entities.BasicRequestParams;
 import com.betfair.entities.ListMarketCatalogueRequestParams;
+import com.betfair.entities.ListMarketPricesRequestParams;
 import com.betfair.entities.MarketFilter;
 import com.betfair.entities.PriceProjection;
 import com.betfair.enums.types.ApiNgOperation;
@@ -53,14 +54,28 @@ public class BetfairOperationsManagerImpl extends BetfairOperationsManager{
 
         return result;
     }
+    
+    @Override
+    public String listMarketPrice(List<String> marketIds, PriceProjection priceProjection, OrderProjection orderProjection,
+    				MatchProjection matchProjection, String currencyCode, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint) throws BetFairAPIException {
+        Map<String, Object> params = new HashMap<String, Object>();
+    	ListMarketPricesRequestParams lmrp = new ListMarketPricesRequestParams();
+        lmrp.setMarketIds(marketIds);
+        params.put(LIST_MARKET_PRICES_PARAMS, lmrp);
+        String result = makeRequest(ApiNgOperation.LIST_MARKET_PRICES.getOperationName(), params, appKey, ssoId, urlBase, suffixUrl, endpoint);
+
+        return result;
+    }
 
     @Override
     public String listMarketCatalogue(MarketFilter filter, Set<MarketProjection> marketProjection,
-                                                     MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName) throws BetFairAPIException {
+                                                     MarketSort sort, String maxResult, String appKey, String ssoId, String urlBase, String suffixUrl, String endpoint, boolean methodParamName, Set<String> marketTypes) throws BetFairAPIException {
         Map<String, Object> params = new HashMap<String, Object>();
         if(methodParamName) {
         	ListMarketCatalogueRequestParams lmcrp = new ListMarketCatalogueRequestParams();
         	lmcrp.setLocale(locale);
+        	filter.setMarketTypes(marketTypes);
+        	filter.setMarketTypeCodes(null);
         	lmcrp.setMarketFilter(filter);
         	lmcrp.setMarketProjection(marketProjection);
         	lmcrp.setMaxResults(Integer.parseInt(maxResult));
@@ -109,5 +124,16 @@ public class BetfairOperationsManagerImpl extends BetfairOperationsManager{
         HttpUtil requester = new HttpUtil();
         return requester.sendPostRequestRescript(requestString, operation, appKey, ssoToken, urlBase, suffixUrl);
        }
+
+	@Override
+	public String listCompetitions(MarketFilter filter, String appKey, String sessionToken, String urlBase, String endpoint, String suffixUrl) throws BetFairAPIException {
+        Map<String, Object> params = new HashMap<String, Object>();
+		BasicRequestParams basicReqParam = new BasicRequestParams();
+        basicReqParam.setMarketFilter(filter);
+        basicReqParam.setLocale(locale);
+        params.put(LIST_COMPETITIONS_PARAMS, basicReqParam);
+        
+        return makeRequest(ApiNgOperation.LISTCOMPETITIONS.getOperationName(), params, appKey, sessionToken, urlBase, suffixUrl, endpoint);
+	}
 }
 
