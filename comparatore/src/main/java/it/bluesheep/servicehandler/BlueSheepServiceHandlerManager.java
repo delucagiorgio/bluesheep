@@ -27,6 +27,7 @@ import it.bluesheep.comparatore.io.datainput.operationmanager.service.util.Input
 import it.bluesheep.comparatore.serviceapi.Service;
 import it.bluesheep.database.ConnectionPool;
 import it.bluesheep.servicehandler.servicemanager.BlueSheepServiceHandlerFactory;
+import it.bluesheep.telegrambot.TelegramBotHandler;
 import it.bluesheep.util.BlueSheepConstants;
 import it.bluesheep.util.BlueSheepSharedResources;
 
@@ -97,14 +98,14 @@ public final class BlueSheepServiceHandlerManager {
 			executor = Executors.newScheduledThreadPool(8);
 			long initialDelay = firstStartExecuted ? 0 : 120;
 
-//			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
-//			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
+			executor.submit(TelegramBotServiceHandler.getTelegramBotServiceHandlerInstance());
+			executor.scheduleAtFixedRate(new BlueSheepUserUpdateServiceHandler(), 0, 10, TimeUnit.MINUTES);
 			
 			for(Service activeService : BlueSheepSharedResources.getActiveServices().keySet()) {
 				if(Service.BETFAIR_EX_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
 				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
-					initialDelay = 60;
+					initialDelay = 120;
 				}else {
 					initialDelay = 240;
 				}
@@ -210,8 +211,8 @@ public final class BlueSheepServiceHandlerManager {
 					
 					logger.info(message + ". Timeout to force shutdown is " + timeout + " " + timeUnitTimeout);
 					
-//					TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
-//					BlueSheepSharedResources.getBotSession().stop();
+					TelegramBotHandler.getTelegramBotHandlerInstance().stopExecution();
+					BlueSheepSharedResources.getBotSession().stop();
 					executor.shutdown();
 					terminatedCorrectly = executor.awaitTermination(timeout, timeUnitTimeout);
 					if(!terminatedCorrectly) {

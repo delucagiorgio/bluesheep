@@ -95,5 +95,40 @@ public class BetfairSportbookInputMappingProcessor extends AbstractBetfairInputM
 		
 		return sportbookRecords;
 	}
+	
+	/**
+	 * GD - 22/04/2018
+	 * Calcola in base al tipo di scommessa il corretto indice da andare a leggere per ottenere le informazioni
+	 * esatte riguardanti la scommessa passata come parametro
+	 * @param scommessaTipo la scommessa
+	 * @return l'indice corretto da leggere, -1 in caso di errore
+	 */
+	protected int getCorrectOddIndexInJSONObjectByScommessa(Scommessa scommessaTipo) {
+		int index = -1;
+		switch(scommessaTipo) {
+		case ALMENO1GOAL_O0X5:
+		case ALMENO2GOAL_O1X5:
+		case ALMENO3GOAL_O2X5:
+		case ALMENO4G0AL_O3X5:
+		case ALMENO5GOAL_O4X5:
+		case ENTRAMBISEGNANO_GOAL:
+		case SFIDANTE1VINCENTE_1:
+			index = 0;
+			break;
+		case NESSUNGOAL_U0X5:
+		case ALPIU1GOAL_U1X5:
+		case ALPIU2GOAL_U2X5:
+		case ALPIU3GOAL_U3X5:
+		case ALPIU4GOAL_U4X5:
+		case NESSUNOSEGNA_NOGOAL:
+		case PAREGGIO_X:
+			index = 1;
+			break;
+		case SFIDANTE2VINCENTE_2:
+			index = 2;
+			break;
+		}
+		return index;
+	}
 
 }

@@ -25,8 +25,8 @@ public class TranslatorUtil {
 	private static Map<String, String> codeTranslationMap;
 	private static Map<String, String> apiTranslationMap;
 	private static Logger logger = Logger.getLogger(TranslatorUtil.class);
-	private static final String ENGLISH = "en";
-	private static final String ITALIAN = "it";
+	public static final String ENGLISH = "en";
+	public static final String ITALIAN = "it";
 	private static boolean upToDate = false;
 	
 	public static void initializeMapFromFile(){
@@ -115,14 +115,14 @@ public class TranslatorUtil {
 	 * @param toBeTranslatedString parola inglese da tradurre
 	 * @return parola tradotta in italiano, la parola inglese se non riesce ad effettuare la traduzione
 	 */
-	private static String getItalianTranslation(String toBeTranslatedString) {
+	public static String getTranslation(String toBeTranslatedString, String fromLang, String toLang) {
 		String translatedString = apiTranslationMap.get(toBeTranslatedString);
 		if(translatedString == null) {
 			try {
 				String url = "https://translate.googleapis.com/translate_a/single?"+
 					    "client=gtx&"+
-					    "sl=" + ENGLISH + 
-					    "&tl=" + ITALIAN + 
+					    "sl=" + fromLang + 
+					    "&tl=" + toLang + 
 					    "&dt=t&q=" + URLEncoder.encode(toBeTranslatedString, BlueSheepConstants.ENCODING_UTF_8);    
 					  
 				URL obj = new URL(url);
@@ -212,7 +212,7 @@ public class TranslatorUtil {
 				return toBeTranslatedString;
 			}
 			
-			translatedString = TranslatorUtil.getItalianTranslation(toBeTranslatedString);
+			translatedString = TranslatorUtil.getTranslation(toBeTranslatedString, ENGLISH, ITALIAN);
 		}
 		return translatedString;
 	}
@@ -234,7 +234,7 @@ public class TranslatorUtil {
 	    			String line = toBeTranslatedString + BlueSheepConstants.REGEX_CSV + apiTranslationMap.get(toBeTranslatedString) + System.lineSeparator();
 	    			writer1.write(line);
 	    		}
-	    		
+				upToDate = true;
 			}catch(IOException e) {
 				logger.error(e.getMessage(), e);
 			}finally {
@@ -242,8 +242,6 @@ public class TranslatorUtil {
 					writer1.close();
 				}
 			}
-			
-			upToDate = true;
 		}
 	}
 

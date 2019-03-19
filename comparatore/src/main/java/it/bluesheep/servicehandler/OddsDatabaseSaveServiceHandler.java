@@ -52,14 +52,15 @@ public class OddsDatabaseSaveServiceHandler extends AbstractBlueSheepService {
 			dao.updateLastRun(service , null, connection);
 			connection.commit();
 			
-			
-			if(!dao.stillRunningProcess(Service.USERPREFNOTIFICATION_SERVICE, connection)) {
-				BlueSheepServiceHandlerManager.executor.submit(new UserPreferenceNotificationServiceHandler());
-				logger.info("Scanning odds for service " + service + " started");
-			}else{
-				logger.warn("Not executing " + service + " because previous one is still running");
-				dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, new PendingExecutionException(), connection);
-				connection.commit();
+			if(Service.BETFAIR_EX_SERVICENAME.equals(service)) {
+				if(!dao.stillRunningProcess(Service.USERPREFNOTIFICATION_SERVICE, connection) ) {
+					BlueSheepServiceHandlerManager.executor.submit(new UserPreferenceNotificationServiceHandler());
+					logger.info("Scanning odds for service " + service + " started");
+				}else{
+					logger.warn("Not executing " + service + " because previous one is still running");
+					dao.updateLastRun(Service.USERPREFNOTIFICATION_SERVICE, new PendingExecutionException(), connection);
+					connection.commit();
+				}
 			}
 
 			ConnectionPool.releaseConnection(connection);
