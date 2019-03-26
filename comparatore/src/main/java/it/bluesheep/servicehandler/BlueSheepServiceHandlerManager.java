@@ -105,7 +105,7 @@ public final class BlueSheepServiceHandlerManager {
 				if(Service.BETFAIR_EX_SERVICENAME.equals(activeService)) {
 					initialDelay = 0;
 				}else if(Service.TXODDS_SERVICENAME.equals(activeService)) {
-					initialDelay = 120;
+					initialDelay = 60;
 				}else {
 					initialDelay = 240;
 				}

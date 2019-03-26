@@ -5,12 +5,13 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import it.bluesheep.comparatore.entities.input.AbstractInputRecord;
+import it.bluesheep.comparatore.entities.input.AbstractScrapingInputRecord;
 import it.bluesheep.comparatore.entities.input.util.IKeyEventoComparator;
 import it.bluesheep.comparatore.entities.util.sport.Sport;
 import it.bluesheep.comparatore.io.datacompare.util.CosineSimilarityUtil;
 import it.bluesheep.comparatore.serviceapi.Service;
 
-public class StanleyBetInputRecord extends AbstractInputRecord implements IKeyEventoComparator{
+public class StanleyBetInputRecord extends AbstractScrapingInputRecord implements IKeyEventoComparator{
 	
 	private static Logger logger = Logger.getLogger(StanleyBetInputRecord.class);
 	
@@ -33,7 +34,7 @@ public class StanleyBetInputRecord extends AbstractInputRecord implements IKeyEv
 	public boolean isSameEventAbstractInputRecord(Date obj, String sport, String partecipante1, String partecipante2)
 			throws Exception {
 		
-		logger.info("Starting identification event for record " + this.keyEvento);
+		logger.debug("Starting identification event for record " + this.keyEvento);
 		
 		String thisP1_LC = this.partecipante1.toLowerCase();
 		String thisP2_LC = this.partecipante2.toLowerCase();

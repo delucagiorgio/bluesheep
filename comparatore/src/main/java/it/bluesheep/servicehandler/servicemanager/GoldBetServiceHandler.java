@@ -3,6 +3,7 @@ package it.bluesheep.servicehandler.servicemanager;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -55,6 +56,10 @@ public class GoldBetServiceHandler extends ScrapedOddsServiceHandler {
 				Date dateParsed = null;
 				try {
 					dateParsed = sdf.parse(date);
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(dateParsed);
+					cal.add(Calendar.HOUR_OF_DAY, 1);
+					dateParsed = cal.getTime();
 				} catch (ParseException e) {
 					logger.error(e.getMessage(), e);
 					continue;
@@ -123,7 +128,6 @@ public class GoldBetServiceHandler extends ScrapedOddsServiceHandler {
 		}
 		
 		return returnList;
-		
 	}
 
 }

@@ -35,9 +35,13 @@ public class ProcessDataManagerFactory {
 		case BETFLAG_SERVICENAME:
 			return new BetflagProcessDataManager();
 		case GOLDBET_SERVICENAME:
+			return new GoldBetProcessDataManager();
 		case STARVEGAS_SERVICENAME:
+			return new StarVegasProcessDataManager();
 		case PINTERBET_SERVICENAME:
+			return new PinterBetProcessDataManager();
 		case STANLEYBET_SERVICENAME:
+			return new StanleyBetProcessDataManager();
 		case TXODDS_SERVICENAME:
 			return new TxOddsProcessDataManager();
 		default:
